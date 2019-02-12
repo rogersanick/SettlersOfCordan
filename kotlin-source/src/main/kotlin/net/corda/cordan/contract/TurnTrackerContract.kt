@@ -2,6 +2,7 @@ package net.corda.cordan.contract
 
 import net.corda.cordan.state.TurnTrackerState
 import net.corda.core.contracts.*
+import net.corda.core.contracts.Requirements.using
 import net.corda.core.transactions.LedgerTransaction
 
 // *************************
@@ -39,11 +40,13 @@ class TurnTrackerContract : Contract {
                 val oldTurnTrackerState = tx.inputsOfType<TurnTrackerState>().firstOrNull() as TurnTrackerState
                 "There must be exactly one Turn Tracker input state." using (listOfTurnTrackerInputStates.size == 1)
                 "There must be exactly one Turn Tracker output state." using (listOfTurnTrackerOutputStates.size == 1)
-                if (newTurnTrackerState.setUpRound2Complete) {
-                    "The turn tracker must be decremented to reflect the reverse placement order" using (oldTurnTrackerState.currTurnIndex > newTurnTrackerState.currTurnIndex)
-                }
+                "Round 1 must be complete if the Turn Tracker turnIndex is greater than 3" using (newTurnTrackerState.currTurnIndex > 3 && newTurnTrackerState.setUpRound1Complete)
                 if (newTurnTrackerState.setUpRound1Complete) {
-                    "The turn tracker must be incremented to reflect the placement order" using (oldTurnTrackerState.currTurnIndex > newTurnTrackerState.currTurnIndex)
+                    "The turn tracker must be decremented to reflect the reverse placement order" using (oldTurnTrackerState.currTurnIndex == newTurnTrackerState.currTurnIndex - 1)
+                } else if (oldTurnTrackerState.setUpRound2Complete) {
+                    "The turn tracker must reset when both setup rounds are complete" using (newTurnTrackerState.currTurnIndex == 0)
+                } else {
+                    "The turn tracker must be incremented to reflect the placement order" using (oldTurnTrackerState.currTurnIndex == newTurnTrackerState.currTurnIndex + 1)
                 }
             }
 
