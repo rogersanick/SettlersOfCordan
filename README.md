@@ -52,5 +52,3 @@ When running the flow tests, if you get a Quasar instrumention error then add:
 ```-ea -javaagent:lib/quasar.jar```
 
 to the VM args property in the default run configuration for JUnit in IntelliJ.
-
-Solutions are available [here](https://github.com/corda/corda-training-solutions).
