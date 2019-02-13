@@ -19,10 +19,12 @@ data class TurnTrackerState (
 
     fun endTurnDuringInitialSettlementPlacement(): TurnTrackerState {
         if (setUpRound2Complete) {
-            throw Error("You should be using the end turn function");
+            throw Error("You should be using the end turn function")
         } else if (setUpRound1Complete) {
+            if (currTurnIndex == 7) return copy(currTurnIndex = currTurnIndex - 1, setUpRound2Complete = true)
             return copy(currTurnIndex = currTurnIndex - 1)
         } else {
+            if (currTurnIndex == 2) return copy(currTurnIndex = currTurnIndex + 1, setUpRound1Complete = true)
             return copy(currTurnIndex = currTurnIndex + 1)
         }
     }
