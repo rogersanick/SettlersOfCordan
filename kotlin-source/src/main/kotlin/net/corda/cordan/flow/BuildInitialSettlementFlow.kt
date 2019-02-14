@@ -30,12 +30,13 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
         // Step 2. Retrieve the Game Board State from the vault.
-        val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardLinearId))
-        val gameBoardStateAndRef = serviceHub.vaultService.queryBy<GameBoardState>(queryCriteria).states.single()
+        val queryCriteriaForGameBoardState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardLinearId))
+        val gameBoardStateAndRef = serviceHub.vaultService.queryBy<GameBoardState>(queryCriteriaForGameBoardState).states.single()
         val gameBoardState = gameBoardStateAndRef.state.data
 
         // Step 3. Retrieve the Turn Tracker State from the vault
-        val turnTrackerStateAndRef = serviceHub.vaultService.queryBy<TurnTrackerState>().states.single()
+        val queryCriteriaForTurnTrackerState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
+        val turnTrackerStateAndRef = serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteriaForTurnTrackerState).states.single()
         val turnTrackerState = turnTrackerStateAndRef.state.data
 
         // Step 4. Create a new transaction builder

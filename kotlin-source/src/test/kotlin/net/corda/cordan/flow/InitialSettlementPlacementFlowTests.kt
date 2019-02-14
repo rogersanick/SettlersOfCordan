@@ -43,7 +43,7 @@ class InitialSettlementPlacementFlowTests {
     fun tearDown() = network.stopNodes()
 
     @Test
-    fun flowReturnsCorrectlyFormedPartiallySignedTransaction() {
+    fun flowReturnsCorrectlyFormedFullySignedTransaction() {
 
         // Get an identity for each of the players of the game.
         val p1 = a.info.chooseIdentity()
@@ -99,13 +99,60 @@ class InitialSettlementPlacementFlowTests {
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
 
         val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
-        val arrayOfAllPlayers = arrayListOf(a, b, c, d)
+        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
+        val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
+        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayOf(Pair(0,5), Pair(0,1), Pair(0,3), Pair(1,1))
+        val nonconflictingHextileIndexAndCoordinatesRound2 = arrayOf(Pair(1,3), Pair(2,1), Pair(2,3), Pair(3,3))
+
+
+        fun placeAPieceFromASpecificNode(i: Int, testCoordinates: Array<Pair<Int, Int>>) {
+            // Build an initial settlement by issuing a settlement state
+            // and updating the current turn.
+            val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second)
+            val currPlayer = arrayOfAllPlayerNodesInOrder[i]
+            val futureWithInitialSettlementBuild = currPlayer.startFlow(buildInitialSettlementFlow)
+            network.runNetwork()
+            arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
+        }
+
+        for (i in 0..3) {
+            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1)
+        }
+
+        for (i in 3.downTo(0)) {
+            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2)
+        }
+
+    }
+
+    @Test(expected = Error::class)
+    fun playersAreUnableToBuildSettlementUsingThePlaceInitialSettlementFlowAfterSetup() {
+
+        // Get an identity for each of the players of the game.
+        val p1 = a.info.chooseIdentity()
+        val p2 = b.info.chooseIdentity()
+        val p3 = c.info.chooseIdentity()
+        val p4 = d.info.chooseIdentity()
+
+        // Issue a game state onto the ledger
+        val gameStateIssueFlow = (SetupGameStartFlow(p1, p2, p3, p4))
+        val futureWithGameState = a.startFlow(gameStateIssueFlow)
+        network.runNetwork()
+
+        val stxGameState = futureWithGameState.getOrThrow()
+
+        // Get a reference to the issued game state
+        val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
+
+        val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
+        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
+        val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
         fun placeAPieceFromASpecificNode(i: Int) {
             // Build an initial settlement by issuing a settlement state
             // and updating the current turn.
             val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, 0, 5)
-            val currPlayer = arrayOfAllPlayers[i]
+            val currPlayer = arrayOfAllPlayerNodesInOrder[i]
             val futureWithInitialSettlementBuild = currPlayer.startFlow(buildInitialSettlementFlow)
             network.runNetwork()
             arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
@@ -119,12 +166,47 @@ class InitialSettlementPlacementFlowTests {
             placeAPieceFromASpecificNode(i)
         }
 
-        for (i in arrayOfAllTransactions) {
-            System.out.println("This is placement ${i.coreTransaction.outputsOfType<TurnTrackerState>().first().currTurnIndex}")
-            System.out.println(i.coreTransaction.outputsOfType<TurnTrackerState>().first().setUpRound1Complete)
-            System.out.println(i.coreTransaction.outputsOfType<TurnTrackerState>().first().setUpRound1Complete)
+        placeAPieceFromASpecificNode(0)
+    }
+
+    @Test
+    fun playersMustBuildSettlementsAccordingToTheTurnOrder() {
+
+        // Get an identity for each of the players of the game.
+        val p1 = a.info.chooseIdentity()
+        val p2 = b.info.chooseIdentity()
+        val p3 = c.info.chooseIdentity()
+        val p4 = d.info.chooseIdentity()
+
+        // Issue a game state onto the ledger
+        val gameStateIssueFlow = (SetupGameStartFlow(p1, p2, p3, p4))
+        val futureWithGameState = a.startFlow(gameStateIssueFlow)
+        network.runNetwork()
+
+        val stxGameState = futureWithGameState.getOrThrow()
+
+        // Get a reference to the issued game state
+        val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
+
+        val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
+        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
+        val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
+
+        fun placeAPieceFromASpecificNode(i: Int) {
+            // Build an initial settlement by issuing a settlement state
+            // and updating the current turn.
+            val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, 0, 5)
+            val currPlayer = arrayOfAllPlayerNodesInOrder[i]
+            val futureWithInitialSettlementBuild = currPlayer.startFlow(buildInitialSettlementFlow)
+            network.runNetwork()
+            arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
         }
 
+        for (i in 0..3) {
+            placeAPieceFromASpecificNode(i)
+        }
+
+        placeAPieceFromASpecificNode(1)
 
     }
 

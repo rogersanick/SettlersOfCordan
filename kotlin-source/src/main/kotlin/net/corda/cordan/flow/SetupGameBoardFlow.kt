@@ -38,6 +38,9 @@ class SetupGameStartFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         tb.addCommand(issueCommand)
         tb.addCommand(createTurnTracker)
 
+        // Step 6. Create a new turn tracker state
+        val turnTrackerState = TurnTrackerState(participants = listOf(p1, p2, p3, p4))
+
         // Step 4. Generate data for new game state
 
         // Storage for hexTiles that will be randomly generated.
@@ -151,6 +154,14 @@ class SetupGameStartFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
          * including checking for valid placement of new roads and structures without forcing the user to provide unnecessarily specific input.
          */
 
+//        fun connect(index: Int, sourceHexTileToConnect: HexTile, reciprocalHexTileToConnect: HexTile) {
+//            if (index > 5) {
+//                throw Error("You have specified an invalid index.")
+//            }
+//            sides[index] = reciprocalHexTileToConnect
+//            reciprocalHexTileToConnect.sides[if (index + 3 <= 5) index + 3 else index - 3] = sourceHexTileToConnect
+//        }
+
         for (i in 0..2) {
             hexTiles[i].connect(3, hexTiles[ i + 3])
             hexTiles[i].connect(2, hexTiles[ i + 4])
@@ -187,10 +198,7 @@ class SetupGameStartFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
             System.out.println("How many times am I running")
         }
 
-        val newGameState = GameBoardState(false, hexTiles, ports, randomizedPlayersList)
-
-        // Step 6. Create a new turn tracker state
-        val turnTrackerState = TurnTrackerState(participants = newGameState.players)
+        val newGameState = GameBoardState(false, hexTiles, ports, randomizedPlayersList, turnTrackerState.linearId)
 
         // Step 6. Add the states to the transaction
         tb.addOutputState(newGameState, GameStateContract.ID)

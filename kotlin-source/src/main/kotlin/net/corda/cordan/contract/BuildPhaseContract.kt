@@ -23,11 +23,16 @@ class BuildPhaseContract : Contract {
 
         val command = tx.commands.requireSingleCommand<BuildPhaseContract.Commands>()
         val newSettlement = tx.outputsOfType<SettlementState>().single()
-        val gameBoardState = tx.outputsOfType<GameBoardState>().single()
+        val gameBoardState = tx.inputsOfType<GameBoardState>().single()
 
         when (command.value) {
             is BuildPhaseContract.Commands.BuildInitialSettlement -> requireThat {
+
                 val hexTileCoordinate = newSettlement.hexTileCoordinate
+
+                "A settlement must not have previously been built in this location." using ( !gameBoardState.settlementsPlaced[newSettlement.hexTileIndex][hexTileCoordinate] )
+                "A settlement must not have previously been built in this location." using ( !gameBoardState.settlementsPlaced[newSettlement.hexTileIndex][hexTileCoordinate + 1] )
+                "A settlement must not have previously been built in this location." using ( !gameBoardState.settlementsPlaced[newSettlement.hexTileIndex][hexTileCoordinate - 1] )
 
                 class LinkedListNode(val int: Int, var next: LinkedListNode? = null)
                 val linkedListNode1 = LinkedListNode(1)

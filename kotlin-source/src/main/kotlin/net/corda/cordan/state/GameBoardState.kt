@@ -7,12 +7,14 @@ import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
 import net.corda.core.serialization.CordaSerializable
+import org.bouncycastle.util.encoders.Hex
 
 @BelongsToContract(GameStateContract::class)
 data class GameBoardState(val beginner: Boolean = false,
                           val hexTiles: List<HexTile>,
                           val ports: List<Port>,
                           val players: List<Party>,
+                          val turnTrackerLinearId: UniqueIdentifier,
                           val spectators: List<Party> = listOf(),
                           val settlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { MutableList(6) { false } },
                           var setUpComplete: Boolean = false,
@@ -24,7 +26,7 @@ data class GameBoardState(val beginner: Boolean = false,
 }
 
 @CordaSerializable
-data class HexTile(val resourceType: String,
+class HexTile(val resourceType: String,
                    val roleTrigger: Int,
                    var robberPresent: Boolean,
                    var sides: MutableList<HexTile?> = MutableList(6) { null }) {
@@ -33,7 +35,7 @@ data class HexTile(val resourceType: String,
             throw Error("You have specified an invalid index.")
         }
         sides[index] = hexTileToConnect
-        hexTileToConnect.sides[if (index + 3 <= 5) index + 3 else index - 3]
+        hexTileToConnect.sides[if (index + 3 <= 5) index + 3 else index - 3] = this
     }
 }
 
