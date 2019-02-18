@@ -5,6 +5,7 @@ import net.corda.cordan.contract.BuildPhaseContract
 import net.corda.cordan.contract.GameStateContract
 import net.corda.cordan.contract.TurnTrackerContract
 import net.corda.cordan.state.GameBoardState
+import net.corda.cordan.state.HexTile
 import net.corda.cordan.state.SettlementState
 import net.corda.cordan.state.TurnTrackerState
 import net.corda.core.contracts.Command
@@ -14,6 +15,8 @@ import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
+import java.lang.IllegalArgumentException
+import java.util.ArrayList
 
 
 // *************************************
@@ -57,7 +60,62 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
 
         // Step X. Create a new Game Board State
         val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { kotlin.collections.MutableList(6) { false } }
+
+        // Step X. Get access to potentially conflicting neighbours
+        class LinkedListNode(val int: Int, var next: LinkedListNode? = null)
+        val linkedListNode1 = LinkedListNode(1)
+        val linkedListNode2 = LinkedListNode(3)
+        linkedListNode1.next = linkedListNode2
+        val linkedListNode3 = LinkedListNode(5)
+        linkedListNode2.next = linkedListNode3
+        linkedListNode3.next = linkedListNode1
+
+        val linkedList2Node1 = LinkedListNode(0)
+        val linkedList2Node2 = LinkedListNode(2)
+        linkedList2Node1.next = linkedList2Node2
+        val linkedList2Node3 = LinkedListNode(4)
+        linkedList2Node2.next = linkedList2Node3
+        linkedList2Node3.next = linkedList2Node1
+
+        var linkedListToGetCoordinateOfPotentiallyConflictingSettlement: LinkedListNode?
+
+        if (hexTileCoordinate % 2 == 0) {
+            linkedListToGetCoordinateOfPotentiallyConflictingSettlement = linkedList2Node1
+            while (hexTileCoordinate != linkedListToGetCoordinateOfPotentiallyConflictingSettlement?.int) {
+                linkedListToGetCoordinateOfPotentiallyConflictingSettlement = linkedListToGetCoordinateOfPotentiallyConflictingSettlement?.next
+            }
+        } else {
+            linkedListToGetCoordinateOfPotentiallyConflictingSettlement = linkedListNode2
+            while (hexTileCoordinate != linkedListToGetCoordinateOfPotentiallyConflictingSettlement?.int) {
+                linkedListToGetCoordinateOfPotentiallyConflictingSettlement = linkedListToGetCoordinateOfPotentiallyConflictingSettlement?.next
+            }
+        }
+
+        val coordinateOfPotentiallyConflictingSettlement1 = linkedListToGetCoordinateOfPotentiallyConflictingSettlement.next?.int!!
+        val coordinateOfPotentiallyConflictingSettlement2 = linkedListToGetCoordinateOfPotentiallyConflictingSettlement.next?.next?.int!!
+
+        val relevantHexTileNeighbours: ArrayList<HexTile?> = arrayListOf()
+
+        if (hexTileCoordinate != 5) {
+            if (gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate - 1] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate - 1]!!])
+            if (gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate]!!])
+        } else {
+            if (gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate - 1] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate - 1]!!])
+            if (gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate]!!])
+        }
+
+        val indexOfRelevantHexTileNeighbour1 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(0))
+        val indexOfRelevantHexTileNeighbour2 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(1))
+
         newSettlementsPlaced[hexTileIndex][hexTileCoordinate] = true
+//        newSettlementsPlaced[hexTileIndex][if (hexTileCoordinate != 0) hexTileCoordinate - 1 else 5] = true
+//        newSettlementsPlaced[hexTileIndex][if (hexTileCoordinate != 5) hexTileCoordinate + 1 else 0] = true
+        if (indexOfRelevantHexTileNeighbour1 != -1) newSettlementsPlaced[indexOfRelevantHexTileNeighbour1][coordinateOfPotentiallyConflictingSettlement1] = true
+//        if (indexOfRelevantHexTileNeighbour1 != -1) newSettlementsPlaced[indexOfRelevantHexTileNeighbour1][if (coordinateOfPotentiallyConflictingSettlement1 != 0) coordinateOfPotentiallyConflictingSettlement1 - 1 else 5] = true
+//        if (indexOfRelevantHexTileNeighbour1 != -1) newSettlementsPlaced[indexOfRelevantHexTileNeighbour1][if (coordinateOfPotentiallyConflictingSettlement1 != 5) coordinateOfPotentiallyConflictingSettlement1 + 1 else 0] = true
+        if (indexOfRelevantHexTileNeighbour2 != -1) newSettlementsPlaced[indexOfRelevantHexTileNeighbour2][coordinateOfPotentiallyConflictingSettlement2] = true
+//        if (indexOfRelevantHexTileNeighbour2 != -1) newSettlementsPlaced[indexOfRelevantHexTileNeighbour2][if (coordinateOfPotentiallyConflictingSettlement2 != 0) coordinateOfPotentiallyConflictingSettlement2 - 1 else 5] = true
+//        if (indexOfRelevantHexTileNeighbour2 != -1) newSettlementsPlaced[indexOfRelevantHexTileNeighbour2][if (coordinateOfPotentiallyConflictingSettlement2 != 5) coordinateOfPotentiallyConflictingSettlement2 + 1 else 0] = true
 
         // Step 8. Add all states and commands to the transaction.
         tb.addInputState(gameBoardStateAndRef)
@@ -84,7 +142,15 @@ class BuildInitialSettlementFlowResponder(val counterpartySession: FlowSession):
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) {
-                stx.verify(serviceHub, false)
+                val gameBoardState = stx.coreTransaction.outputsOfType<GameBoardState>().first()
+                val turnTrackerState = stx.coreTransaction.outputsOfType<TurnTrackerState>().first()
+
+                val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(turnTrackerState.linearId))
+                val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteria).states.first().state.data
+
+                if (counterpartySession.counterparty.owningKey != gameBoardState.players[lastTurnTrackerOnRecordStateAndRef.currTurnIndex].owningKey) {
+                    throw IllegalArgumentException("Only the current player may propose the next move.")
+                }
             }
         }
 

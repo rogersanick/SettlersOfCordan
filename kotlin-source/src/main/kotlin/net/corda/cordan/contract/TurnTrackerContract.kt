@@ -1,5 +1,6 @@
 package net.corda.cordan.contract
 
+import net.corda.cordan.state.GameBoardState
 import net.corda.cordan.state.TurnTrackerState
 import net.corda.core.contracts.*
 import net.corda.core.contracts.Requirements.using
@@ -22,6 +23,8 @@ class TurnTrackerContract : Contract {
         val listOfTurnTrackerInputStates = tx.inputsOfType<TurnTrackerState>()
         val listOfTurnTrackerOutputStates = tx.outputsOfType<TurnTrackerState>()
         val newTurnTrackerState = listOfTurnTrackerOutputStates.first()
+
+        tx.commandsOfType<TurnTrackerContract.Commands.EndTurnDuringInitialPlacementPhase>()
 
         when (command.value) {
 

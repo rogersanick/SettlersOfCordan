@@ -16,7 +16,7 @@ data class GameBoardState(val beginner: Boolean = false,
                           val players: List<Party>,
                           val turnTrackerLinearId: UniqueIdentifier,
                           val spectators: List<Party> = listOf(),
-                          val settlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { MutableList(6) { false } },
+                          val settlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(19) { MutableList(6) { false } },
                           var setUpComplete: Boolean = false,
                           var initialPiecesPlaced: Int = 0,
                           override val linearId: UniqueIdentifier = UniqueIdentifier()): LinearState {
@@ -27,15 +27,16 @@ data class GameBoardState(val beginner: Boolean = false,
 
 @CordaSerializable
 class HexTile(val resourceType: String,
-                   val roleTrigger: Int,
-                   var robberPresent: Boolean,
-                   var sides: MutableList<HexTile?> = MutableList(6) { null }) {
+              val roleTrigger: Int,
+              var robberPresent: Boolean,
+              var hexTileIndex: Int,
+              var sides: MutableList<Int?> = MutableList(6) { null }) {
     fun connect(index: Int, hexTileToConnect: HexTile) {
         if (index > 5) {
             throw Error("You have specified an invalid index.")
         }
-        sides[index] = hexTileToConnect
-        hexTileToConnect.sides[if (index + 3 <= 5) index + 3 else index - 3] = this
+        sides[index] = hexTileToConnect.hexTileIndex
+        hexTileToConnect.sides[if (index + 3 <= 5) index + 3 else index - 3] = hexTileIndex
     }
 }
 

@@ -1,6 +1,7 @@
 package net.corda.cordan.flow
 
 import co.paralleluniverse.fibers.Suspendable
+import com.sun.org.apache.xpath.internal.operations.Bool
 import net.corda.cordan.contract.GameStateContract
 import net.corda.cordan.contract.TurnTrackerContract
 import net.corda.cordan.state.HexTile
@@ -138,9 +139,8 @@ class SetupGameStartFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
             hexTiles.add(i, HexTile(
                     hexType,
                     if (hexType.equals("Desert")) 0 else roleTriggerTilePlacementMapping.getOrElse(roleTriggerTilePlacementOrder[i - desertSkippedIndexAdjustment]) { 0 },
-                    terrainTypes[hexTypeIndex] == "Desert"
-            )
-            )
+                    terrainTypes[hexTypeIndex] == "Desert",
+                    i))
             countArray[hexTypeIndex]++
 
             // Establish the index adjustment once a desert HexTile has been encountered.
@@ -154,13 +154,10 @@ class SetupGameStartFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
          * including checking for valid placement of new roads and structures without forcing the user to provide unnecessarily specific input.
          */
 
-//        fun connect(index: Int, sourceHexTileToConnect: HexTile, reciprocalHexTileToConnect: HexTile) {
-//            if (index > 5) {
-//                throw Error("You have specified an invalid index.")
-//            }
-//            sides[index] = reciprocalHexTileToConnect
-//            reciprocalHexTileToConnect.sides[if (index + 3 <= 5) index + 3 else index - 3] = sourceHexTileToConnect
-//        }
+        /**
+         * TODO: Refactor to create a boolean mapping of settlements built with overlapping references such that building a settlement at coordinate 'n' on HexTile 'n'
+         * causes the bool variable for the coordinate to flip from false to true, the bool variable is shared by hexTiles.
+         */
 
         for (i in 0..2) {
             hexTiles[i].connect(3, hexTiles[ i + 3])
@@ -171,6 +168,10 @@ class SetupGameStartFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         for (i in 3..6) {
             hexTiles[i].connect(3, hexTiles[ i + 4])
             hexTiles[i].connect(2, hexTiles[ i + 5])
+            if (i != 6) hexTiles[i].connect(1, hexTiles[ i + 1])
+        }
+
+        for (i in 7..11) {
             if (i != 6) hexTiles[i].connect(1, hexTiles[ i + 1])
         }
 
