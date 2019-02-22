@@ -10,6 +10,10 @@
       <module name="com.template.cordapp-template-kotlin.test" target="1.8" />
       <module name="com.template.kotlin-source.main" target="1.8" />
       <module name="com.template.kotlin-source.test" target="1.8" />
+      <module name="com.template.oracleService.main" target="1.8" />
+      <module name="com.template.oracleService.test" target="1.8" />
+      <module name="com.template.oracleClient.main" target="1.8" />
+      <module name="com.template.oracleClient.test" target="1.8" />
       <module name="com.template.SettlersOfCordan2.0.main" target="1.8" />
       <module name="com.template.SettlersOfCordan2.0.test" target="1.8" />
       <module name="com.template.workflows.integrationTest" target="1.8" />

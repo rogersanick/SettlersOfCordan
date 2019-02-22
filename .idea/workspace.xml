@@ -2,7 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a2411927-6da4-490e-8024-ff65b0375487" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/oracleClient/build.gradle" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/oracleService/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -16,6 +23,12 @@
     <ignored path="$PROJECT_DIR$/workflows/.gradle/" />
     <ignored path="$PROJECT_DIR$/workflows/build/" />
     <ignored path="$PROJECT_DIR$/workflows/out/" />
+    <ignored path="$PROJECT_DIR$/oracleService/.gradle/" />
+    <ignored path="$PROJECT_DIR$/oracleService/build/" />
+    <ignored path="$PROJECT_DIR$/oracleService/out/" />
+    <ignored path="$PROJECT_DIR$/oracleClient/.gradle/" />
+    <ignored path="$PROJECT_DIR$/oracleClient/build/" />
+    <ignored path="$PROJECT_DIR$/oracleClient/out/" />
     <ignored path="$PROJECT_DIR$/java-source/.gradle/" />
     <ignored path="$PROJECT_DIR$/java-source/build/" />
     <ignored path="$PROJECT_DIR$/kotlin-source/.gradle/" />
@@ -38,38 +51,81 @@
         <task path="$PROJECT_DIR$">
           <activation />
         </task>
+        <task path="$PROJECT_DIR$/oracle">
+          <activation />
+        </task>
         <projects_view />
       </state>
     </system>
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+    <leaf>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/.idea/compiler.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="225">
+              <caret line="15" column="67" selection-start-line="15" selection-start-column="67" selection-end-line="15" selection-end-column="67" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/.idea/encodings.xml">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/.idea/gradle.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="210">
+              <caret line="14" column="54" selection-start-line="14" selection-start-column="54" selection-end-line="14" selection-end-column="54" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/.idea/kotlinc.xml">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/.idea/misc.xml">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/.idea/modules.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="225">
+              <caret line="15" column="187" selection-start-line="15" selection-start-column="187" selection-end-line="15" selection-end-column="187" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/.idea/vcs.xml">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/.idea/workspace.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="234">
+              <caret line="29" column="54" selection-start-line="29" selection-start-column="54" selection-end-line="29" selection-end-column="54" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/settings.gradle">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/.gitignore">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="253">
-              <caret line="29" selection-start-line="29" selection-end-line="29" selection-end-column="11" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/InitialSettlementPlacementFlowTests.kt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="184">
-              <caret line="47" column="8" selection-start-line="47" selection-start-column="8" selection-end-line="47" selection-end-column="8" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/README.md">
-          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-            <state split_layout="SPLIT">
-              <first_editor relative-caret-position="-972">
-                <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
-              </first_editor>
-              <second_editor />
+            <state relative-caret-position="178">
+              <caret line="24" lean-forward="true" selection-start-line="24" selection-end-line="24" />
             </state>
           </provider>
         </entry>
@@ -90,9 +146,19 @@
       <find>GameStateContract</find>
       <find>null</find>
       <find>driver</find>
+      <find>work</find>
+      <find>workflows</find>
+      <find>workflo</find>
+      <find>orac</find>
+      <find>ora</find>
+      <find>oracleClient</find>
+      <find>oracle</find>
     </findStrings>
     <replaceStrings>
       <replace />
+      <replace>oracle</replace>
+      <replace>oracleClient</replace>
+      <replace>oracleService</replace>
     </replaceStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$/workflows/src/test/kotlin/com/template</dir>
@@ -126,13 +192,29 @@
         <option value="$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/InitialSettlementPlacementFlowTests.kt" />
         <option value="$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/SetupGameBoardFlowTests.kt" />
         <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/.idea/modules/oracle/com.template.oracle.iml" />
+        <option value="$PROJECT_DIR$/.idea/modules/oracle/com.template.oracle.main.iml" />
+        <option value="$PROJECT_DIR$/.idea/modules/oracle/com.template.oracle.test.iml" />
+        <option value="$PROJECT_DIR$/oracle/build.gradle" />
+        <option value="$PROJECT_DIR$/.idea/modules/oracleClient/com.template.oracleClient.iml" />
+        <option value="$PROJECT_DIR$/.idea/modules/oracleClient/com.template.oracleClient.main.iml" />
+        <option value="$PROJECT_DIR$/.idea/modules/oracleClient/com.template.oracleClient.test.iml" />
+        <option value="$PROJECT_DIR$/.idea/modules/oracleService/com.template.oracleClient.iml" />
+        <option value="$PROJECT_DIR$/.idea/modules/oracleService/com.template.oracleClient.main.iml" />
+        <option value="$PROJECT_DIR$/.idea/modules/oracleService/com.template.oracleClient.test.iml" />
+        <option value="$PROJECT_DIR$/.idea/modules/com.template.SettlersOfCordan2.0.main.iml" />
+        <option value="$PROJECT_DIR$/.idea/modules/com.template.SettlersOfCordan2.0.test.iml" />
+        <option value="$PROJECT_DIR$/.idea/compiler.xml" />
+        <option value="$PROJECT_DIR$/.idea/gradle.xml" />
+        <option value="$PROJECT_DIR$/.idea/modules.xml" />
+        <option value="$PROJECT_DIR$/.idea/workspace.xml" />
         <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
     <option name="y" value="23" />
-    <option name="width" value="1680" />
+    <option name="width" value="929" />
     <option name="height" value="955" />
   </component>
   <component name="ProjectView">
@@ -140,6 +222,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -147,28 +231,58 @@
               <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
               <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
             </path>
+            <path>
+              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name=".idea" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name=".idea" type="462c0819:PsiDirectoryNode" />
+              <item name="modules" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name=".idea" type="462c0819:PsiDirectoryNode" />
+              <item name="modules" type="462c0819:PsiDirectoryNode" />
+              <item name="oracleClient" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name=".idea" type="462c0819:PsiDirectoryNode" />
+              <item name="modules" type="462c0819:PsiDirectoryNode" />
+              <item name="oracleService" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name=".idea" type="462c0819:PsiDirectoryNode" />
+              <item name="modules" type="462c0819:PsiDirectoryNode" />
+              <item name="workflows" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1550869673726" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1550871771676" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="project.structure.last.edited" value="Problems" />
+    <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/.idea/modules/oracleService" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/.idea/modules/oracle" />
       <recent name="$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests" />
       <recent name="$PROJECT_DIR$/workflows/src/main/kotlin/com/template/flows" />
-      <recent name="$PROJECT_DIR$/workflows/src/test/kotlin/com/template" />
-      <recent name="$PROJECT_DIR$/contracts/src/main/kotlin/com/template/states" />
-      <recent name="$PROJECT_DIR$/contracts/src/main/kotlin/com/template/contracts" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -183,7 +297,26 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.InitialSettlementPlacementFlowTests">
+  <component name="RunManager" selected="Gradle.Plugin">
+    <configuration name="Plugin" type="GradleRunConfiguration" factoryName="Gradle">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/oracle" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":runIde" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
+      <method v="2" />
+    </configuration>
     <configuration name="InitialSettlementPlacementFlowTests" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="com.template.workflows.test" />
       <extension name="coverage">
@@ -235,17 +368,18 @@
       </method>
     </configuration>
     <list>
+      <item itemvalue="Gradle.Unit tests" />
+      <item itemvalue="Gradle.Plugin" />
+      <item itemvalue="JUnit.Run Flow Tests" />
+      <item itemvalue="JUnit.Run Contract Tests" />
+      <item itemvalue="JUnit.Run Integration Tests" />
       <item itemvalue="JUnit.com.template in com.template.workflows.test" />
       <item itemvalue="JUnit.InitialSettlementPlacementFlowTests" />
       <item itemvalue="JUnit.SetupGameBoardFlowTests" />
-      <item itemvalue="Gradle.Unit tests" />
-      <item itemvalue="Remote.Debug CorDapp" />
-      <item itemvalue="JUnit.Run Flow Tests" />
-      <item itemvalue="JUnit.Run Contract Tests" />
       <item itemvalue="Kotlin.Run Template Client" />
       <item itemvalue="Kotlin.Run Template Server" />
       <item itemvalue="Kotlin.Run Template Cordapp" />
-      <item itemvalue="JUnit.Run Integration Tests" />
+      <item itemvalue="Remote.Debug CorDapp" />
     </list>
     <recent_temporary>
       <list>
@@ -301,10 +435,10 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1680" height="955" extended-state="6" />
+    <frame x="0" y="23" width="929" height="955" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.15445666" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2897407" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -318,10 +452,10 @@
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="7" visible="true" weight="0.32908458" />
+      <window_info anchor="bottom" id="Terminal" order="7" weight="0.32908458" />
       <window_info anchor="bottom" id="Event Log" order="8" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="9" />
-      <window_info anchor="bottom" id="Build" order="10" weight="0.329849" />
+      <window_info anchor="bottom" id="Build" order="10" visible="true" weight="0.32908458" />
       <window_info anchor="bottom" id="Messages" order="11" weight="0.32908458" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -353,25 +487,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/workflows/src/test/kotlin/com/template/ContractTests.kt" />
-    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/template/states/TemplateState.kt" />
-    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/TemplateContract.kt" />
-    <entry file="file://$PROJECT_DIR$/clients/src/main/kotlin/com/template/Client.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="11" column="4" selection-start-line="11" selection-start-column="4" selection-end-line="11" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/clients/src/main/kotlin/com/template/webserver/Server.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="11" column="19" selection-start-line="11" selection-start-column="19" selection-end-line="11" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/workflows/src/test/kotlin/com/template/NodeDriver.kt" />
-    <entry file="file://$PROJECT_DIR$/workflows/src/test/kotlin/com/template/InitialSettlementPlacementFlowTests.kt" />
     <entry file="file://$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/asdf.kt" />
     <entry file="file://$PROJECT_DIR$/contracts/src/test/kotlin/com/template/ContractTests.kt">
       <provider selected="true" editor-type-id="text-editor">
@@ -556,10 +671,141 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/oracle/oracle.iml" />
+    <entry file="file://$PROJECT_DIR$/oracle/src/main/resources/META-INF/plugin.xml" />
+    <entry file="file://$PROJECT_DIR$/oracle/out/test/classes/com/flowTests/NodeDriverKt.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" selection-start-line="1" selection-end-line="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/modules/workflows/com.template.workflows.iml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret selection-end-line="12" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/modules/workflows/com.template.workflows.main.iml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/oracleService/build.gradle">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/oracleClient/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="292">
+          <caret line="46" column="1" selection-start-line="46" selection-start-column="1" selection-end-line="46" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/modules/oracleClient/com.template.oracleClient.iml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="7" column="67" selection-start-line="7" selection-start-column="67" selection-end-line="7" selection-end-column="67" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/modules/oracleClient/com.template.oracleClient.main.iml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="107">
+          <caret line="39" column="66" selection-start-line="39" selection-start-column="66" selection-end-line="39" selection-end-column="66" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/modules/oracleClient/com.template.oracleClient.test.iml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3649">
+          <caret line="248" column="85" selection-start-line="248" selection-start-column="85" selection-end-line="248" selection-end-column="85" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/modules/oracleService/com.template.oracleService.test.iml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3707">
+          <caret line="248" column="86" selection-start-line="248" selection-start-column="86" selection-end-line="248" selection-end-column="86" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/modules/oracleService/com.template.oracleService.iml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="12" column="9" selection-start-line="12" selection-start-column="9" selection-end-line="12" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/modules/oracleService/com.template.oracleService.main.iml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="572">
+          <caret line="39" column="67" selection-start-line="39" selection-start-column="67" selection-end-line="39" selection-end-column="67" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/modules/com.template.SettlersOfCordan2.0.iml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/modules/com.template.SettlersOfCordan2.0.main.iml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="47" column="31" selection-start-line="47" selection-start-column="31" selection-end-line="47" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/modules/com.template.SettlersOfCordan2.0.test.iml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="248">
+          <caret line="50" column="39" selection-start-line="50" selection-start-column="39" selection-end-line="50" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/compiler.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="15" column="67" selection-start-line="15" selection-start-column="67" selection-end-line="15" selection-end-column="67" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/encodings.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/gradle.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="14" column="54" selection-start-line="14" selection-start-column="54" selection-end-line="14" selection-end-column="54" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/kotlinc.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/misc.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/modules.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="15" column="187" selection-start-line="15" selection-start-column="187" selection-end-line="15" selection-end-column="187" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/vcs.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/workspace.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="234">
+          <caret line="29" column="54" selection-start-line="29" selection-start-column="54" selection-end-line="29" selection-end-column="54" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/settings.gradle">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="253">
-          <caret line="29" selection-start-line="29" selection-end-line="29" selection-end-column="11" />
+        <state relative-caret-position="178">
+          <caret line="24" lean-forward="true" selection-start-line="24" selection-end-line="24" />
         </state>
       </provider>
     </entry>
@@ -615,7 +861,7 @@
       </state>
       <state key="ModuleStructureConfigurable.UI">
         <settings>
-          <last-edited>test|workflows|template</last-edited>
+          <last-edited>workflows|template</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
