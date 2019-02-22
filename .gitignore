@@ -22,7 +22,7 @@ lib/dokka.jar
 *.iml
 
 ## Directory-based project format:
-.idea
+#.idea
 
 # if you remove the above rule, at least ignore the following:
 
@@ -55,7 +55,10 @@ lib/dokka.jar
 ## Plugin-specific files:
 
 # IntelliJ
-**/out/
+/out/
+workflows/out/
+contracts/out/
+clients/out/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
