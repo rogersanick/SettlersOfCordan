@@ -2,39 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a2411927-6da4-490e-8024-ff65b0375487" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/oracleClient/out/production/classes/META-INF/oracleClient.com.template.oracleClient.main.kotlin_module" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/oracleClient/out/production/classes/com/oracleClient/GetRandomDiceRollValues.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/oracleClient/out/production/classes/com/oracleClient/RollDiceFlow$call$ftx$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/oracleClient/out/production/classes/com/oracleClient/RollDiceFlow.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/oracleClient/out/test/classes/META-INF/oracleClient.com.template.oracleClient.test.kotlin_module" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/GetRandomDiceRollValues.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/oracleService/out/production/classes/META-INF/oracleService.com.template.oracleService.main.kotlin_module" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/RollDiceFlow.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/GatherPhaseContract.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleClient/out/production/classes/com/flows/RollDiceFlow$call$ftx$1.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleClient/out/production/classes/com/flows/RollDiceFlow.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleClient/out/production/classes/com/flows/SignDiceRollFlow.class" beforeDir="false" afterPath="$PROJECT_DIR$/oracleClient/out/production/classes/com/oracleClient/SignDiceRollFlow.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleClient/out/test/classes/com/flowTests/OracleClientIntegrationTest$oracleReturnsARandomDiceRoll$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/oracleClient/out/test/classes/com/flowTests/OracleClientIntegrationTest$oracleReturnsARandomDiceRoll$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleClient/out/test/classes/com/flowTests/OracleClientIntegrationTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/oracleClient/out/test/classes/com/flowTests/OracleClientIntegrationTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/RollDiceFlow.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleClient/src/test/kotlin/com.flowTests/OracleClientIntegrationTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/oracleClient/src/test/kotlin/com.flowTests/OracleClientIntegrationTest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleService/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/oracleService/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/contracts/DiceRollContract$Commands$RollDice.class" beforeDir="false" afterPath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/contracts/DiceRollContract$Commands$RollDice.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/contracts/DiceRollContract$Commands.class" beforeDir="false" afterPath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/contracts/DiceRollContract$Commands.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/contracts/DiceRollContract$Companion.class" beforeDir="false" afterPath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/contracts/DiceRollContract$Companion.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/contracts/DiceRollContract.class" beforeDir="false" afterPath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/contracts/DiceRollContract.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/flows/DiceRollRequestHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/flows/DiceRollRequestHandler.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/flows/SignDiceRollHandler$call$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/flows/SignDiceRollHandler$call$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/flows/SignDiceRollHandler$call$isValidMerkleTree$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/flows/SignDiceRollHandler$call$isValidMerkleTree$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/flows/SignDiceRollHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/flows/SignDiceRollHandler.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/service/Oracle.class" beforeDir="false" afterPath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/service/Oracle.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/state/DiceRollState.class" beforeDir="false" afterPath="$PROJECT_DIR$/oracleService/out/production/classes/com/oracleService/state/DiceRollState.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/contracts/DiceRollContract.kt" beforeDir="false" afterPath="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/contracts/DiceRollContract.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/DiceRollRequestHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/DiceRollRequestHandler.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/SignDiceRollHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/SignDiceRollHandler.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/workflows/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/workflows/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameCurrencyStates.kt" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameCurrencyStates.kt" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -88,40 +59,61 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/SignDiceRollHandler.kt">
+        <entry file="file://$PROJECT_DIR$/workflows/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-259">
-              <caret column="31" selection-start-column="31" selection-end-column="31" />
+            <state relative-caret-position="990">
+              <caret line="66" column="67" selection-start-line="66" selection-start-column="67" selection-end-line="66" selection-end-column="67" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/GetRandomDiceRollValues.kt">
+        <entry file="file://$PROJECT_DIR$/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="195">
-              <caret line="28" column="1" selection-start-line="28" selection-start-column="1" selection-end-line="28" selection-end-column="1" />
+            <state relative-caret-position="203">
+              <caret line="136" column="21" selection-start-line="136" selection-start-column="21" selection-end-line="136" selection-end-column="21" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/RollDiceFlow.kt">
+        <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/GatherPhaseContract.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="50" column="84" selection-start-line="50" selection-start-column="84" selection-end-line="50" selection-end-column="84" />
+            <state relative-caret-position="150">
+              <caret line="10" lean-forward="true" selection-start-line="10" selection-end-line="10" />
               <folding>
-                <element signature="e#19#735#0" expanded="true" />
+                <element signature="e#42#327#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
+        <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameCurrencyStates.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="325">
-              <caret line="62" column="12" selection-start-line="62" selection-start-column="12" selection-end-line="62" selection-end-column="12" />
+            <state relative-caret-position="75">
+              <caret line="5" column="53" selection-start-line="5" selection-start-column="53" selection-end-line="5" selection-end-column="53" />
+              <folding>
+                <element signature="e#39#233#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameBoardState.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <caret column="37" lean-forward="true" selection-start-column="37" selection-end-column="37" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/BuildPhaseContract.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="60">
+              <caret line="11" selection-start-line="11" selection-end-line="47" selection-end-column="1" />
             </state>
           </provider>
         </entry>
@@ -129,7 +121,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/DiceRollRequestHandler.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-83">
+            <state relative-caret-position="60">
               <caret line="12" column="36" selection-start-line="12" selection-start-column="36" selection-end-line="12" selection-end-column="36" />
             </state>
           </provider>
@@ -138,7 +130,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/oracleClient/src/test/kotlin/com.flowTests/OracleClientIntegrationTest.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-473">
+            <state relative-caret-position="510">
               <caret line="56" column="8" selection-start-line="56" selection-start-column="8" selection-end-line="56" selection-end-column="8" />
             </state>
           </provider>
@@ -156,7 +148,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildInitialSettlementFlow.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="82">
+            <state relative-caret-position="1725">
               <caret line="131" selection-start-line="131" selection-end-line="155" />
             </state>
           </provider>
@@ -222,9 +214,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/.idea/modules/oracleService/com.template.oracleClient.test.iml" />
-        <option value="$PROJECT_DIR$/.idea/compiler.xml" />
-        <option value="$PROJECT_DIR$/.idea/workspace.xml" />
         <option value="$PROJECT_DIR$/oracleClient/src/main/kotlin/com.oracleClient/oracleClient.kt" />
         <option value="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleClient/oracleClient.kt" />
         <option value="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleClient/service/oracleService.kt" />
@@ -273,22 +262,22 @@
         <option value="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/DiceRollRequestHandler.kt" />
         <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/RollDiceFlow.kt" />
         <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/build.gradle" />
+        <option value="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/GatherPhaseContract.kt" />
+        <option value="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameCurrencyStates.kt" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="44" />
     <option name="y" value="23" />
-    <option name="width" value="1370" />
-    <option name="height" value="953" />
+    <option name="width" value="1680" />
+    <option name="height" value="955" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -299,30 +288,25 @@
             <path>
               <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
               <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name=".gradle" type="462c0819:PsiDirectoryNode" />
+              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
             </path>
             <path>
               <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
               <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleClient" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleClient" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
               <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleClient" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
             </path>
             <path>
               <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
               <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleClient" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="kotlin" type="462c0819:PsiDirectoryNode" />
@@ -330,139 +314,66 @@
             <path>
               <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
               <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleClient" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="oracleClient" type="462c0819:PsiDirectoryNode" />
+              <item name="contractsAndStates" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
               <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleClient" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="kotlin" type="462c0819:PsiDirectoryNode" />
+              <item name="contractsAndStates" type="462c0819:PsiDirectoryNode" />
+              <item name="states" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
               <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="oracleService" type="462c0819:PsiDirectoryNode" />
+              <item name="contractsAndStates" type="462c0819:PsiDirectoryNode" />
+              <item name="states" type="462c0819:PsiDirectoryNode" />
+              <item name="GameBoardState.kt" type="24436e51:KtFileTreeNode" />
             </path>
             <path>
               <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
               <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="oracleService" type="462c0819:PsiDirectoryNode" />
-              <item name="flows" type="462c0819:PsiDirectoryNode" />
+              <item name="contractsAndStates" type="462c0819:PsiDirectoryNode" />
+              <item name="states" type="462c0819:PsiDirectoryNode" />
+              <item name="GameBoardState.kt" type="24436e51:KtFileTreeNode" />
+              <item name="PortTile" type="2c5a2ef7:KtClassOrObjectTreeNode" />
             </path>
             <path>
               <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
               <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="oracleService" type="462c0819:PsiDirectoryNode" />
-              <item name="flows" type="462c0819:PsiDirectoryNode" />
-              <item name="DiceRollRequestHandler" type="2c5a2ef7:KtClassOrObjectTreeNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="oracleService" type="462c0819:PsiDirectoryNode" />
-              <item name="flows" type="462c0819:PsiDirectoryNode" />
-              <item name="SignDiceRollHandler" type="2c5a2ef7:KtClassOrObjectTreeNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="flows" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="flows" type="462c0819:PsiDirectoryNode" />
-              <item name="RollDiceFlow.kt" type="24436e51:KtFileTreeNode" />
+              <item name="contractsAndStates" type="462c0819:PsiDirectoryNode" />
+              <item name="states" type="462c0819:PsiDirectoryNode" />
+              <item name="GameCurrencyStates.kt" type="24436e51:KtFileTreeNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1551300589057" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1551303449805" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
@@ -642,9 +553,6 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="OracleClientIntegrationTest_oracleReturnsARandomDiceRoll - 2019.02.27 at 14h 34m 01s.xml">
-      <configuration name="OracleClientIntegrationTest.oracleReturnsARandomDiceRoll" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="OracleClientIntegrationTest_oracleReturnsARandomDiceRoll - 2019.02.27 at 14h 38m 00s.xml">
       <configuration name="OracleClientIntegrationTest.oracleReturnsARandomDiceRoll" configurationId="JUnit" />
     </history-entry>
@@ -672,12 +580,15 @@
     <history-entry file="OracleClientIntegrationTest_oracleReturnsARandomDiceRoll - 2019.02.27 at 15h 35m 17s.xml">
       <configuration name="OracleClientIntegrationTest.oracleReturnsARandomDiceRoll" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="OracleClientIntegrationTest_oracleReturnsARandomDiceRoll - 2019.02.27 at 15h 50m 40s.xml">
+      <configuration name="OracleClientIntegrationTest.oracleReturnsARandomDiceRoll" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="44" y="23" width="1370" height="953" extended-state="0" />
+    <frame x="0" y="23" width="1680" height="955" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24397591" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2002442" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -691,7 +602,7 @@
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Terminal" order="7" sideWeight="0.496337" visible="true" weight="0.32752612" />
+      <window_info anchor="bottom" id="Terminal" order="7" sideWeight="0.496337" visible="true" weight="0.3267671" />
       <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50183153" side_tool="true" weight="0.32752612" />
       <window_info anchor="bottom" id="Version Control" order="9" />
       <window_info anchor="bottom" id="Build" order="10" weight="0.32908458" />
@@ -778,23 +689,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/.idea/modules/com.template.SettlersOfCordan2.0.iml">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.idea/modules/com.template.SettlersOfCordan2.0.main.iml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="18" column="46" selection-start-line="18" selection-start-column="46" selection-end-line="18" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.idea/modules/com.template.SettlersOfCordan2.0.test.iml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="226">
-          <caret line="24" column="46" selection-start-line="24" selection-start-column="46" selection-end-line="24" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/.idea/modules/oracleService/com.template.oracleService.iml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
@@ -857,13 +751,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="990">
-          <caret line="66" selection-start-line="66" selection-end-line="66" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/contracts/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-233" />
@@ -873,13 +760,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="412">
           <caret line="54" column="67" selection-start-line="54" selection-start-column="67" selection-end-line="54" selection-end-column="67" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/workflows/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="397">
-          <caret line="66" column="67" selection-start-line="66" selection-start-column="67" selection-end-line="66" selection-end-column="67" />
         </state>
       </provider>
     </entry>
@@ -932,13 +812,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="375">
           <caret line="25" column="10" selection-start-line="25" selection-start-column="10" selection-end-line="25" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameBoardState.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="11" column="11" selection-start-line="11" selection-start-column="11" selection-end-line="11" selection-end-column="11" />
         </state>
       </provider>
     </entry>
@@ -1085,37 +958,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildInitialSettlementFlow.kt">
+    <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="82">
-          <caret line="131" selection-start-line="131" selection-end-line="155" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/SignDiceRollFlow.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="11" column="46" selection-start-line="11" selection-start-column="46" selection-end-line="11" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/oracleClient/src/test/kotlin/com.flowTests/OracleClientIntegrationTest.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-473">
-          <caret line="56" column="8" selection-start-line="56" selection-start-column="8" selection-end-line="56" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/DiceRollRequestHandler.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-83">
-          <caret line="12" column="36" selection-start-line="12" selection-start-column="36" selection-end-line="12" selection-end-column="36" />
+        <state relative-caret-position="325">
+          <caret line="62" column="12" selection-start-line="62" selection-start-column="12" selection-end-line="62" selection-end-column="12" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/SignDiceRollHandler.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-259">
+        <state>
           <caret column="31" selection-start-column="31" selection-end-column="31" />
         </state>
       </provider>
@@ -1129,18 +981,84 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/RollDiceFlow.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="50" column="84" selection-start-line="50" selection-start-column="84" selection-end-line="50" selection-end-column="84" />
+        <state relative-caret-position="210">
+          <caret line="14" column="52" selection-start-line="14" selection-start-column="52" selection-end-line="14" selection-end-column="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workflows/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="990">
+          <caret line="66" column="67" selection-start-line="66" selection-start-column="67" selection-end-line="66" selection-end-column="67" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/DiceRollRequestHandler.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="12" column="36" selection-start-line="12" selection-start-column="36" selection-end-line="12" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/oracleClient/src/test/kotlin/com.flowTests/OracleClientIntegrationTest.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="510">
+          <caret line="56" column="8" selection-start-line="56" selection-start-column="8" selection-end-line="56" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/SignDiceRollFlow.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="11" column="46" selection-start-line="11" selection-start-column="46" selection-end-line="11" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildInitialSettlementFlow.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1725">
+          <caret line="131" selection-start-line="131" selection-end-line="155" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="203">
+          <caret line="136" column="21" selection-start-line="136" selection-start-column="21" selection-end-line="136" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/BuildPhaseContract.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="11" selection-start-line="11" selection-end-line="47" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/GatherPhaseContract.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" lean-forward="true" selection-start-line="10" selection-end-line="10" />
           <folding>
-            <element signature="e#19#735#0" expanded="true" />
+            <element signature="e#42#327#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
+    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameBoardState.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="325">
-          <caret line="62" column="12" selection-start-line="62" selection-start-column="12" selection-end-line="62" selection-end-column="12" />
+        <state>
+          <caret column="37" lean-forward="true" selection-start-column="37" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameCurrencyStates.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="53" selection-start-line="5" selection-start-column="53" selection-end-line="5" selection-end-column="53" />
+          <folding>
+            <element signature="e#39#233#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
