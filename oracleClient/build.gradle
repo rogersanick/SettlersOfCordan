@@ -52,5 +52,6 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         apiVersion = "1.1"
         jvmTarget = "1.8"
         javaParameters = true   // Useful for reflection.
+        freeCompilerArgs = ["-Xnormalize-constructor-calls=enable"]
     }
 }
