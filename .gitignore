@@ -59,6 +59,8 @@ lib/dokka.jar
 workflows/out/
 contracts/out/
 clients/out/
+oracleService/out/
+oracleClient/out/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/

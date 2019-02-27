@@ -9,7 +9,7 @@ import net.corda.core.transactions.LedgerTransaction
 class DiceRollContract : Contract {
     companion object {
         // Used to identify our contract when building a transaction.
-        const val ID = "com.oracleClient.contracts.DiceRollContract"
+        const val ID = "com.oracleService.contracts.DiceRollContract"
     }
 
     // A transaction is valid if the verify() function of the contract of all the transaction's input and output states

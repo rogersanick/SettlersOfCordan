@@ -1,10 +1,11 @@
 package com.oracleService.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.flows.SignDiceRollFlow
+import com.oracleClient.SignDiceRollFlow
 import com.oracleService.contracts.DiceRollContract
 import com.oracleService.state.DiceRollState
 import net.corda.core.contracts.Command
+import net.corda.core.contracts.TransactionState
 import net.corda.core.contracts.requireThat
 import net.corda.core.crypto.TransactionSignature
 import net.corda.core.flows.FlowLogic
@@ -35,12 +36,14 @@ class SignDiceRollHandler(val session: FlowSession): FlowLogic<TransactionSignat
             "The second dice rolled is the same the oracle record" using (outputDiceRollInTransaction.randomRoll2 == oracleCopyOfDiceRollWeHaveOnRecord.randomRoll2)
             "The gameBoardState referenced is the same as we have on record" using (outputDiceRollInTransaction.gameBoardStateUniqueIdentifier == oracleCopyOfDiceRollWeHaveOnRecord.gameBoardStateUniqueIdentifier)
             "The gameBoardState referenced is the same as we have on record" using (outputDiceRollInTransaction.turnTrackerUniqueIdentifier == oracleCopyOfDiceRollWeHaveOnRecord.turnTrackerUniqueIdentifier)
-            "The turn tracker referenced is the same and has not been used previously" using (allDiceRollsOracleHasOnRecord.filter { it.state.data.turnTrackerUniqueIdentifier == outputDiceRollInTransaction.turnTrackerUniqueIdentifier }.isEmpty())
+            "The turn tracker referenced is the same and has not been used previously" using (allDiceRollsOracleHasOnRecord.filter { it.state.data.turnTrackerUniqueIdentifier == outputDiceRollInTransaction.turnTrackerUniqueIdentifier }.size == 1)
         }
 
         val myKey = serviceHub.myInfo.legalIdentities.first().owningKey
 
         fun isRollDiceCommandAndIAmSigner(elem: Any) = when {
+            elem is TransactionState<*> -> (elem.data as DiceRollState).gameBoardStateUniqueIdentifier == oracleCopyOfDiceRollWeHaveOnRecord.gameBoardStateUniqueIdentifier
+                    && (elem.data as DiceRollState).turnTrackerUniqueIdentifier == oracleCopyOfDiceRollWeHaveOnRecord.turnTrackerUniqueIdentifier
             elem is Command<*> && elem.value is DiceRollContract.Commands.RollDice -> {
                 myKey in elem.signers
             }
@@ -51,7 +54,9 @@ class SignDiceRollHandler(val session: FlowSession): FlowLogic<TransactionSignat
         val isValidMerkleTree = ftx.checkWithFun(::isRollDiceCommandAndIAmSigner)
 
         if (isValidMerkleTree) {
-            return serviceHub.createSignature(ftx, myKey)
+            val transactionSignature = serviceHub.createSignature(ftx, myKey)
+            session.send(transactionSignature)
+            return transactionSignature
         } else {
             throw java.lang.IllegalArgumentException("Oracle signature requested over invalid transaction.")
         }

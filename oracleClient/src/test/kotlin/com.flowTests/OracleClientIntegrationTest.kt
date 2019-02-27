@@ -5,6 +5,7 @@ import com.contractsAndStates.states.TurnTrackerState
 import com.flows.RollDiceFlow
 import com.flows.SetupGameStartFlow
 import com.flows.SetupGameStartFlowResponder
+import com.oracleClient.GetRandomDiceRollValues
 import com.oracleService.flows.DiceRollRequestHandler
 import com.oracleService.flows.SignDiceRollHandler
 import com.oracleService.state.DiceRollState
@@ -104,7 +105,6 @@ class OracleClientIntegrationTest {
         val futureWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
         network.runNetwork()
         val txWithDiceRoll = futureWithDiceRoll.getOrThrow()
-
         val diceRollState = txWithDiceRoll.coreTransaction.outputsOfType<DiceRollState>().single()
 
         val diceRoll1 = diceRollState.randomRoll1
