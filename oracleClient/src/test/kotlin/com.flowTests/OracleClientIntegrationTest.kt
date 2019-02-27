@@ -2,9 +2,9 @@ package com.flowTests
 
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.TurnTrackerState
+import com.flows.RollDiceFlow
 import com.flows.SetupGameStartFlow
 import com.flows.SetupGameStartFlowResponder
-import com.oracleClient.flows.RollDiceFlow
 import com.oracleService.flows.DiceRollRequestHandler
 import com.oracleService.flows.SignDiceRollHandler
 import com.oracleService.state.DiceRollState

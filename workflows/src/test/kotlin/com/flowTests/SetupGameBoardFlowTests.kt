@@ -44,8 +44,8 @@ class SetupGameBoardFlowTests {
         val p4 = d.info.chooseIdentity()
 
         // Get an identity for two additional spectators in the game.
-        val spec1 = e.info.chooseIdentity()
-        val spec2 = f.info.chooseIdentity()
+//        val spec1 = e.info.chooseIdentity()
+//        val spec2 = f.info.chooseIdentity()
 
         // Issue a game state onto the ledger.
         val gameStateIssueFlow = SetupGameStartFlow(p1, p2, p3, p4)
@@ -81,8 +81,8 @@ class SetupGameBoardFlowTests {
         val p4 = d.info.chooseIdentity()
 
         // Get an identity for two additional spectators in the game.
-        val spec1 = e.info.chooseIdentity()
-        val spec2 = f.info.chooseIdentity()
+//        val spec1 = e.info.chooseIdentity()
+//        val spec2 = f.info.chooseIdentity()
 
         // Issue a game state onto the ledger.
         val gameStateIssueFlow = SetupGameStartFlow(p1, p2, p3, p4)

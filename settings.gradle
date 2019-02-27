@@ -1,5 +1,6 @@
 include 'workflows'
 include 'contracts'
 include 'clients'
-include 'oracle'
+include 'oracleClient'
+include 'oracleService'
 

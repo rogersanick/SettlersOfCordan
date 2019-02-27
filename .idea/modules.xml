@@ -11,7 +11,6 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/contracts/com.template.contracts.iml" filepath="$PROJECT_DIR$/.idea/modules/contracts/com.template.contracts.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/contracts/com.template.contracts.main.iml" filepath="$PROJECT_DIR$/.idea/modules/contracts/com.template.contracts.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/contracts/com.template.contracts.test.iml" filepath="$PROJECT_DIR$/.idea/modules/contracts/com.template.contracts.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/oracle/com.template.oracle.iml" filepath="$PROJECT_DIR$/.idea/modules/oracle/com.template.oracle.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/oracleClient/com.template.oracleClient.iml" filepath="$PROJECT_DIR$/.idea/modules/oracleClient/com.template.oracleClient.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/oracleClient/com.template.oracleClient.main.iml" filepath="$PROJECT_DIR$/.idea/modules/oracleClient/com.template.oracleClient.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/oracleClient/com.template.oracleClient.test.iml" filepath="$PROJECT_DIR$/.idea/modules/oracleClient/com.template.oracleClient.test.iml" />
@@ -22,6 +21,10 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/workflows/com.template.workflows.integrationTest.iml" filepath="$PROJECT_DIR$/.idea/modules/workflows/com.template.workflows.integrationTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/workflows/com.template.workflows.main.iml" filepath="$PROJECT_DIR$/.idea/modules/workflows/com.template.workflows.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/workflows/com.template.workflows.test.iml" filepath="$PROJECT_DIR$/.idea/modules/workflows/com.template.workflows.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/oracleClient/oracleClient.com.template.oracleClient.main.iml" filepath="$PROJECT_DIR$/.idea/modules/oracleClient/oracleClient.com.template.oracleClient.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/oracleClient/oracleClient.com.template.oracleClient.test.iml" filepath="$PROJECT_DIR$/.idea/modules/oracleClient/oracleClient.com.template.oracleClient.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/oracleService/oracleService.com.template.oracleService.main.iml" filepath="$PROJECT_DIR$/.idea/modules/oracleService/oracleService.com.template.oracleService.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/oracleService/oracleService.com.template.oracleService.test.iml" filepath="$PROJECT_DIR$/.idea/modules/oracleService/oracleService.com.template.oracleService.test.iml" />
     </modules>
   </component>
 </project>

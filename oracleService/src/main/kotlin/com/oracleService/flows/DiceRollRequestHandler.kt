@@ -3,7 +3,7 @@ package com.oracleService.flows
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.TurnTrackerState
-import com.oracleClient.flows.RollDiceFlow
+import com.flows.RollDiceFlow
 import com.oracleService.contracts.DiceRollContract
 import com.oracleService.service.Oracle
 import com.oracleService.state.DiceRollState

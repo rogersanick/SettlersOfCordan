@@ -1,8 +1,8 @@
-package com.flows
+package com.oracleClient
 
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.states.GameBoardState
-import com.oracleClient.flows.SignDiceRollFlow
+import com.flows.SignDiceRollFlow
 import com.oracleService.contracts.DiceRollContract
 import com.oracleService.state.DiceRollState
 import net.corda.core.contracts.Command

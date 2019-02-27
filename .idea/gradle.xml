@@ -11,7 +11,8 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/clients" />
             <option value="$PROJECT_DIR$/contracts" />
-            <option value="$PROJECT_DIR$/oracle" />
+            <option value="$PROJECT_DIR$/oracleClient" />
+            <option value="$PROJECT_DIR$/oracleService" />
             <option value="$PROJECT_DIR$/workflows" />
           </set>
         </option>
