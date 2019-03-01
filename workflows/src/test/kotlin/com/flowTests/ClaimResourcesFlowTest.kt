@@ -2,18 +2,15 @@ package com.flowTests
 
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.TurnTrackerState
-import com.flows.RollDiceFlow
-import com.flows.SetupGameStartFlow
-import com.flows.SetupGameStartFlowResponder
-import com.oracleClient.GetRandomDiceRollValues
+import com.flows.*
 import com.oracleService.flows.DiceRollRequestHandler
 import com.oracleService.flows.SignDiceRollHandler
 import com.oracleService.state.DiceRollState
-import net.corda.cordan.flow.BuildInitialSettlementFlow
-import net.corda.cordan.flow.BuildInitialSettlementFlowResponder
+import net.corda.core.contracts.requireThat
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
+import net.corda.sdk.token.contracts.states.OwnedTokenAmount
 import net.corda.testing.common.internal.testNetworkParameters
 import net.corda.testing.internal.chooseIdentity
 import net.corda.testing.node.MockNetwork
@@ -24,7 +21,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-class OracleClientIntegrationTest {
+class ClaimResourcesFlowTest {
     private val network = MockNetwork(listOf("com.contractsAndStates", "com.flows", "com.oracleClient", "com.oracleService"),
             notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB"))),
             defaultParameters = MockNetworkParameters(networkParameters = testNetworkParameters(minimumPlatformVersion = 4))
@@ -107,11 +104,13 @@ class OracleClientIntegrationTest {
         val txWithDiceRoll = futureWithDiceRoll.getOrThrow()
         val diceRollState = txWithDiceRoll.coreTransaction.outputsOfType<DiceRollState>().single()
 
-        val diceRoll1 = diceRollState.randomRoll1
-        val diceRoll2 = diceRollState.randomRoll2
-        assert(diceRoll1 in 1..7)
-        assert(diceRoll2 in 1..7)
+        val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(IssueResourcesFlow(gameBoardLinearId = gameBoardState.linearId))
+        network.runNetwork()
+        val txWithNewReources = futureWithClaimedResources.getOrThrow()
 
+        requireThat {
+          "Resources were produced" using txWithNewReources.coreTransaction.outputsOfType<OwnedTokenAmount<*>>().isNotEmpty()
+        }
     }
 
 }

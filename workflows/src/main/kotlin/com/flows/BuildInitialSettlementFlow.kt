@@ -1,4 +1,4 @@
-package net.corda.cordan.flow
+package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.BuildPhaseContract

@@ -20,8 +20,16 @@ sourceSets {
     }
 }
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile "net.corda.sdk.token:contract:0.1"
+    compile "net.corda.sdk.token:workflow:0.1"
+    compile "net.corda.sdk.token.plugins:money:0.1"
     testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testCompile "junit:junit:$junit_version"
     // Corda dependencies.
@@ -32,8 +40,8 @@ dependencies {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
-        languageVersion = "1.1"
-        apiVersion = "1.1"
+        languageVersion = "1.2"
+        apiVersion = "1.2"
         jvmTarget = "1.8"
         javaParameters = true   // Useful for reflection.
     }

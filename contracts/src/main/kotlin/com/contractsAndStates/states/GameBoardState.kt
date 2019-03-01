@@ -1,10 +1,7 @@
 package com.contractsAndStates.states
 
 import com.contractsAndStates.contracts.GameStateContract
-import net.corda.core.contracts.Amount
-import net.corda.core.contracts.BelongsToContract
-import net.corda.core.contracts.LinearState
-import net.corda.core.contracts.UniqueIdentifier
+import net.corda.core.contracts.*
 import net.corda.core.identity.Party
 import net.corda.core.serialization.CordaSerializable
 
@@ -40,7 +37,7 @@ class HexTile(val resourceType: String,
 }
 
 @CordaSerializable
-data class PortTile(val amountInputRequired: Amount<GameCurrency>)
+data class PortTile(val inputRequired: List<Amount<Resource>>, val outputRequired: List<Amount<Resource>>)
 
 @CordaSerializable
 data class Port(val portTile: PortTile, var accessPoints: List<AccessPoint>)

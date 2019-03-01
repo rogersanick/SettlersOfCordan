@@ -1,6 +1,8 @@
 package com.oracleService.state
 
 import com.contractsAndStates.states.GameBoardState
+import com.oracleService.contracts.DiceRollContract
+import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.TransactionSignature
@@ -11,7 +13,17 @@ import net.corda.core.schemas.PersistentState
 import net.corda.core.serialization.CordaSerializable
 import java.util.*
 
+
+fun DiceRollState(diceRollState: DiceRollState) = DiceRollState(
+        diceRollState.randomRoll1,
+        diceRollState.randomRoll2,
+        diceRollState.turnTrackerUniqueIdentifier,
+        diceRollState.gameBoardStateUniqueIdentifier,
+        diceRollState.participants
+)
+
 @CordaSerializable
+@BelongsToContract(DiceRollContract::class)
 data class DiceRollState(
         val randomRoll1: Int,
         val randomRoll2: Int,

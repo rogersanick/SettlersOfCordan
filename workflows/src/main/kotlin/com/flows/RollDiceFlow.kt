@@ -30,7 +30,7 @@ class RollDiceFlow(val turnTrackerStateLinearId: UniqueIdentifier, val gameBoard
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
         val tb = TransactionBuilder(notary)
 
-        tb.addOutputState(diceRoll.copy(participants = listOf(ourIdentity, oracle)), DiceRollContract.ID)
+        tb.addOutputState(DiceRollState(diceRoll))
         tb.addCommand(DiceRollContract.Commands.RollDice(), listOf(ourIdentity.owningKey, oracle.owningKey))
 
         tb.verify(serviceHub)
@@ -54,7 +54,7 @@ class RollDiceFlow(val turnTrackerStateLinearId: UniqueIdentifier, val gameBoard
 }
 
 @InitiatedBy(RollDiceFlow::class)
-class BuildInitialSettlementFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
+class RollDiceFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
@@ -74,7 +74,6 @@ class BuildInitialSettlementFlowResponder(val counterpartySession: FlowSession):
         }
 
         val txWeJustSignedId = subFlow(signedTransactionFlow)
-
         return subFlow(ReceiveFinalityFlow(otherSideSession = counterpartySession, expectedTxId = txWeJustSignedId.id))
     }
 }

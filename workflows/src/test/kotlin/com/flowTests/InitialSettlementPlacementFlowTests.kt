@@ -2,10 +2,10 @@ package com.flowTests
 
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.TurnTrackerState
+import com.flows.BuildInitialSettlementFlow
+import com.flows.BuildInitialSettlementFlowResponder
 import com.flows.SetupGameStartFlow
 import com.flows.SetupGameStartFlowResponder
-import net.corda.cordan.flow.BuildInitialSettlementFlow
-import net.corda.cordan.flow.BuildInitialSettlementFlowResponder
 import net.corda.core.contracts.TransactionVerificationException
 import net.corda.core.flows.FlowException
 import net.corda.core.identity.CordaX500Name

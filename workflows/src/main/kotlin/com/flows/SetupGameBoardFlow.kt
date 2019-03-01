@@ -59,15 +59,15 @@ class SetupGameStartFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         // Available Port Tiles
         val portTilesTracking = BooleanArray(9)
         val portTiles: ArrayList<PortTile> = arrayListOf(
-                PortTile(Amount(2, Wood())),
-                PortTile(Amount(2, Ore())),
-                PortTile(Amount(2, Wheat())),
-                PortTile(Amount(3, GameCurrency())),
-                PortTile(Amount(2, Sheep())),
-                PortTile(Amount(2, Brick())),
-                PortTile(Amount(3, GameCurrency())),
-                PortTile(Amount(3, GameCurrency())),
-                PortTile(Amount(3, GameCurrency()))
+                PortTile(listOf(2.Sheep), listOf(1.Wood, 1.Brick, 1.Ore, 1.Wheat)),
+                PortTile(listOf(2.Wood), listOf(1.Sheep, 1.Brick, 1.Ore, 1.Wheat)),
+                PortTile(listOf(2.Brick), listOf(1.Wood, 1.Sheep, 1.Ore, 1.Wheat)),
+                PortTile(listOf(2.Ore), listOf(1.Wood, 1.Sheep, 1.Brick, 1.Wheat)),
+                PortTile(listOf(2.Wheat), listOf(1.Wood, 1.Sheep, 1.Brick, 1.Sheep)),
+                PortTile(listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep), listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep)),
+                PortTile(listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep), listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep)),
+                PortTile(listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep), listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep)),
+                PortTile(listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep), listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep))
         )
 
         val portHexTileAccessPointMapping = arrayListOf(
