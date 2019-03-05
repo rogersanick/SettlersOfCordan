@@ -3,18 +3,22 @@ package com.flows
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.GatherPhaseContract
 import com.contractsAndStates.states.*
+import com.oracleService.contracts.DiceRollContract
 import com.oracleService.state.DiceRollState
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.ReferencedStateAndRef
-import net.corda.core.contracts.StateAndRef
+import net.corda.core.contracts.TokenizableAssetInfo
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
-import net.corda.core.node.services.Vault
 import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
+import net.corda.sdk.token.contracts.OwnedTokenAmountContract
+import net.corda.sdk.token.contracts.commands.Issue
+import net.corda.sdk.token.contracts.commands.OwnedTokenCommand
 import net.corda.sdk.token.contracts.states.OwnedTokenAmount
+import net.corda.sdk.token.contracts.types.Issued
 import net.corda.sdk.token.contracts.utilities.AMOUNT
 import net.corda.sdk.token.contracts.utilities.issuedBy
 
@@ -42,13 +46,13 @@ class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<Sig
 
         // Step 4. Retrieve the Dice Roll State from the vault
         val diceRollStateAndRef = serviceHub.vaultService.queryBy<DiceRollState>().states.single()
+        val diceRollState = diceRollStateAndRef.state.data
 
         // Step 5. Create a transaction builder
         val tb = TransactionBuilder(notary = notary)
 
         // Step 6. Generate the appropriate resources
-        val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states
-        val resourcesToBeProduced = arrayListOf<Amount<Resource>>()
+        val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states.filter { gameBoardState.hexTiles[it.state.data.hexTileCoordinate].roleTrigger == diceRollState.randomRoll1 + diceRollState.randomRoll2 }
 
         for (result in listOfValidSettlements) {
             val settlementState = result.state.data
@@ -56,6 +60,7 @@ class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<Sig
             val resourceType = hexTile.resourceType
             val gameCurrency = Resource.getInstance(resourceType)
             val resource = AMOUNT(settlementState.resourceAmountClaim, gameCurrency) issuedBy ourIdentity
+            tb.addCommand(Issue(resource.token), gameBoardState.players.map { it.owningKey })
             tb.addOutputState(OwnedTokenAmount(resource, settlementState.owner))
         }
 
@@ -65,12 +70,14 @@ class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<Sig
         tb.addReferenceState(ReferencedStateAndRef(turnTrackerStateAndRef))
 
         // Step 8. Add the gather resources command and verify the transaction
-        tb.addCommand(GatherPhaseContract.Commands.issueResourcesToAllPlayers())
+        val commandSigners = gameBoardState.players.map {it.owningKey}
+        tb.addCommand(GatherPhaseContract.Commands.issueResourcesToAllPlayers(), commandSigners)
+        tb.addCommand(DiceRollContract.Commands.ConsumeDiceRoll(), commandSigners)
         tb.verify(serviceHub)
 
         // Step 9. Collect the signatures and sign the transaction
         val ptx = serviceHub.signInitialTransaction(tb)
-        val sessions = gameBoardState.players.map { initiateFlow(it) }
+        val sessions = (gameBoardState.players + diceRollState.participants).toSet().map { initiateFlow(it) }
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
         return subFlow(FinalityFlow(stx, sessions))
     }

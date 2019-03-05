@@ -38,6 +38,7 @@ class OracleClientIntegrationTest {
         startedNodes.forEach {
             it.registerInitiatedFlow(SetupGameStartFlowResponder::class.java)
             it.registerInitiatedFlow(BuildInitialSettlementFlowResponder::class.java)
+            it.registerInitiatedFlow(RollDiceFlowResponder::class.java)
         }
 
         listOf(DiceRollRequestHandler::class.java, SignDiceRollHandler::class.java).forEach { oracle.registerInitiatedFlow(it) }

@@ -11,6 +11,8 @@ import net.corda.core.crypto.TransactionSignature
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.FlowSession
 import net.corda.core.flows.InitiatedBy
+import net.corda.core.internal.DigitalSignatureWithCert
+import net.corda.core.internal.signWithCert
 import net.corda.core.node.services.queryBy
 import net.corda.core.transactions.FilteredTransaction
 import net.corda.core.utilities.unwrap
@@ -29,21 +31,29 @@ class SignDiceRollHandler(val session: FlowSession): FlowLogic<TransactionSignat
         val outputDiceRollInTransaction = ftx.outputsOfType<DiceRollState>().single()
 
         val allDiceRollsOracleHasOnRecord = serviceHub.vaultService.queryBy<DiceRollState>().states
-        val oracleCopyOfDiceRollWeHaveOnRecord = allDiceRollsOracleHasOnRecord.first().state.data
 
-        requireThat {
-            "The first dice rolled is the same the oracle record" using (outputDiceRollInTransaction.randomRoll1 == oracleCopyOfDiceRollWeHaveOnRecord.randomRoll1)
-            "The second dice rolled is the same the oracle record" using (outputDiceRollInTransaction.randomRoll2 == oracleCopyOfDiceRollWeHaveOnRecord.randomRoll2)
-            "The gameBoardState referenced is the same as we have on record" using (outputDiceRollInTransaction.gameBoardStateUniqueIdentifier == oracleCopyOfDiceRollWeHaveOnRecord.gameBoardStateUniqueIdentifier)
-            "The gameBoardState referenced is the same as we have on record" using (outputDiceRollInTransaction.turnTrackerUniqueIdentifier == oracleCopyOfDiceRollWeHaveOnRecord.turnTrackerUniqueIdentifier)
-            "The turn tracker referenced is the same and has not been used previously" using (allDiceRollsOracleHasOnRecord.filter { it.state.data.turnTrackerUniqueIdentifier == outputDiceRollInTransaction.turnTrackerUniqueIdentifier }.size == 1)
+        if (allDiceRollsOracleHasOnRecord.isNotEmpty()) {
+
+            val oracleCopyOfDiceRollWeHaveOnRecord = allDiceRollsOracleHasOnRecord.first().state.data
+
+            requireThat {
+                "The first dice rolled is the same the oracle record" using (outputDiceRollInTransaction.randomRoll1 == oracleCopyOfDiceRollWeHaveOnRecord.randomRoll1)
+                "The second dice rolled is the same the oracle record" using (outputDiceRollInTransaction.randomRoll2 == oracleCopyOfDiceRollWeHaveOnRecord.randomRoll2)
+                "The gameBoardState referenced is the same as we have on record" using (outputDiceRollInTransaction.gameBoardStateUniqueIdentifier == oracleCopyOfDiceRollWeHaveOnRecord.gameBoardStateUniqueIdentifier)
+                "The gameBoardState referenced is the same as we have on record" using (outputDiceRollInTransaction.turnTrackerUniqueIdentifier == oracleCopyOfDiceRollWeHaveOnRecord.turnTrackerUniqueIdentifier)
+                "The turn tracker referenced is the same and has not been used previously" using (allDiceRollsOracleHasOnRecord.filter { it.state.data.turnTrackerUniqueIdentifier == outputDiceRollInTransaction.turnTrackerUniqueIdentifier }.size == 1)
+            }
+
         }
 
-        val myKey = serviceHub.myInfo.legalIdentities.first().owningKey
+        // Check if the state is valid using our Signature
+        val byteArrayOfDataToSign = byteArrayOf(outputDiceRollInTransaction.randomRoll1.toByte(), outputDiceRollInTransaction.randomRoll2.toByte(), outputDiceRollInTransaction.turnTrackerUniqueIdentifier.hashCode().toByte(), outputDiceRollInTransaction.gameBoardStateUniqueIdentifier.hashCode().toByte())
+        val signedDataWithCertFromOutputDiceRoll = ourIdentity.signWithCert { DigitalSignatureWithCert(ourIdentityAndCert.certificate, byteArrayOfDataToSign) }
 
+        // Check if the command is correct and the oracle is a signer
+        val myKey = serviceHub.myInfo.legalIdentities.first().owningKey
         fun isRollDiceCommandAndIAmSigner(elem: Any) = when {
-            elem is TransactionState<*> -> (elem.data as DiceRollState).gameBoardStateUniqueIdentifier == oracleCopyOfDiceRollWeHaveOnRecord.gameBoardStateUniqueIdentifier
-                    && (elem.data as DiceRollState).turnTrackerUniqueIdentifier == oracleCopyOfDiceRollWeHaveOnRecord.turnTrackerUniqueIdentifier
+            elem is TransactionState<*> -> (elem.data as DiceRollState).signedDataWithOracleCert == signedDataWithCertFromOutputDiceRoll.id
             elem is Command<*> && elem.value is DiceRollContract.Commands.RollDice -> {
                 myKey in elem.signers
             }
@@ -52,7 +62,6 @@ class SignDiceRollHandler(val session: FlowSession): FlowLogic<TransactionSignat
 
         // Is it a Merkle tree we are willing to sign over?
         val isValidMerkleTree = ftx.checkWithFun(::isRollDiceCommandAndIAmSigner)
-
         if (isValidMerkleTree) {
             val transactionSignature = serviceHub.createSignature(ftx, myKey)
             session.send(transactionSignature)

@@ -1,5 +1,6 @@
 package com.oracleService.contracts
 
+import com.contractsAndStates.states.GameBoardState
 import com.oracleService.state.DiceRollState
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
@@ -15,7 +16,7 @@ class DiceRollContract : Contract {
     // A transaction is valid if the verify() function of the contract of all the transaction's input and output states
     // does not throw an exception.
     override fun verify(tx: LedgerTransaction) {
-        when (tx.commands.single().value) {
+        when (tx.commandsOfType<DiceRollContract.Commands>().single().value) {
             is Commands.RollDice -> {
                 requireThat {
                     "There are no inputs" using (tx.inputStates.isEmpty())
@@ -26,11 +27,24 @@ class DiceRollContract : Contract {
                     "The output state is a DiceRollState" using (diceRollState.randomRoll2 in 1..6)
                 }
             }
+            is Commands.ConsumeDiceRoll -> {
+                requireThat {
+                    "There is one DiceRollState input" using (tx.inputsOfType<DiceRollState>().size == 1)
+                    "There is are no DiceRollStateOutputs" using (tx.outputsOfType<DiceRollState>().isEmpty())
+
+                    val diceRollState = tx.inputsOfType<DiceRollState>().single()
+                    val gameBoardState = tx.referenceInputsOfType<GameBoardState>().single()
+                    "The output state is a DiceRollState" using (diceRollState.gameBoardStateUniqueIdentifier == gameBoardState.linearId)
+                    "The output state is a DiceRollState" using (diceRollState.turnTrackerUniqueIdentifier == gameBoardState.turnTrackerLinearId)
+                }
+            }
+
         }
     }
 
     // Used to indicate the transaction's intent.
     interface Commands : CommandData {
         class RollDice : Commands
+        class ConsumeDiceRoll: Commands
     }
 }
