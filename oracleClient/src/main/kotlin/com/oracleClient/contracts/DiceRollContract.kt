@@ -1,7 +1,7 @@
-package com.oracleService.contracts
+package com.oracleClient.contracts
 
 import com.contractsAndStates.states.GameBoardState
-import com.oracleService.state.DiceRollState
+import com.oracleClient.state.DiceRollState
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
 import net.corda.core.contracts.requireThat
@@ -16,7 +16,7 @@ class DiceRollContract : Contract {
     // A transaction is valid if the verify() function of the contract of all the transaction's input and output states
     // does not throw an exception.
     override fun verify(tx: LedgerTransaction) {
-        when (tx.commandsOfType<DiceRollContract.Commands>().single().value) {
+        when (tx.commandsOfType<Commands>().single().value) {
             is Commands.RollDice -> {
                 requireThat {
                     "There are no inputs" using (tx.inputStates.isEmpty())

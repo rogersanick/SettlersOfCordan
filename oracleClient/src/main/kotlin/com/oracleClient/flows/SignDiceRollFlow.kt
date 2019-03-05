@@ -1,4 +1,4 @@
-package com.oracleClient
+package com.oracleClient.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import net.corda.core.crypto.TransactionSignature

@@ -1,9 +1,9 @@
 package com.oracleService.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.oracleClient.SignDiceRollFlow
-import com.oracleService.contracts.DiceRollContract
-import com.oracleService.state.DiceRollState
+import com.oracleClient.contracts.DiceRollContract
+import com.oracleClient.flows.SignDiceRollFlow
+import com.oracleClient.state.DiceRollState
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.TransactionState
 import net.corda.core.contracts.requireThat

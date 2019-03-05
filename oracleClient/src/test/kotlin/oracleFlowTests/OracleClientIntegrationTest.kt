@@ -3,6 +3,7 @@ package oracleFlowTests
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.TurnTrackerState
 import com.flows.*
+import com.oracleClient.state.DiceRollState
 import com.oracleService.flows.DiceRollRequestHandler
 import com.oracleService.flows.SignDiceRollHandler
 import com.oracleService.state.DiceRollState
