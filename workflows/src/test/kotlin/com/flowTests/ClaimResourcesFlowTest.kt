@@ -101,8 +101,7 @@ class ClaimResourcesFlowTest {
         val rollDiceFlow = RollDiceFlow(turnTrackerStateLinearId, gameBoardState.copy(), oracleParty)
         val futureWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
         network.runNetwork()
-        val txWithDiceRoll = futureWithDiceRoll.getOrThrow()
-        val diceRollState = txWithDiceRoll.coreTransaction.outputsOfType<DiceRollState>().single()
+        futureWithDiceRoll.getOrThrow()
 
         val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(IssueResourcesFlow(gameBoardLinearId = gameBoardState.linearId))
         network.runNetwork()
