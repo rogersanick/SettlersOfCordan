@@ -4,8 +4,8 @@ import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.TurnTrackerState
 import com.flows.*
 import com.oracleService.flows.DiceRollRequestHandler
+import com.oracleService.flows.IssueResourcesOracleFlowResponder
 import com.oracleService.flows.SignDiceRollHandler
-import com.oracleService.state.DiceRollState
 import net.corda.core.contracts.requireThat
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.transactions.SignedTransaction
@@ -42,7 +42,7 @@ class ClaimResourcesFlowTest {
             it.registerInitiatedFlow(BuildInitialSettlementFlowResponder::class.java)
         }
 
-        listOf(DiceRollRequestHandler::class.java, SignDiceRollHandler::class.java).forEach { oracle.registerInitiatedFlow(it) }
+        listOf(DiceRollRequestHandler::class.java, SignDiceRollHandler::class.java, IssueResourcesOracleFlowResponder::class.java).forEach { oracle.registerInitiatedFlow(it) }
 
         network.runNetwork()
     }
@@ -103,12 +103,12 @@ class ClaimResourcesFlowTest {
         network.runNetwork()
         futureWithDiceRoll.getOrThrow()
 
-        val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(IssueResourcesFlow(gameBoardLinearId = gameBoardState.linearId))
+        val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(IssueResourcesFlow(gameBoardLinearId = gameBoardState.linearId, oracle = oracleParty))
         network.runNetwork()
         val txWithNewReources = futureWithClaimedResources.getOrThrow()
 
         requireThat {
-          "Resources were produced" using txWithNewReources.coreTransaction.outputsOfType<OwnedTokenAmount<*>>().isNotEmpty()
+          "Assert that resources were produced in the transaction" using txWithNewReources.coreTransaction.outputsOfType<OwnedTokenAmount<*>>().isNotEmpty()
         }
     }
 

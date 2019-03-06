@@ -1,7 +1,5 @@
 package com.contractsAndStates.states
 
-import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonProperty
 import net.corda.core.contracts.Amount
 import net.corda.core.serialization.CordaSerializable
 import net.corda.sdk.token.contracts.utilities.AMOUNT
@@ -62,9 +60,6 @@ class Resource(private val currency: GameCurrency) : Money() {
     override val description: String get() = currency.displayName
     override val displayTokenSize: BigDecimal get() = BigDecimal.ONE.scaleByPowerOfTen(-currency.defaultFractionDigits)
     override fun toString(): String = symbol
-
-    @JsonCreator
-    constructor(@JsonProperty("currencyCode") currencyCode: String) : this(GameCurrency(currencyCode))
 
     companion object {
         // Uses the java money registry.

@@ -29,10 +29,9 @@ import java.lang.IllegalArgumentException
 
 @InitiatingFlow
 @StartableByRPC
-class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<SignedTransaction>() {
+class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier, val oracle: Party): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
-
         // Step 1. Get reference to the notary
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
@@ -73,12 +72,12 @@ class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<Sig
         // Step 8. Add the gather resources command and verify the transaction
         val commandSigners = gameBoardState.players.map {it.owningKey}
         tb.addCommand(GatherPhaseContract.Commands.issueResourcesToAllPlayers(), commandSigners)
-        tb.addCommand(DiceRollContract.Commands.ConsumeDiceRoll(), commandSigners)
+        tb.addCommand(DiceRollContract.Commands.ConsumeDiceRoll(), commandSigners + oracle.owningKey)
         tb.verify(serviceHub)
 
         // Step 9. Collect the signatures and sign the transaction
         val ptx = serviceHub.signInitialTransaction(tb)
-        val sessions = (gameBoardState.players - ourIdentity).toSet().map { initiateFlow(it) }
+        val sessions = (gameBoardState.players - ourIdentity + oracle).toSet().map { initiateFlow(it) }
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
         return subFlow(FinalityFlow(stx, sessions))
     }
@@ -86,7 +85,7 @@ class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<Sig
 }
 
 @InitiatedBy(IssueResourcesFlow::class)
-class IssueResourcesFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
+open class IssueResourcesFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
@@ -117,6 +116,7 @@ class IssueResourcesFlowResponder(val counterpartySession: FlowSession): FlowLog
             } else false
         }
         val mappingOfPlayerToResourcesClaimed = mutableMapOf<AbstractParty, Amount<Issued<Resource>>>()
+        val ourIdentity = ourIdentity
         val gameBoardState = serviceHub.vaultService.queryBy<GameBoardState>().states.single().state.data
         gameBoardState.players.forEach {
             mappingOfPlayerToResourcesClaimed[it] = Amount(0, Resource.getInstance(currencyType) issuedBy ourIdentity)
