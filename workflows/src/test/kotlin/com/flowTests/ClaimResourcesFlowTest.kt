@@ -40,6 +40,7 @@ class ClaimResourcesFlowTest {
         startedNodes.forEach {
             it.registerInitiatedFlow(SetupGameStartFlowResponder::class.java)
             it.registerInitiatedFlow(BuildInitialSettlementFlowResponder::class.java)
+            it.registerInitiatedFlow(IssueResourcesFlowResponder::class.java)
         }
 
         listOf(DiceRollRequestHandler::class.java, SignDiceRollHandler::class.java, IssueResourcesOracleFlowResponder::class.java).forEach { oracle.registerInitiatedFlow(it) }

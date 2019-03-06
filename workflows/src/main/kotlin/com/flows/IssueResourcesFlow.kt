@@ -53,6 +53,7 @@ class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier, val oracle: Pa
 
         // Step 6. Generate the appropriate resources
         val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states.filter { gameBoardState.hexTiles[it.state.data.hexTileCoordinate].roleTrigger == diceRollState.randomRoll1 + diceRollState.randomRoll2 }
+        val listOfSettlments = serviceHub.vaultService.queryBy<SettlementState>().states.map { it.state.data }
 
         for (result in listOfValidSettlements) {
             val settlementState = result.state.data
