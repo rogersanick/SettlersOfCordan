@@ -2,13 +2,12 @@ package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.BuildPhaseContract
-import com.contractsAndStates.contracts.GameStateContract
-import com.contractsAndStates.contracts.TurnTrackerContract
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.HexTile
 import com.contractsAndStates.states.SettlementState
 import com.contractsAndStates.states.TurnTrackerState
 import net.corda.core.contracts.Command
+import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
 import net.corda.core.node.services.queryBy
@@ -18,13 +17,14 @@ import net.corda.core.transactions.TransactionBuilder
 import java.lang.IllegalArgumentException
 import java.util.ArrayList
 
-// *********************************
-// * Build Initial Settlement Flow *
-// *********************************
+
+// *************************************
+// * Initial Settlement Placement Flow *
+// *************************************
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
-class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: Int, val hexTileCoordinate: Int): FlowLogic<SignedTransaction>() {
+class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: Int, val hexTileCoordinate: Int): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
 
@@ -38,29 +38,22 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
 
         // Step 3. Retrieve the Turn Tracker State from the vault
         val queryCriteriaForTurnTrackerState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
-        val turnTrackerStateAndRef = serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteriaForTurnTrackerState).states.single()
-        val turnTrackerState = turnTrackerStateAndRef.state.data
+        val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteriaForTurnTrackerState).states.single())
 
         // Step 4. Create a new transaction builder
         val tb = TransactionBuilder(notary)
 
         // Step 5. Create new commands for placing a settlement and ending a turn. Add both to the transaction.
-        val endTurnDuringInitialPlacementPhase = Command(TurnTrackerContract.Commands.EndTurnDuringInitialPlacementPhase(), ourIdentity.owningKey)
-        val placeInitialSettlement = Command(BuildPhaseContract.Commands.BuildInitialSettlement(), gameBoardState.players.map { it.owningKey })
-
-        tb.addCommand(placeInitialSettlement)
-        tb.addCommand(endTurnDuringInitialPlacementPhase)
+        val buildSettlement = Command(BuildPhaseContract.Commands.BuildSettlement(), gameBoardState.players.map { it.owningKey })
+        tb.addCommand(buildSettlement)
 
         // Step 6. Create initial settlement
         val settlementState = SettlementState(hexTileIndex, hexTileCoordinate, gameBoardState.players, ourIdentity)
 
-        // Step 7. Create the new turnTracker state.
-        val newTurnTrackerState = turnTrackerState.endTurnDuringInitialSettlementPlacement()
-
-        // Step X. Create a new Game Board State
+        // Step 7. Create a new Game Board State
         val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { kotlin.collections.MutableList(6) { false } }
 
-        // Step X. Get access to potentially conflicting neighbours
+        // Step 8. Get access to potentially conflicting neighbours
         class LinkedListNode(val int: Int, var next: LinkedListNode? = null)
         val linkedListNode1 = LinkedListNode(1)
         val linkedListNode2 = LinkedListNode(3)
@@ -112,9 +105,8 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
 
         // Step 8. Add all states and commands to the transaction.
         tb.addInputState(gameBoardStateAndRef)
-        tb.addInputState(turnTrackerStateAndRef)
+        tb.addReferenceState(turnTrackerReferenceStateAndRef)
         tb.addOutputState(settlementState, BuildPhaseContract.ID)
-        tb.addOutputState(newTurnTrackerState, GameStateContract.ID)
         tb.addOutputState(gameBoardState.copy(settlementsPlaced = newSettlementsPlaced))
 
         // Step 9. Sign initial transaction
@@ -129,14 +121,15 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
     }
 }
 
-@InitiatedBy(BuildInitialSettlementFlow::class)
-class BuildInitialSettlementFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
+@InitiatedBy(BuildSettlementFlow::class)
+class BuildSettlementFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) {
                 val gameBoardState = stx.coreTransaction.outputsOfType<GameBoardState>().first()
-                val turnTrackerState = stx.coreTransaction.outputsOfType<TurnTrackerState>().first()
+                val turnTrackerStateRef = stx.coreTransaction.references.single()
+                val turnTrackerState = serviceHub.vaultService.queryBy<TurnTrackerState>(QueryCriteria.VaultQueryCriteria(stateRefs = listOf(turnTrackerStateRef))).states.single().state.data
 
                 val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(turnTrackerState.linearId))
                 val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteria).states.first().state.data

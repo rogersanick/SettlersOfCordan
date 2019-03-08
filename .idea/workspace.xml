@@ -2,7 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a2411927-6da4-490e-8024-ff65b0375487" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/state/ConsumedDiceRollState.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildSettlementFlow.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameCurrencyStates.kt" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameCurrencyStates.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/flows/GetRandomDiceRollValues.kt" beforeDir="false" afterPath="$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/flows/GetRandomDiceRollValues.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/IssueResourcesOracleFlowResponder.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildInitialSettlementFlow.kt" beforeDir="false" afterPath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildInitialSettlementFlow.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt" beforeDir="false" afterPath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/RollDiceFlow.kt" beforeDir="false" afterPath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/RollDiceFlow.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/ClaimResourcesFlowTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/ClaimResourcesFlowTest.kt" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -59,56 +67,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/ClaimResourcesFlowTest.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-180">
-              <caret line="80" column="90" selection-start-line="80" selection-start-column="90" selection-end-line="80" selection-end-column="90" />
-              <folding>
-                <element signature="e#23#874#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="842">
+              <caret line="76" column="114" selection-start-line="76" selection-start-column="114" selection-end-line="76" selection-end-column="114" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/NodeDriver.kt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="165">
-              <caret line="16" column="95" selection-start-line="16" selection-start-column="85" selection-end-line="16" selection-end-column="95" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/transactions/BaseTransaction.kt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="194">
-              <caret line="85" selection-start-line="85" selection-end-line="85" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/transactions/SignedTransaction.kt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="194">
-              <caret line="64" selection-start-line="64" selection-end-line="64" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-node/4.0/399beb517b103cffe608c284c4e304afccf162a3/corda-node-4.0-sources.jar!/net/corda/node/internal/FlowManager.kt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="203">
-              <caret line="155" selection-start-line="155" selection-end-line="155" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="94">
-              <caret line="68" selection-start-line="68" selection-end-line="68" />
+            <state relative-caret-position="286">
+              <caret line="119" selection-start-line="119" selection-end-line="119" />
               <folding>
                 <element signature="e#19#1111#0" expanded="true" />
               </folding>
@@ -116,23 +85,62 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.3.21/224a3bcfa1c088dd5d7c4a3958a68427b44c65dc/kotlin-stdlib-common-1.3.21-sources.jar!/generated/_Collections.kt">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildSettlementFlow.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="113">
-              <caret line="1370" selection-start-line="1370" selection-end-line="1370" />
+            <state relative-caret-position="320">
+              <caret line="141" lean-forward="true" selection-start-line="141" selection-end-line="141" />
+              <folding>
+                <element signature="e#19#840#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/IssueResourcesOracleFlowResponder.kt">
+        <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/flows/FinalityFlow.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="18" column="44" selection-start-line="18" selection-start-column="44" selection-end-line="18" selection-end-column="44" />
+            <state relative-caret-position="-1596">
+              <caret line="72" column="4" selection-start-line="72" selection-start-column="4" selection-end-line="72" selection-end-column="4" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/SetupGameBoardFlow.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="344">
+              <caret line="218" column="28" selection-start-line="218" selection-start-column="28" selection-end-line="218" selection-end-column="28" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/flows/CollectSignaturesFlow.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="321">
+              <caret line="230" selection-start-line="230" selection-end-line="230" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameCurrencyStates.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="178">
+              <caret line="75" selection-start-line="75" selection-end-line="75" />
               <folding>
-                <element signature="e#33#527#0" expanded="true" />
+                <element signature="e#39#313#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-node/4.0/399beb517b103cffe608c284c4e304afccf162a3/corda-node-4.0-sources.jar!/net/corda/node/services/statemachine/FlowStateMachineImpl.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="185">
+              <caret line="160" selection-start-line="160" selection-end-line="160" />
             </state>
           </provider>
         </entry>
@@ -140,20 +148,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/contracts/ContractsDSL.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="185">
+            <state relative-caret-position="175">
               <caret line="25" selection-start-line="25" selection-end-line="25" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/DiceRollRequestHandler.kt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="196">
-              <caret line="16" column="13" selection-start-line="16" selection-start-column="13" selection-end-line="16" selection-end-column="13" />
-              <folding>
-                <element signature="e#33#397#0" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -169,12 +165,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>1.1</find>
-      <find>api</find>
-      <find>apiVersion</find>
-      <find>SignDice</find>
-      <find>main</find>
-      <find>src/main</find>
       <find>BuildSettlementFlow</find>
       <find>BuildInitial</find>
       <find>ma</find>
@@ -199,6 +189,12 @@
       <find>service.Oracle</find>
       <find>Error</find>
       <find>oracle</find>
+      <find>toString</find>
+      <find>signatu</find>
+      <find>MIssing signatures</find>
+      <find>missing</find>
+      <find>signa</find>
+      <find>signat</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -218,8 +214,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/.idea/modules/clients/com.template.clients.test.iml" />
-        <option value="$PROJECT_DIR$/.idea/modules/clients/com.template.clients.main.iml" />
         <option value="$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/SetupGameBoardFlowTests.kt" />
         <option value="$PROJECT_DIR$/settings.gradle" />
         <option value="$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/SignDiceRollFlow.kt" />
@@ -227,7 +221,6 @@
         <option value="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/GatherPhaseContract.kt" />
         <option value="$PROJECT_DIR$/.idea/modules/contracts/com.template.contracts.main.iml" />
         <option value="$PROJECT_DIR$/.idea/modules/contracts/com.template.contracts.test.iml" />
-        <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildInitialSettlementFlow.kt" />
         <option value="$PROJECT_DIR$/.idea/modules/com.template.SettlersOfCordan2.0.test.iml" />
         <option value="$PROJECT_DIR$/.idea/modules/oracleClient/oracleClient.com.template.oracleClient.test.iml" />
         <option value="$PROJECT_DIR$/.idea/modules/oracleClient/oracleClient.com.template.oracleClient.main.iml" />
@@ -249,26 +242,29 @@
         <option value="$PROJECT_DIR$/oracleClient/src/test/kotlin/com.flowTests/OracleClientIntegrationTest.kt" />
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/oracleClient/src/test/kotlin/oracleFlowTests/OracleClientIntegrationTest.kt" />
-        <option value="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameBoardState.kt" />
         <option value="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/state/DiceRollState.kt" />
         <option value="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/contracts/DiceRollContract.kt" />
         <option value="$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/GetRandomDiceRollValues.kt" />
         <option value="$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/contracts/DiceRollContract.kt" />
-        <option value="$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/flows/GetRandomDiceRollValues.kt" />
         <option value="$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/state/DiceRollState.kt" />
         <option value="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/SignDiceRollHandler.kt" />
-        <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/RollDiceFlow.kt" />
         <option value="$PROJECT_DIR$/oracleService/build.gradle" />
         <option value="$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/NodeDriver.kt" />
         <option value="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/service/OracleService.kt" />
         <option value="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/DiceRollRequestHandler.kt" />
         <option value="$PROJECT_DIR$/oracleClient/build.gradle" />
         <option value="$PROJECT_DIR$/workflows/build.gradle" />
-        <option value="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameCurrencyStates.kt" />
         <option value="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/IssueResourcesFlowResponder.kt" />
         <option value="$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/IssueResourcesOracleFlowResponder.kt" />
-        <option value="$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/ClaimResourcesFlowTest.kt" />
+        <option value="$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/flows/GetRandomDiceRollValues.kt" />
+        <option value="$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/state/ConsumedDiceRollState.kt" />
+        <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/RollDiceFlow.kt" />
+        <option value="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameBoardState.kt" />
+        <option value="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameCurrencyStates.kt" />
         <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt" />
+        <option value="$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/ClaimResourcesFlowTest.kt" />
+        <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildInitialSettlementFlow.kt" />
+        <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildSettlementFlow.kt" />
       </list>
     </option>
   </component>
@@ -278,10 +274,10 @@
       <select />
     </treeState>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="251" />
-    <option name="y" value="23" />
-    <option name="width" value="1429" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="459" />
+    <option name="y" value="166" />
+    <option name="width" value="1680" />
     <option name="height" value="955" />
   </component>
   <component name="ProjectView">
@@ -299,6 +295,41 @@
             <path>
               <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
               <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+            </path>
+            <path>
+              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+            </path>
+            <path>
+              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
+              <item name="oracleService" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
             </path>
             <path>
@@ -321,60 +352,17 @@
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="flows" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="flowTests" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="flowTests" type="462c0819:PsiDirectoryNode" />
-              <item name="ClaimResourcesFlowTest" type="2c5a2ef7:KtClassOrObjectTreeNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
       <pane id="Scope" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1551896692305" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1552011882228" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
@@ -534,34 +522,34 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="ClaimResourcesFlowTest - 2019.03.06 at 12h 07m 26s.xml">
+    <history-entry file="ClaimResourcesFlowTest - 2019.03.07 at 20h 50m 18s.xml">
       <configuration name="ClaimResourcesFlowTest" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="ClaimResourcesFlowTest - 2019.03.06 at 12h 15m 10s.xml">
+    <history-entry file="ClaimResourcesFlowTest - 2019.03.07 at 20h 59m 39s.xml">
       <configuration name="ClaimResourcesFlowTest" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="ClaimResourcesFlowTest - 2019.03.06 at 12h 33m 51s.xml">
+    <history-entry file="ClaimResourcesFlowTest - 2019.03.07 at 21h 01m 08s.xml">
       <configuration name="ClaimResourcesFlowTest" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="ClaimResourcesFlowTest - 2019.03.06 at 12h 35m 40s.xml">
+    <history-entry file="ClaimResourcesFlowTest - 2019.03.07 at 21h 02m 35s.xml">
       <configuration name="ClaimResourcesFlowTest" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="ClaimResourcesFlowTest - 2019.03.06 at 12h 38m 49s.xml">
+    <history-entry file="ClaimResourcesFlowTest - 2019.03.07 at 21h 04m 10s.xml">
       <configuration name="ClaimResourcesFlowTest" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="ClaimResourcesFlowTest - 2019.03.06 at 12h 40m 53s.xml">
+    <history-entry file="ClaimResourcesFlowTest - 2019.03.07 at 21h 05m 44s.xml">
       <configuration name="ClaimResourcesFlowTest" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="ClaimResourcesFlowTest - 2019.03.06 at 12h 43m 53s.xml">
+    <history-entry file="ClaimResourcesFlowTest - 2019.03.07 at 21h 07m 15s.xml">
       <configuration name="ClaimResourcesFlowTest" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="ClaimResourcesFlowTest - 2019.03.06 at 13h 06m 22s.xml">
+    <history-entry file="ClaimResourcesFlowTest - 2019.03.07 at 21h 08m 37s.xml">
       <configuration name="ClaimResourcesFlowTest" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="ClaimResourcesFlowTest - 2019.03.06 at 13h 08m 40s.xml">
+    <history-entry file="ClaimResourcesFlowTest - 2019.03.07 at 21h 09m 46s.xml">
       <configuration name="ClaimResourcesFlowTest" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="ClaimResourcesFlowTest - 2019.03.06 at 13h 11m 27s.xml">
+    <history-entry file="ClaimResourcesFlowTest - 2019.03.07 at 21h 11m 23s.xml">
       <configuration name="ClaimResourcesFlowTest" configurationId="JUnit" />
     </history-entry>
   </component>
@@ -575,9 +563,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="251" y="23" width="1429" height="955" extended-state="0" />
+    <frame x="0" y="23" width="1674" height="955" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" weight="0.2855083" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.28615198" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -585,9 +574,9 @@
       <window_info id="UI Designer" order="5" />
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.3283237" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32792583" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4981685" weight="0.3267671" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.67902666" />
+      <window_info anchor="bottom" id="Debug" order="3" visible="true" weight="0.33603707" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32947975" />
@@ -608,7 +597,7 @@
       <window_info anchor="right" id="Palette&#9;" order="8" />
     </layout>
     <layout-to-restore>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2855083" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.29389554" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -616,9 +605,9 @@
       <window_info id="UI Designer" order="5" />
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.3283237" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32792583" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4981685" weight="0.3267671" />
-      <window_info anchor="bottom" id="Debug" order="3" visible="true" weight="0.29663962" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.33603707" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32947975" />
@@ -678,53 +667,16 @@
           <option name="timeStamp" value="95" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
-          <condition expression="serviceHub.vaultService.queryBy&lt;GameBoardState&gt;().states.size != 1" language="kotlin" />
           <url>file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt</url>
-          <line>120</line>
+          <line>110</line>
           <properties />
-          <option name="timeStamp" value="97" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/ClaimResourcesFlowTest.kt</url>
-          <line>111</line>
-          <properties />
-          <option name="timeStamp" value="98" />
+          <option name="timeStamp" value="142" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt</url>
-          <line>98</line>
+          <line>119</line>
           <properties />
-          <option name="timeStamp" value="99" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt</url>
-          <line>96</line>
-          <properties />
-          <option name="timeStamp" value="100" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt</url>
-          <line>68</line>
-          <properties />
-          <option name="timeStamp" value="101" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt</url>
-          <line>55</line>
-          <properties />
-          <option name="timeStamp" value="102" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt</url>
-          <line>57</line>
-          <properties />
-          <option name="timeStamp" value="103" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt</url>
-          <line>85</line>
-          <properties />
-          <option name="timeStamp" value="104" />
+          <option name="timeStamp" value="143" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/co.paralleluniverse/quasar-core/0.7.10/859c7790c5378fcebbc22bdb25eb8346fa96ec68/quasar-core-0.7.10-sources.jar!/co/paralleluniverse/fibers/Fiber.java</url>
@@ -758,206 +710,60 @@
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
     </expressions>
+    <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>listOf(listOfTokensIssued.single(), listOfTokensThatShouldHaveBeenIssued.single())</expression-string>
+        <language-id>kotlin</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>listOfTokensIssued.single() == listOfTokensThatShouldHaveBeenIssued.single()</expression-string>
+        <language-id>kotlin</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>listOfTokensIssued.indexOf(listOfTokensThatShouldHaveBeenIssued.single())</expression-string>
+        <language-id>kotlin</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>listOfTokensThatShouldHaveBeenIssued.filter {}</expression-string>
+        <language-id>kotlin</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>listOfTokensIssued.size == listOfTokensThatShouldHaveBeenIssued.size</expression-string>
+        <language-id>kotlin</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>listOf(listOfTokensIssued, listOfTokensThatShouldHaveBeenIssued)</expression-string>
+        <language-id>kotlin</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>listOfTokensIssued.size</expression-string>
+        <language-id>kotlin</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>it.data::class</expression-string>
+        <language-id>kotlin</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>it.data.class</expression-string>
+        <language-id>kotlin</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>it.data.javaClass</expression-string>
+        <language-id>kotlin</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-node/4.0/399beb517b103cffe608c284c4e304afccf162a3/corda-node-4.0-sources.jar!/net/corda/node/utilities/AffinityExecutor.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="182">
-          <caret line="64" selection-start-line="64" selection-end-line="64" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-serialization/4.0/5a0534d43ea315241cf8f665735a27f95219a338/corda-serialization-4.0-sources.jar!/net/corda/serialization/internal/amqp/AMQPSerializationScheme.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="233">
-          <caret line="224" selection-start-line="224" selection-end-line="224" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-serialization/4.0/5a0534d43ea315241cf8f665735a27f95219a338/corda-serialization-4.0-sources.jar!/net/corda/serialization/internal/amqp/DeserializationInput.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="175">
-          <caret line="118" selection-start-line="118" selection-end-line="118" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/co.paralleluniverse/quasar-core/0.7.10/859c7790c5378fcebbc22bdb25eb8346fa96ec68/quasar-core-0.7.10-sources.jar!/co/paralleluniverse/fibers/Stack.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="175">
-          <caret line="226" selection-start-line="226" selection-end-line="226" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/net/corda/sdk/token/contract/0.1/contract-0.1-sources.jar!/net/corda/sdk/token/contracts/states/OwnedTokenAmount.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-134">
-          <caret column="44" selection-start-column="44" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/contracts/Structures.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="175">
-          <caret line="209" column="40" selection-start-line="209" selection-start-column="40" selection-end-line="209" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/workflows/logs/node-MacBook-Dev-09.local.log">
-      <provider selected="true" editor-type-id="LogFileEditorProvider">
-        <state relative-caret-position="159">
-          <caret line="3314" column="77" selection-start-line="3314" selection-start-column="77" selection-end-line="3314" selection-end-column="77" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/net/corda/sdk/token/contract/0.1/contract-0.1-sources.jar!/net/corda/sdk/token/contracts/commands/OwnedTokenCommand.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="133">
-          <caret line="11" column="8" selection-start-line="11" selection-start-column="8" selection-end-line="11" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/TurnTrackerState.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="99">
-          <caret line="14" column="12" selection-start-line="14" selection-start-column="12" selection-end-line="14" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameBoardState.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="16" column="38" selection-start-line="16" selection-start-column="38" selection-end-line="16" selection-end-column="38" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/transactions/LedgerTransaction.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="185">
-          <caret line="124" selection-start-line="124" selection-end-line="124" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/transactions/TransactionBuilder.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="317">
-          <caret line="473" column="9" lean-forward="true" selection-start-line="473" selection-start-column="9" selection-end-line="473" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/internal/TransactionVerifierServiceInternal.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="178">
-          <caret line="70" selection-start-line="70" selection-end-line="70" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/identity/IdentityUtils.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="84">
-          <caret line="44" column="4" selection-start-line="44" selection-start-column="4" selection-end-line="44" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/flows/FlowLogic.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="99">
-          <caret line="315" selection-start-line="315" selection-end-line="315" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-node/4.0/399beb517b103cffe608c284c4e304afccf162a3/corda-node-4.0-sources.jar!/net/corda/node/services/statemachine/FlowStateMachineImpl.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="175">
-          <caret line="265" selection-start-line="265" selection-end-line="265" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/co.paralleluniverse/quasar-core/0.7.10/859c7790c5378fcebbc22bdb25eb8346fa96ec68/quasar-core-0.7.10-sources.jar!/co/paralleluniverse/fibers/Fiber.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="130">
-          <caret line="802" selection-start-line="802" selection-end-line="802" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/co.paralleluniverse/quasar-core/0.7.10/859c7790c5378fcebbc22bdb25eb8346fa96ec68/quasar-core-0.7.10-sources.jar!/co/paralleluniverse/fibers/RunnableFiberTask.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="77">
-          <caret line="90" selection-start-line="90" selection-end-line="90" />
-          <folding>
-            <element signature="e#3165#3166#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-node/4.0/399beb517b103cffe608c284c4e304afccf162a3/corda-node-4.0-sources.jar!/net/corda/node/services/statemachine/FlowSessionImpl.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="17" selection-start-line="17" selection-end-line="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/identity/AbstractParty.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="18" selection-start-line="18" selection-end-line="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildInitialSettlementFlow.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="99">
-          <caret line="132" selection-start-line="132" selection-end-line="154" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/net/corda/sdk/token/contract/0.1/contract-0.1-sources.jar!/net/corda/sdk/token/contracts/OwnedTokenAmountContract.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="171">
-          <caret line="62" selection-start-line="62" selection-end-line="62" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/BuildPhaseContract.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="274">
-          <caret line="34" selection-start-line="34" selection-end-line="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/RollDiceFlow.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="47" column="50" selection-start-line="47" selection-start-column="50" selection-end-line="47" selection-end-column="50" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/SignDiceRollHandler.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="34" column="23" selection-start-line="34" selection-start-column="23" selection-end-line="34" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.idea/modules/oracleService/com.template.oracleService.main.iml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="213">
-          <caret line="33" column="59" selection-start-line="33" selection-start-column="46" selection-end-line="33" selection-end-column="59" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.idea/modules.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="17" column="121" lean-forward="true" selection-start-line="17" selection-start-column="121" selection-end-line="17" selection-end-column="121" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.idea/misc.xml">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.idea/vcs.xml">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/service/OracleService.kt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
@@ -972,13 +778,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="375">
           <caret line="25" column="55" selection-start-line="25" selection-start-column="55" selection-end-line="25" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/flows/CollectSignaturesFlow.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3315">
-          <caret line="231" selection-start-line="231" selection-end-line="231" />
         </state>
       </provider>
     </entry>
@@ -1003,48 +802,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/state/DiceRollState.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="12" column="4" selection-start-line="12" selection-start-column="4" selection-end-line="12" selection-end-column="4" />
-          <folding>
-            <element signature="e#32#404#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/flows/GetRandomDiceRollValues.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="21" column="17" selection-start-line="21" selection-start-column="17" selection-end-line="21" selection-end-column="17" />
-          <folding>
-            <element signature="e#32#462#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/flows/SignDiceRollFlow.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="12" column="30" selection-start-line="12" selection-start-column="30" selection-end-line="12" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.gradle/wrapper/dists/gradle-4.4.1-all/2kpyt0ea6hyxavvt21uml23gd/gradle-4.4.1/src/core-api/org/gradle/api/artifacts/dsl/DependencyHandler.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-271">
           <folding>
             <element signature="e#0#15288#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameCurrencyStates.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="284">
-          <caret line="61" column="44" selection-start-line="61" selection-start-column="44" selection-end-line="61" selection-end-column="44" />
-          <folding>
-            <element signature="e#39#313#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1056,44 +818,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/DiceRollRequestHandler.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="196">
-          <caret line="16" column="13" selection-start-line="16" selection-start-column="13" selection-end-line="16" selection-end-column="13" />
-          <folding>
-            <element signature="e#33#397#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-node/4.0/399beb517b103cffe608c284c4e304afccf162a3/corda-node-4.0-sources.jar!/net/corda/node/internal/FlowManager.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="203">
-          <caret line="155" selection-start-line="155" selection-end-line="155" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/contracts/ContractsDSL.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="185">
-          <caret line="25" selection-start-line="25" selection-end-line="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/transactions/BaseTransaction.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="194">
-          <caret line="85" selection-start-line="85" selection-end-line="85" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/transactions/SignedTransaction.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="194">
-          <caret line="64" selection-start-line="64" selection-end-line="64" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/NodeDriver.kt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="165">
@@ -1101,39 +825,338 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/ClaimResourcesFlowTest.kt">
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/transactions/BaseTransaction.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-180">
-          <caret line="80" column="90" selection-start-line="80" selection-start-column="90" selection-end-line="80" selection-end-column="90" />
-          <folding>
-            <element signature="e#23#874#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="1170">
+          <caret line="85" selection-start-line="85" selection-end-line="85" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-node/4.0/399beb517b103cffe608c284c4e304afccf162a3/corda-node-4.0-sources.jar!/net/corda/node/internal/FlowManager.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2130">
+          <caret line="155" selection-start-line="155" selection-end-line="155" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/IssueResourcesOracleFlowResponder.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
+        <state relative-caret-position="75">
           <caret line="18" column="44" selection-start-line="18" selection-start-column="44" selection-end-line="18" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Applications/h2/src/test/org/h2/test/unit/TestStringUtils.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
           <folding>
-            <element signature="e#33#527#0" expanded="true" />
+            <element signature="e#0#9543#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/flows/SignDiceRollFlow.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="12" column="30" selection-start-line="12" selection-start-column="30" selection-end-line="12" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/state/DiceRollState.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret selection-end-line="30" selection-end-column="35" />
+          <folding>
+            <element signature="e#32#404#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/state/ConsumedDiceRollState.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
+          <folding>
+            <element signature="e#32#404#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameBoardState.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="66">
+          <caret line="23" column="18" selection-start-line="23" selection-start-column="18" selection-end-line="23" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/net/corda/sdk/token/contract/0.1/contract-0.1-sources.jar!/net/corda/sdk/token/contracts/commands/OwnedTokenCommand.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="14" column="39" selection-start-line="14" selection-start-column="39" selection-end-line="14" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_191.jdk/Contents/Home/src.zip!/java/util/concurrent/ThreadPoolExecutor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="197">
+          <caret line="631" column="20" selection-start-line="631" selection-start-column="20" selection-end-line="631" selection-end-column="20" />
+          <folding>
+            <element signature="e#25302#25303#0" expanded="true" />
+            <element signature="e#25341#25342#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/net/corda/sdk/token/contract/0.1/contract-0.1-sources.jar!/net/corda/sdk/token/contracts/types/Issued.kt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/transactions/LedgerTransaction.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="182">
+          <caret line="124" selection-start-line="124" selection-end-line="124" />
         </state>
       </provider>
     </entry>
     <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.3.21/224a3bcfa1c088dd5d7c4a3958a68427b44c65dc/kotlin-stdlib-common-1.3.21-sources.jar!/generated/_Collections.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="113">
-          <caret line="1370" selection-start-line="1370" selection-end-line="1370" />
+        <state relative-caret-position="182">
+          <caret line="516" selection-start-line="516" selection-end-line="516" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/internal/TransactionVerifierServiceInternal.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="379" selection-start-line="379" selection-end-line="379" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/net/corda/sdk/token/contract/0.1/contract-0.1-sources.jar!/net/corda/sdk/token/contracts/OwnedTokenAmountContract.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="47">
+          <caret line="76" column="9" selection-start-line="76" selection-start-column="9" selection-end-line="76" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/net/corda/sdk/token/contract/0.1/contract-0.1-sources.jar!/net/corda/sdk/token/contracts/states/OwnedTokenAmount.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="193">
+          <caret line="29" column="14" lean-forward="true" selection-start-line="29" selection-start-column="14" selection-end-line="29" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/contracts/FungibleState.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="309">
+          <caret line="28" column="10" selection-start-line="28" selection-start-column="10" selection-end-line="28" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/node/NetworkParameters.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="39" selection-start-line="39" selection-end-line="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/internal/CordaUtils.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="31" selection-start-line="31" selection-end-line="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-node/4.0/399beb517b103cffe608c284c4e304afccf162a3/corda-node-4.0-sources.jar!/net/corda/node/internal/AbstractNode.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="175">
+          <caret line="962" selection-start-line="962" selection-end-line="962" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/contracts/Structures.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="182">
+          <caret line="171" column="50" selection-start-line="171" selection-start-column="50" selection-end-line="171" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/transactions/TransactionBuilder.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="175">
+          <caret line="137" selection-start-line="137" selection-end-line="137" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/flows/FlowLogic.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="175">
+          <caret line="115" selection-start-line="115" selection-end-line="115" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/transactions/SignedTransaction.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="256">
+          <caret line="323" column="30" selection-start-line="323" selection-start-column="30" selection-end-line="323" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_191.jdk/Contents/Home/src.zip!/java/security/SignatureException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="110">
+          <caret line="54" column="12" selection-start-line="54" selection-start-column="12" selection-end-line="54" selection-end-column="12" />
+          <folding>
+            <element signature="e#949#950#0" expanded="true" />
+            <element signature="e#975#976#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_191.jdk/Contents/Home/src.zip!/java/lang/Exception.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="197">
+          <caret line="65" column="11" selection-start-line="65" selection-start-column="11" selection-end-line="65" selection-end-column="11" />
+          <folding>
+            <element signature="e#1663#1664#0" expanded="true" />
+            <element signature="e#1693#1694#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_191.jdk/Contents/Home/src.zip!/java/lang/Throwable.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="182">
+          <caret line="263" column="11" selection-start-line="263" selection-start-column="11" selection-end-line="263" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/oracleClient/src/main/kotlin/com/oracleClient/flows/GetRandomDiceRollValues.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="19" column="29" selection-start-line="19" selection-start-column="29" selection-end-line="19" selection-end-column="29" />
+          <folding>
+            <element signature="e#32#462#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/oracleService/src/main/kotlin/com/oracleService/flows/DiceRollRequestHandler.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="290">
+          <caret line="22" column="30" selection-start-line="22" selection-start-column="30" selection-end-line="22" selection-end-column="30" />
+          <folding>
+            <element signature="e#33#397#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_191.jdk/Contents/Home/src.zip!/java/security/GeneralSecurityException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="197">
+          <caret line="55" column="12" selection-start-line="55" selection-start-column="12" selection-end-line="55" selection-end-column="12" />
+          <folding>
+            <element signature="e#1018#1019#0" expanded="true" />
+            <element signature="e#1044#1045#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workflows/logs/node-MacBook-Dev-09.local.log">
+      <provider selected="true" editor-type-id="LogFileEditorProvider">
+        <state relative-caret-position="20764">
+          <caret line="3462" column="56" selection-start-line="3462" selection-start-column="56" selection-end-line="3462" selection-end-column="56" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/RollDiceFlow.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-306">
+          <caret line="28" column="47" selection-start-line="28" selection-start-column="47" selection-end-line="28" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/transactions/TransactionWithSignatures.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="250">
+          <caret line="77" selection-start-line="77" selection-end-line="77" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-node/4.0/399beb517b103cffe608c284c4e304afccf162a3/corda-node-4.0-sources.jar!/net/corda/node/services/statemachine/FlowStateMachineImpl.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="185">
+          <caret line="160" selection-start-line="160" selection-end-line="160" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/flows/CollectSignaturesFlow.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="321">
+          <caret line="230" selection-start-line="230" selection-end-line="230" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/SetupGameBoardFlow.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="344">
+          <caret line="218" column="28" selection-start-line="218" selection-start-column="28" selection-end-line="218" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/flows/FinalityFlow.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1596">
+          <caret line="72" column="4" selection-start-line="72" selection-start-column="4" selection-end-line="72" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/contracts/ContractsDSL.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="175">
+          <caret line="25" selection-start-line="25" selection-end-line="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameCurrencyStates.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="178">
+          <caret line="75" selection-start-line="75" selection-end-line="75" />
+          <folding>
+            <element signature="e#39#313#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/ClaimResourcesFlowTest.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="842">
+          <caret line="76" column="114" selection-start-line="76" selection-start-column="114" selection-end-line="76" selection-end-column="114" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="94">
-          <caret line="68" selection-start-line="68" selection-end-line="68" />
+        <state relative-caret-position="286">
+          <caret line="119" selection-start-line="119" selection-end-line="119" />
           <folding>
             <element signature="e#19#1111#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildInitialSettlementFlow.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="44">
+          <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildSettlementFlow.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="320">
+          <caret line="141" lean-forward="true" selection-start-line="141" selection-end-line="141" />
+          <folding>
+            <element signature="e#19#840#0" expanded="true" />
           </folding>
         </state>
       </provider>

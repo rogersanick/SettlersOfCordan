@@ -9,8 +9,19 @@ import java.math.BigDecimal
 import java.util.*
 
 
+fun getCurrency(resourceType: String, amount: Int) {
+    when (resourceType) {
+        "Field" -> Wheat(amount)
+        "Mountain" -> Ore(amount)
+        "Pasture" -> Sheep(amount)
+        "Forest" -> Wood(amount)
+        "Hill" -> Brick(amount)
+        else -> "NOTCURRENCY"
+    }
+}
+
 // Wheat.
-val Wheat = Resource.getInstance("Wheat")
+val Wheat = Resource.getInstance("Field")
 fun Wheat(amount: Int): Amount<Resource> = AMOUNT(amount, Wheat)
 fun Wheat(amount: Long): Amount<Resource> = AMOUNT(amount, Wheat)
 fun Wheat(amount: Double): Amount<Resource> = AMOUNT(amount, Wheat)
@@ -19,7 +30,7 @@ val Long.Wheat: Amount<Resource> get() = Wheat(this)
 val Double.Wheat: Amount<Resource> get() = Wheat(this)
 
 // Ore.
-val Ore = Resource.getInstance("Ore")
+val Ore = Resource.getInstance("Mountain")
 fun Ore(amount: Int): Amount<Resource> = AMOUNT(amount, Ore)
 fun Ore(amount: Long): Amount<Resource> = AMOUNT(amount, Ore)
 fun Ore(amount: Double): Amount<Resource> = AMOUNT(amount, Ore)
@@ -28,7 +39,7 @@ val Long.Ore: Amount<Resource> get() = Ore(this)
 val Double.Ore: Amount<Resource> get() = Ore(this)
 
 // Sheep.
-val Sheep = Resource.getInstance("Sheep")
+val Sheep = Resource.getInstance("Pasture")
 fun Sheep(amount: Int): Amount<Resource> = AMOUNT(amount, Sheep)
 fun Sheep(amount: Long): Amount<Resource> = AMOUNT(amount, Sheep)
 fun Sheep(amount: Double): Amount<Resource> = AMOUNT(amount, Sheep)
@@ -37,7 +48,7 @@ val Long.Sheep: Amount<Resource> get() = Sheep(this)
 val Double.Sheep: Amount<Resource> get() = Sheep(this)
 
 // Wood.
-val Wood = Resource.getInstance("Wood")
+val Wood = Resource.getInstance("Forest")
 fun Wood(amount: Int): Amount<Resource> = AMOUNT(amount, Wood)
 fun Wood(amount: Long): Amount<Resource> = AMOUNT(amount, Wood)
 fun Wood(amount: Double): Amount<Resource> = AMOUNT(amount, Wood)
@@ -46,7 +57,7 @@ val Long.Wood: Amount<Resource> get() = Wood(this)
 val Double.Wood: Amount<Resource> get() = Wood(this)
 
 // Brick.
-val Brick = Resource.getInstance("Brick")
+val Brick = Resource.getInstance("Hill")
 fun Brick(amount: Int): Amount<Resource> = AMOUNT(amount, Brick)
 fun Brick(amount: Long): Amount<Resource> = AMOUNT(amount, Brick)
 fun Brick(amount: Double): Amount<Resource> = AMOUNT(amount, Brick)
@@ -62,8 +73,7 @@ class Resource(private val currency: GameCurrency) : Money() {
     override fun toString(): String = symbol
 
     companion object {
-        // Uses the java money registry.
-        fun getInstance(currencyCode: String) = Resource(GameCurrency(currencyCode))
+        fun getInstance(resourceType: String) = Resource(GameCurrency(resourceType))
     }
 
     override fun equals(other: Any?): Boolean {
@@ -81,14 +91,39 @@ class Resource(private val currency: GameCurrency) : Money() {
 
 // Game Currency Utility Class
 @CordaSerializable
-class GameCurrency(val currencyCode: String) {
-    val displayName: String get() = when (currencyCode) {
-        "Wheat" -> "Wh"
-        "Ore" -> "Or"
-        "Sheep" -> "Sh"
-        "Wood" -> "Wd"
-        "Brick" -> "Br"
-        else -> throw IllegalArgumentException("A game currency must be of type Wheat, Ore, Sheep, Wood or Brick.")
+class GameCurrency(val resourceType: String) {
+    init {
+        if (!listOf("Field", "Mountain", "Pasture", "Forest", "Hill").contains(resourceType)) {
+            throw IllegalArgumentException("A game currency must be of type Wheat, Ore, Sheep, Wood or Brick.")
+        }
     }
+
+    val currencyCode: String
+        get() = when (resourceType) {
+            "Field" -> "Wheat"
+            "Mountain" -> "Ore"
+            "Pasture" -> "Sheep"
+            "Forest" -> "Wood"
+            "Hill" -> "Brick"
+            else -> "NOTCURRENCY"
+        }
+    val displayName: String
+        get() = when (resourceType) {
+            "Field" -> "Wh"
+            "Mountain" -> "Or"
+            "Pasture" -> "Sh"
+            "Forest" -> "Wd"
+            "Hill" -> "Br"
+            else -> "NOTCURRENCY"
+        }
     val defaultFractionDigits: Int get() = 0
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is GameCurrency) return false
+        if (other.currencyCode != this.currencyCode) return false
+        if (other.defaultFractionDigits != this.defaultFractionDigits) return false
+        if (other.displayName != this.displayName) return false
+        if (other.resourceType != this.resourceType) return false
+        return true
+    }
 }

@@ -4,7 +4,6 @@ import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.TurnTrackerState
 import com.flows.*
 import com.oracleService.flows.DiceRollRequestHandler
-import com.oracleService.flows.IssueResourcesOracleFlowResponder
 import com.oracleService.flows.SignDiceRollHandler
 import net.corda.core.contracts.requireThat
 import net.corda.core.identity.CordaX500Name
@@ -43,7 +42,7 @@ class ClaimResourcesFlowTest {
             it.registerInitiatedFlow(IssueResourcesFlowResponder::class.java)
         }
 
-        listOf(DiceRollRequestHandler::class.java, SignDiceRollHandler::class.java, IssueResourcesOracleFlowResponder::class.java).forEach { oracle.registerInitiatedFlow(it) }
+        listOf(DiceRollRequestHandler::class.java, SignDiceRollHandler::class.java).forEach { oracle.registerInitiatedFlow(it) }
 
         network.runNetwork()
     }
@@ -74,8 +73,8 @@ class ClaimResourcesFlowTest {
         val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
-        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayOf(Pair(0,5), Pair(0,1), Pair(0,3), Pair(1,1))
-        val nonconflictingHextileIndexAndCoordinatesRound2 = arrayOf(Pair(1,3), Pair(2,1), Pair(2,3), Pair(3,3))
+        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayOf(Pair(0,5), Pair(2,5), Pair(4,3), Pair(5,2))
+        val nonconflictingHextileIndexAndCoordinatesRound2 = arrayOf(Pair(7,3), Pair(9,3), Pair(11,3), Pair(13,3))
 
 
         fun placeAPieceFromASpecificNode(i: Int, testCoordinates: Array<Pair<Int, Int>>) {

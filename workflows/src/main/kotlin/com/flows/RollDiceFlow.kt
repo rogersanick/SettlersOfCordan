@@ -48,7 +48,7 @@ class RollDiceFlow(val turnTrackerStateLinearId: UniqueIdentifier, val gameBoard
         val oracleSignature = subFlow(SignDiceRollFlow(oracle, ftx))
         val stx = ptx.withAdditionalSignature(oracleSignature)
 
-        val sessionsForFinalityFlow = (gameBoardState.players - ourIdentity + oracle).toSet().map { initiateFlow(it) }
+        val sessionsForFinalityFlow = (gameBoardState.players - ourIdentity).toSet().map { initiateFlow(it) }
         return subFlow(FinalityFlow(stx, sessionsForFinalityFlow))
     }
 }

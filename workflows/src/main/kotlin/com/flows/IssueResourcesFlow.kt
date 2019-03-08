@@ -8,6 +8,7 @@ import com.oracleClient.state.DiceRollState
 import net.corda.core.contracts.*
 import net.corda.core.flows.*
 import net.corda.core.identity.AbstractParty
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
@@ -52,16 +53,15 @@ class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier, val oracle: Pa
         val tb = TransactionBuilder(notary = notary)
 
         // Step 6. Generate the appropriate resources
-        val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states.filter { gameBoardState.hexTiles[it.state.data.hexTileCoordinate].roleTrigger == diceRollState.randomRoll1 + diceRollState.randomRoll2 }
-        val listOfSettlments = serviceHub.vaultService.queryBy<SettlementState>().states.map { it.state.data }
+        val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states.filter { gameBoardState.hexTiles[it.state.data.hexTileIndex].roleTrigger == diceRollState.randomRoll1 + diceRollState.randomRoll2 }
 
         for (result in listOfValidSettlements) {
             val settlementState = result.state.data
-            val hexTile = gameBoardState.hexTiles[result.state.data.hexTileCoordinate]
+            val hexTile = gameBoardState.hexTiles[result.state.data.hexTileIndex]
             val resourceType = hexTile.resourceType
             val gameCurrency = Resource.getInstance(resourceType)
             val resource = AMOUNT(settlementState.resourceAmountClaim, gameCurrency) issuedBy ourIdentity
-            tb.addCommand(Issue(resource.token), gameBoardState.players.map { it.owningKey })
+            tb.addCommand(Issue(resource.token), ourIdentity.owningKey)
             tb.addOutputState(OwnedTokenAmount(resource, settlementState.owner))
         }
 
@@ -73,12 +73,12 @@ class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier, val oracle: Pa
         // Step 8. Add the gather resources command and verify the transaction
         val commandSigners = gameBoardState.players.map {it.owningKey}
         tb.addCommand(GatherPhaseContract.Commands.issueResourcesToAllPlayers(), commandSigners)
-        tb.addCommand(DiceRollContract.Commands.ConsumeDiceRoll(), commandSigners + oracle.owningKey)
+        tb.addCommand(DiceRollContract.Commands.ConsumeDiceRoll(), commandSigners)
         tb.verify(serviceHub)
 
         // Step 9. Collect the signatures and sign the transaction
         val ptx = serviceHub.signInitialTransaction(tb)
-        val sessions = (gameBoardState.players - ourIdentity + oracle).toSet().map { initiateFlow(it) }
+        val sessions = (gameBoardState.players - ourIdentity).toSet().map { initiateFlow(it) }
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
         return subFlow(FinalityFlow(stx, sessions))
     }
@@ -90,15 +90,34 @@ open class IssueResourcesFlowResponder(val counterpartySession: FlowSession): Fl
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
-            override fun checkTransaction(stx: SignedTransaction) {
+            override fun checkTransaction(stx: SignedTransaction) = requireThat {
+                val oracleLegalName = CordaX500Name("Oracle", "New York", "US")
+                val oracleParty = serviceHub.networkMapCache.getNodeByLegalName(oracleLegalName)
+                oracleParty?.legalIdentities?.first()?.owningKey
 
-                val wheatIssued = getIssuedCurrency("Wheat", stx)
-                val brickIssued = getIssuedCurrency("Brick", stx)
-                val oreIssued = getIssuedCurrency("Ore", stx)
-                val sheepIssue = getIssuedCurrency("Sheep", stx)
-                val woodIssued = getIssuedCurrency("Wood", stx)
+                val listOfTokensIssued = stx.coreTransaction.outputsOfType<OwnedTokenAmount<*>>().toMutableList()
 
-                val validSettlementStates = serviceHub.vaultService.queryBy<SettlementState>().states
+                val gameBoardState = serviceHub.vaultService.queryBy<GameBoardState>(QueryCriteria.VaultQueryCriteria(stateRefs = stx.references)).states.single().state.data
+                val turnTrackerState = serviceHub.vaultService.queryBy<TurnTrackerState>().states.single().state.data
+                val diceRollState = serviceHub.vaultService.queryBy<DiceRollState>(QueryCriteria.VaultQueryCriteria(stateRefs = stx.inputs)).states.single().state.data
+                val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states.filter { gameBoardState.hexTiles[it.state.data.hexTileIndex].roleTrigger == diceRollState.randomRoll1 + diceRollState.randomRoll2 }
+
+                val listOfTokensThatShouldHaveBeenIssued = mutableListOf<OwnedTokenAmount<*>>()
+                for (result in listOfValidSettlements) {
+                    val settlementState = result.state.data
+                    val hexTile = gameBoardState.hexTiles[settlementState.hexTileIndex]
+                    val resourceType = hexTile.resourceType
+                    val gameCurrency = Resource.getInstance(resourceType)
+                    val amountOfResource = AMOUNT(settlementState.resourceAmountClaim, gameCurrency) issuedBy gameBoardState.players[turnTrackerState.currTurnIndex]
+                    val ownedTokenAmount = OwnedTokenAmount(amountOfResource, settlementState.owner)
+                    listOfTokensThatShouldHaveBeenIssued.add(ownedTokenAmount)
+                }
+
+                "The correct number of resources must be produced for each respective party" using (listOfTokensThatShouldHaveBeenIssued.filter {
+                    listOfTokensIssued.indexOf(it) == -1
+                }.isEmpty() && listOfTokensIssued.size == listOfTokensThatShouldHaveBeenIssued.size)
+
+                val test = 0
 
             }
         }
@@ -108,19 +127,17 @@ open class IssueResourcesFlowResponder(val counterpartySession: FlowSession): Fl
         return subFlow(ReceiveFinalityFlow(otherSideSession = counterpartySession, expectedTxId = txWeJustSignedId.id))
     }
 
-    fun getIssuedCurrency(currencyType: String, stx: SignedTransaction): List<TransactionState<ContractState>> {
+    // Unused utility function
+    fun getIssuedCurrency(hexTileTerrainType: String, stx: SignedTransaction): MutableMap<AbstractParty, Amount<Issued<Resource>>> {
 
-        val resourceOfTypeIssued = stx.coreTransaction.outputs.filter {
-            if (it.data is OwnedTokenAmount<*>) {
-                val ownedTokenAmount = it.data as OwnedTokenAmount<Resource>
-                ownedTokenAmount.amount.token.product == Resource.getInstance(currencyType)
-            } else false
+        val resourceOfTypeIssued = stx.coreTransaction.outputsOfType<OwnedTokenAmount<*>>().filter {
+            it.amount.token.product == Resource.getInstance(hexTileTerrainType)
         }
         val mappingOfPlayerToResourcesClaimed = mutableMapOf<AbstractParty, Amount<Issued<Resource>>>()
         val ourIdentity = ourIdentity
         val gameBoardState = serviceHub.vaultService.queryBy<GameBoardState>().states.single().state.data
         gameBoardState.players.forEach {
-            mappingOfPlayerToResourcesClaimed[it] = Amount(0, Resource.getInstance(currencyType) issuedBy ourIdentity)
+            mappingOfPlayerToResourcesClaimed[it] = Amount(0, Resource.getInstance(hexTileTerrainType) issuedBy ourIdentity)
         }
 
         resourceOfTypeIssued.forEach {
@@ -128,7 +145,7 @@ open class IssueResourcesFlowResponder(val counterpartySession: FlowSession): Fl
             mappingOfPlayerToResourcesClaimed[ownedTokenAmount.owner]?.plus(ownedTokenAmount.amount)
         }
 
-        return resourceOfTypeIssued
+        return mappingOfPlayerToResourcesClaimed
 
     }
 
