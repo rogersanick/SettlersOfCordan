@@ -21,6 +21,7 @@ import org.junit.Before
 import org.junit.Test
 
 class ClaimResourcesFlowTest {
+    // TODO: Accommodate for random dice rolls so that test correctly verifies every time regardless of random roll return
     private val network = MockNetwork(listOf("com.contractsAndStates", "com.flows", "com.oracleClient", "com.oracleService", "net.corda.sdk.token"),
             notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB"))),
             defaultParameters = MockNetworkParameters(networkParameters = testNetworkParameters(minimumPlatformVersion = 4))
