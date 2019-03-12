@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="a2411927-6da4-490e-8024-ff65b0375487" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/BuildPhaseContract.kt" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/BuildPhaseContract.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildSettlementFlow.kt" beforeDir="false" afterPath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildSettlementFlow.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt" beforeDir="false" afterPath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -61,8 +59,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="211">
-              <caret line="59" column="178" selection-start-line="59" selection-start-column="178" selection-end-line="59" selection-end-column="178" />
+            <state relative-caret-position="120">
+              <caret line="30" column="81" selection-start-line="30" selection-start-column="81" selection-end-line="30" selection-end-column="81" />
             </state>
           </provider>
         </entry>
@@ -70,8 +68,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/SetupGameBoardFlow.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1">
-              <caret line="144" lean-forward="true" selection-start-line="144" selection-end-line="144" />
+            <state relative-caret-position="1950">
+              <caret line="144" selection-start-line="144" selection-end-line="144" />
             </state>
           </provider>
         </entry>
@@ -79,8 +77,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameBoardState.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="292">
-              <caret line="35" column="5" lean-forward="true" selection-start-line="35" selection-start-column="5" selection-end-line="35" selection-end-column="5" />
+            <state relative-caret-position="480">
+              <caret line="35" column="5" selection-start-line="35" selection-start-column="5" selection-end-line="35" selection-end-column="5" />
             </state>
           </provider>
         </entry>
@@ -205,18 +203,17 @@
       <select />
     </treeState>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="651" />
+  <component name="ProjectFrameBounds">
     <option name="y" value="23" />
-    <option name="width" value="1029" />
-    <option name="height" value="955" />
+    <option name="width" value="1680" />
+    <option name="height" value="957" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -224,79 +221,11 @@
               <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
               <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
             </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="contractsAndStates" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="contractsAndStates" type="462c0819:PsiDirectoryNode" />
-              <item name="states" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="contractsAndStates" type="462c0819:PsiDirectoryNode" />
-              <item name="states" type="462c0819:PsiDirectoryNode" />
-              <item name="GameBoardState.kt" type="24436e51:KtFileTreeNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="contractsAndStates" type="462c0819:PsiDirectoryNode" />
-              <item name="states" type="462c0819:PsiDirectoryNode" />
-              <item name="GameBoardState.kt" type="24436e51:KtFileTreeNode" />
-              <item name="HexTile" type="2c5a2ef7:KtClassOrObjectTreeNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -501,10 +430,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1680" height="955" extended-state="6" />
+    <frame x="0" y="23" width="1680" height="957" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14774115" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.14957266" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -517,8 +446,8 @@
       <window_info anchor="bottom" id="Debug" order="3" weight="0.33603707" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info active="true" anchor="bottom" id="TODO" order="6" visible="true" weight="0.32908458" />
-      <window_info anchor="bottom" id="Terminal" order="7" sideWeight="0.496337" weight="0.32329085" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32908458" />
+      <window_info anchor="bottom" id="Terminal" order="7" sideWeight="0.496337" visible="true" weight="0.32254335" />
       <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.5034613" side_tool="true" weight="0.3267671" />
       <window_info anchor="bottom" id="Version Control" order="9" weight="0.32908458" />
       <window_info anchor="bottom" id="Build" order="10" weight="0.32908458" />
@@ -1047,24 +976,24 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameBoardState.kt">
+    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="292">
-          <caret line="35" column="5" lean-forward="true" selection-start-line="35" selection-start-column="5" selection-end-line="35" selection-end-column="5" />
+        <state relative-caret-position="120">
+          <caret line="30" column="81" selection-start-line="30" selection-start-column="81" selection-end-line="30" selection-end-column="81" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/SetupGameBoardFlow.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1">
-          <caret line="144" lean-forward="true" selection-start-line="144" selection-end-line="144" />
+        <state relative-caret-position="1950">
+          <caret line="144" selection-start-line="144" selection-end-line="144" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt">
+    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameBoardState.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="211">
-          <caret line="59" column="178" selection-start-line="59" selection-start-column="178" selection-end-line="59" selection-end-column="178" />
+        <state relative-caret-position="480">
+          <caret line="35" column="5" selection-start-line="35" selection-start-column="5" selection-end-line="35" selection-end-column="5" />
         </state>
       </provider>
     </entry>

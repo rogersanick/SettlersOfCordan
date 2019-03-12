@@ -28,6 +28,8 @@ import java.lang.IllegalArgumentException
 // * Initial Settlement Placement Flow *
 // *************************************
 
+// TODO: Add initialization service that prints Settlers Of CorDan to the console
+
 @InitiatingFlow
 @StartableByRPC
 class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier, val oracle: Party): FlowLogic<SignedTransaction>() {
