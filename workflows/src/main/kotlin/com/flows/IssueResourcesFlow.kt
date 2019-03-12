@@ -53,7 +53,14 @@ class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier, val oracle: Pa
         val tb = TransactionBuilder(notary = notary)
 
         // Step 6. Generate the appropriate resources
-        val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states.filter { gameBoardState.hexTiles[it.state.data.hexTileIndex].roleTrigger == diceRollState.randomRoll1 + diceRollState.randomRoll2 }
+        val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states.filter {
+            // TODO: Add additional filtering conditionals so that settlements with adjacent hextiles triggered by a roll are considered valid.
+            val diceRollTotal = diceRollState.randomRoll1 + diceRollState.randomRoll2
+            val adjacentHexTileIndex1 = gameBoardState.hexTiles[(gameBoardState.hexTiles[it.state.data.hexTileIndex].sides[it.state.data.hexTileCoordinate]) ?: 7].roleTrigger == diceRollTotal
+            val adjacentHexTileIndex2 = gameBoardState.hexTiles[(gameBoardState.hexTiles[it.state.data.hexTileIndex].sides[it.state.data.hexTileCoordinate + 1]) ?: 7].roleTrigger == diceRollTotal
+            val primaryHexTile = gameBoardState.hexTiles[it.state.data.hexTileIndex].roleTrigger == diceRollTotal
+            adjacentHexTileIndex1 || adjacentHexTileIndex2 || primaryHexTile
+        }
 
         for (result in listOfValidSettlements) {
             val settlementState = result.state.data
@@ -116,8 +123,6 @@ open class IssueResourcesFlowResponder(val counterpartySession: FlowSession): Fl
                 "The correct number of resources must be produced for each respective party" using (listOfTokensThatShouldHaveBeenIssued.filter {
                     listOfTokensIssued.indexOf(it) == -1
                 }.isEmpty() && listOfTokensIssued.size == listOfTokensThatShouldHaveBeenIssued.size)
-
-                val test = 0
 
             }
         }
