@@ -22,7 +22,7 @@ import org.junit.Before
 import org.junit.Test
 
 class InitialSettlementPlacementFlowTests {
-    private val network = MockNetwork(listOf("com.contractsAndStates", "com.flows"),
+    private val network = MockNetwork(listOf("com.contractsAndStates", "com.flows", "net.corda.sdk.token"),
             notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB"))),
             defaultParameters = MockNetworkParameters(networkParameters = testNetworkParameters(minimumPlatformVersion = 4))
     )

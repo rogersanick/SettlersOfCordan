@@ -4,10 +4,7 @@ import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.BuildPhaseContract
 import com.contractsAndStates.contracts.GameStateContract
 import com.contractsAndStates.contracts.TurnTrackerContract
-import com.contractsAndStates.states.GameBoardState
-import com.contractsAndStates.states.HexTile
-import com.contractsAndStates.states.SettlementState
-import com.contractsAndStates.states.TurnTrackerState
+import com.contractsAndStates.states.*
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
@@ -15,6 +12,12 @@ import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
+import net.corda.sdk.token.contracts.OwnedTokenAmountContract
+import net.corda.sdk.token.contracts.commands.Issue
+import net.corda.sdk.token.contracts.states.OwnedTokenAmount
+import net.corda.sdk.token.contracts.utilities.AMOUNT
+import net.corda.sdk.token.contracts.utilities.issuedBy
+import net.corda.sdk.token.contracts.utilities.ownedBy
 import java.lang.IllegalArgumentException
 import java.util.ArrayList
 
@@ -57,10 +60,10 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
         // Step 7. Create the new turnTracker state.
         val newTurnTrackerState = turnTrackerState.endTurnDuringInitialSettlementPlacement()
 
-        // Step X. Create a new Game Board State
+        // Step 8. Create a new Game Board State
         val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { kotlin.collections.MutableList(6) { false } }
 
-        // Step X. Get access to potentially conflicting neighbours
+        // Step 9. Get access to potentially conflicting neighbours
         class LinkedListNode(val int: Int, var next: LinkedListNode? = null)
         val linkedListNode1 = LinkedListNode(1)
         val linkedListNode2 = LinkedListNode(3)
@@ -110,18 +113,41 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
         if (indexOfRelevantHexTileNeighbour1 != -1) newSettlementsPlaced[indexOfRelevantHexTileNeighbour1][coordinateOfPotentiallyConflictingSettlement1] = true
         if (indexOfRelevantHexTileNeighbour2 != -1) newSettlementsPlaced[indexOfRelevantHexTileNeighbour2][coordinateOfPotentiallyConflictingSettlement2] = true
 
-        // Step 8. Add all states and commands to the transaction.
+        // Step 10. Add a self-issued resource if we are in the second round of initial placement
+        if (turnTrackerState.setUpRound1Complete) {
+            val gameCurrencyToClaim = arrayListOf<Resource>()
+            gameCurrencyToClaim.add(Resource.getInstance(gameBoardState.hexTiles[settlementState.hexTileIndex].resourceType))
+            if (indexOfRelevantHexTileNeighbour1 != null) gameCurrencyToClaim.add(Resource.getInstance(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType))
+            if (indexOfRelevantHexTileNeighbour1 != null) gameCurrencyToClaim.add(Resource.getInstance(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType))
+
+            val ownedTokenAmountsOfResourcesToClaim = gameCurrencyToClaim.map {
+                AMOUNT(1, it) issuedBy ourIdentity ownedBy ourIdentity
+            }
+
+            // Add a command to issue the appropriate types of resources. Convert the gameCurrencyToClaim to a set to prevent duplicate commands.
+            val resourceTypesToBeIssuedForWhichACommandShouldBeIncluded = gameCurrencyToClaim.toSet()
+            resourceTypesToBeIssuedForWhichACommandShouldBeIncluded.forEach {
+                tb.addCommand(Issue(it), ourIdentity.owningKey)
+            }
+
+            // Add all of the appropriate new owned token amounts to the transaction.
+            ownedTokenAmountsOfResourcesToClaim.forEach {
+                tb.addOutputState(it, OwnedTokenAmountContract.contractId)
+            }
+        }
+
+        // Step 10. Add all states and commands to the transaction.
         tb.addInputState(gameBoardStateAndRef)
         tb.addInputState(turnTrackerStateAndRef)
         tb.addOutputState(settlementState, BuildPhaseContract.ID)
         tb.addOutputState(newTurnTrackerState, GameStateContract.ID)
         tb.addOutputState(gameBoardState.copy(settlementsPlaced = newSettlementsPlaced))
 
-        // Step 9. Sign initial transaction
+        // Step 11. Sign initial transaction
         tb.verify(serviceHub)
         val ptx = serviceHub.signInitialTransaction(tb)
 
-        // Step 10. Collect all signatures
+        // Step 12. Collect all signatures
         val sessions = (gameBoardState.players - ourIdentity).map { initiateFlow(it) }.toSet()
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
 
@@ -135,6 +161,7 @@ class BuildInitialSettlementFlowResponder(val counterpartySession: FlowSession):
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) {
+                // TODO: Verify that the user is only issuing themselves resources on the second placement and that they are issuing the correct amount
                 val gameBoardState = stx.coreTransaction.outputsOfType<GameBoardState>().first()
                 val turnTrackerState = stx.coreTransaction.outputsOfType<TurnTrackerState>().first()
 

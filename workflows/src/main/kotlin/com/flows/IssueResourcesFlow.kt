@@ -22,6 +22,7 @@ import net.corda.sdk.token.contracts.types.EmbeddableToken
 import net.corda.sdk.token.contracts.types.Issued
 import net.corda.sdk.token.contracts.utilities.AMOUNT
 import net.corda.sdk.token.contracts.utilities.issuedBy
+import net.corda.sdk.token.contracts.utilities.ownedBy
 import java.lang.IllegalArgumentException
 
 // *************************************
@@ -56,7 +57,6 @@ class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier, val oracle: Pa
 
         // Step 6. Generate the appropriate resources
         val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states.filter {
-            // TODO: Add additional filtering conditionals so that settlements with adjacent hextiles triggered by a roll are considered valid.
             val diceRollTotal = diceRollState.randomRoll1 + diceRollState.randomRoll2
             val adjacentHexTileIndex1 = gameBoardState.hexTiles[(gameBoardState.hexTiles[it.state.data.hexTileIndex].sides[it.state.data.hexTileCoordinate]) ?: 7].roleTrigger == diceRollTotal
             val adjacentHexTileIndex2 = gameBoardState.hexTiles[(gameBoardState.hexTiles[it.state.data.hexTileIndex].sides[it.state.data.hexTileCoordinate + 1]) ?: 7].roleTrigger == diceRollTotal
@@ -69,9 +69,9 @@ class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier, val oracle: Pa
             val hexTile = gameBoardState.hexTiles[result.state.data.hexTileIndex]
             val resourceType = hexTile.resourceType
             val gameCurrency = Resource.getInstance(resourceType)
-            val resource = AMOUNT(settlementState.resourceAmountClaim, gameCurrency) issuedBy ourIdentity
-            tb.addCommand(Issue(resource.token), ourIdentity.owningKey)
-            tb.addOutputState(OwnedTokenAmount(resource, settlementState.owner))
+            val resource = AMOUNT(settlementState.resourceAmountClaim, gameCurrency) issuedBy ourIdentity ownedBy settlementState.owner
+            tb.addCommand(Issue(resource.amount.token), ourIdentity.owningKey)
+            tb.addOutputState(resource, OwnedTokenAmountContract.contractId)
         }
 
         // Step 7. Add reference states for turn tracker and game board. Add input state for the dice roll.

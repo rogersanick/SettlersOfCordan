@@ -26,20 +26,18 @@ class BuildPhaseContract : Contract {
 
         val command = tx.commands.requireSingleCommand<Commands>()
         val newSettlement = tx.outputsOfType<SettlementState>().single()
-        val resources = tx.inputsOfType<OwnedTokenAmount<*>>()
-        val wheatInTx = resources.filter { it.amount.token.product == Resource.getInstance("Field") }.sumByLong { it.amount.quantity }
-        val brickInTx = resources.filter { it.amount.token.product == Resource.getInstance("Hill") }.sumByLong { it.amount.quantity }
-        val sheepInTx = resources.filter { it.amount.token.product == Resource.getInstance("Pasture") }.sumByLong { it.amount.quantity }
-        val woodInTx = resources.filter { it.amount.token.product == Resource.getInstance("Forest") }.sumByLong { it.amount.quantity }
-        val referenceTurnTracker = tx.referenceInputRefsOfType<TurnTrackerState>().single().state.data
+        val inputResources = tx.inputsOfType<OwnedTokenAmount<*>>()
 
-                when (command.value) {
+
+        when (command.value) {
 
             is Commands.BuildInitialSettlement -> requireThat {
+
+                val turnTracker = tx.inputsOfType<TurnTrackerState>().single()
                 val gameBoardState = tx.inputsOfType<GameBoardState>().single()
                 val hexTileCoordinate = newSettlement.hexTileCoordinate
 
-                if (referenceTurnTracker.setUpRound1Complete) {
+                if (turnTracker.setUpRound1Complete) {
                     "The player should be issuing them self a resource of the appropriate type" using ( Resource.getInstance(gameBoardState.hexTiles[newSettlement.hexTileIndex].resourceType) == tx.outputsOfType<OwnedTokenAmount<*>>().single().amount.token.product)
                 }
 
@@ -49,9 +47,14 @@ class BuildPhaseContract : Contract {
 
             }
 
-            is Commands.BuildInitialSettlement -> requireThat {
+            is Commands.BuildSettlement -> requireThat {
                 val gameBoardState = tx.referenceInputsOfType<GameBoardState>().single()
+                val referenceTurnTracker = tx.referenceInputRefsOfType<TurnTrackerState>().single().state.data
                 val hexTileCoordinate = newSettlement.hexTileCoordinate
+                val wheatInTx = inputResources.filter { it.amount.token.product == Resource.getInstance("Field") }.sumByLong { it.amount.quantity }
+                val brickInTx = inputResources.filter { it.amount.token.product == Resource.getInstance("Hill") }.sumByLong { it.amount.quantity }
+                val sheepInTx = inputResources.filter { it.amount.token.product == Resource.getInstance("Pasture") }.sumByLong { it.amount.quantity }
+                val woodInTx = inputResources.filter { it.amount.token.product == Resource.getInstance("Forest") }.sumByLong { it.amount.quantity }
 
                 "A settlement must not have previously been built in this location." using ( !gameBoardState.settlementsPlaced[newSettlement.hexTileIndex][hexTileCoordinate] )
                 "A settlement must not have previously been built beside this location." using ( !gameBoardState.settlementsPlaced[newSettlement.hexTileIndex][if (hexTileCoordinate != 0) hexTileCoordinate - 1 else 5] )
