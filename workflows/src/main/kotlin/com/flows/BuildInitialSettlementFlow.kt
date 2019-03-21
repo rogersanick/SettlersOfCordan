@@ -117,8 +117,8 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
         if (turnTrackerState.setUpRound1Complete) {
             val gameCurrencyToClaim = arrayListOf<Resource>()
             gameCurrencyToClaim.add(Resource.getInstance(gameBoardState.hexTiles[settlementState.hexTileIndex].resourceType))
-            if (indexOfRelevantHexTileNeighbour1 != null) gameCurrencyToClaim.add(Resource.getInstance(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType))
-            if (indexOfRelevantHexTileNeighbour1 != null) gameCurrencyToClaim.add(Resource.getInstance(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType))
+            if (indexOfRelevantHexTileNeighbour1 != -1) gameCurrencyToClaim.add(Resource.getInstance(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType))
+            if (indexOfRelevantHexTileNeighbour1 != -1) gameCurrencyToClaim.add(Resource.getInstance(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType))
 
             val ownedTokenAmountsOfResourcesToClaim = gameCurrencyToClaim.map {
                 AMOUNT(1, it) issuedBy ourIdentity ownedBy ourIdentity
@@ -127,7 +127,7 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
             // Add a command to issue the appropriate types of resources. Convert the gameCurrencyToClaim to a set to prevent duplicate commands.
             val resourceTypesToBeIssuedForWhichACommandShouldBeIncluded = gameCurrencyToClaim.toSet()
             resourceTypesToBeIssuedForWhichACommandShouldBeIncluded.forEach {
-                tb.addCommand(Issue(it), ourIdentity.owningKey)
+                tb.addCommand(Issue(it issuedBy ourIdentity), ourIdentity.owningKey)
             }
 
             // Add all of the appropriate new owned token amounts to the transaction.
