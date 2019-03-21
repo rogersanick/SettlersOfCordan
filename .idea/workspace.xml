@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a2411927-6da4-490e-8024-ff65b0375487" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/BuildPhaseContract.kt" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/BuildPhaseContract.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildInitialSettlementFlow.kt" beforeDir="false" afterPath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildInitialSettlementFlow.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/InitialSettlementPlacementFlowTests.kt" beforeDir="false" afterPath="$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/InitialSettlementPlacementFlowTests.kt" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -60,8 +59,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildInitialSettlementFlow.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="115">
-              <caret line="136" column="9" lean-forward="true" selection-start-line="136" selection-start-column="9" selection-end-line="136" selection-end-column="9" />
+            <state relative-caret-position="108">
+              <caret line="29" selection-start-line="29" selection-end-line="29" />
             </state>
           </provider>
         </entry>
@@ -69,17 +68,38 @@
       <file pinned="false" current-in-tab="false">
         <entry file="jar://$MAVEN_REPOSITORY$/net/corda/sdk/token/contract/0.1/contract-0.1-sources.jar!/net/corda/sdk/token/contracts/OwnedTokenAmountContract.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="166">
-              <caret line="53" selection-start-line="53" selection-end-line="53" />
+            <state relative-caret-position="-19">
+              <caret line="49" column="35" selection-start-line="49" selection-start-column="35" selection-end-line="49" selection-end-column="35" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/BuildPhaseContract.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="190">
+              <caret line="104" selection-start-line="104" selection-end-line="104" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/BuildPhaseContract.kt">
+        <entry file="file://$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/InitialSettlementPlacementFlowTests.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="259">
-              <caret line="49" column="9" lean-forward="true" selection-start-line="49" selection-start-column="9" selection-end-line="49" selection-end-column="9" />
+            <state relative-caret-position="3543">
+              <caret line="270" column="9" selection-start-line="270" selection-start-column="9" selection-end-line="270" selection-end-column="9" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameCurrencyStates.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="281">
+              <caret line="101" column="37" selection-start-line="101" selection-start-column="37" selection-end-line="101" selection-end-column="37" />
+              <folding>
+                <element signature="e#39#313#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -88,7 +108,7 @@
         <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="78">
-              <caret line="114" column="40" lean-forward="true" selection-start-line="114" selection-start-column="40" selection-end-line="114" selection-end-column="40" />
+              <caret line="114" column="40" selection-start-line="114" selection-start-column="40" selection-end-line="114" selection-end-column="40" />
             </state>
           </provider>
         </entry>
@@ -96,8 +116,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/internal/TransactionVerifierServiceInternal.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="8140">
-              <caret line="376" selection-start-line="376" selection-end-line="376" />
+            <state relative-caret-position="152">
+              <caret line="379" selection-start-line="379" selection-end-line="379" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/transactions/TransactionBuilder.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="116">
+              <caret line="189" selection-start-line="189" selection-end-line="189" />
             </state>
           </provider>
         </entry>
@@ -105,7 +134,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/contracts/ContractsDSL.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="440">
+            <state relative-caret-position="167">
               <caret line="25" selection-start-line="25" selection-end-line="25" />
             </state>
           </provider>
@@ -122,7 +151,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>@InitiatedBy</find>
       <find>flows</find>
       <find>@initiatedBy(Set</find>
       <find>IssueRes</find>
@@ -152,6 +180,7 @@
       <find>Id</find>
       <find>addInp</find>
       <find>getInstant</find>
+      <find>ref</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -219,9 +248,9 @@
         <option value="$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/ClaimResourcesFlowTest.kt" />
         <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildSettlementFlow.kt" />
         <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt" />
-        <option value="$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/InitialSettlementPlacementFlowTests.kt" />
         <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildInitialSettlementFlow.kt" />
         <option value="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/BuildPhaseContract.kt" />
+        <option value="$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/InitialSettlementPlacementFlowTests.kt" />
       </list>
     </option>
   </component>
@@ -232,9 +261,9 @@
     </treeState>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="491" />
+    <option name="x" value="107" />
     <option name="y" value="23" />
-    <option name="width" value="1189" />
+    <option name="width" value="1573" />
     <option name="height" value="955" />
   </component>
   <component name="ProjectView">
@@ -242,125 +271,13 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name=".idea" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name=".idea" type="462c0819:PsiDirectoryNode" />
-              <item name="modules" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="oracleService" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="oracleService" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="flows" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="flows" type="462c0819:PsiDirectoryNode" />
-              <item name="IssueResourcesFlow.kt" type="24436e51:KtFileTreeNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="flows" type="462c0819:PsiDirectoryNode" />
-              <item name="IssueResourcesFlow.kt" type="24436e51:KtFileTreeNode" />
-              <item name="IssueResourcesFlow" type="2c5a2ef7:KtClassOrObjectTreeNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
+      <pane id="ProjectPane" />
       <pane id="Scope" />
       <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1553179778309" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1553195804964" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
@@ -540,34 +457,34 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.20 at 09h 19m 16s.xml">
+    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.21 at 14h 49m 45s.xml">
       <configuration name="InitialSettlementPlacementFlowTests" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.20 at 09h 20m 30s.xml">
+    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.21 at 14h 50m 54s.xml">
       <configuration name="InitialSettlementPlacementFlowTests" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.20 at 09h 24m 59s.xml">
+    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.21 at 14h 52m 14s.xml">
       <configuration name="InitialSettlementPlacementFlowTests" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.20 at 09h 34m 54s.xml">
+    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.21 at 15h 00m 44s.xml">
       <configuration name="InitialSettlementPlacementFlowTests" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.20 at 09h 37m 52s.xml">
+    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.21 at 15h 01m 49s.xml">
       <configuration name="InitialSettlementPlacementFlowTests" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.20 at 09h 42m 46s.xml">
+    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.21 at 15h 04m 14s.xml">
       <configuration name="InitialSettlementPlacementFlowTests" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.20 at 09h 48m 10s.xml">
+    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.21 at 15h 06m 01s.xml">
       <configuration name="InitialSettlementPlacementFlowTests" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.20 at 09h 49m 36s.xml">
+    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.21 at 15h 10m 05s.xml">
       <configuration name="InitialSettlementPlacementFlowTests" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.20 at 10h 58m 13s.xml">
+    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.21 at 15h 11m 37s.xml">
       <configuration name="InitialSettlementPlacementFlowTests" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.20 at 11h 05m 34s.xml">
+    <history-entry file="InitialSettlementPlacementFlowTests - 2019.03.21 at 15h 14m 08s.xml">
       <configuration name="InitialSettlementPlacementFlowTests" configurationId="JUnit" />
     </history-entry>
   </component>
@@ -581,10 +498,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="491" y="23" width="1189" height="955" extended-state="0" />
+    <frame x="107" y="23" width="1573" height="955" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.23801221" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17831482" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -594,7 +511,7 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32792583" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4981685" weight="0.3267671" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.5677868" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.034762457" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32908458" />
@@ -691,22 +608,35 @@
           <option name="timeStamp" value="96" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
+          <condition expression="gameBoardState.hexTiles[hexTileIndex].resourceType == &quot;Desert&quot;" language="kotlin" />
           <url>file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/BuildPhaseContract.kt</url>
-          <line>60</line>
+          <line>59</line>
           <properties />
-          <option name="timeStamp" value="103" />
+          <option name="timeStamp" value="112" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildInitialSettlementFlow.kt</url>
-          <line>117</line>
+          <url>file://$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/InitialSettlementPlacementFlowTests.kt</url>
+          <line>263</line>
           <properties />
-          <option name="timeStamp" value="104" />
+          <option name="timeStamp" value="115" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildInitialSettlementFlow.kt</url>
-          <line>128</line>
+          <url>file://$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/InitialSettlementPlacementFlowTests.kt</url>
+          <line>213</line>
           <properties />
-          <option name="timeStamp" value="111" />
+          <option name="timeStamp" value="116" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/InitialSettlementPlacementFlowTests.kt</url>
+          <line>164</line>
+          <properties />
+          <option name="timeStamp" value="117" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/InitialSettlementPlacementFlowTests.kt</url>
+          <line>115</line>
+          <properties />
+          <option name="timeStamp" value="118" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/co.paralleluniverse/quasar-core/0.7.10/859c7790c5378fcebbc22bdb25eb8346fa96ec68/quasar-core-0.7.10-sources.jar!/co/paralleluniverse/fibers/Fiber.java</url>
@@ -719,6 +649,11 @@
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="breakpointCondition">
+      <expression>
+        <expression-string>gameBoardState.hexTiles[hexTileIndex].resourceType == &quot;Desert&quot;</expression-string>
+        <language-id>kotlin</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
       <expression>
         <expression-string>serviceHub.vaultService.queryBy&lt;GameBoardState&gt;().states.size != 1</expression-string>
         <language-id>kotlin</language-id>
@@ -736,6 +671,11 @@
       </expression>
     </expressions>
     <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>resourceType == &quot;Desert&quot;</expression-string>
+        <language-id>kotlin</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
       <expression>
         <expression-string>tx.outputsOfType&lt;OwnedTokenAmount&lt;Resource&gt;&gt;()</expression-string>
         <language-id>kotlin</language-id>
@@ -777,12 +717,6 @@
         <expression-string>tx.inputsOfType&lt;OwnedTokenAmount&lt;Resource&gt;&gt;()</expression-string>
         <language-id>kotlin</language-id>
         <custom-info>import net.corda.sdk.token.contracts.states.OwnedToken,import net.corda.sdk.token.contracts.types.Issued</custom-info>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>tx.inputsOfType&lt;OwnedTokenAmount&lt;Resource&gt;&gt;()</expression-string>
-        <language-id>kotlin</language-id>
-        <custom-info>import net.corda.sdk.token.contracts.states.OwnedToken</custom-info>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
     </expressions>
@@ -1042,27 +976,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameCurrencyStates.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="246">
-          <caret line="96" selection-start-line="96" selection-end-line="96" />
-          <folding>
-            <element signature="e#39#313#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/flows/FlowLogic.kt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="175">
           <caret line="115" selection-start-line="115" selection-end-line="115" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/transactions/TransactionBuilder.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="182">
-          <caret line="458" selection-start-line="458" selection-end-line="458" />
         </state>
       </provider>
     </entry>
@@ -1117,52 +1034,69 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/InitialSettlementPlacementFlowTests.kt">
+    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="108">
-          <caret line="86" column="8" selection-start-line="86" selection-start-column="8" selection-end-line="86" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/internal/TransactionVerifierServiceInternal.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8140">
-          <caret line="376" selection-start-line="376" selection-end-line="376" />
+        <state relative-caret-position="78">
+          <caret line="114" column="40" selection-start-line="114" selection-start-column="40" selection-end-line="114" selection-end-column="40" />
         </state>
       </provider>
     </entry>
     <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/contracts/ContractsDSL.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="440">
+        <state relative-caret-position="167">
           <caret line="25" selection-start-line="25" selection-end-line="25" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildInitialSettlementFlow.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="115">
-          <caret line="136" column="9" lean-forward="true" selection-start-line="136" selection-start-column="9" selection-end-line="136" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="78">
-          <caret line="114" column="40" lean-forward="true" selection-start-line="114" selection-start-column="40" selection-end-line="114" selection-end-column="40" />
+        <state relative-caret-position="108">
+          <caret line="29" selection-start-line="29" selection-end-line="29" />
         </state>
       </provider>
     </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/net/corda/sdk/token/contract/0.1/contract-0.1-sources.jar!/net/corda/sdk/token/contracts/OwnedTokenAmountContract.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="166">
-          <caret line="53" selection-start-line="53" selection-end-line="53" />
+        <state relative-caret-position="-19">
+          <caret line="49" column="35" selection-start-line="49" selection-start-column="35" selection-end-line="49" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/internal/TransactionVerifierServiceInternal.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="379" selection-start-line="379" selection-end-line="379" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.corda/corda-core/4.0/f157f0cd83cd4a5f0a99ed59e718ac62443b52fc/corda-core-4.0-sources.jar!/net/corda/core/transactions/TransactionBuilder.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="116">
+          <caret line="189" selection-start-line="189" selection-end-line="189" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/BuildPhaseContract.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="259">
-          <caret line="49" column="9" lean-forward="true" selection-start-line="49" selection-start-column="9" selection-end-line="49" selection-end-column="9" />
+        <state relative-caret-position="190">
+          <caret line="104" selection-start-line="104" selection-end-line="104" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameCurrencyStates.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="281">
+          <caret line="101" column="37" selection-start-line="101" selection-start-column="37" selection-end-line="101" selection-end-column="37" />
+          <folding>
+            <element signature="e#39#313#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/InitialSettlementPlacementFlowTests.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3543">
+          <caret line="270" column="9" selection-start-line="270" selection-start-column="9" selection-end-line="270" selection-end-column="9" />
         </state>
       </provider>
     </entry>

@@ -45,11 +45,11 @@ class BuildPhaseContract : Contract {
         val indexOfRelevantHexTileNeighbour1 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(0))
         val indexOfRelevantHexTileNeighbour2 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(1))
 
-        val resourcesThatShouldBeClaimed = arrayListOf(
+        val resourcesThatShouldBeIssued = arrayListOf(
                 AMOUNT(newSettlement.resourceAmountClaim, Resource.getInstance(gameBoardState.hexTiles[hexTileIndex].resourceType)) issuedBy gameBoardState.players[turnTrackerState.currTurnIndex] ownedBy gameBoardState.players[turnTrackerState.currTurnIndex]
         )
-        resourcesThatShouldBeClaimed.add(AMOUNT(newSettlement.resourceAmountClaim, Resource.getInstance(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType)) issuedBy gameBoardState.players[turnTrackerState.currTurnIndex] ownedBy gameBoardState.players[turnTrackerState.currTurnIndex])
-        resourcesThatShouldBeClaimed.add(AMOUNT(newSettlement.resourceAmountClaim, Resource.getInstance(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType)) issuedBy gameBoardState.players[turnTrackerState.currTurnIndex] ownedBy gameBoardState.players[turnTrackerState.currTurnIndex])
+        if (indexOfRelevantHexTileNeighbour1 != -1) resourcesThatShouldBeIssued.add(AMOUNT(newSettlement.resourceAmountClaim, Resource.getInstance(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType)) issuedBy gameBoardState.players[turnTrackerState.currTurnIndex] ownedBy gameBoardState.players[turnTrackerState.currTurnIndex])
+        if (indexOfRelevantHexTileNeighbour2 != -1) resourcesThatShouldBeIssued.add(AMOUNT(newSettlement.resourceAmountClaim, Resource.getInstance(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType)) issuedBy gameBoardState.players[turnTrackerState.currTurnIndex] ownedBy gameBoardState.players[turnTrackerState.currTurnIndex])
 
         when (command.value) {
 
@@ -57,10 +57,11 @@ class BuildPhaseContract : Contract {
 
                 val turnTracker = tx.inputsOfType<TurnTrackerState>().single()
 
+                "A settlement cannot be built on a hexTile that is of type Desert" using (gameBoardState.hexTiles[hexTileIndex].resourceType == "Desert")
+
                 if (turnTracker.setUpRound1Complete) {
-                    "The player should be issuing them self a resource of the appropriate type" using ( true )
-                    if (indexOfRelevantHexTileNeighbour1 != -1) "The player should be issuing them self a resource of the appropriate type" using ( true )
-                    if (indexOfRelevantHexTileNeighbour2 != -1) "The player should be issuing them self a resource of the appropriate type" using ( true )
+                    "The player should be issuing them self a resource of the appropriate type" using (outputResources.containsAll(resourcesThatShouldBeIssued))
+                    "The player should be issuing them self a resource of the appropriate type" using (outputResources.size == resourcesThatShouldBeIssued.size)
                 }
 
                 "A settlement must not have previously been built in this location." using ( !gameBoardState.settlementsPlaced[newSettlement.hexTileIndex][hexTileCoordinate] )
@@ -70,13 +71,14 @@ class BuildPhaseContract : Contract {
             }
 
             is Commands.BuildSettlement -> requireThat {
-                val gameBoardState = tx.referenceInputsOfType<GameBoardState>().single()
+
+                "A settlement cannot be built on a hexTile that is of type Desert" using (gameBoardState.hexTiles[hexTileIndex].resourceType == "Desert")
+
                 val referenceTurnTracker = tx.referenceInputRefsOfType<TurnTrackerState>().single().state.data
-                val hexTileCoordinate = newSettlement.hexTileCoordinate
-                val wheatInTx = inputResources.filter { it.amount.token.product == Resource.getInstance("Field") }.sumByLong { it.amount.quantity }
-                val brickInTx = inputResources.filter { it.amount.token.product == Resource.getInstance("Hill") }.sumByLong { it.amount.quantity }
-                val sheepInTx = inputResources.filter { it.amount.token.product == Resource.getInstance("Pasture") }.sumByLong { it.amount.quantity }
-                val woodInTx = inputResources.filter { it.amount.token.product == Resource.getInstance("Forest") }.sumByLong { it.amount.quantity }
+                val wheatInTx = outputResources.filter { it.amount.token.product == Resource.getInstance("Field") }.sumByLong { it.amount.quantity }
+                val brickInTx = outputResources.filter { it.amount.token.product == Resource.getInstance("Hill") }.sumByLong { it.amount.quantity }
+                val sheepInTx = outputResources.filter { it.amount.token.product == Resource.getInstance("Pasture") }.sumByLong { it.amount.quantity }
+                val woodInTx = outputResources.filter { it.amount.token.product == Resource.getInstance("Forest") }.sumByLong { it.amount.quantity }
 
                 "A settlement must not have previously been built in this location." using ( !gameBoardState.settlementsPlaced[newSettlement.hexTileIndex][hexTileCoordinate] )
                 "A settlement must not have previously been built beside this location." using ( !gameBoardState.settlementsPlaced[newSettlement.hexTileIndex][if (hexTileCoordinate != 0) hexTileCoordinate - 1 else 5] )
