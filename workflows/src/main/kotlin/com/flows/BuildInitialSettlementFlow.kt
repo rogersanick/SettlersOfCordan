@@ -5,6 +5,11 @@ import com.contractsAndStates.contracts.BuildPhaseContract
 import com.contractsAndStates.contracts.GameStateContract
 import com.contractsAndStates.contracts.TurnTrackerContract
 import com.contractsAndStates.states.*
+import com.r3.corda.sdk.token.contracts.FungibleTokenContract
+import com.r3.corda.sdk.token.contracts.commands.IssueTokenCommand
+import com.r3.corda.sdk.token.contracts.states.FungibleToken
+import com.r3.corda.sdk.token.contracts.utilities.amount
+import com.r3.corda.sdk.token.contracts.utilities.heldBy
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
@@ -12,12 +17,6 @@ import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
-import net.corda.sdk.token.contracts.OwnedTokenAmountContract
-import net.corda.sdk.token.contracts.commands.Issue
-import net.corda.sdk.token.contracts.states.OwnedTokenAmount
-import net.corda.sdk.token.contracts.utilities.AMOUNT
-import net.corda.sdk.token.contracts.utilities.issuedBy
-import net.corda.sdk.token.contracts.utilities.ownedBy
 import java.lang.IllegalArgumentException
 import java.util.ArrayList
 
@@ -115,24 +114,31 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
 
         // Step 10. Add a self-issued resource if we are in the second round of initial placement
         if (turnTrackerState.setUpRound1Complete) {
-            val gameCurrencyToClaim = arrayListOf<Resource>()
-            gameCurrencyToClaim.add(Resource.getInstance(gameBoardState.hexTiles[settlementState.hexTileIndex].resourceType))
-            if (indexOfRelevantHexTileNeighbour1 != -1) gameCurrencyToClaim.add(Resource.getInstance(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType))
-            if (indexOfRelevantHexTileNeighbour1 != -1) gameCurrencyToClaim.add(Resource.getInstance(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType))
+            val gameCurrencyToClaim = arrayListOf<Pair<Resource, Long>>()
+            gameCurrencyToClaim.add(Pair(Resource.getInstance(gameBoardState.hexTiles[settlementState.hexTileIndex].resourceType), settlementState.resourceAmountClaim.toLong()))
+            if (indexOfRelevantHexTileNeighbour1 != -1 && gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType != "Desert") gameCurrencyToClaim.add(Pair(Resource.getInstance(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType), settlementState.resourceAmountClaim.toLong()))
+            if (indexOfRelevantHexTileNeighbour1 != -1 && gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType != "Desert") gameCurrencyToClaim.add(Pair(Resource.getInstance(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType), settlementState.resourceAmountClaim.toLong()))
 
-            val ownedTokenAmountsOfResourcesToClaim = gameCurrencyToClaim.map {
-                AMOUNT(1, it) issuedBy ourIdentity ownedBy ourIdentity
+            val ownedTokenAmountOfResources = mutableMapOf<Resource, Long>()
+
+            gameCurrencyToClaim.forEach{
+                if (ownedTokenAmountOfResources.containsKey(it.first)) ownedTokenAmountOfResources[it.first] = ownedTokenAmountOfResources[it.first]!!.plus(it.second)
+                else ownedTokenAmountOfResources[it.first] = it.second
+            }
+
+            val ownedTokenAmountsOfResourcesToClaim = ownedTokenAmountOfResources.map {
+                amount(it.value, it.key) issuedBy ourIdentity heldBy ourIdentity
             }
 
             // Add a command to issue the appropriate types of resources. Convert the gameCurrencyToClaim to a set to prevent duplicate commands.
             val resourceTypesToBeIssuedForWhichACommandShouldBeIncluded = gameCurrencyToClaim.toSet()
             resourceTypesToBeIssuedForWhichACommandShouldBeIncluded.forEach {
-                tb.addCommand(Issue(it issuedBy ourIdentity), ourIdentity.owningKey)
+                tb.addCommand(IssueTokenCommand(it.first issuedBy ourIdentity), ourIdentity.owningKey)
             }
 
             // Add all of the appropriate new owned token amounts to the transaction.
             ownedTokenAmountsOfResourcesToClaim.forEach {
-                tb.addOutputState(it, OwnedTokenAmountContract.contractId)
+                tb.addOutputState(it, FungibleTokenContract.contractId)
             }
         }
 

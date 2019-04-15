@@ -5,11 +5,11 @@ import com.contractsAndStates.states.TurnTrackerState
 import com.flows.*
 import com.oracleService.flows.DiceRollRequestHandler
 import com.oracleService.flows.SignDiceRollHandler
+import com.r3.corda.sdk.token.contracts.states.FungibleToken
 import net.corda.core.contracts.requireThat
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
-import net.corda.sdk.token.contracts.states.OwnedTokenAmount
 import net.corda.testing.common.internal.testNetworkParameters
 import net.corda.testing.internal.chooseIdentity
 import net.corda.testing.node.MockNetwork
@@ -109,7 +109,7 @@ class ClaimResourcesFlowTest {
         val txWithNewReources = futureWithClaimedResources.getOrThrow()
 
         requireThat {
-          "Assert that resources were produced in the transaction" using txWithNewReources.coreTransaction.outputsOfType<OwnedTokenAmount<*>>().isNotEmpty()
+          "Assert that resources were produced in the transaction" using txWithNewReources.coreTransaction.outputsOfType<FungibleToken<*>>().isNotEmpty()
         }
     }
 
