@@ -9,7 +9,9 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.identity.Party
+import net.corda.core.internal.SignedDataWithCert
 import net.corda.core.utilities.unwrap
+import org.bouncycastle.asn1.cms.SignedData
 
 // ******************
 // * Roll Dice Flow *
@@ -22,7 +24,7 @@ class GetRandomDiceRollValues(val turnTrackerStateLinearId: UniqueIdentifier, va
     override fun call(): DiceRollState {
         val oracleSession = initiateFlow(oracle)
         val diceRolls = oracleSession.sendAndReceive<List<*>>(listOf(turnTrackerStateLinearId, gameBoardState.linearId)).unwrap { it }
-        val signature = oracleSession.receive<SecureHash>().unwrap { it }
+        val signature = oracleSession.receive<SignedDataWithCert<Party>>().unwrap { it }
         return DiceRollState(diceRolls[0] as Int, diceRolls[1] as Int, turnTrackerStateLinearId, gameBoardState.linearId, gameBoardState.participants, signature)
     }
 }

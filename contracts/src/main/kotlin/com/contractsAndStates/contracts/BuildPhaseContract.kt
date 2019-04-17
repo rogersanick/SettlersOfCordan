@@ -19,6 +19,7 @@ class BuildPhaseContract : Contract {
 
     override fun verify(tx: LedgerTransaction) {
 
+        // Get access to all of the pieces of the transaction that will be used to verify the contract.
         val command = tx.commands.requireSingleCommand<Commands>()
         val turnTrackerState = tx.inputsOfType<TurnTrackerState>().single()
         val gameBoardState = tx.inputsOfType<GameBoardState>().single()
@@ -27,6 +28,7 @@ class BuildPhaseContract : Contract {
         val hexTileCoordinate = newSettlement.hexTileCoordinate
         val hexTileIndex = newSettlement.hexTileIndex
 
+        // Initialize storage for a list of relevant HexTiles that lay adjacent to the square in question
         val relevantHexTileNeighbours: ArrayList<HexTile?> = arrayListOf()
 
         if (hexTileCoordinate != 5) {
@@ -40,11 +42,21 @@ class BuildPhaseContract : Contract {
         val indexOfRelevantHexTileNeighbour1 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(0))
         val indexOfRelevantHexTileNeighbour2 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(1))
 
-        val resourcesThatShouldBeIssued = arrayListOf(
-                Amount(newSettlement.resourceAmountClaim.toLong(), Resource.getInstance(gameBoardState.hexTiles[hexTileIndex].resourceType)) issuedBy gameBoardState.players[turnTrackerState.currTurnIndex] heldBy gameBoardState.players[turnTrackerState.currTurnIndex]
-        )
-        if (indexOfRelevantHexTileNeighbour1 != -1 && gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType != "Desert") resourcesThatShouldBeIssued.add(Amount(newSettlement.resourceAmountClaim.toLong(), Resource.getInstance(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType)) issuedBy gameBoardState.players[turnTrackerState.currTurnIndex] heldBy gameBoardState.players[turnTrackerState.currTurnIndex])
-        if (indexOfRelevantHexTileNeighbour2 != -1 && gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType != "Desert") resourcesThatShouldBeIssued.add(Amount(newSettlement.resourceAmountClaim.toLong(), Resource.getInstance(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType)) issuedBy gameBoardState.players[turnTrackerState.currTurnIndex] heldBy gameBoardState.players[turnTrackerState.currTurnIndex])
+        // Initialize storage for a list of resources that we should see issued in this transaction.
+        val resourcesThatShouldBeIssuedPreConsolidation = arrayListOf<Pair<String, Long>>()
+        resourcesThatShouldBeIssuedPreConsolidation.add(Pair(gameBoardState.hexTiles[hexTileIndex].resourceType, newSettlement.resourceAmountClaim.toLong()))
+        if (indexOfRelevantHexTileNeighbour1 != -1 && gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType != "Desert") resourcesThatShouldBeIssuedPreConsolidation.add(Pair(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType, newSettlement.resourceAmountClaim.toLong()))
+        if (indexOfRelevantHexTileNeighbour2 != -1 && gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType != "Desert") resourcesThatShouldBeIssuedPreConsolidation.add(Pair(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType, newSettlement.resourceAmountClaim.toLong()))
+
+        val consolidatedListOfResourceThatShouldBeIssued = mutableMapOf<String, Long>()
+        resourcesThatShouldBeIssuedPreConsolidation.forEach{
+            if (consolidatedListOfResourceThatShouldBeIssued.containsKey(it.first)) consolidatedListOfResourceThatShouldBeIssued[it.first] = consolidatedListOfResourceThatShouldBeIssued[it.first]!!.plus(it.second)
+            else consolidatedListOfResourceThatShouldBeIssued[it.first] = it.second
+        }
+
+        val fungibleTokenAmountsOfResourcesThatShouldBeIssued = consolidatedListOfResourceThatShouldBeIssued.map {
+            amount(it.value, Resource.getInstance(it.key)) issuedBy gameBoardState.players[turnTrackerState.currTurnIndex] heldBy gameBoardState.players[turnTrackerState.currTurnIndex]
+        }
 
         when (command.value) {
 
@@ -58,8 +70,8 @@ class BuildPhaseContract : Contract {
                 "A settlement cannot be built on a hexTile that is of type Desert" using (gameBoardState.hexTiles[hexTileIndex].resourceType != "Desert")
 
                 if (turnTracker.setUpRound1Complete) {
-                    "The player should be issuing them self a resource of the appropriate type" using (outputResources.containsAll(resourcesThatShouldBeIssued))
-                    "The player should be issuing them self a resource of the appropriate type" using (outputResources.size == resourcesThatShouldBeIssued.size)
+                    "The player should be issuing them self a resource of the appropriate type" using (outputResources.containsAll(fungibleTokenAmountsOfResourcesThatShouldBeIssued))
+                    "The player should be issuing them self a resource of the appropriate type" using (outputResources.size == fungibleTokenAmountsOfResourcesThatShouldBeIssued.size)
                 }
 
                 "A settlement must not have previously been built in this location." using ( !gameBoardState.settlementsPlaced[newSettlement.hexTileIndex][hexTileCoordinate] )

@@ -22,7 +22,7 @@ import org.junit.Test
 
 class ClaimResourcesFlowTest {
     // TODO: Accommodate for random dice rolls so that test correctly verifies every time regardless of random roll return
-    private val network = MockNetwork(listOf("com.contractsAndStates", "com.flows", "com.oracleClient", "com.oracleService", "net.corda.sdk.token"),
+    private val network = MockNetwork(listOf("com.contractsAndStates", "com.flows", "com.oracleClient", "com.oracleService", "com.r3.corda.sdk.token.workflows", "com.r3.corda.sdk.token.contracts", "com.r3.corda.sdk.token.money"),
             notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB"))),
             defaultParameters = MockNetworkParameters(networkParameters = testNetworkParameters(minimumPlatformVersion = 4))
     )
@@ -74,13 +74,16 @@ class ClaimResourcesFlowTest {
         val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
-        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayOf(Pair(0,5), Pair(2,5), Pair(4,3), Pair(5,2))
-        val nonconflictingHextileIndexAndCoordinatesRound2 = arrayOf(Pair(7,3), Pair(9,3), Pair(11,3), Pair(13,3))
+        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(2,5), Pair(4,3), Pair(5,2))
+        val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(6,2), Pair(8,2), Pair(9,2), Pair(10,2))
 
 
-        fun placeAPieceFromASpecificNode(i: Int, testCoordinates: Array<Pair<Int, Int>>) {
+        fun placeAPieceFromASpecificNode(i: Int, testCoordinates: ArrayList<Pair<Int, Int>>) {
             // Build an initial settlement by issuing a settlement state
             // and updating the current turn.
+            if (gameState.hexTiles[testCoordinates[i].first].resourceType == "Desert") {
+                testCoordinates[i] = Pair(testCoordinates[i].first + 9, testCoordinates[i].second)
+            }
             val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second)
             val currPlayer = arrayOfAllPlayerNodesInOrder[i]
             val futureWithInitialSettlementBuild = currPlayer.startFlow(buildInitialSettlementFlow)

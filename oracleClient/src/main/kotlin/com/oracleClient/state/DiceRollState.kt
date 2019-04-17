@@ -6,6 +6,7 @@ import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.Party
+import net.corda.core.internal.SignedDataWithCert
 import net.corda.core.schemas.PersistentState
 import net.corda.core.serialization.CordaSerializable
 
@@ -27,5 +28,5 @@ data class DiceRollState(
         val turnTrackerUniqueIdentifier: UniqueIdentifier,
         val gameBoardStateUniqueIdentifier: UniqueIdentifier,
         override val participants: List<Party>,
-        val signedDataWithOracleCert: SecureHash
+        val signedDataWithOracleCert: SignedDataWithCert<Party>
 ): ContractState, PersistentState()
