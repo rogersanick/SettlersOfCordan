@@ -6,7 +6,6 @@ import com.flows.*
 import com.oracleClient.state.DiceRollState
 import com.oracleService.flows.DiceRollRequestHandler
 import com.oracleService.flows.SignDiceRollHandler
-import com.oracleService.state.DiceRollState
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow

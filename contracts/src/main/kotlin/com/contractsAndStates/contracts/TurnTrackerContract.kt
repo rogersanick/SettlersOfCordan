@@ -31,10 +31,7 @@ class TurnTrackerContract : Contract {
                 "There must be exactly one Turn Tracker input state." using (listOfTurnTrackerInputStates.size == 1)
                 "There must be exactly one Turn Tracker output state." using (listOfTurnTrackerOutputStates.size == 1)
                 "Both setup rounds must have been completed" using (newTurnTrackerState.setUpRound1Complete && newTurnTrackerState.setUpRound2Complete)
-                "The turn tracker must be incremented to 4 and then reset." using (
-                        if (oldTurnTrackerState.currTurnIndex < 3 && (newTurnTrackerState.currTurnIndex + 1 == oldTurnTrackerState.currTurnIndex))
-                            (oldTurnTrackerState.currTurnIndex == 3 && newTurnTrackerState.currTurnIndex == 0)
-                        else false)
+                "The turn tracker must be incremented by 1." using (newTurnTrackerState.currTurnIndex == oldTurnTrackerState.currTurnIndex + 1 || (newTurnTrackerState.currTurnIndex == 0 && oldTurnTrackerState.currTurnIndex == 3))
             }
 
             is Commands.EndTurnDuringInitialPlacementPhase -> requireThat {

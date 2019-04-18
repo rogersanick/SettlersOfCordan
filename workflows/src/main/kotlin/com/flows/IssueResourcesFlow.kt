@@ -65,6 +65,7 @@ class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier, val oracle: Pa
             val resourceType = hexTile.resourceType
             val gameCurrency = Resource.getInstance(resourceType)
             val resource = amount(settlementState.resourceAmountClaim, gameCurrency) issuedBy ourIdentity heldBy settlementState.owner
+
             tb.addCommand(IssueTokenCommand(resource.amount.token), ourIdentity.owningKey)
             tb.addOutputState(resource, FungibleTokenContract.contractId)
         }

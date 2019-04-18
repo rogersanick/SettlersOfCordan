@@ -203,15 +203,15 @@ class InitialSettlementPlacementFlowTests {
         val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
-        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayOf(Pair(0,5), Pair(0,1), Pair(0,3), Pair(1,1))
-        val nonconflictingHextileIndexAndCoordinatesRound2 = arrayOf(Pair(1,3), Pair(2,1), Pair(2,3), Pair(3,3))
+        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(1,5), Pair(2,5), Pair(3,5))
+        val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(4,5), Pair(5,5), Pair(6,5), Pair(7,5))
 
 
-        fun placeAPieceFromASpecificNode(i: Int, testCoordinates: Array<Pair<Int, Int>>) {
+        fun placeAPieceFromASpecificNode(i: Int, testCoordinates: ArrayList<Pair<Int, Int>>) {
             // Build an initial settlement by issuing a settlement state
             // and updating the current turn.
             if (gameState.hexTiles[testCoordinates[i].first].resourceType == "Desert") {
-                testCoordinates[i] = Pair(testCoordinates[i].first + 9, testCoordinates[i].second)
+                testCoordinates[i] = Pair(testCoordinates[i].first + 7, testCoordinates[i].second)
             }
             val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second)
             val currPlayer = arrayOfAllPlayerNodesInOrder[i]
@@ -228,7 +228,7 @@ class InitialSettlementPlacementFlowTests {
             placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2)
         }
 
-        placeAPieceFromASpecificNode(0, arrayOf(Pair(9, 3)))
+        placeAPieceFromASpecificNode(0, arrayListOf(Pair(9, 3)))
 
     }
 

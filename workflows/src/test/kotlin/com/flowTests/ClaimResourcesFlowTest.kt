@@ -6,6 +6,7 @@ import com.flows.*
 import com.oracleService.flows.DiceRollRequestHandler
 import com.oracleService.flows.SignDiceRollHandler
 import com.r3.corda.sdk.token.contracts.states.FungibleToken
+import com.r3.corda.sdk.token.contracts.types.TokenType
 import net.corda.core.contracts.requireThat
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.transactions.SignedTransaction
@@ -21,7 +22,6 @@ import org.junit.Before
 import org.junit.Test
 
 class ClaimResourcesFlowTest {
-    // TODO: Accommodate for random dice rolls so that test correctly verifies every time regardless of random roll return
     private val network = MockNetwork(listOf("com.contractsAndStates", "com.flows", "com.oracleClient", "com.oracleService", "com.r3.corda.sdk.token.workflows", "com.r3.corda.sdk.token.contracts", "com.r3.corda.sdk.token.money"),
             notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB"))),
             defaultParameters = MockNetworkParameters(networkParameters = testNetworkParameters(minimumPlatformVersion = 4))
@@ -52,7 +52,7 @@ class ClaimResourcesFlowTest {
     fun tearDown() = network.stopNodes()
 
     @Test
-    fun oracleReturnsARandomDiceRoll() {
+    fun player1IsAbleToClaimTheAppropriateResourcesAfterSetup() {
 
         // Get an identity for each of the players of the game.
         val p1 = a.info.chooseIdentity()
@@ -109,11 +109,99 @@ class ClaimResourcesFlowTest {
 
         val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(IssueResourcesFlow(gameBoardLinearId = gameBoardState.linearId, oracle = oracleParty))
         network.runNetwork()
-        val txWithNewReources = futureWithClaimedResources.getOrThrow()
+        val txWithNewResources = futureWithClaimedResources.getOrThrow()
 
         requireThat {
-          "Assert that resources were produced in the transaction" using txWithNewReources.coreTransaction.outputsOfType<FungibleToken<*>>().isNotEmpty()
+            "Assert that resources were produced in the transaction" using txWithNewResources.coreTransaction.outputsOfType<FungibleToken<TokenType>>().isNotEmpty()
         }
+    }
+
+    @Test
+    fun player1and2AreAbleToClaimTheAppropriateResourcesAfterSetup() {
+
+        // Get an identity for each of the players of the game.
+        val p1 = a.info.chooseIdentity()
+        val p2 = b.info.chooseIdentity()
+        val p3 = c.info.chooseIdentity()
+        val p4 = d.info.chooseIdentity()
+        val oracleParty = oracle.info.chooseIdentity()
+
+        // Issue a game state onto the ledger
+        val gameStateIssueFlow = (SetupGameStartFlow(p1, p2, p3, p4))
+        val futureWithGameState = a.startFlow(gameStateIssueFlow)
+        network.runNetwork()
+
+        val stxGameState = futureWithGameState.getOrThrow()
+
+        // Get a reference to the issued game state
+        val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
+
+        val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
+        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
+        val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
+        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(1,5), Pair(2,5), Pair(3,5))
+        val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(4,5), Pair(5,5), Pair(6,5), Pair(7,5))
+
+
+        fun placeAPieceFromASpecificNode(i: Int, testCoordinates: ArrayList<Pair<Int, Int>>) {
+            // Build an initial settlement by issuing a settlement state
+            // and updating the current turn.
+            if (gameState.hexTiles[testCoordinates[i].first].resourceType == "Desert") {
+                testCoordinates[i] = Pair(testCoordinates[i].first + 7, testCoordinates[i].second)
+            }
+            val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second)
+            val currPlayer = arrayOfAllPlayerNodesInOrder[i]
+            val futureWithInitialSettlementBuild = currPlayer.startFlow(buildInitialSettlementFlow)
+            network.runNetwork()
+            arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
+        }
+
+        for (i in 0..3) {
+            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1)
+        }
+
+        for (i in 3.downTo(0)) {
+            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2)
+        }
+
+        val turnTrackerStateLinearId = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<TurnTrackerState>().first().state.data.linearId
+        val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
+
+        val rollDiceFlow = RollDiceFlow(turnTrackerStateLinearId, gameBoardState.copy(), oracleParty)
+        val futureWithDiceRollPlayer1 = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
+        network.runNetwork()
+        futureWithDiceRollPlayer1.getOrThrow()
+
+        val futureWithClaimedResourcesByPlayer1 = arrayOfAllPlayerNodesInOrder[0].startFlow(IssueResourcesFlow(gameBoardLinearId = gameBoardState.linearId, oracle = oracleParty))
+        network.runNetwork()
+        val txWithNewResourcesOwnedByPlayer1 = futureWithClaimedResourcesByPlayer1.getOrThrow()
+
+        requireThat {
+            val resources = txWithNewResourcesOwnedByPlayer1.coreTransaction.outputsOfType<FungibleToken<*>>()
+            "Assert resources were produced in the transaction" using resources.isNotEmpty()
+        }
+
+        val futureWithPlayer2Turn = arrayOfAllPlayerNodes[0].startFlow(EndTurnFlow())
+        network.runNetwork()
+        futureWithPlayer2Turn.getOrThrow()
+
+        val futureWithPlayer2DiceRoll = arrayOfAllPlayerNodes[1].startFlow(RollDiceFlow(turnTrackerStateLinearId, gameBoardState, oracleParty))
+        network.runNetwork()
+        futureWithPlayer2DiceRoll.getOrThrow()
+
+        val futureWithClaimedResourcesByPlayer2 = arrayOfAllPlayerNodes[1].startFlow(IssueResourcesFlow(gameBoardState.linearId, oracleParty))
+        network.runNetwork()
+        val txWithNewResourcesOwnedByPlayer2 = futureWithClaimedResourcesByPlayer2.getOrThrow()
+
+        requireThat {
+            val resources = txWithNewResourcesOwnedByPlayer2.coreTransaction.outputsOfType<FungibleToken<TokenType>>()
+            "Resources were produced in the transaction" using resources.isNotEmpty()
+        }
+
+        val futureWithPlayer3Turn = arrayOfAllPlayerNodes[1].startFlow(EndTurnFlow())
+        network.runNetwork()
+        futureWithPlayer3Turn.getOrThrow()
+
     }
 
 }
