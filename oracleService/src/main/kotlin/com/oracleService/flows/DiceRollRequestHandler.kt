@@ -12,8 +12,6 @@ import net.corda.core.utilities.unwrap
 
 @InitiatedBy(GetRandomDiceRollValues::class)
 class DiceRollRequestHandler(val session: FlowSession): FlowLogic<Unit>() {
-
-    // TODO: Decouple tightly integrated oracleClient and oracleService.
     @Suspendable
     override fun call() {
         try {

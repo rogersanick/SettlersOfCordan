@@ -52,16 +52,16 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
         tb.addCommand(placeInitialSettlement)
         tb.addCommand(endTurnDuringInitialPlacementPhase)
 
-        // Step 6. Create initial settlement
+        // Step 6. Create an initial settlement state
         val settlementState = SettlementState(hexTileIndex, hexTileCoordinate, gameBoardState.players, ourIdentity)
 
-        // Step 7. Create the new turnTracker state.
+        // Step 7. Create an updated turnTracker state.
         val newTurnTrackerState = turnTrackerState.endTurnDuringInitialSettlementPlacement()
 
-        // Step 8. Create a new Game Board State
+        // Step 8. Create a new Game Board State which will contain an updated mapping of where settlements have been placed.
         val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { kotlin.collections.MutableList(6) { false } }
 
-        // Step 9. Get access to potentially conflicting neighbours
+        // Step 9. Use a linkedList to calculate the coordinates of any relevant overlapping alternative location specification (e.g. 0,2; 1,4 and 5,0 all correspond to a single position)
         class LinkedListNode(val int: Int, var next: LinkedListNode? = null)
         val linkedListNode1 = LinkedListNode(1)
         val linkedListNode2 = LinkedListNode(3)
@@ -94,6 +94,9 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
         val coordinateOfPotentiallyConflictingSettlement1 = linkedListToGetCoordinateOfPotentiallyConflictingSettlement.next?.int!!
         val coordinateOfPotentiallyConflictingSettlement2 = linkedListToGetCoordinateOfPotentiallyConflictingSettlement.next?.next?.int!!
 
+        // Step 10. Use the coordinate calculated for equivalent positions to get the index of each equivalent position.
+        // Each hextile has a mapping representing the index of the hexTile adjacent to each of its six sides.
+        // The coordinate of the conflicting position allows us to access the appropriate side and get the appropriate index.
         val relevantHexTileNeighbours: ArrayList<HexTile?> = arrayListOf()
 
         if (gameBoardState.hexTiles[hexTileIndex].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1]!!])
@@ -106,28 +109,31 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
         if (indexOfRelevantHexTileNeighbour1 != -1) newSettlementsPlaced[indexOfRelevantHexTileNeighbour1][coordinateOfPotentiallyConflictingSettlement1] = true
         if (indexOfRelevantHexTileNeighbour2 != -1) newSettlementsPlaced[indexOfRelevantHexTileNeighbour2][coordinateOfPotentiallyConflictingSettlement2] = true
 
-        // Step 10. Add a self-issued resource if we are in the second round of initial placement
+        // Step 11. Add self-issued resources if we are in the second round of initial placement
         if (turnTrackerState.setUpRound1Complete) {
+
+            // Calculate the currencies that should be claimed by the player proposing a move.
             val gameCurrencyToClaim = arrayListOf<Pair<String, Long>>()
             gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles[settlementState.hexTileIndex].resourceType, settlementState.resourceAmountClaim.toLong()))
             if (indexOfRelevantHexTileNeighbour1 != -1 && gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType != "Desert") gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType, settlementState.resourceAmountClaim.toLong()))
             if (indexOfRelevantHexTileNeighbour2 != -1 && gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType != "Desert") gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType, settlementState.resourceAmountClaim.toLong()))
 
+            // Consolidate the list so that they is only one instance of a given token type issued with the appropriate amount.
             val reducedListOfGameCurrencyToClaim = mutableMapOf<String, Long>()
-
             gameCurrencyToClaim.forEach{
                 if (reducedListOfGameCurrencyToClaim.containsKey(it.first)) reducedListOfGameCurrencyToClaim[it.first] = reducedListOfGameCurrencyToClaim[it.first]!!.plus(it.second)
                 else reducedListOfGameCurrencyToClaim[it.first] = it.second
             }
 
+            // Convert each gameCurrentToClaim into a valid fungible token.
             val fungibleTokenAmountsOfResourcesToClaim = reducedListOfGameCurrencyToClaim.map {
                 amount(it.value, Resource.getInstance(it.key)) issuedBy ourIdentity heldBy ourIdentity
             }
 
-            // Add a command to issue the appropriate types of resources. Convert the gameCurrencyToClaim to a set to prevent duplicate commands.
+            // Add commands to issue the appropriate types of resources. Convert the gameCurrencyToClaim to a set to prevent duplicate commands.
             val resourceTypesToBeIssuedForWhichACommandShouldBeIncluded = gameCurrencyToClaim.toSet()
             resourceTypesToBeIssuedForWhichACommandShouldBeIncluded.forEach {
-                tb.addCommand(IssueTokenCommand(Resource.getInstance(it.first) issuedBy ourIdentity), ourIdentity.owningKey)
+                tb.addCommand(IssueTokenCommand(Resource.getInstance(it.first) issuedBy ourIdentity), gameBoardState.players.map { it.owningKey })
             }
 
             // Add all of the appropriate new owned token amounts to the transaction.
@@ -136,21 +142,22 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
             }
         }
 
-        // Step 10. Add all states and commands to the transaction.
+        // Step 12. Add all states and commands to the transaction.
         tb.addInputState(gameBoardStateAndRef)
         tb.addInputState(turnTrackerStateAndRef)
         tb.addOutputState(settlementState, BuildPhaseContract.ID)
         tb.addOutputState(newTurnTrackerState, GameStateContract.ID)
         tb.addOutputState(gameBoardState.copy(settlementsPlaced = newSettlementsPlaced))
 
-        // Step 11. Sign initial transaction
+        // Step 13. Sign initial transaction
         tb.verify(serviceHub)
         val ptx = serviceHub.signInitialTransaction(tb)
 
-        // Step 12. Collect all signatures
+        // Step 14. Collect all signatures
         val sessions = (gameBoardState.players - ourIdentity).map { initiateFlow(it) }.toSet()
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
 
+        // Step 15. Run the FinalityFlow to persist the transaction to the ledgers of all appropriate parties.
         return subFlow(FinalityFlow(stx, sessions))
     }
 }
@@ -161,21 +168,26 @@ class BuildInitialSettlementFlowResponder(val counterpartySession: FlowSession):
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) {
-                // TODO: Verify that the user is only issuing themselves resources on the second placement and that they are issuing the correct amount
+
+                // Get access to the GameBoardState and TurnTracker from the transaction
                 val gameBoardState = stx.coreTransaction.outputsOfType<GameBoardState>().first()
                 val turnTrackerState = stx.coreTransaction.outputsOfType<TurnTrackerState>().first()
 
+                // Build query criteria to retrieve that last evolution of the turn tracker we have on record.
                 val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(turnTrackerState.linearId))
                 val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteria).states.first().state.data
 
+                // Ensure that the player proposing the build of a settlement is currently the player whose turn it is.
                 if (counterpartySession.counterparty.owningKey != gameBoardState.players[lastTurnTrackerOnRecordStateAndRef.currTurnIndex].owningKey) {
                     throw IllegalArgumentException("Only the current player may propose the next move.")
                 }
             }
         }
 
+        // Sign the transaction
         val txWeJustSignedId = subFlow(signedTransactionFlow)
 
+        // Run the ReceiveFinalityFlow flow to finalize the transaction.
         return subFlow(ReceiveFinalityFlow(otherSideSession = counterpartySession, expectedTxId = txWeJustSignedId.id))
     }
 }

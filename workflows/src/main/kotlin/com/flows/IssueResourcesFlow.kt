@@ -24,14 +24,12 @@ import net.corda.core.transactions.TransactionBuilder
 // * Initial Settlement Placement Flow *
 // *************************************
 
-// TODO: Add initialization service that prints Settlers Of CorDan to the console
-
 @InitiatingFlow
 @StartableByRPC
-class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier, val oracle: Party): FlowLogic<SignedTransaction>() {
+class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
-        // Step 1. Get reference to the notary
+        // Step 1. Get reference to the notary and oracle
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
         // Step 2. Retrieve the Game Board State from the vault.
@@ -50,7 +48,7 @@ class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier, val oracle: Pa
         // Step 5. Create a transaction builder
         val tb = TransactionBuilder(notary = notary)
 
-        // Step 6. Generate the appropriate resources
+        // Step 6. Generate valid settlements for which we will be issuing resources.
         val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states.filter {
             val diceRollTotal = diceRollState.randomRoll1 + diceRollState.randomRoll2
             val adjacentHexTileIndex1 = gameBoardState.hexTiles[(gameBoardState.hexTiles[it.state.data.hexTileIndex].sides[it.state.data.hexTileCoordinate]) ?: 7].roleTrigger == diceRollTotal
@@ -59,29 +57,51 @@ class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier, val oracle: Pa
             adjacentHexTileIndex1 || adjacentHexTileIndex2 || primaryHexTile
         }
 
+        // Step 7. Generate a list of all currencies amounts that will be issued.
+
+        val gameCurrenciesToClaim = arrayListOf<GameCurrencyToClaim>()
         for (result in listOfValidSettlements) {
             val settlementState = result.state.data
             val hexTile = gameBoardState.hexTiles[result.state.data.hexTileIndex]
-            val resourceType = hexTile.resourceType
-            val gameCurrency = Resource.getInstance(resourceType)
-            val resource = amount(settlementState.resourceAmountClaim, gameCurrency) issuedBy ourIdentity heldBy settlementState.owner
-
-            tb.addCommand(IssueTokenCommand(resource.amount.token), ourIdentity.owningKey)
-            tb.addOutputState(resource, FungibleTokenContract.contractId)
+            val ownerIndex = gameBoardState.players.indexOf(settlementState.owner)
+            gameCurrenciesToClaim.add(GameCurrencyToClaim(hexTile.resourceType, ownerIndex))
         }
 
-        // Step 7. Add reference states for turn tracker and game board. Add input state for the dice roll.
+        // Consolidate the list so that they is only one instance of a given token type issued with the appropriate amount.
+        val reducedListOfGameCurrencyToClaim = mutableMapOf<GameCurrencyToClaim, Int>()
+        gameCurrenciesToClaim.forEach{
+            if (reducedListOfGameCurrencyToClaim.containsKey(it)) reducedListOfGameCurrencyToClaim[it] = reducedListOfGameCurrencyToClaim[it]!!.plus(1)
+            else reducedListOfGameCurrencyToClaim[it] = 1
+        }
+
+        // Convert each gameCurrentToClaim into a valid fungible token.
+        val fungibleTokenAmountsOfResourcesToClaim = reducedListOfGameCurrencyToClaim.map {
+            amount(it.value, Resource.getInstance(it.key.resourceType)) issuedBy ourIdentity heldBy gameBoardState.players[it.key.ownerIndex]
+        }
+
+        // Add commands to issue the appropriate types of resources. Convert the gameCurrencyToClaim to a set to prevent duplicate commands.
+        val resourceTypesToBeIssuedForWhichACommandShouldBeIncluded = gameCurrenciesToClaim.toSet()
+        resourceTypesToBeIssuedForWhichACommandShouldBeIncluded.forEach {
+            tb.addCommand(IssueTokenCommand(Resource.getInstance(it.resourceType) issuedBy ourIdentity), gameBoardState.players.map { it.owningKey })
+        }
+
+        // Add all of the appropriate new owned token amounts to the transaction.
+        fungibleTokenAmountsOfResourcesToClaim.forEach {
+            tb.addOutputState(it, FungibleTokenContract.contractId)
+        }
+
+        // Step 8. Add reference states for turn tracker and game board. Add input state for the dice roll.
         tb.addInputState(diceRollStateAndRef)
         tb.addReferenceState(ReferencedStateAndRef(gameBoardStateAndRef))
         tb.addReferenceState(ReferencedStateAndRef(turnTrackerStateAndRef))
 
-        // Step 8. Add the gather resources command and verify the transaction
+        // Step 9. Add the gather resources command and verify the transaction
         val commandSigners = gameBoardState.players.map {it.owningKey}
         tb.addCommand(GatherPhaseContract.Commands.issueResourcesToAllPlayers(), commandSigners)
         tb.addCommand(DiceRollContract.Commands.ConsumeDiceRoll(), commandSigners)
         tb.verify(serviceHub)
 
-        // Step 9. Collect the signatures and sign the transaction
+        // Step 10. Collect the signatures and sign the transaction
         val ptx = serviceHub.signInitialTransaction(tb)
         val sessions = (gameBoardState.players - ourIdentity).toSet().map { initiateFlow(it) }
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
@@ -96,12 +116,7 @@ open class IssueResourcesFlowResponder(val counterpartySession: FlowSession): Fl
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
-                val oracleLegalName = CordaX500Name("Oracle", "New York", "US")
-                val oracleParty = serviceHub.networkMapCache.getNodeByLegalName(oracleLegalName)
-                oracleParty?.legalIdentities?.first()?.owningKey
-
                 val listOfTokensIssued = stx.coreTransaction.outputsOfType<FungibleState<*>>().toMutableList()
-
                 val gameBoardState = serviceHub.vaultService.queryBy<GameBoardState>(QueryCriteria.VaultQueryCriteria(stateRefs = stx.references)).states.single().state.data
                 val turnTrackerState = serviceHub.vaultService.queryBy<TurnTrackerState>().states.single().state.data
                 val diceRollState = serviceHub.vaultService.queryBy<DiceRollState>(QueryCriteria.VaultQueryCriteria(stateRefs = stx.inputs)).states.single().state.data
@@ -113,15 +128,24 @@ open class IssueResourcesFlowResponder(val counterpartySession: FlowSession): Fl
                     adjacentHexTileIndex1 || adjacentHexTileIndex2 || primaryHexTile
                 }
 
-                val listOfTokensThatShouldHaveBeenIssued = mutableListOf<FungibleState<*>>()
+                val gameCurrenciesThatShouldHaveBeenClaimed = arrayListOf<GameCurrencyToClaim>()
                 for (result in listOfValidSettlements) {
                     val settlementState = result.state.data
-                    val hexTile = gameBoardState.hexTiles[settlementState.hexTileIndex]
-                    val resourceType = hexTile.resourceType
-                    val gameCurrency = Resource.getInstance(resourceType)
-                    val amountOfResource = amount(settlementState.resourceAmountClaim, gameCurrency) issuedBy gameBoardState.players[turnTrackerState.currTurnIndex]
-                    val ownedTokenAmount = FungibleToken(amountOfResource, settlementState.owner)
-                    listOfTokensThatShouldHaveBeenIssued.add(ownedTokenAmount)
+                    val hexTile = gameBoardState.hexTiles[result.state.data.hexTileIndex]
+                    val ownerIndex = gameBoardState.players.indexOf(settlementState.owner)
+                    gameCurrenciesThatShouldHaveBeenClaimed.add(GameCurrencyToClaim(hexTile.resourceType, ownerIndex))
+                }
+
+                // Consolidate the list so that they is only one instance of a given token type issued with the appropriate amount.
+                val reducedListOfGameCurrencyToClaim = mutableMapOf<GameCurrencyToClaim, Int>()
+                gameCurrenciesThatShouldHaveBeenClaimed.forEach{
+                    if (reducedListOfGameCurrencyToClaim.containsKey(it)) reducedListOfGameCurrencyToClaim[it] = reducedListOfGameCurrencyToClaim[it]!!.plus(1)
+                    else reducedListOfGameCurrencyToClaim[it] = 1
+                }
+
+                // Convert each gameCurrentToClaim into a valid fungible token.
+                val listOfTokensThatShouldHaveBeenIssued = reducedListOfGameCurrencyToClaim.map {
+                    amount(it.value, Resource.getInstance(it.key.resourceType)) issuedBy gameBoardState.players[turnTrackerState.currTurnIndex] heldBy gameBoardState.players[it.key.ownerIndex]
                 }
 
                 "The correct number of resources must be produced for each respective party" using (listOfTokensThatShouldHaveBeenIssued.filter {
@@ -136,26 +160,9 @@ open class IssueResourcesFlowResponder(val counterpartySession: FlowSession): Fl
         return subFlow(ReceiveFinalityFlow(otherSideSession = counterpartySession, expectedTxId = txWeJustSignedId.id))
     }
 
-    // Unused utility function
-    fun getIssuedCurrency(hexTileTerrainType: String, stx: SignedTransaction): MutableMap<AbstractParty, Amount<IssuedTokenType<Resource>>> {
-
-        val resourceOfTypeIssued = stx.coreTransaction.outputsOfType<FungibleToken<*>>().filter {
-            it.amount.token.tokenType == Resource.getInstance(hexTileTerrainType)
-        }
-        val mappingOfPlayerToResourcesClaimed = mutableMapOf<AbstractParty, Amount<IssuedTokenType<Resource>>>()
-        val ourIdentity = ourIdentity
-        val gameBoardState = serviceHub.vaultService.queryBy<GameBoardState>().states.single().state.data
-        gameBoardState.players.forEach {
-            mappingOfPlayerToResourcesClaimed[it] = Amount(0, Resource.getInstance(hexTileTerrainType) issuedBy ourIdentity)
-        }
-
-        resourceOfTypeIssued.forEach {
-            val fungibleTokenAmount = it as FungibleToken<Resource>
-            mappingOfPlayerToResourcesClaimed[fungibleTokenAmount.holder]?.plus(fungibleTokenAmount.amount)
-        }
-
-        return mappingOfPlayerToResourcesClaimed
-
-    }
-
 }
+
+data class GameCurrencyToClaim(
+        val resourceType: String,
+        val ownerIndex: Int
+)

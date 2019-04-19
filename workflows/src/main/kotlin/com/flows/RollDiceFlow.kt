@@ -13,6 +13,7 @@ import net.corda.core.identity.Party
 import net.corda.core.internal.DigitalSignatureWithCert
 import net.corda.core.internal.signWithCert
 import net.corda.core.node.services.queryBy
+import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
@@ -22,9 +23,21 @@ import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
 @StartableByRPC
-class RollDiceFlow(val turnTrackerStateLinearId: UniqueIdentifier, val gameBoardState: GameBoardState, val oracle: Party) : FlowLogic<SignedTransaction>() {
+class RollDiceFlow(val gameBoardStateLinearId: UniqueIdentifier) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
+
+        val queryCriteriaForGameBoardState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardStateLinearId))
+        val gameBoardStateAndRef = serviceHub.vaultService.queryBy<GameBoardState>(queryCriteriaForGameBoardState).states.single()
+        val gameBoardState = gameBoardStateAndRef.state.data
+
+        val queryCriteriaForTurnTrackerState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
+        val turnTrackerState = serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteriaForTurnTrackerState).states.first().state.data
+        val turnTrackerStateLinearId = turnTrackerState.linearId
+
+        val oracleLegalName = CordaX500Name("Oracle", "New York", "US")
+        val oracle = serviceHub.networkMapCache.getNodeByLegalName(oracleLegalName)!!.legalIdentities.single()
+
         val diceRoll = subFlow(GetRandomDiceRollValues(turnTrackerStateLinearId, gameBoardState, oracle))
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
         val tb = TransactionBuilder(notary)

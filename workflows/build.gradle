@@ -56,7 +56,6 @@ dependencies {
 
     // CorDapp dependencies.
     cordapp project(":contracts")
-    cordapp project(":oracleClient")
     cordapp project(":oracleService")
 }
 

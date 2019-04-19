@@ -62,11 +62,14 @@ class BuildPhaseContract : Contract {
                 if (gameBoardState.hexTiles[hexTileIndex].resourceType == "Desert") {
                     System.out.println("Hello")
                 }
+
                 "A settlement cannot be built on a hexTile that is of type Desert" using (gameBoardState.hexTiles[hexTileIndex].resourceType != "Desert")
 
                 if (turnTracker.setUpRound1Complete) {
                     "The player should be issuing them self a resource of the appropriate type" using (outputResources.containsAll(fungibleTokenAmountsOfResourcesThatShouldBeIssued))
                     "The player should be issuing them self a resource of the appropriate type" using (outputResources.size == fungibleTokenAmountsOfResourcesThatShouldBeIssued.size)
+                } else {
+                    "The player should not be issuing them self any resources as this is the first round of placement" using (outputResources.isEmpty())
                 }
 
                 "A settlement must not have previously been built in this location." using ( !gameBoardState.settlementsPlaced[newSettlement.hexTileIndex][hexTileCoordinate] )

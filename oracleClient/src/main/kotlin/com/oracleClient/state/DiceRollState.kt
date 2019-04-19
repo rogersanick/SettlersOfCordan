@@ -4,7 +4,6 @@ import com.oracleClient.contracts.DiceRollContract
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.UniqueIdentifier
-import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.Party
 import net.corda.core.internal.SignedDataWithCert
 import net.corda.core.schemas.PersistentState

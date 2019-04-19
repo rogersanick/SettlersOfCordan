@@ -68,7 +68,7 @@ val Long.Brick: Amount<Resource> get() = Brick(this)
 val Double.Brick: Amount<Resource> get() = Brick(this)
 
 // Underlying Resource Property
-class Resource(private val currency: GameCurrency,
+data class Resource(private val currency: GameCurrency,
                override val tokenIdentifier: String) : Money() {
     val symbol: String get() = currency.currencyCode
     override val description: String get() = currency.displayName
@@ -95,7 +95,7 @@ class Resource(private val currency: GameCurrency,
 
 // Game Currency Utility Class
 @CordaSerializable
-class GameCurrency(val resourceType: String) {
+data class GameCurrency(val resourceType: String) {
     init {
         if (!listOf("Field", "Mountain", "Pasture", "Forest", "Hill").contains(resourceType)) {
             throw IllegalArgumentException("A game currency must be of type Wheat, Ore, Sheep, Wood or Brick.")

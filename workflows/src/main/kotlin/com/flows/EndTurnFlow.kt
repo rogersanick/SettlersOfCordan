@@ -13,6 +13,7 @@ import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import java.lang.IllegalArgumentException
+import javax.management.Query
 
 // *****************
 // * End Turn Flow *
@@ -71,6 +72,21 @@ class EndTurnFlowResponder(val counterpartySession: FlowSession): FlowLogic<Sign
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) {
+                val inputTurnTrackerInTransaction = stx.coreTransaction.inputs.single()
+                val queryCriteria = QueryCriteria.VaultQueryCriteria(stateRefs = listOf(inputTurnTrackerInTransaction))
+                val turnTrackerReferencedInTransaction = serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteria).states.single().state.data
+
+                val gameBoard = serviceHub.vaultService.queryBy<GameBoardState>().states.single().state.data
+                val lastTurnTrackerWeHaveOnRecord = serviceHub.vaultService.queryBy<TurnTrackerState>().states.single().state.data
+                if (lastTurnTrackerWeHaveOnRecord.linearId != turnTrackerReferencedInTransaction.linearId) {
+                    throw IllegalArgumentException("The TurnTracker included in the transaction is not correct for this game or turn.")
+                }
+                if (lastTurnTrackerWeHaveOnRecord.currTurnIndex != turnTrackerReferencedInTransaction.currTurnIndex) {
+                    throw IllegalArgumentException("The player is proposing an incorrect turn advancement.")
+                }
+                if (gameBoard.players[turnTrackerReferencedInTransaction.currTurnIndex] != counterpartySession.counterparty) {
+                    throw IllegalArgumentException("The player who is proposing this transaction is not currently the player whose turn it is.")
+                }
             }
         }
 

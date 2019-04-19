@@ -43,10 +43,6 @@ class SetupGameBoardFlowTests {
         val p3 = c.info.chooseIdentity()
         val p4 = d.info.chooseIdentity()
 
-        // Get an identity for two additional spectators in the game.
-//        val spec1 = e.info.chooseIdentity()
-//        val spec2 = f.info.chooseIdentity()
-
         // Issue a game state onto the ledger.
         val gameStateIssueFlow = SetupGameStartFlow(p1, p2, p3, p4)
         val future = a.startFlow(gameStateIssueFlow);
@@ -55,13 +51,14 @@ class SetupGameBoardFlowTests {
         val ptx = future.getOrThrow()
 
         assert(ptx.tx.inputs.isEmpty())
-        assert(ptx.tx.outputs.single().data is GameBoardState)
 
-        // This is a change for git.
-        val command = ptx.tx.commands.single()
+        val gameBoardState = ptx.tx.outputs.filter { it.data is GameBoardState }.single().data
+        assert(gameBoardState is GameBoardState)
+
+        val command = ptx.tx.commands.filter { it.value is GameStateContract.Commands.SetUpGameBoard }.single()
 
         assert(command.value is GameStateContract.Commands.SetUpGameBoard)
-        assert(command.signers.toSet() == ptx.tx.outputs.single().data.participants.map { it.owningKey }.toSet())
+        assert(command.signers.toSet() == gameBoardState.participants.map { it.owningKey }.toSet())
 
         ptx.verifySignaturesExcept(
                 p2.owningKey,
@@ -80,10 +77,6 @@ class SetupGameBoardFlowTests {
         val p3 = c.info.chooseIdentity()
         val p4 = d.info.chooseIdentity()
 
-        // Get an identity for two additional spectators in the game.
-//        val spec1 = e.info.chooseIdentity()
-//        val spec2 = f.info.chooseIdentity()
-
         // Issue a game state onto the ledger.
         val gameStateIssueFlow = SetupGameStartFlow(p1, p2, p3, p4)
         val future = a.startFlow(gameStateIssueFlow)
@@ -92,12 +85,14 @@ class SetupGameBoardFlowTests {
         val stx = future.getOrThrow()
 
         assert(stx.tx.inputs.isEmpty())
-        assert(stx.tx.outputs.single().data is GameBoardState)
 
-        val command = stx.tx.commands.single()
+        val gameBoardState = stx.tx.outputs.filter { it.data is GameBoardState }.single().data
+        assert(gameBoardState is GameBoardState)
+
+        val command = stx.tx.commands.filter { it.value is GameStateContract.Commands.SetUpGameBoard }.single()
 
         assert(command.value is GameStateContract.Commands.SetUpGameBoard)
-        assert(command.signers.toSet() == stx.tx.outputs.single().data.participants.map { it.owningKey }.toSet())
+        assert(command.signers.toSet() == gameBoardState.participants.map { it.owningKey }.toSet())
 
         stx.verifyRequiredSignatures()
     }

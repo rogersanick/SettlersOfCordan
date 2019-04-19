@@ -1,11 +1,9 @@
-package oracleFlowTests
+package com.oracleFlowTests
 
 import com.contractsAndStates.states.GameBoardState
-import com.contractsAndStates.states.TurnTrackerState
 import com.flows.*
 import com.oracleClient.state.DiceRollState
 import com.oracleService.flows.DiceRollRequestHandler
-import com.oracleService.flows.SignDiceRollHandler
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
@@ -41,7 +39,7 @@ class OracleClientIntegrationTest {
             it.registerInitiatedFlow(RollDiceFlowResponder::class.java)
         }
 
-        listOf(DiceRollRequestHandler::class.java, SignDiceRollHandler::class.java).forEach { oracle.registerInitiatedFlow(it) }
+        listOf(DiceRollRequestHandler::class.java).forEach { oracle.registerInitiatedFlow(it) }
 
         network.runNetwork()
     }
@@ -94,10 +92,9 @@ class OracleClientIntegrationTest {
             placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2)
         }
 
-        val turnTrackerStateLinearId = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<TurnTrackerState>().first().state.data.linearId
         val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
 
-        val rollDiceFlow = RollDiceFlow(turnTrackerStateLinearId, gameBoardState.copy(), oracleParty)
+        val rollDiceFlow = RollDiceFlow(gameBoardState.linearId)
         val futureWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
         network.runNetwork()
         val txWithDiceRoll = futureWithDiceRoll.getOrThrow()

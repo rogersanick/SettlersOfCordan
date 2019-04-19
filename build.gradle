@@ -64,6 +64,11 @@ dependencies {
     // CorDapp dependencies.
     cordapp project(":workflows")
     cordapp project(":contracts")
+    cordapp project(":oracleClient")
+    cordapp project(":oracleService")
+    cordapp "com.r3.tokens-sdk:contract:1.0-SNAPSHOT"
+    cordapp "com.r3.tokens-sdk:workflow:1.0-SNAPSHOT"
+    cordapp "com.r3.tokens-sdk:money:1.0-SNAPSHOT"
 
     cordaCompile "org.apache.logging.log4j:log4j-slf4j-impl:${log4j_version}"
     cordaCompile "org.apache.logging.log4j:log4j-web:${log4j_version}"
@@ -99,9 +104,12 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
             adminAddress("localhost:10042")
         }
         cordapps = [
-                "$project.group:oracleClient:$project.version",
                 "$project.group:contracts:$project.version",
-                "$project.group:workflows:$project.version"
+                "$project.group:workflows:$project.version",
+                "$project.group:oracleClient:$project.version",
+                "com.r3.tokens-sdk:contract:1.0-SNAPSHOT",
+                "com.r3.tokens-sdk:workflow:1.0-SNAPSHOT",
+                "com.r3.tokens-sdk:money:1.0-SNAPSHOT",
         ]
     }
     node {
@@ -112,9 +120,12 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
             adminAddress("localhost:10044")
         }
         cordapps = [
-                "$project.group:oracleClient:$project.version",
                 "$project.group:contracts:$project.version",
-                "$project.group:workflows:$project.version"
+                "$project.group:workflows:$project.version",
+                "$project.group:oracleClient:$project.version",
+                "com.r3.tokens-sdk:contract:1.0-SNAPSHOT",
+                "com.r3.tokens-sdk:workflow:1.0-SNAPSHOT",
+                "com.r3.tokens-sdk:money:1.0-SNAPSHOT"
         ]
         rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
@@ -126,9 +137,12 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
             adminAddress("localhost:10046")
         }
         cordapps = [
-                "$project.group:oracleClient:$project.version",
                 "$project.group:contracts:$project.version",
-                "$project.group:workflows:$project.version"
+                "$project.group:workflows:$project.version",
+                "$project.group:oracleClient:$project.version",
+                "com.r3.tokens-sdk:contract:1.0-SNAPSHOT",
+                "com.r3.tokens-sdk:workflow:1.0-SNAPSHOT",
+                "com.r3.tokens-sdk:money:1.0-SNAPSHOT"
         ]
         rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
@@ -140,9 +154,12 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
             adminAddress("localhost:10048")
         }
         cordapps = [
-                "$project.group:oracleClient:$project.version",
                 "$project.group:contracts:$project.version",
-                "$project.group:workflows:$project.version"
+                "$project.group:workflows:$project.version",
+                "$project.group:oracleClient:$project.version",
+                "com.r3.tokens-sdk:contract:1.0-SNAPSHOT",
+                "com.r3.tokens-sdk:workflow:1.0-SNAPSHOT",
+                "com.r3.tokens-sdk:money:1.0-SNAPSHOT"
         ]
         rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
@@ -154,9 +171,25 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
             adminAddress("localhost:10050")
         }
         cordapps = [
-                "$project.group:oracleClient:$project.version",
                 "$project.group:contracts:$project.version",
-                "$project.group:workflows:$project.version"
+                "$project.group:workflows:$project.version",
+                "$project.group:oracleClient:$project.version",
+                "com.r3.tokens-sdk:contract:1.0-SNAPSHOT",
+                "com.r3.tokens-sdk:workflow:1.0-SNAPSHOT",
+                "com.r3.tokens-sdk:money:1.0-SNAPSHOT"
+        ]
+        rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
+    }
+    node {
+        name "O=Oracle,L=New York,C=US"
+        p2pPort 10013
+        rpcSettings {
+            address("localhost:10012")
+            adminAddress("localhost:10052")
+        }
+        cordapps = [
+                "$project.group:oracleService:$project.version",
+                "$project.group:oracleClient:$project.version",
         ]
         rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
