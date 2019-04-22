@@ -113,7 +113,7 @@ class InitialSettlementPlacementFlowTests {
             // Build an initial settlement by issuing a settlement state
             // and updating the current turn.
             if (gameState.hexTiles[testCoordinates[i].first].resourceType == "Desert") {
-                testCoordinates[i] = Pair(testCoordinates[i].first + 9, testCoordinates[i].second)
+                testCoordinates[i] = Pair(testCoordinates[i].first + 7, testCoordinates[i].second)
             }
             val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second)
             val currPlayer = arrayOfAllPlayerNodesInOrder[i]

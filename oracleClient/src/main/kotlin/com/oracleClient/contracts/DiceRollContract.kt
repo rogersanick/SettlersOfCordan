@@ -1,6 +1,5 @@
 package com.oracleClient.contracts
 
-import com.contractsAndStates.states.GameBoardState
 import com.oracleClient.state.DiceRollState
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
@@ -27,15 +26,11 @@ class DiceRollContract : Contract {
                     "The output state is a DiceRollState" using (diceRollState.randomRoll2 in 1..6)
                 }
             }
+
             is Commands.ConsumeDiceRoll -> {
                 requireThat {
                     "There is one DiceRollState input" using (tx.inputsOfType<DiceRollState>().size == 1)
                     "There is are no DiceRollStateOutputs" using (tx.outputsOfType<DiceRollState>().isEmpty())
-
-                    val diceRollState = tx.inputsOfType<DiceRollState>().single()
-                    val gameBoardState = tx.referenceInputsOfType<GameBoardState>().single()
-                    "The output state is a DiceRollState" using (diceRollState.gameBoardStateUniqueIdentifier == gameBoardState.linearId)
-                    "The output state is a DiceRollState" using (diceRollState.turnTrackerUniqueIdentifier == gameBoardState.turnTrackerLinearId)
                 }
             }
 

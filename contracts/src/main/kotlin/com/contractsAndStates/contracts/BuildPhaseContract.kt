@@ -59,10 +59,6 @@ class BuildPhaseContract : Contract {
 
                 val turnTracker = tx.inputsOfType<TurnTrackerState>().single()
 
-                if (gameBoardState.hexTiles[hexTileIndex].resourceType == "Desert") {
-                    System.out.println("Hello")
-                }
-
                 "A settlement cannot be built on a hexTile that is of type Desert" using (gameBoardState.hexTiles[hexTileIndex].resourceType != "Desert")
 
                 if (turnTracker.setUpRound1Complete) {

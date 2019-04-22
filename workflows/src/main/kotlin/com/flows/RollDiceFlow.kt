@@ -38,7 +38,7 @@ class RollDiceFlow(val gameBoardStateLinearId: UniqueIdentifier) : FlowLogic<Sig
         val oracleLegalName = CordaX500Name("Oracle", "New York", "US")
         val oracle = serviceHub.networkMapCache.getNodeByLegalName(oracleLegalName)!!.legalIdentities.single()
 
-        val diceRoll = subFlow(GetRandomDiceRollValues(turnTrackerStateLinearId, gameBoardState, oracle))
+        val diceRoll = subFlow(GetRandomDiceRollValues(turnTrackerStateLinearId, gameBoardState.linearId, gameBoardState.players, oracle))
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
         val tb = TransactionBuilder(notary)
 
