@@ -8,6 +8,7 @@ import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
 import net.corda.core.serialization.CordaSerializable
 import java.lang.Error
+import java.lang.IllegalArgumentException
 
 @CordaSerializable
 @BelongsToContract(TurnTrackerContract::class)
@@ -21,9 +22,7 @@ data class TurnTrackerState (
     fun endTurn() = copy(currTurnIndex = if (this.currTurnIndex + 1 < 4) this.currTurnIndex + 1 else 0, linearId = linearId)
 
     fun endTurnDuringInitialSettlementPlacement(): TurnTrackerState {
-        if (setUpRound2Complete) {
-            throw Error("You should be using the end turn function")
-        } else if (setUpRound1Complete) {
+        if (setUpRound1Complete) {
             if (currTurnIndex == 0) return copy(currTurnIndex = currTurnIndex, setUpRound2Complete = true, linearId = linearId)
             return copy(currTurnIndex = currTurnIndex - 1, linearId = linearId)
         } else {

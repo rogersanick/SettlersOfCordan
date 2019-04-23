@@ -23,10 +23,20 @@ import net.corda.core.utilities.ProgressTracker
 @InitiatingFlow(version = 1)
 @StartableByRPC
 class SetupGameStartFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Party) : FlowLogic<SignedTransaction>() {
-    override val progressTracker = ProgressTracker()
+
+    companion object {
+        object BUILDING_TRANSACTION : ProgressTracker.Step("Getting reference to the notary")
+    }
+
+    override val progressTracker = ProgressTracker(BUILDING_TRANSACTION)
 
     @Suspendable
     override fun call(): SignedTransaction {
+
+        /**
+         * The following objects define all of the steps required to execute the flow. These steps will
+         * be executed in sequence to set up a game board and displayed to the user via a progress tracker.
+         */
         // Step 1. Get a reference to the notary service on the network
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
@@ -227,7 +237,8 @@ class SetupGameStartFlowResponder(val counterpartySession: FlowSession) : FlowLo
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
-                stx.verify(serviceHub, false)
+                System.out.println("Someone has invited you to play Settlers of Catan on Corda")
+                System.out.println("Your unique game board identified is $stx")
             }
         }
 

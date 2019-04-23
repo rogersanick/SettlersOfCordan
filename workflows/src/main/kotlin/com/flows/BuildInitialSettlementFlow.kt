@@ -2,7 +2,6 @@ package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.BuildPhaseContract
-import com.contractsAndStates.contracts.GameStateContract
 import com.contractsAndStates.contracts.TurnTrackerContract
 import com.contractsAndStates.states.*
 import com.r3.corda.sdk.token.contracts.FungibleTokenContract
@@ -10,6 +9,8 @@ import com.r3.corda.sdk.token.contracts.commands.IssueTokenCommand
 import com.r3.corda.sdk.token.contracts.utilities.amount
 import com.r3.corda.sdk.token.contracts.utilities.heldBy
 import net.corda.core.contracts.Command
+import net.corda.core.contracts.ReferencedStateAndRef
+import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
 import net.corda.core.node.services.queryBy
@@ -29,6 +30,11 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
     @Suspendable
     override fun call(): SignedTransaction {
 
+        /**
+         * The following section defines all of the steps required to execute the flow. These steps will
+         * be executed in sequence to build an initial settlement.
+         */
+
         // Step 1. Get a reference to the notary service on the network
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
@@ -45,23 +51,17 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
         // Step 4. Create a new transaction builder
         val tb = TransactionBuilder(notary)
 
-        // Step 5. Create new commands for placing a settlement and ending a turn. Add both to the transaction.
-        val endTurnDuringInitialPlacementPhase = Command(TurnTrackerContract.Commands.EndTurnDuringInitialPlacementPhase(), ourIdentity.owningKey)
+        // Step 5. Create new commands for placing a settlement. Add both to the transaction.
         val placeInitialSettlement = Command(BuildPhaseContract.Commands.BuildInitialSettlement(), gameBoardState.players.map { it.owningKey })
-
         tb.addCommand(placeInitialSettlement)
-        tb.addCommand(endTurnDuringInitialPlacementPhase)
 
         // Step 6. Create an initial settlement state
         val settlementState = SettlementState(hexTileIndex, hexTileCoordinate, gameBoardState.players, ourIdentity)
 
-        // Step 7. Create an updated turnTracker state.
-        val newTurnTrackerState = turnTrackerState.endTurnDuringInitialSettlementPlacement()
+        // Step 7. Create a new Game Board State which will contain an updated mapping of where settlements have been placed.
+        val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { MutableList(6) { false } }
 
-        // Step 8. Create a new Game Board State which will contain an updated mapping of where settlements have been placed.
-        val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { kotlin.collections.MutableList(6) { false } }
-
-        // Step 9. Use a linkedList to calculate the coordinates of any relevant overlapping alternative location specification (e.g. 0,2; 1,4 and 5,0 all correspond to a single position)
+        // Step 8. Use a linkedList to calculate the coordinates of any relevant overlapping alternative location specification (e.g. 0,2; 1,4 and 5,0 all correspond to a single position)
         class LinkedListNode(val int: Int, var next: LinkedListNode? = null)
         val linkedListNode1 = LinkedListNode(1)
         val linkedListNode2 = LinkedListNode(3)
@@ -94,7 +94,7 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
         val coordinateOfPotentiallyConflictingSettlement1 = linkedListToGetCoordinateOfPotentiallyConflictingSettlement.next?.int!!
         val coordinateOfPotentiallyConflictingSettlement2 = linkedListToGetCoordinateOfPotentiallyConflictingSettlement.next?.next?.int!!
 
-        // Step 10. Use the coordinate calculated for equivalent positions to get the index of each equivalent position.
+        // Step 9. Use the coordinate calculated for equivalent positions to get the index of each equivalent position.
         // Each hextile has a mapping representing the index of the hexTile adjacent to each of its six sides.
         // The coordinate of the conflicting position allows us to access the appropriate side and get the appropriate index.
         val relevantHexTileNeighbours: ArrayList<HexTile?> = arrayListOf()
@@ -144,9 +144,8 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
 
         // Step 12. Add all states and commands to the transaction.
         tb.addInputState(gameBoardStateAndRef)
-        tb.addInputState(turnTrackerStateAndRef)
+        tb.addReferenceState(ReferencedStateAndRef(turnTrackerStateAndRef))
         tb.addOutputState(settlementState, BuildPhaseContract.ID)
-        tb.addOutputState(newTurnTrackerState, GameStateContract.ID)
         tb.addOutputState(gameBoardState.copy(settlementsPlaced = newSettlementsPlaced))
 
         // Step 13. Sign initial transaction
@@ -171,7 +170,9 @@ class BuildInitialSettlementFlowResponder(val counterpartySession: FlowSession):
 
                 // Get access to the GameBoardState and TurnTracker from the transaction
                 val gameBoardState = stx.coreTransaction.outputsOfType<GameBoardState>().first()
-                val turnTrackerState = stx.coreTransaction.outputsOfType<TurnTrackerState>().first()
+                val turnTrackerStateRef = stx.coreTransaction.references.first()
+                val turnTrackerQueryCriteria = QueryCriteria.VaultQueryCriteria(stateRefs = listOf(turnTrackerStateRef))
+                val turnTrackerState = serviceHub.vaultService.queryBy<TurnTrackerState>(turnTrackerQueryCriteria).states.first().state.data
 
                 // Build query criteria to retrieve that last evolution of the turn tracker we have on record.
                 val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(turnTrackerState.linearId))
@@ -180,6 +181,10 @@ class BuildInitialSettlementFlowResponder(val counterpartySession: FlowSession):
                 // Ensure that the player proposing the build of a settlement is currently the player whose turn it is.
                 if (counterpartySession.counterparty.owningKey != gameBoardState.players[lastTurnTrackerOnRecordStateAndRef.currTurnIndex].owningKey) {
                     throw IllegalArgumentException("Only the current player may propose the next move.")
+                }
+
+                if (turnTrackerState.setUpRound2Complete) {
+                    throw IllegalArgumentException("You should be using the end turn function")
                 }
             }
         }

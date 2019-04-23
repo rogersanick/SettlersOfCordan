@@ -1,11 +1,11 @@
 package com.flowTests
 
 import com.contractsAndStates.states.GameBoardState
-import com.contractsAndStates.states.TurnTrackerState
 import com.flows.*
 import com.oracleService.flows.DiceRollRequestHandler
 import com.r3.corda.sdk.token.contracts.states.FungibleToken
 import com.r3.corda.sdk.token.contracts.types.TokenType
+import com.testUtilities.placeAPieceFromASpecificNode
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.FlowException
 import net.corda.core.identity.CordaX500Name
@@ -60,7 +60,6 @@ class ClaimResourcesFlowTest {
         val p2 = b.info.chooseIdentity()
         val p3 = c.info.chooseIdentity()
         val p4 = d.info.chooseIdentity()
-        val oracleParty = oracle.info.chooseIdentity()
 
         // Issue a game state onto the ledger
         val gameStateIssueFlow = (SetupGameStartFlow(p1, p2, p3, p4))
@@ -78,26 +77,12 @@ class ClaimResourcesFlowTest {
         val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(1,5), Pair(2,5), Pair(3,5))
         val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(4,5), Pair(5,5), Pair(6,5), Pair(7,5))
 
-
-        fun placeAPieceFromASpecificNode(i: Int, testCoordinates: ArrayList<Pair<Int, Int>>) {
-            // Build an initial settlement by issuing a settlement state
-            // and updating the current turn.
-            if (gameState.hexTiles[testCoordinates[i].first].resourceType == "Desert") {
-                testCoordinates[i] = Pair(testCoordinates[i].first + 7, testCoordinates[i].second)
-            }
-            val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second)
-            val currPlayer = arrayOfAllPlayerNodesInOrder[i]
-            val futureWithInitialSettlementBuild = currPlayer.startFlow(buildInitialSettlementFlow)
-            network.runNetwork()
-            arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
-        }
-
         for (i in 0..3) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1)
+            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
         for (i in 3.downTo(0)) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2)
+            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
         val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
@@ -125,7 +110,6 @@ class ClaimResourcesFlowTest {
         val p2 = b.info.chooseIdentity()
         val p3 = c.info.chooseIdentity()
         val p4 = d.info.chooseIdentity()
-        val oracleParty = oracle.info.chooseIdentity()
 
         // Issue a game state onto the ledger
         val gameStateIssueFlow = (SetupGameStartFlow(p1, p2, p3, p4))
@@ -143,29 +127,14 @@ class ClaimResourcesFlowTest {
         val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(1,5), Pair(2,5), Pair(3,5))
         val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(4,5), Pair(5,5), Pair(6,5), Pair(7,5))
 
-
-        fun placeAPieceFromASpecificNode(i: Int, testCoordinates: ArrayList<Pair<Int, Int>>) {
-            // Build an initial settlement by issuing a settlement state
-            // and updating the current turn.
-            if (gameState.hexTiles[testCoordinates[i].first].resourceType == "Desert") {
-                testCoordinates[i] = Pair(testCoordinates[i].first + 7, testCoordinates[i].second)
-            }
-            val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second)
-            val currPlayer = arrayOfAllPlayerNodesInOrder[i]
-            val futureWithInitialSettlementBuild = currPlayer.startFlow(buildInitialSettlementFlow)
-            network.runNetwork()
-            arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
-        }
-
         for (i in 0..3) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1)
+            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
         for (i in 3.downTo(0)) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2)
+            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
-        val turnTrackerStateLinearId = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<TurnTrackerState>().first().state.data.linearId
         val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
 
         val rollDiceFlow = RollDiceFlow(gameBoardState.linearId)
@@ -182,7 +151,7 @@ class ClaimResourcesFlowTest {
             "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)
         }
 
-        val futureWithPlayer2Turn = arrayOfAllPlayerNodes[0].startFlow(EndTurnFlow())
+        val futureWithPlayer2Turn = arrayOfAllPlayerNodesInOrder[2].startFlow(EndTurnFlow())
         network.runNetwork()
         assertFailsWith<FlowException>("The player who is proposing this transaction is not currently the player whose turn it is.") { futureWithPlayer2Turn.getOrThrow() }
 
@@ -196,7 +165,6 @@ class ClaimResourcesFlowTest {
         val p2 = b.info.chooseIdentity()
         val p3 = c.info.chooseIdentity()
         val p4 = d.info.chooseIdentity()
-        val oracleParty = oracle.info.chooseIdentity()
 
         // Issue a game state onto the ledger
         val gameStateIssueFlow = (SetupGameStartFlow(p1, p2, p3, p4))
@@ -214,29 +182,14 @@ class ClaimResourcesFlowTest {
         val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(1,5), Pair(2,5), Pair(3,5))
         val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(4,5), Pair(5,5), Pair(6,5), Pair(7,5))
 
-
-        fun placeAPieceFromASpecificNode(i: Int, testCoordinates: ArrayList<Pair<Int, Int>>) {
-            // Build an initial settlement by issuing a settlement state
-            // and updating the current turn.
-            if (gameState.hexTiles[testCoordinates[i].first].resourceType == "Desert") {
-                testCoordinates[i] = Pair(testCoordinates[i].first + 7, testCoordinates[i].second)
-            }
-            val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second)
-            val currPlayer = arrayOfAllPlayerNodesInOrder[i]
-            val futureWithInitialSettlementBuild = currPlayer.startFlow(buildInitialSettlementFlow)
-            network.runNetwork()
-            arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
-        }
-
         for (i in 0..3) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1)
+            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
         for (i in 3.downTo(0)) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2)
+            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
-        val turnTrackerStateLinearId = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<TurnTrackerState>().first().state.data.linearId
         val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
 
         val rollDiceFlow = RollDiceFlow(gameBoardState.linearId)

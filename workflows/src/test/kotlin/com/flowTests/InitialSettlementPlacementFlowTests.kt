@@ -1,11 +1,8 @@
 package com.flowTests
 
 import com.contractsAndStates.states.GameBoardState
-import com.contractsAndStates.states.TurnTrackerState
-import com.flows.BuildInitialSettlementFlow
-import com.flows.BuildInitialSettlementFlowResponder
-import com.flows.SetupGameStartFlow
-import com.flows.SetupGameStartFlowResponder
+import com.flows.*
+import com.testUtilities.placeAPieceFromASpecificNode
 import net.corda.core.contracts.TransactionVerificationException
 import net.corda.core.flows.FlowException
 import net.corda.core.identity.CordaX500Name
@@ -20,6 +17,8 @@ import net.corda.testing.node.MockNodeParameters
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import java.lang.IllegalArgumentException
+import kotlin.test.assertFailsWith
 
 class InitialSettlementPlacementFlowTests {
     private val network = MockNetwork(listOf("com.contractsAndStates", "com.flows", "com.r3.corda.sdk.token.workflows", "com.r3.corda.sdk.token.contracts", "com.r3.corda.sdk.token.money"),
@@ -37,6 +36,8 @@ class InitialSettlementPlacementFlowTests {
         startedNodes.forEach {
             it.registerInitiatedFlow(SetupGameStartFlowResponder::class.java)
             it.registerInitiatedFlow(BuildInitialSettlementFlowResponder::class.java)
+            it.registerInitiatedFlow(EndTurnFlowResponder::class.java)
+            it.registerInitiatedFlow(EndTurnDuringInitialPlacementFlowResponder::class.java)
         }
         network.runNetwork()
     }
@@ -66,20 +67,18 @@ class InitialSettlementPlacementFlowTests {
         // Build an initial settlement by issuing a settlement state
         // and updating the current turn.
         val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, 0, 5)
-        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
+        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
         val futureWithInitialSettlementBuild = arrayOfAllPlayerNodesInOrder.first().startFlow(buildInitialSettlementFlow)
         network.runNetwork()
 
         val stxBuildInitialSettlement = futureWithInitialSettlementBuild.getOrThrow()
 
-        assert(stxBuildInitialSettlement.tx.inputs.size == 2)
-        assert(stxBuildInitialSettlement.tx.outputs.size == 3)
+        assert(stxBuildInitialSettlement.tx.inputs.size == 1)
+        assert(stxBuildInitialSettlement.tx.outputs.size == 2)
 
         val buildCommands = stxBuildInitialSettlement.tx.commands
-
-        assert(buildCommands.first().signers.toSet() == stxBuildInitialSettlement.tx.outputsOfType<TurnTrackerState>().single().participants.map { it.owningKey }.toSet())
-
+        assert(buildCommands.first().signers.toSet() == gameState.players.map { it.owningKey }.toSet())
         stxBuildInitialSettlement.verifyRequiredSignatures()
     }
 
@@ -109,25 +108,12 @@ class InitialSettlementPlacementFlowTests {
         val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(1,3), Pair(2,1), Pair(2,3), Pair(3,3))
 
 
-        fun placeAPieceFromASpecificNode(i: Int, testCoordinates: ArrayList<Pair<Int, Int>>) {
-            // Build an initial settlement by issuing a settlement state
-            // and updating the current turn.
-            if (gameState.hexTiles[testCoordinates[i].first].resourceType == "Desert") {
-                testCoordinates[i] = Pair(testCoordinates[i].first + 7, testCoordinates[i].second)
-            }
-            val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second)
-            val currPlayer = arrayOfAllPlayerNodesInOrder[i]
-            val futureWithInitialSettlementBuild = currPlayer.startFlow(buildInitialSettlementFlow)
-            network.runNetwork()
-            arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
-        }
-
         for (i in 0..3) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1)
+            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
         for (i in 3.downTo(0)) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2)
+            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
     }
@@ -154,34 +140,20 @@ class InitialSettlementPlacementFlowTests {
         val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
-        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayOf(Pair(0,5), Pair(0,4), Pair(0,3), Pair(1,1))
-        val nonconflictingHextileIndexAndCoordinatesRound2 = arrayOf(Pair(1,3), Pair(2,1), Pair(2,3), Pair(3,3))
-
-
-        fun placeAPieceFromASpecificNode(i: Int, testCoordinates: Array<Pair<Int, Int>>) {
-            // Build an initial settlement by issuing a settlement state
-            // and updating the current turn.
-            if (gameState.hexTiles[testCoordinates[i].first].resourceType == ("Desert")) {
-                testCoordinates[i] = Pair(testCoordinates[i].first + 9, testCoordinates[i].second)
-            }
-            val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second)
-            val currPlayer = arrayOfAllPlayerNodesInOrder[i]
-            val futureWithInitialSettlementBuild = currPlayer.startFlow(buildInitialSettlementFlow)
-            network.runNetwork()
-            arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
-        }
+        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(0,4), Pair(0,3), Pair(1,1))
+        val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(1,3), Pair(2,1), Pair(2,3), Pair(3,3))
 
         for (i in 0..3) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1)
+            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
         for (i in 3.downTo(0)) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2)
+            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
     }
 
-    @Test(expected = Error::class)
+    @Test
     fun playersAreUnableToBuildSettlementUsingThePlaceInitialSettlementFlowAfterSetup() {
 
         // Get an identity for each of the players of the game.
@@ -206,33 +178,19 @@ class InitialSettlementPlacementFlowTests {
         val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(1,5), Pair(2,5), Pair(3,5))
         val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(4,5), Pair(5,5), Pair(6,5), Pair(7,5))
 
-
-        fun placeAPieceFromASpecificNode(i: Int, testCoordinates: ArrayList<Pair<Int, Int>>) {
-            // Build an initial settlement by issuing a settlement state
-            // and updating the current turn.
-            if (gameState.hexTiles[testCoordinates[i].first].resourceType == "Desert") {
-                testCoordinates[i] = Pair(testCoordinates[i].first + 7, testCoordinates[i].second)
-            }
-            val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second)
-            val currPlayer = arrayOfAllPlayerNodesInOrder[i]
-            val futureWithInitialSettlementBuild = currPlayer.startFlow(buildInitialSettlementFlow)
-            network.runNetwork()
-            arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
-        }
-
         for (i in 0..3) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1)
+            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
         for (i in 3.downTo(0)) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2)
+            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
-        placeAPieceFromASpecificNode(0, arrayListOf(Pair(9, 3)))
+        assertFailsWith<FlowException>("You should be using the end turn function") { placeAPieceFromASpecificNode(0, arrayListOf(Pair(9, 3)), gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false) }
 
     }
 
-    @Test(expected = FlowException::class)
+    @Test
     fun playersMustBuildSettlementsAccordingToTheTurnOrder() {
 
         // Get an identity for each of the players of the game.
@@ -254,24 +212,11 @@ class InitialSettlementPlacementFlowTests {
         val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
-        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayOf(Pair(0,5), Pair(0,1), Pair(0,3), Pair(1,1))
+        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(0,1), Pair(0,3), Pair(1,1))
 
 
-        fun placeAPieceFromASpecificNode(i: Int, testCoordinates: Array<Pair<Int, Int>>) {
-            // Build an initial settlement by issuing a settlement state
-            // and updating the current turn.
-            if (gameState.hexTiles[testCoordinates[i].first].resourceType == "Desert") {
-                testCoordinates[i] = Pair(testCoordinates[i].first + 9, testCoordinates[i].second)
-            }
-            val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second)
-            val currPlayer = arrayOfAllPlayerNodesInOrder[i]
-            val futureWithInitialSettlementBuild = currPlayer.startFlow(buildInitialSettlementFlow)
-            network.runNetwork()
-            arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
-        }
-
-        placeAPieceFromASpecificNode(0, nonconflictingHextileIndexAndCoordinatesRound1)
-        placeAPieceFromASpecificNode(2, nonconflictingHextileIndexAndCoordinatesRound1)
+        placeAPieceFromASpecificNode(0, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
+        assertFailsWith<FlowException>("Only the current player may propose the next move.") { placeAPieceFromASpecificNode(2, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false) }
 
     }
 
