@@ -178,6 +178,15 @@ class BuildInitialSettlementFlowResponder(val counterpartySession: FlowSession):
                 val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(turnTrackerState.linearId))
                 val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteria).states.first().state.data
 
+                // Get all of the settlements currently allocated to this player
+                val currentSettlementsBelongingToPlayer = serviceHub.vaultService.queryBy<SettlementState>().states.filter { it.state.data.owner == counterpartySession.counterparty }
+
+                if (!turnTrackerState.setUpRound1Complete && currentSettlementsBelongingToPlayer.isNotEmpty()) {
+                    throw IllegalArgumentException("The current player has already built an initial settlement in round 1.")
+                } else if (turnTrackerState.setUpRound1Complete && currentSettlementsBelongingToPlayer.size > 1) {
+                    throw IllegalArgumentException("The current player has already built an initial settlement in round 2.")
+                }
+
                 // Ensure that the player proposing the build of a settlement is currently the player whose turn it is.
                 if (counterpartySession.counterparty.owningKey != gameBoardState.players[lastTurnTrackerOnRecordStateAndRef.currTurnIndex].owningKey) {
                     throw IllegalArgumentException("Only the current player may propose the next move.")

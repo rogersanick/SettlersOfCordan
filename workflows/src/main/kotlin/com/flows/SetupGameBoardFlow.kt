@@ -25,10 +25,32 @@ import net.corda.core.utilities.ProgressTracker
 class SetupGameStartFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Party) : FlowLogic<SignedTransaction>() {
 
     companion object {
-        object BUILDING_TRANSACTION : ProgressTracker.Step("Getting reference to the notary")
+        object GETTING_NOTARY : ProgressTracker.Step("Getting reference to the notary")
+        object INITIALIZING_TRANSACTION : ProgressTracker.Step("Initializing the transaction and transaction builder")
+        object ISSUING_COMMANDS : ProgressTracker.Step("Issuing the appropriate commands")
+        object CREATING_A_TURN_TRACKER : ProgressTracker.Step("Creating a turn tracker for you buncha' cheaters")
+        object SETTING_UP_YOUR_GAMEBOARD : ProgressTracker.Step("Setting up your personal GameBoard on Corda")
+        object FINALIZING_GAMEBOARD : ProgressTracker.Step("Finalizing your GameBoard on Corda")
+        object ADDING_PORTS_FOR_YOU_SEAFARING_SOULS : ProgressTracker.Step("Adding sea-ports for your sea-faring souls")
+        object ADDING_ALL_GAME_STATES_TO_THE_TRANSACTION : ProgressTracker.Step("Adding all states to the transaction")
+        object VERIFYING : ProgressTracker.Step("Verifying the transaction")
+        object COLLECTING_SIGNATURES : ProgressTracker.Step("Collecting signatures from your fellow citizens of Cordan")
+        object FINALIZING_TRANSACTION : ProgressTracker.Step("Finalizing the transaction")
     }
 
-    override val progressTracker = ProgressTracker(BUILDING_TRANSACTION)
+    override val progressTracker = ProgressTracker(
+            GETTING_NOTARY,
+            INITIALIZING_TRANSACTION,
+            ISSUING_COMMANDS,
+            CREATING_A_TURN_TRACKER,
+            SETTING_UP_YOUR_GAMEBOARD,
+            ADDING_PORTS_FOR_YOU_SEAFARING_SOULS,
+            FINALIZING_GAMEBOARD,
+            ADDING_ALL_GAME_STATES_TO_THE_TRANSACTION,
+            VERIFYING,
+            COLLECTING_SIGNATURES,
+            FINALIZING_TRANSACTION
+    )
 
     @Suspendable
     override fun call(): SignedTransaction {
@@ -38,22 +60,26 @@ class SetupGameStartFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
          * be executed in sequence to set up a game board and displayed to the user via a progress tracker.
          */
         // Step 1. Get a reference to the notary service on the network
+        progressTracker.currentStep = GETTING_NOTARY
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
         // Step 2. Create a new transaction builder
+        progressTracker.currentStep = INITIALIZING_TRANSACTION
         val tb = TransactionBuilder(notary)
 
         // Step 3. Create a new issue command and add it to the transaction.
+        progressTracker.currentStep = ISSUING_COMMANDS
         val issueCommand = Command(GameStateContract.Commands.SetUpGameBoard(), listOf(p1.owningKey, p2.owningKey, p3.owningKey, p4.owningKey))
         val createTurnTracker = Command(TurnTrackerContract.Commands.CreateTurnTracker(), listOf(p1.owningKey, p2.owningKey, p3.owningKey, p4.owningKey))
         tb.addCommand(issueCommand)
         tb.addCommand(createTurnTracker)
 
-        // Step 6. Create a new turn tracker state
+        // Step 4. Create a new turn tracker state
+        progressTracker.currentStep = CREATING_A_TURN_TRACKER
         val turnTrackerState = TurnTrackerState(participants = listOf(p1, p2, p3, p4))
 
-        // Step 4. Generate data for new game state
-
+        // Step 5. Generate data for new game state
+        progressTracker.currentStep = SETTING_UP_YOUR_GAMEBOARD
         // Storage for hexTiles that will be randomly generated.
         val hexTiles = arrayListOf<HexTile>()
 
@@ -67,6 +93,8 @@ class SetupGameStartFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
          */
 
         // Available Port Tiles
+        progressTracker.currentStep = ADDING_PORTS_FOR_YOU_SEAFARING_SOULS
+        progressTracker.nextStep()
         val portTilesTracking = BooleanArray(9)
         val portTiles: ArrayList<PortTile> = arrayListOf(
                 PortTile(listOf(2.Sheep), listOf(1.Wood, 1.Brick, 1.Ore, 1.Wheat)),
@@ -206,26 +234,46 @@ class SetupGameStartFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
             if (!randomizedPlayersList.contains(playersList[randomNumber])) {
                 randomizedPlayersList.add(playersList[randomNumber])
             }
-            System.out.println("How many times am I running")
         }
 
+        progressTracker.currentStep = FINALIZING_GAMEBOARD
         val newGameState = GameBoardState(false, hexTiles, ports, randomizedPlayersList, turnTrackerState.linearId)
 
         // Step 6. Add the states to the transaction
+        progressTracker.currentStep = ADDING_ALL_GAME_STATES_TO_THE_TRANSACTION
         tb.addOutputState(newGameState, GameStateContract.ID)
         tb.addOutputState(turnTrackerState, TurnTrackerContract.ID)
 
         // Step 7. Verify and sign the transaction
+        progressTracker.currentStep = VERIFYING
         tb.verify(serviceHub)
         val ptx = serviceHub.signInitialTransaction(tb)
 
         // Step 8. Create a list of flows with the relevant participants
+        progressTracker.currentStep = COLLECTING_SIGNATURES
         val sessions = (newGameState.participants - ourIdentity).map { initiateFlow(it) }.toSet()
 
         // Step 9. Collect other signatures
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
 
         // Step 10. Run the FinalityFlow
+        progressTracker.currentStep = FINALIZING_TRANSACTION
+
+        val linearIDToBePrinted = newGameState.linearId
+        val players = newGameState.players
+        val playerNames = players.map { it.name.toString() }
+        val currPlayer = players[0]
+
+        // TODO: This messaging is not displaying
+        System.out.println("\nYour unique game board identified is $linearIDToBePrinted")
+        System.out.println("\nYou are playing with $playerNames")
+
+        if (ourIdentity == currPlayer) {
+            System.out.println("\nIt is your turn, you should use the BuildInitialSettlementFlow to setup the board!")
+        } else {
+            System.out.println("\nIt is $currPlayer's turn")
+        }
+
         return subFlow(FinalityFlow(stx, sessions))
 
     }
@@ -237,8 +285,21 @@ class SetupGameStartFlowResponder(val counterpartySession: FlowSession) : FlowLo
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
-                System.out.println("Someone has invited you to play Settlers of Catan on Corda")
-                System.out.println("Your unique game board identified is $stx")
+                System.out.println("\nSomeone has invited you to play Settlers of Cordan (Catan on Corda)\n")
+                val gameBoardState = stx.coreTransaction.outputsOfType<GameBoardState>().single()
+                val linearIDToBePrinted = gameBoardState.linearId
+                val players = gameBoardState.players
+                val playerNames = players.map { it.name.toString() }
+                val currPlayer = players[0]
+                System.out.println("\nYour unique game board identified is $linearIDToBePrinted")
+                System.out.println("\nYou are playing with $playerNames")
+
+                if (ourIdentity == currPlayer) {
+                    System.out.println("\nIt is your turn, you should use the BuildInitialSettlementFlow to setup the board!")
+                } else {
+                    System.out.println("\nIt is $currPlayer's turn")
+                }
+
             }
         }
 

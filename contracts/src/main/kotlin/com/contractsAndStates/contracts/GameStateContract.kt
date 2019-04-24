@@ -22,7 +22,5 @@ class GameStateContract : Contract {
     // Used to indicate the transaction's intent.
     interface Commands : CommandData {
         class SetUpGameBoard : Commands
-        class StartGame: Commands
-        class EndGame: Commands
     }
 }

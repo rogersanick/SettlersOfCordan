@@ -101,6 +101,7 @@ class BuildPhaseContract : Contract {
         class BuildInitialSettlement: Commands
         class BuildSettlement: Commands
         class BuildCity: Commands
+        class BuildInitialRoads: Commands
         class BuildRoad: Commands
     }
 
