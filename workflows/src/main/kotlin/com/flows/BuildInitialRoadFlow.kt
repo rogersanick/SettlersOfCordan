@@ -13,15 +13,18 @@ import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import java.lang.IllegalArgumentException
-import java.util.ArrayList
 
-// *******************
-// * Build Road Flow *
-// *******************
+// ***************************
+// * Build Initial Road Flow *
+// ***************************
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
-class BuildRoadFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: Int, val hexTileSide: Int): FlowLogic<SignedTransaction>() {
+class BuildInitialRoadsFlow(val gameBoardLinearId: UniqueIdentifier,
+                            val hexTileIndex1: Int,
+                            val hexTileSide1: Int,
+                            val hexTileIndex2: Int,
+                            val hexTileSide2: Int): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
 
@@ -42,20 +45,23 @@ class BuildRoadFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: I
         val tb = TransactionBuilder(notary)
 
         // Step 5. Create new commands for placing a settlement and ending a turn. Add both to the transaction.
-        val buildRoadCommand = Command(BuildPhaseContract.Commands.BuildRoad(), gameBoardState.players.map { it.owningKey })
-        tb.addCommand(buildRoadCommand)
+        val buildInitialRoadCommand = Command(BuildPhaseContract.Commands.BuildRoad(), gameBoardState.players.map { it.owningKey })
+        tb.addCommand(buildInitialRoadCommand)
 
         // Step 6. Create initial road state
-        val roadState = RoadState(hexTileIndex, hexTileSide, gameBoardState.players, ourIdentity)
+        val roadState1 = RoadState(hexTileIndex1, hexTileSide1, gameBoardState.players, ourIdentity)
+        val roadState2 = RoadState(hexTileIndex2, hexTileSide2, gameBoardState.players, ourIdentity)
 
         // Step 7. Determine if the road state is extending an existing road
-        val newHexTileSetWithRoad = gameBoardState.hexTiles[hexTileIndex].buildRoad(hexTileSide, roadState.linearId, gameBoardState)
-        val outputGameBoardState = gameBoardState.copy(hexTiles = newHexTileSetWithRoad)
+        val newHexTileSetWithFirstRoad = gameBoardState.hexTiles[hexTileIndex1].buildRoad(hexTileSide1, roadState1.linearId, gameBoardState)
+        val newHexTileSetWithFirstAndSecondRoad = newHexTileSetWithFirstRoad[hexTileIndex1].buildRoad(hexTileSide1, roadState1.linearId, gameBoardState)
+        val outputGameBoardState = gameBoardState.copy(hexTiles = newHexTileSetWithFirstAndSecondRoad)
 
         // Step 8. Add all states and commands to the transaction.
         tb.addReferenceState(gameBoardReferenceStateAndRef)
         tb.addReferenceState(turnTrackerReferenceStateAndRef)
-        tb.addOutputState(roadState, BuildPhaseContract.ID)
+        tb.addOutputState(roadState1, BuildPhaseContract.ID)
+        tb.addOutputState(roadState2, BuildPhaseContract.ID)
         tb.addOutputState(outputGameBoardState, GameStateContract.ID)
 
         // Step 9. Sign initial transaction
@@ -70,8 +76,8 @@ class BuildRoadFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: I
     }
 }
 
-@InitiatedBy(BuildRoadFlow::class)
-class BuildRoadFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
+@InitiatedBy(BuildInitialRoadsFlow::class)
+class BuildInitialRoadFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {

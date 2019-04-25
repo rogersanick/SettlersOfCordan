@@ -26,14 +26,27 @@ class HexTile(val resourceType: String,
               val roleTrigger: Int,
               var robberPresent: Boolean,
               var hexTileIndex: Int,
-              var sides: MutableList<Int?> = MutableList(6) { null }) {
-    fun connect(index: Int, hexTileToConnect: HexTile) {
-        if (index > 5) {
+              var sides: MutableList<Int?> = MutableList(6) { null },
+              var roads: MutableList<UniqueIdentifier?> = MutableList(6) { null }) {
+
+    fun connect(sideIndex: Int, hexTileToConnect: HexTile) {
+        if (sideIndex > 5) {
             throw Error("You have specified an invalid index.")
         }
-        sides[index] = hexTileToConnect.hexTileIndex
-        hexTileToConnect.sides[if (index + 3 <= 5) index + 3 else index - 3] = hexTileIndex
+        sides[sideIndex] = hexTileToConnect.hexTileIndex
+        hexTileToConnect.sides[if (sideIndex + 3 <= 5) sideIndex + 3 else sideIndex - 3] = hexTileIndex
     }
+
+    fun buildRoad(sideIndex: Int, roadStateLinearId: UniqueIdentifier, gameBoardState: GameBoardState): List<HexTile> {
+        this.roads[sideIndex] = roadStateLinearId
+        val reciprocalSideIndex = if (sideIndex + 3 > 5) sideIndex - 3 else sideIndex + 3
+        if (this.sides[sideIndex] != null) {
+            gameBoardState.hexTiles[this.sides[sideIndex]!!].roads[reciprocalSideIndex] = roadStateLinearId
+        }
+
+        return gameBoardState.hexTiles
+    }
+
 }
 
 @CordaSerializable
