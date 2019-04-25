@@ -1,16 +1,15 @@
 package com.testUtilities
 
 import com.contractsAndStates.states.GameBoardState
-import com.flows.BuildInitialSettlementFlow
+import com.flows.BuildInitialSettlementAndRoadFlow
+import com.flows.BuildSettlementFlow
 import com.flows.EndTurnDuringInitialPlacementFlow
-import com.flows.EndTurnFlow
-import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.StartedMockNode
 
-fun placeAPieceFromASpecificNode(i: Int, testCoordinates: ArrayList<Pair<Int, Int>>, gameState: GameBoardState, network: MockNetwork, arrayOfAllPlayerNodesInOrder: List<StartedMockNode>, arrayOfAllTransactions: ArrayList<SignedTransaction>, initialSetupComplete: Boolean) {
+fun placeAPieceFromASpecificNodeAndEndTurn(i: Int, testCoordinates: ArrayList<Pair<Int, Int>>, gameState: GameBoardState, network: MockNetwork, arrayOfAllPlayerNodesInOrder: List<StartedMockNode>, arrayOfAllTransactions: ArrayList<SignedTransaction>, initialSetupComplete: Boolean) {
     // Build an initial settlement by issuing a settlement state
     // and updating the current turn.
     if (gameState.hexTiles[testCoordinates[i].first].resourceType == "Desert") {
@@ -19,11 +18,26 @@ fun placeAPieceFromASpecificNode(i: Int, testCoordinates: ArrayList<Pair<Int, In
 
     val currPlayer = arrayOfAllPlayerNodesInOrder[i]
 
-    val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second)
-    val futureWithInitialSettlementBuild = currPlayer.startFlow(buildInitialSettlementFlow)
-    network.runNetwork()
-    arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
+    if (initialSetupComplete) {
+        // Build a settlement only
+        val buildSettlementFlow = BuildSettlementFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second)
+        val futureWithInitialSettlementBuild = currPlayer.startFlow(buildSettlementFlow)
+        network.runNetwork()
+        arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
 
-    currPlayer.startFlow(if (initialSetupComplete) EndTurnFlow() else EndTurnDuringInitialPlacementFlow())
-    network.runNetwork()
+        // End turn during normal game play
+        currPlayer.startFlow(EndTurnDuringInitialPlacementFlow())
+        network.runNetwork()
+    } else {
+        // Build an initial settlement and road
+        val buildInitialSettlementFlow = BuildInitialSettlementAndRoadFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second, testCoordinates[i].second)
+        val futureWithInitialSettlementBuild = currPlayer.startFlow(buildInitialSettlementFlow)
+        network.runNetwork()
+        arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
+
+        // End turn during initial setup phase
+        currPlayer.startFlow(EndTurnDuringInitialPlacementFlow())
+        network.runNetwork()
+    }
+
 }

@@ -13,7 +13,6 @@ import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import java.lang.IllegalArgumentException
-import java.util.ArrayList
 
 // *******************
 // * Build Road Flow *
@@ -49,7 +48,7 @@ class BuildRoadFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: I
         val roadState = RoadState(hexTileIndex, hexTileSide, gameBoardState.players, ourIdentity)
 
         // Step 7. Determine if the road state is extending an existing road
-        val newHexTileSetWithRoad = gameBoardState.hexTiles[hexTileIndex].buildRoad(hexTileSide, roadState.linearId, gameBoardState)
+        val newHexTileSetWithRoad = gameBoardState.hexTiles[hexTileIndex].buildRoad(hexTileSide, roadState.linearId, gameBoardState.hexTiles)
         val outputGameBoardState = gameBoardState.copy(hexTiles = newHexTileSetWithRoad)
 
         // Step 8. Add all states and commands to the transaction.

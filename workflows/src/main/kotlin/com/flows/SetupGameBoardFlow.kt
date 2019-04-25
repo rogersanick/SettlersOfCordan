@@ -269,7 +269,7 @@ class SetupGameStartFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         System.out.println("\nYou are playing with $playerNames")
 
         if (ourIdentity == currPlayer) {
-            System.out.println("\nIt is your turn, you should use the BuildInitialSettlementFlow to setup the board!")
+            System.out.println("\nIt is your turn, you should use the BuildInitialSettlementAndRoadFlow to setup the board!")
         } else {
             System.out.println("\nIt is $currPlayer's turn")
         }
@@ -295,7 +295,7 @@ class SetupGameStartFlowResponder(val counterpartySession: FlowSession) : FlowLo
                 System.out.println("\nYou are playing with $playerNames")
 
                 if (ourIdentity == currPlayer) {
-                    System.out.println("\nIt is your turn, you should use the BuildInitialSettlementFlow to setup the board!")
+                    System.out.println("\nIt is your turn, you should use the BuildInitialSettlementAndRoadFlow to setup the board!")
                 } else {
                     System.out.println("\nIt is $currPlayer's turn")
                 }

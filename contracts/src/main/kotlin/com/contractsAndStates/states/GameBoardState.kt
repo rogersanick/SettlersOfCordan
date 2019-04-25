@@ -4,10 +4,11 @@ import com.contractsAndStates.contracts.GameStateContract
 import net.corda.core.contracts.*
 import net.corda.core.identity.Party
 import net.corda.core.serialization.CordaSerializable
+import java.util.Collections.copy
 
 @BelongsToContract(GameStateContract::class)
 data class GameBoardState(val beginner: Boolean = false,
-                          val hexTiles: List<HexTile>,
+                          val hexTiles: MutableList<HexTile>,
                           val ports: List<Port>,
                           val players: List<Party>,
                           val turnTrackerLinearId: UniqueIdentifier,
@@ -24,8 +25,8 @@ data class GameBoardState(val beginner: Boolean = false,
 @CordaSerializable
 class HexTile(val resourceType: String,
               val roleTrigger: Int,
-              var robberPresent: Boolean,
-              var hexTileIndex: Int,
+              val robberPresent: Boolean,
+              val hexTileIndex: Int,
               var sides: MutableList<Int?> = MutableList(6) { null },
               var roads: MutableList<UniqueIdentifier?> = MutableList(6) { null }) {
 
@@ -37,14 +38,22 @@ class HexTile(val resourceType: String,
         hexTileToConnect.sides[if (sideIndex + 3 <= 5) sideIndex + 3 else sideIndex - 3] = hexTileIndex
     }
 
-    fun buildRoad(sideIndex: Int, roadStateLinearId: UniqueIdentifier, gameBoardState: GameBoardState): List<HexTile> {
-        this.roads[sideIndex] = roadStateLinearId
+    fun buildRoad(sideIndex: Int, roadStateLinearId: UniqueIdentifier, hexTiles: MutableList<HexTile>): MutableList<HexTile> {
+
+        var newMutableHexTiles = hexTiles.map { it }.toMutableList()
+
+        var newMutableListOfRoads = newMutableHexTiles[this.hexTileIndex].roads.map { it }.toMutableList()
+        newMutableListOfRoads.set(sideIndex, roadStateLinearId)
+
         val reciprocalSideIndex = if (sideIndex + 3 > 5) sideIndex - 3 else sideIndex + 3
         if (this.sides[sideIndex] != null) {
-            gameBoardState.hexTiles[this.sides[sideIndex]!!].roads[reciprocalSideIndex] = roadStateLinearId
+            var newMutableReciprocalListOfRoads = newMutableHexTiles[this.sides[sideIndex]!!].roads.map { it }.toMutableList()
+            newMutableReciprocalListOfRoads.set(reciprocalSideIndex, roadStateLinearId)
+            newMutableHexTiles[this.sides[sideIndex]!!].roads = newMutableReciprocalListOfRoads
         }
 
-        return gameBoardState.hexTiles
+        newMutableHexTiles[this.hexTileIndex].roads = newMutableListOfRoads
+        return newMutableHexTiles
     }
 
 }

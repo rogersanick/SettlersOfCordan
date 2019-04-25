@@ -4,7 +4,7 @@ import com.contractsAndStates.states.GameBoardState
 import com.flows.*
 import com.oracleClient.state.DiceRollState
 import com.oracleService.flows.DiceRollRequestHandler
-import com.testUtilities.placeAPieceFromASpecificNode
+import com.testUtilities.placeAPieceFromASpecificNodeAndEndTurn
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
@@ -74,11 +74,11 @@ class OracleClientIntegrationTest {
         val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(1,3), Pair(2,1), Pair(2,3), Pair(3,3))
 
         for (i in 0..3) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
+            placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
         for (i in 3.downTo(0)) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
+            placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
         val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data

@@ -2,7 +2,6 @@ package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.BuildPhaseContract
-import com.contractsAndStates.contracts.TurnTrackerContract
 import com.contractsAndStates.states.*
 import com.r3.corda.sdk.token.contracts.FungibleTokenContract
 import com.r3.corda.sdk.token.contracts.commands.IssueTokenCommand
@@ -10,7 +9,6 @@ import com.r3.corda.sdk.token.contracts.utilities.amount
 import com.r3.corda.sdk.token.contracts.utilities.heldBy
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef
-import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
 import net.corda.core.node.services.queryBy
@@ -26,7 +24,10 @@ import java.util.ArrayList
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
-class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: Int, val hexTileCoordinate: Int): FlowLogic<SignedTransaction>() {
+class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
+                                        val hexTileIndex: Int,
+                                        val hexTileCoordinate: Int,
+                                        val hexTileRoadSide: Int): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
 
@@ -41,7 +42,7 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
         // Step 2. Retrieve the Game Board State from the vault.
         val queryCriteriaForGameBoardState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardLinearId))
         val gameBoardStateAndRef = serviceHub.vaultService.queryBy<GameBoardState>(queryCriteriaForGameBoardState).states.single()
-        val gameBoardState = gameBoardStateAndRef.state.data
+        var gameBoardState = gameBoardStateAndRef.state.data
 
         // Step 3. Retrieve the Turn Tracker State from the vault
         val queryCriteriaForTurnTrackerState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
@@ -52,7 +53,7 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
         val tb = TransactionBuilder(notary)
 
         // Step 5. Create new commands for placing a settlement. Add both to the transaction.
-        val placeInitialSettlement = Command(BuildPhaseContract.Commands.BuildInitialSettlement(), gameBoardState.players.map { it.owningKey })
+        val placeInitialSettlement = Command(BuildPhaseContract.Commands.BuildInitialSettlementAndRoad(), gameBoardState.players.map { it.owningKey })
         tb.addCommand(placeInitialSettlement)
 
         // Step 6. Create an initial settlement state
@@ -142,26 +143,33 @@ class BuildInitialSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val he
             }
         }
 
-        // Step 12. Add all states and commands to the transaction.
+        // Step 12. Create the road state at the appropriate location specified by the user.
+        val roadState = RoadState(hexTileIndex, hexTileRoadSide, gameBoardState.players, ourIdentity, null, null)
+
+        // Step 13. Update the gameBoardState hextiles with the roads being built.
+        val newHexTiles = gameBoardState.hexTiles[hexTileIndex].buildRoad(hexTileRoadSide, roadState.linearId, gameBoardState.hexTiles)
+
+        // Step 14. Add all states and commands to the transaction.
         tb.addInputState(gameBoardStateAndRef)
         tb.addReferenceState(ReferencedStateAndRef(turnTrackerStateAndRef))
         tb.addOutputState(settlementState, BuildPhaseContract.ID)
-        tb.addOutputState(gameBoardState.copy(settlementsPlaced = newSettlementsPlaced))
+        tb.addOutputState(roadState, BuildPhaseContract.ID)
+        tb.addOutputState(gameBoardState.copy(settlementsPlaced = newSettlementsPlaced, hexTiles = newHexTiles))
 
-        // Step 13. Sign initial transaction
+        // Step 15. Sign initial transaction
         tb.verify(serviceHub)
         val ptx = serviceHub.signInitialTransaction(tb)
 
-        // Step 14. Collect all signatures
+        // Step 16. Collect all signatures
         val sessions = (gameBoardState.players - ourIdentity).map { initiateFlow(it) }.toSet()
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
 
-        // Step 15. Run the FinalityFlow to persist the transaction to the ledgers of all appropriate parties.
+        // Step 17. Run the FinalityFlow to persist the transaction to the ledgers of all appropriate parties.
         return subFlow(FinalityFlow(stx, sessions))
     }
 }
 
-@InitiatedBy(BuildInitialSettlementFlow::class)
+@InitiatedBy(BuildInitialSettlementAndRoadFlow::class)
 class BuildInitialSettlementFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {

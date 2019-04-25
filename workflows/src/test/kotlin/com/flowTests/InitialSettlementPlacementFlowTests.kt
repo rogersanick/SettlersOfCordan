@@ -2,7 +2,7 @@ package com.flowTests
 
 import com.contractsAndStates.states.GameBoardState
 import com.flows.*
-import com.testUtilities.placeAPieceFromASpecificNode
+import com.testUtilities.placeAPieceFromASpecificNodeAndEndTurn
 import net.corda.core.contracts.TransactionVerificationException
 import net.corda.core.flows.FlowException
 import net.corda.core.identity.CordaX500Name
@@ -17,7 +17,6 @@ import net.corda.testing.node.MockNodeParameters
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import java.lang.IllegalArgumentException
 import kotlin.test.assertFailsWith
 
 class InitialSettlementPlacementFlowTests {
@@ -66,7 +65,7 @@ class InitialSettlementPlacementFlowTests {
 
         // Build an initial settlement by issuing a settlement state
         // and updating the current turn.
-        val buildInitialSettlementFlow = BuildInitialSettlementFlow(gameState.linearId, 0, 5)
+        val buildInitialSettlementFlow = BuildInitialSettlementAndRoadFlow(gameState.linearId, 0, 5, 5)
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
         val futureWithInitialSettlementBuild = arrayOfAllPlayerNodesInOrder.first().startFlow(buildInitialSettlementFlow)
@@ -75,7 +74,7 @@ class InitialSettlementPlacementFlowTests {
         val stxBuildInitialSettlement = futureWithInitialSettlementBuild.getOrThrow()
 
         assert(stxBuildInitialSettlement.tx.inputs.size == 1)
-        assert(stxBuildInitialSettlement.tx.outputs.size == 2)
+        assert(stxBuildInitialSettlement.tx.outputs.size == 3)
 
         val buildCommands = stxBuildInitialSettlement.tx.commands
         assert(buildCommands.first().signers.toSet() == gameState.players.map { it.owningKey }.toSet())
@@ -109,11 +108,11 @@ class InitialSettlementPlacementFlowTests {
 
 
         for (i in 0..3) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
+            placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
         for (i in 3.downTo(0)) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
+            placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
     }
@@ -144,11 +143,11 @@ class InitialSettlementPlacementFlowTests {
         val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(1,3), Pair(2,1), Pair(2,3), Pair(3,3))
 
         for (i in 0..3) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
+            placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
         for (i in 3.downTo(0)) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
+            placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
     }
@@ -179,14 +178,14 @@ class InitialSettlementPlacementFlowTests {
         val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(4,5), Pair(5,5), Pair(6,5), Pair(7,5))
 
         for (i in 0..3) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
+            placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
         for (i in 3.downTo(0)) {
-            placeAPieceFromASpecificNode(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
+            placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
         }
 
-        assertFailsWith<FlowException>("You should be using the end turn function") { placeAPieceFromASpecificNode(0, arrayListOf(Pair(9, 3)), gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false) }
+        assertFailsWith<FlowException>("You should be using the end turn function") { placeAPieceFromASpecificNodeAndEndTurn(0, arrayListOf(Pair(9, 3)), gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false) }
 
     }
 
@@ -215,8 +214,8 @@ class InitialSettlementPlacementFlowTests {
         val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(0,1), Pair(0,3), Pair(1,1))
 
 
-        placeAPieceFromASpecificNode(0, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
-        assertFailsWith<FlowException>("Only the current player may propose the next move.") { placeAPieceFromASpecificNode(2, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false) }
+        placeAPieceFromASpecificNodeAndEndTurn(0, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
+        assertFailsWith<FlowException>("Only the current player may propose the next move.") { placeAPieceFromASpecificNodeAndEndTurn(2, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false) }
 
     }
 
