@@ -132,7 +132,7 @@ class BuildPhaseContract : Contract {
 
                 "The player must have provided the appropriate amount of brick to build a settlement" using ( brickInTx == (1 * newRoads.size).toLong())
                 "The player must have provided the appropriate amount of wood to build a settlement" using ( woodInTx == (1 * newRoads.size).toLong())
-                "A road must not have previously been built in this location." using ( newRoads.all { inputGameBoardState.hexTiles[it.hexTileIndex].roads[it.hexTileSide] != null } )
+                "A road must not have previously been built in this location." using ( newRoads.all { inputGameBoardState.hexTiles[it.hexTileIndex].roads[it.hexTileSide] == null } )
             }
 
             is Commands.BuildCity -> requireThat {

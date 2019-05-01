@@ -19,7 +19,7 @@ class GatherPhaseContract : Contract {
     }
 
     interface Commands : CommandData {
-        class issueResourcesToAllPlayers: Commands
+        class IssueResourcesToAllPlayers: Commands
     }
 
 }

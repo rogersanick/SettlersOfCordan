@@ -97,7 +97,7 @@ class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<Sig
 
         // Step 9. Add the gather resources command and verify the transaction
         val commandSigners = gameBoardState.players.map {it.owningKey}
-        tb.addCommand(GatherPhaseContract.Commands.issueResourcesToAllPlayers(), commandSigners)
+        tb.addCommand(GatherPhaseContract.Commands.IssueResourcesToAllPlayers(), commandSigners)
         tb.addCommand(DiceRollContract.Commands.ConsumeDiceRoll(), commandSigners)
         tb.verify(serviceHub)
 

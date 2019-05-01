@@ -42,7 +42,7 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         // Step 2. Retrieve the Game Board State from the vault.
         val queryCriteriaForGameBoardState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardLinearId))
         val gameBoardStateAndRef = serviceHub.vaultService.queryBy<GameBoardState>(queryCriteriaForGameBoardState).states.single()
-        var gameBoardState = gameBoardStateAndRef.state.data
+        val gameBoardState = gameBoardStateAndRef.state.data
 
         // Step 3. Retrieve the Turn Tracker State from the vault
         val queryCriteriaForTurnTrackerState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))

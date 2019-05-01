@@ -7,7 +7,6 @@ import com.contractsAndStates.states.HexTile
 import com.contractsAndStates.states.PortTile
 import com.contractsAndStates.states.TurnTrackerState
 import com.contractsAndStates.states.*
-import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
@@ -22,7 +21,7 @@ import net.corda.core.utilities.ProgressTracker
 // *********
 @InitiatingFlow(version = 1)
 @StartableByRPC
-class SetupGameStartFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Party) : FlowLogic<SignedTransaction>() {
+class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Party) : FlowLogic<SignedTransaction>() {
 
     companion object {
         object GETTING_NOTARY : ProgressTracker.Step("Getting reference to the notary")
@@ -279,8 +278,8 @@ class SetupGameStartFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
     }
 }
 
-@InitiatedBy(SetupGameStartFlow::class)
-class SetupGameStartFlowResponder(val counterpartySession: FlowSession) : FlowLogic<SignedTransaction>() {
+@InitiatedBy(SetupGameBoardFlow::class)
+class SetupGameBoardFlowResponder(val counterpartySession: FlowSession) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {

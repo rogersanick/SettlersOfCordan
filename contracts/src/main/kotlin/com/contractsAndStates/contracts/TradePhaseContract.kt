@@ -2,7 +2,6 @@ package com.contractsAndStates.contracts
 
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
-import net.corda.core.contracts.requireSingleCommand
 import net.corda.core.transactions.LedgerTransaction
 
 // *************************
@@ -11,18 +10,16 @@ import net.corda.core.transactions.LedgerTransaction
 
 class TradePhaseContract : Contract {
     companion object {
-        const val ID = "com.contractsAndStates.contracts.GatherPhaseContract"
+        const val ID = "com.contractsAndStates.contracts.TradePhaseContract"
     }
 
     override fun verify(tx: LedgerTransaction) {
-        val command = tx.commands.requireSingleCommand<Commands>()
     }
 
     interface Commands : CommandData {
-        class issueTrade: Commands
-        class updateTrade: Commands
-        class cancelTrade: Commands
-        class executeTrade: Commands
+        class IssueTrade: Commands
+        class CancelTrade: Commands
+        class ExecuteTrade: Commands
     }
 
 }

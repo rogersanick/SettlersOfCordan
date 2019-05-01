@@ -2,8 +2,8 @@ package com.flowTests
 
 import com.contractsAndStates.contracts.GameStateContract
 import com.contractsAndStates.states.GameBoardState
-import com.flows.SetupGameStartFlow
-import com.flows.SetupGameStartFlowResponder
+import com.flows.SetupGameBoardFlow
+import com.flows.SetupGameBoardFlowResponder
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.internal.chooseIdentity
@@ -27,7 +27,7 @@ class SetupGameBoardFlowTests {
     fun setup() {
         val startedNodes = arrayListOf(a, b, c, d, e, f)
         // For real nodes this happens automatically, but we have to manually register the flow for tests
-        startedNodes.forEach { it.registerInitiatedFlow(SetupGameStartFlowResponder::class.java) }
+        startedNodes.forEach { it.registerInitiatedFlow(SetupGameBoardFlowResponder::class.java) }
         network.runNetwork()
     }
 
@@ -44,7 +44,7 @@ class SetupGameBoardFlowTests {
         val p4 = d.info.chooseIdentity()
 
         // Issue a game state onto the ledger.
-        val gameStateIssueFlow = SetupGameStartFlow(p1, p2, p3, p4)
+        val gameStateIssueFlow = SetupGameBoardFlow(p1, p2, p3, p4)
         val future = a.startFlow(gameStateIssueFlow);
         network.runNetwork()
 
@@ -78,7 +78,7 @@ class SetupGameBoardFlowTests {
         val p4 = d.info.chooseIdentity()
 
         // Issue a game state onto the ledger.
-        val gameStateIssueFlow = SetupGameStartFlow(p1, p2, p3, p4)
+        val gameStateIssueFlow = SetupGameBoardFlow(p1, p2, p3, p4)
         val future = a.startFlow(gameStateIssueFlow)
         network.runNetwork()
 

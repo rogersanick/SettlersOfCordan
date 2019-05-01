@@ -39,7 +39,7 @@ class ClaimResourcesFlowTest {
         val startedNodes = arrayListOf(a, b, c, d)
 
         startedNodes.forEach {
-            it.registerInitiatedFlow(SetupGameStartFlowResponder::class.java)
+            it.registerInitiatedFlow(SetupGameBoardFlowResponder::class.java)
             it.registerInitiatedFlow(BuildInitialSettlementFlowResponder::class.java)
             it.registerInitiatedFlow(IssueResourcesFlowResponder::class.java)
         }
@@ -62,7 +62,7 @@ class ClaimResourcesFlowTest {
         val p4 = d.info.chooseIdentity()
 
         // Issue a game state onto the ledger
-        val gameStateIssueFlow = (SetupGameStartFlow(p1, p2, p3, p4))
+        val gameStateIssueFlow = (SetupGameBoardFlow(p1, p2, p3, p4))
         val futureWithGameState = a.startFlow(gameStateIssueFlow)
         network.runNetwork()
 
@@ -112,7 +112,7 @@ class ClaimResourcesFlowTest {
         val p4 = d.info.chooseIdentity()
 
         // Issue a game state onto the ledger
-        val gameStateIssueFlow = (SetupGameStartFlow(p1, p2, p3, p4))
+        val gameStateIssueFlow = (SetupGameBoardFlow(p1, p2, p3, p4))
         val futureWithGameState = a.startFlow(gameStateIssueFlow)
         network.runNetwork()
 
@@ -167,7 +167,7 @@ class ClaimResourcesFlowTest {
         val p4 = d.info.chooseIdentity()
 
         // Issue a game state onto the ledger
-        val gameStateIssueFlow = (SetupGameStartFlow(p1, p2, p3, p4))
+        val gameStateIssueFlow = (SetupGameBoardFlow(p1, p2, p3, p4))
         val futureWithGameState = a.startFlow(gameStateIssueFlow)
         network.runNetwork()
 
