@@ -18,6 +18,11 @@ import java.lang.IllegalArgumentException
 // * Build Road Flow *
 // *******************
 
+/**
+ * This flow allows for the creation of a RoadState and its placement
+ * on the game board in a non-conflicting position.
+ */
+
 @InitiatingFlow(version = 1)
 @StartableByRPC
 class BuildRoadFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: Int, val hexTileSide: Int): FlowLogic<SignedTransaction>() {

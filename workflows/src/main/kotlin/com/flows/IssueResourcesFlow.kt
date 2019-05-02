@@ -20,9 +20,14 @@ import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
-// *************************************
-// * Initial Settlement Placement Flow *
-// *************************************
+// ********************
+// * Issue Trade Flow *
+// ********************
+
+/**
+ * This flow allows nodes to self-issue tokens where they are able to prove that
+ * they have the appropriate settlement states to enable them to do so.
+ */
 
 @InitiatingFlow
 @StartableByRPC

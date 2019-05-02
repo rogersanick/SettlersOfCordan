@@ -18,9 +18,15 @@ import net.corda.finance.flows.TwoPartyDealFlow
 import java.security.PublicKey
 import java.util.stream.Collectors
 
-// *************************************
-// * Initial Settlement Placement Flow *
-// *************************************
+// **********************
+// * Execute Trade Flow *
+// **********************
+
+/**
+ * This flow allows a counterparty to trigger the execution of a trade posted by
+ * another node. It facillitates the exchange of tokens and checks that the balances
+ * of the tokens exchanged matches the TradeState original proposed.
+ */
 
 @InitiatingFlow
 @StartableByRPC

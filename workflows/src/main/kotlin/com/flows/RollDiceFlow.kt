@@ -18,6 +18,13 @@ import net.corda.core.transactions.TransactionBuilder
 // * Roll Dice Flow *
 // ******************
 
+/**
+ * This flow uses the DiceRoll oracle. It gets a new, randomly generated DiceRollState
+ * associated with a specific turn tracker as well as a specific GameBoardState. This
+ * DiceRollState is then used to facilitate the collection of resources and the advancement
+ * of the game.
+ */
+
 @InitiatingFlow
 @StartableByRPC
 class RollDiceFlow(val gameBoardStateLinearId: UniqueIdentifier) : FlowLogic<SignedTransaction>() {

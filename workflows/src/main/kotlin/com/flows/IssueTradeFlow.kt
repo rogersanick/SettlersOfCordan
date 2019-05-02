@@ -23,9 +23,15 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import java.lang.IllegalArgumentException
 
-// *************************************
-// * Initial Settlement Placement Flow *
-// *************************************
+// ********************
+// * Issue Trade Flow *
+// ********************
+
+/**
+ * This flow enables players to post and advertise trades that they would like to make
+ * with specific counter-parties in the game. These trades can then be executed at anytime
+ * (given they haven't been cancelled) by the target counter-party.
+ */
 
 @InitiatingFlow
 @StartableByRPC

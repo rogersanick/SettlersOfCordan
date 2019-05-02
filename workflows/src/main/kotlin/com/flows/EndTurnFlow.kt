@@ -19,6 +19,11 @@ import javax.management.Query
 // * End Turn Flow *
 // *****************
 
+/**
+ * This flow allows the player to end their turn, update the turn tracker. It also
+ * signals to the next player that it is now their turn.
+ */
+
 @InitiatingFlow(version = 1)
 @StartableByRPC
 class EndTurnFlow: FlowLogic<SignedTransaction>() {

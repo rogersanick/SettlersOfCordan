@@ -8,6 +8,15 @@ import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
 
+/**
+ * Roads are pieces of infrastructure that connect your settlements and cities.
+ * Players are unable to build new settlements without first building new roads to connect
+ * them with existing settlements (at least two paths away).
+ *
+ * Only one road may be built on each path - this is verified by the Corda contract.
+ * You may build roads along the coast.
+ */
+
 @BelongsToContract(BuildPhaseContract::class)
 data class RoadState (
         val hexTileIndex: Int,
@@ -20,6 +29,12 @@ data class RoadState (
 ): ContractState, LinearState {
 
     override val participants: List<AbstractParty> get() = players
+
+    /**
+     * In Settlers of Catan, players earn additional victory points for maintaining the longest
+     * road - so long as that continuous road is comprised of 5 or more adjacent roads. The methods
+     * below are helpers to enable our keeping track of which roads might be the longest.
+     */
 
     fun attachRoadA(linearIdentifier: UniqueIdentifier): RoadState {
         return this.copy(roadAttachedA = linearIdentifier)

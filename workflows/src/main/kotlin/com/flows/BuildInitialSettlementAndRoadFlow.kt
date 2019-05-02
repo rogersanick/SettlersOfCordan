@@ -18,16 +18,24 @@ import net.corda.core.transactions.TransactionBuilder
 import java.lang.IllegalArgumentException
 import java.util.ArrayList
 
-// *********************************
-// * Build Initial Settlement Flow *
-// *********************************
+// ******************************************
+// * Build Initial Settlement And Road Flow *
+// ******************************************
+
+/**
+ * After setting up the game, this is the first flow that players will run. It allows them
+ * to place settlements and roads to establish an initial position on the gameboard. It also
+ * facillitates the claiming of initial resources that a player is entitled to when executing
+ * the second round of setup (e.g - their second execution of this flow).
+ */
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
 class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
                                         val hexTileIndex: Int,
                                         val hexTileCoordinate: Int,
-                                        val hexTileRoadSide: Int): FlowLogic<SignedTransaction>() {
+                                        val hexTileRoadSide: Int
+): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
 

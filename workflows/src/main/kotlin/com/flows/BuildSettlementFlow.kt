@@ -18,9 +18,15 @@ import java.lang.IllegalArgumentException
 import java.util.ArrayList
 
 
-// *************************************
-// * Initial Settlement Placement Flow *
-// *************************************
+// *************************
+// * Build Settlement Flow *
+// *************************
+
+/**
+ * This is the flow nodes may execute to consume resources and issue a new settlement
+ * state onto the ledger at a location of their choosing. New settlements will be used
+ * in the future to claim additional resources in the IssueResourcesFlow.
+ */
 
 @InitiatingFlow(version = 1)
 @StartableByRPC

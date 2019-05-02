@@ -6,6 +6,15 @@ import net.corda.core.identity.Party
 import net.corda.core.serialization.CordaSerializable
 import java.util.Collections.copy
 
+/**
+ * This state represents the same shared data that the symbolic representation of the Settlers board game
+ * and game-pieces represent in real life.
+ *
+ * It contains an ordered list of the hexTiles that were used in its construction, the locations and
+ * specifications of individual ports, and other pieces of data that act as infrastructure and validation for
+ * future transactions. It is frequently used as a reference state (for example, in the issueResourcesFlow)
+ */
+
 @BelongsToContract(GameStateContract::class)
 data class GameBoardState(val beginner: Boolean = false,
                           val hexTiles: MutableList<HexTile>,
@@ -30,6 +39,11 @@ class HexTile(val resourceType: String,
               var sides: MutableList<Int?> = MutableList(6) { null },
               var roads: MutableList<UniqueIdentifier?> = MutableList(6) { null }) {
 
+    /**
+     * This method is used to create a fully connected graph of HexTiles. This enables some
+     * funky maths that we will use later on to calculate the validity of transactions.
+     */
+
     fun connect(sideIndex: Int, hexTileToConnect: HexTile) {
         if (sideIndex > 5) {
             throw Error("You have specified an invalid index.")
@@ -37,6 +51,13 @@ class HexTile(val resourceType: String,
         sides[sideIndex] = hexTileToConnect.hexTileIndex
         hexTileToConnect.sides[if (sideIndex + 3 <= 5) sideIndex + 3 else sideIndex - 3] = hexTileIndex
     }
+
+    /**
+     * This method is used in flows to product a new version of the gameboard with a record of the location of roads, identified by
+     * their specific linearID
+     *
+     * TODO: Add functionality to connect roadStates when new roads and proposed extending existing roads.
+     */
 
     fun buildRoad(sideIndex: Int, roadStateLinearId: UniqueIdentifier, hexTiles: MutableList<HexTile>): MutableList<HexTile> {
 

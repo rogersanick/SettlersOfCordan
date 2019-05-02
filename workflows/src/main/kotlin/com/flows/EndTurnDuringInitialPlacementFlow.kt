@@ -14,8 +14,14 @@ import net.corda.core.transactions.TransactionBuilder
 import java.lang.IllegalArgumentException
 
 // ******************************************
-// * End Turn During Initial Settlment Flow *
+// * End Turn During Initial Settlement Flow *
 // ******************************************
+
+/**
+ * This flow ends a players turn, but may only be used during the setup phase of
+ * the game. Its impact on the proposed TurnTracker is different than the endTurnFlow
+ * used in a game with the setup phase complete.
+ */
 
 @InitiatingFlow(version = 1)
 @StartableByRPC

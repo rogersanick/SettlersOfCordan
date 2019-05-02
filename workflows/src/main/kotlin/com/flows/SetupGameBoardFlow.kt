@@ -16,9 +16,17 @@ import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 
 
-// *********
+// *******************
 // * Game Start Flow *
-// *********
+// *******************
+
+/**
+ * This is the first flow run by a given node in order to propose the start of a new game to other
+ * nodes on the network. In it's current implementation the flow requires the specification of which
+ * parties will participate in the game. In the future there may be an opportunity to handle this auto-
+ * matically through match making functionality.
+ */
+
 @InitiatingFlow(version = 1)
 @StartableByRPC
 class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Party) : FlowLogic<SignedTransaction>() {

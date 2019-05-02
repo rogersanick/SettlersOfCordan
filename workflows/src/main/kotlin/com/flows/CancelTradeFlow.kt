@@ -22,9 +22,15 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import java.lang.IllegalArgumentException
 
-// *************************************
-// * Initial Settlement Placement Flow *
-// *************************************
+// *********************
+// * Cancel Trade Flow *
+// *********************
+
+/**
+ * Trades may be issued and cancelled at any time by nodes on the network. This flow
+ * will be used to cancel existing trades. Only the owner (submitter) of a trade may
+ * cancel it.
+ */
 
 @InitiatingFlow
 @StartableByRPC
