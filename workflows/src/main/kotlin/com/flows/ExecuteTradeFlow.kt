@@ -52,7 +52,7 @@ class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier): FlowLo
 
         val tokenSelection = TokenSelection(serviceHub)
 
-        val tbWithWantedTokensMovedFromUsToThem = tokenSelection.generateMove(
+        val tbWithOfferedTokensMovedFromUsToThem = tokenSelection.generateMove(
                 TransactionBuilder(),
                 tradeStateOnWhichToMakeAnOffer.wanted,
                 tradeStateOnWhichToMakeAnOffer.owner
@@ -70,9 +70,9 @@ class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier): FlowLo
                 TwoPartyDealFlow.AutoOffer(
                         notary,
                         tradeStateOnWhichToMakeAnOffer.copy(informationForAcceptor = InformationForAcceptor(
-                        tbWithWantedTokensMovedFromUsToThem.first.inputStates(),
-                        tbWithWantedTokensMovedFromUsToThem.first.outputStates(),
-                        tbWithWantedTokensMovedFromUsToThem.first.commands()
+                        tbWithOfferedTokensMovedFromUsToThem.first.inputStates(),
+                        tbWithOfferedTokensMovedFromUsToThem.first.outputStates(),
+                        tbWithOfferedTokensMovedFromUsToThem.first.commands()
                 ))),
                 progressTracker.getChildProgressTracker(DEALING)!!
         )

@@ -39,9 +39,6 @@ data class TradeState (
 interface ExtendedDealState: DealState {
     fun generateAgreement(transactionBuilder: TransactionBuilder): TransactionBuilder
     val informationForAcceptor: InformationForAcceptor?
-//    var inputStatesFromExecutor: List<StateRef>?
-//    var outputStatesFromExecutor: List<TransactionState<*>>?
-//    var commandsFromExecutor: List<Command<*>>?
     val offering: Amount<TokenType>
     val wanted: Amount<TokenType>
     val owner: Party
@@ -54,26 +51,3 @@ class InformationForAcceptor(
         val outputStates: List<TransactionState<*>>,
         val commands: List<Command<*>>
 )
-
-//override var inputStatesFromExecutor: List<StateRef>? = null
-//
-//    override var outputStatesFromExecutor: List<TransactionState<*>>? = null
-//        get() {
-//            val newListOfOutputStates = ArrayList<TransactionState<*>>()
-//            newListOfOutputStates.addAll(field!!.asIterable())
-//            return newListOfOutputStates
-//        }
-//
-//    override var commandsFromExecutor: List<Command<*>>? = null
-//
-//        set(value) {
-//            val newListOfCommands = ArrayList<Command<*>>()
-//            newListOfCommands.addAll(value!!.asIterable())
-//            field = newListOfCommands
-//        }
-//
-//        get() {
-//            val newListOfCommands = ArrayList<Command<*>>()
-//            newListOfCommands.addAll(field!!.asIterable())
-//            return newListOfCommands
-//        }
