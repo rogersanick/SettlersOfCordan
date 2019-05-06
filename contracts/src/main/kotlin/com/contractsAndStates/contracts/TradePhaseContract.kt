@@ -17,6 +17,7 @@ class TradePhaseContract : Contract {
     }
 
     interface Commands : CommandData {
+        class TradeWithPort: Commands
         class IssueTrade: Commands
         class CancelTrade: Commands
         class ExecuteTrade: Commands

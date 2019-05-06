@@ -97,15 +97,15 @@ class ExecuteTradeFlowResponder(otherSideSession: FlowSession): TwoPartyDealFlow
         val ourIdentity = serviceHub.myInfo.legalIdentities.single()
         val tokenSelection = TokenSelection(serviceHub)
 
-        val newInputStates = handShakeToAssembleSharedTX.informationForAcceptor!!.inputStates.stream().collect(Collectors.toList())
-        val newOutputStates = handShakeToAssembleSharedTX.informationForAcceptor!!.outputStates.stream().collect(Collectors.toList())
-        val newCommands = handShakeToAssembleSharedTX.informationForAcceptor!!.commands.stream().collect(Collectors.toList())
+        val counterPartyInputStates = handShakeToAssembleSharedTX.informationForAcceptor!!.inputStates.stream().collect(Collectors.toList())
+        val counterPartyOutputStates = handShakeToAssembleSharedTX.informationForAcceptor!!.outputStates.stream().collect(Collectors.toList())
+        val counterPartyCommands = handShakeToAssembleSharedTX.informationForAcceptor!!.commands.stream().collect(Collectors.toList())
 
         val tbWithWantedMoved = tokenSelection.generateMove(
                 builder = TransactionBuilder(
-                        inputs = newInputStates,
-                        outputs = newOutputStates,
-                        commands = newCommands
+                        inputs = counterPartyInputStates,
+                        outputs = counterPartyOutputStates,
+                        commands = counterPartyCommands
                 ),
                 amount = handShakeToAssembleSharedTX.offering,
                 recipient = otherSideSession.counterparty

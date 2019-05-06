@@ -8,6 +8,7 @@ import com.contractsAndStates.states.SettlementState
 import com.contractsAndStates.states.TurnTrackerState
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef
+import net.corda.core.contracts.TransactionState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
 import net.corda.core.node.services.queryBy
@@ -27,6 +28,8 @@ import java.util.ArrayList
  * state onto the ledger at a location of their choosing. New settlements will be used
  * in the future to claim additional resources in the IssueResourcesFlow.
  */
+
+// TODO: Add the resource cost for building a settlement
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
