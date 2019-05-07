@@ -27,8 +27,7 @@ data class GameBoardState(val beginner: Boolean = false,
                           var initialPiecesPlaced: Int = 0,
                           override val linearId: UniqueIdentifier = UniqueIdentifier()): LinearState {
 
-    override val participants: List<Party> get() = players + spectators
-
+    override val participants: List<Party> get() = players
 }
 
 @CordaSerializable

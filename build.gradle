@@ -2,6 +2,7 @@ buildscript {
     ext {
         corda_release_group = 'net.corda'
         corda_release_version = '4.0'
+        ext.corda_release_distribution = 'net.corda'
         corda_gradle_plugins_version = '4.0.37'
         kotlin_version = '1.2.71'
         junit_version = '4.12'
@@ -55,10 +56,13 @@ sourceSets {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile 'info.picocli:picocli:4.0.0-alpha-2'
 
     // Corda dependencies.
     cordaCompile "$corda_release_group:corda-core:$corda_release_version"
     cordaCompile "$corda_release_group:corda-node-api:$corda_release_version"
+    cordaCompile "$corda_release_distribution:corda-finance-contracts:$corda_release_version"
+    cordaCompile "$corda_release_distribution:corda-finance-workflows:$corda_release_version"
     cordaRuntime "$corda_release_group:corda:$corda_release_version"
 
     // CorDapp dependencies.
@@ -69,7 +73,10 @@ dependencies {
     cordapp "com.r3.tokens-sdk:contract:1.0-SNAPSHOT"
     cordapp "com.r3.tokens-sdk:workflow:1.0-SNAPSHOT"
     cordapp "com.r3.tokens-sdk:money:1.0-SNAPSHOT"
+    cordapp("$corda_release_distribution:corda-finance-contracts:$corda_release_version")
+    cordapp("$corda_release_distribution:corda-finance-workflows:$corda_release_version")
 
+    cordaCompile project(":clients")
     cordaCompile "org.apache.logging.log4j:log4j-slf4j-impl:${log4j_version}"
     cordaCompile "org.apache.logging.log4j:log4j-web:${log4j_version}"
     cordaCompile "org.slf4j:jul-to-slf4j:$slf4j_version"
@@ -95,6 +102,12 @@ cordapp {
 
 task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
     directory "./build/nodes"
+
+    nodeDefaults {
+        cordapp("$corda_release_distribution:corda-finance-contracts:$corda_release_version")
+        cordapp("$corda_release_distribution:corda-finance-workflows:$corda_release_version")
+    }
+
     node {
         name "O=Notary,L=London,C=GB"
         notary = [validating : false]

@@ -69,7 +69,7 @@ class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort
 
 }
 
-@InitiatedBy(IssueResourcesFlow::class)
+@InitiatedBy(TradeWithPortFlow::class)
 open class TradeWithPortFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
