@@ -7,46 +7,53 @@
 Welcome to the Settlers of CorDan! This is a fully distributed board game, based on the classic 'Settlers of Catan.' Funny enough, board games are an excellent example of why 
 we need Distributed Ledger Technology (DLT) and some of its advantages over centralized systems. 
 
-## How do you build a board game on DLT?
+## How does a decentralized board game work?
 
 In a non-digital, real-life board game, players use symbolic tokens and intricate game boards to maintain a shared understanding of the state of a given game. 
-They update this shared representation of the game by first announcing their intent, verifying that the move is valid with their counterparties (based on the previously agreed 
-upon rules), and then imparting that change by making an update. This update could include any number of actions depending on the game, moving a tile, advancing a piece, 
+They update this shared representation of the game by first announcing their intent, verifying that the move is valid with the other players (based on the previously agreed 
+upon rules), and then imparting that change by making a physical update on the game board. This update could include any number of actions depending on the game, moving a tile, advancing a piece, 
 flipping over a card. The action or vehicle of delivery is irrelevant, but it's payload and impact are the same - with the consent of the counterparties, the player has changed our 
-shared understanding of the game. They have persisted new information to our shared understanding. That understanding them forms the basis for future updates going forward. 
-Players continue this cycle of proposing updates, verifying updates and making updates until the game is won.
+shared understanding of the game - see where we're going here? 
 
-Corda is a DLT platform that enables mutually distrusting parties to maintain consensus over a set of shared facts. In this implementation we use Corda states, contracts and flows
-to enable all Settlers of CorDan players to participate in that same cycle: propose --> verify --> persist. 
+They have persisted new information to each of our perspectives of the ledger. That shared understanding then forms the basis for future updates. Players continue this cycle of proposing updates, 
+verifying these proposals and making updates until the game is won.
+
+Corda is a DLT platform that enables mutually distrusting parties to maintain consensus over a set of shared facts. They do so by proposing valid updates to their peers, peers (fellow Corda nodes) 
+verify these transactions and finally all relevant nodes persist new information to their respective ledgers. Notice the similarities to a board game? In a decentralized board game built on Corda, 
+the set of shared facts is comprised of all of the relevant information of a board game! In this implementation we use Corda states, contracts and flows to model Settlers of Catan.
 
 ## Why build a board game on DLT?
 
-So why DLT? The short answer is that we eliminate the opportunity for cheating. There are two kinds of cheating we are trying to solution for:
-
-- Malicious changes to the HISTORY of the game state.
-- Malicious updates to the current game state.
+So why DLT? The short answer is that we eliminate the opportunity for cheating.
 
 Imagine you are playing a digital game of Catan in a traditional, centralized architecture. You and all counterparties (opposing players) are both accessing a front-end, which 
 communicates with a webserver, hosted by a cloud-provider. The hosted webserver then makes updates to a hosted DB in order to persist the current version of the game state.
 
 There's nothing inherently villanous about this architecture, our issue however, stems from the fact that we cannot be 100% certain that the hosting party has not impacted 
-the current state of a given game. What if this was a professional match of Catan and we had millions of dollars on the line? A centralized architecture means that we are 
+the state of a given game. What if this was a professional match of Catan and we had millions of dollars on the line? A centralized architecture means that we are 
 completely reliant on the honesty and ability of the hosting party to maintain our source of truth.
 
-If the hosting party does make a malicious or even erroneous update to the DB - we will have no recourse. It is the board game equivalent of all players describing the actions
-or moves they wish to make in a game to an unknown third party - who is updating a boardgame in another room. 
-
-So we propose a decentalized architecture! 
-
-# Pre-Requisites
-
-See https://docs.corda.net/getting-set-up.html.
+If the hosting party does make a malicious or even erroneous update to the DB, changing the history of moves made in the board game - we will have no recourse. To use a real-world 
+example, imagine all players of a board game describing their actions, or moves they wish to make, to an unknown third party - who is updating a boardgame in another room. If they 
+suddenly decide the playerA has lost all their money, they will be able to make that change with no consequences (besides a very angry PartyA). The solution here, is to have PartyA
+maintain their own copy of the board game or their own copy of a ledger with all information relevant to them. In fact, all players should keep their own copy of the board game
+which effectively, will now act as a distributed ledger. This is what's happening under the hood of this CorDapp!
 
 # Usage
 
 ## Running the nodes
 
-See https://docs.corda.net/tutorial-cordapp.html#running-the-example-cordapp.
+Clone the repo from github:
+
+    git clone https://github.com/rogersanick/SettlersOfCordan
+    
+Run the deploy nodes Gradle script:
+
+    ./gradlew clean deployNodes
+    
+Run the following to deploy all nodes locally (four players, one notary and one dice-roll oracle):
+
+    build/nodes/runNodes
 
 ## Interacting with the nodes
 
@@ -65,18 +72,6 @@ the other nodes on the network:
     Tue Nov 06 11:58:13 GMT 2018>>> run networkMapSnapshot
     [
       {
-      "addresses" : [ "localhost:10002" ],
-      "legalIdentitiesAndCerts" : [ "O=Notary, L=London, C=GB" ],
-      "platformVersion" : 3,
-      "serial" : 1541505484825
-    },
-      {
-      "addresses" : [ "localhost:10005" ],
-      "legalIdentitiesAndCerts" : [ "O=PartyA, L=London, C=GB" ],
-      "platformVersion" : 3,
-      "serial" : 1541505382560
-    },
-      {
       "addresses" : [ "localhost:10008" ],
       "legalIdentitiesAndCerts" : [ "O=PartyB, L=New York, C=US" ],
       "platformVersion" : 3,
@@ -86,67 +81,13 @@ the other nodes on the network:
     
     Tue Nov 06 12:30:11 GMT 2018>>> 
 
-You can find out more about the node shell [here](https://docs.corda.net/shell.html).
-
-### Client
-
-`clients/src/main/kotlin/com/template/Client.kt` defines a simple command-line client that connects to a node via RPC 
-and prints a list of the other nodes on the network.
-
-#### Running the client
-
-##### Via the command line
-
-Run the `runTemplateClient` Gradle task. By default, it connects to the node with RPC address `localhost:10006` with 
-the username `user1` and the password `test`.
-
-##### Via IntelliJ
-
-Run the `Run Template Client` run configuration. By default, it connects to the node with RPC address `localhost:10006` 
-with the username `user1` and the password `test`.
-
-### Webserver
-
-`clients/src/main/kotlin/com/template/webserver/` defines a simple Spring webserver that connects to a node via RPC and 
-allows you to interact with the node over HTTP.
-
-The API endpoints are defined here:
-
-     clients/src/main/kotlin/com/template/webserver/Controller.kt
-
-And a static webpage is defined here:
-
-     clients/src/main/resources/static/
-
-#### Running the webserver
-
-##### Via the command line
-
-Run the `runTemplateServer` Gradle task. By default, it connects to the node with RPC address `localhost:10006` with 
-the username `user1` and the password `test`, and serves the webserver on port `localhost:10050`.
-
-##### Via IntelliJ
-
-Run the `Run Template Server` run configuration. By default, it connects to the node with RPC address `localhost:10006` 
-with the username `user1` and the password `test`, and serves the webserver on port `localhost:10050`.
-
-#### Interacting with the webserver
-
-The static webpage is served on:
-
-    http://localhost:10050
-
-While the sole template endpoint is served on:
-
-    http://localhost:10050/templateendpoint
+To start a game between all of the nodes running locally, use the following command.
     
-# Extending the template
+    flow start SetupGameBoardFlow p1: PartyA, p2: PartyB, p3: PartyC, p4: PartyD
 
-You should extend this template as follows:
+### Running the tests
 
-* Add your own state and contract definitions under `contracts/src/main/kotlin/`
-* Add your own flow definitions under `workflows/src/main/kotlin/`
-* Extend or replace the client and webserver under `clients/src/main/kotlin/`
+##### Via IntelliJ
 
-For a guided example of how to extend this template, see the Hello, World! tutorial 
-[here](https://docs.corda.net/hello-world-introduction.html).
+Run the `Run All Tests` run configuration in Intellij by selecting the configuration from the drop down in the 
+top right of the application and then clicking the green play button.
