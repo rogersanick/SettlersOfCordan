@@ -46,7 +46,7 @@ class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort
         // Step 5. Generate an exit for the tokens that will be consumed by the port.
         val resourceTypeParsed = Resource.getInstance(resourceType)
         val amountOfResourceType = Amount(resourceAmount, resourceTypeParsed)
-        val tb = TransactionBuilder()
+        val tb = TransactionBuilder(notary)
         val tokenSelection = TokenSelection(serviceHub)
         RedeemToken
 

@@ -48,7 +48,6 @@ class IssueTradeFlow(val amountOffered: Amount<TokenType>, val amountWanted: Amo
 
         // Step 3. Retrieve the Turn Tracker State from the vault
         val queryCriteriaForTurnTrackerState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
-        val turnTrackerStateAndRef = serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteriaForTurnTrackerState).states.single()
 
         // Step 4. Create a transaction builder
         val tb = TransactionBuilder(notary = notary)

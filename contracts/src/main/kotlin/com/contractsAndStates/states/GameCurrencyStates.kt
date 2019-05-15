@@ -18,7 +18,6 @@ fun getCurrency(resourceType: String, amount: Int) {
         "Pasture" -> Sheep(amount)
         "Forest" -> Wood(amount)
         "Hill" -> Brick(amount)
-        else -> "NOTCURRENCY"
     }
 }
 

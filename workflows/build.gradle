@@ -46,6 +46,8 @@ configurations {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile 'info.picocli:picocli:4.0.0-alpha-2'
+    compile "$corda_release_group:corda-tools-cliutils:$corda_release_version"
+    compile "$corda_release_group:corda-shell:$corda_release_version"
     testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testCompile "junit:junit:$junit_version"
 
@@ -75,4 +77,10 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         javaParameters = true   // Useful for reflection.
         freeCompilerArgs = ["-Xnormalize-constructor-calls=enable"]
     }
+}
+
+// We need this because log4j2.xml is pulled in from multiple dependency JARs.
+// JAR signing will fail if there are multiple files with the same name.
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
