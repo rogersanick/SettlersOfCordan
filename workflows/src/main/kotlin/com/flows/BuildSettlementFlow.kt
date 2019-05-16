@@ -8,7 +8,6 @@ import com.contractsAndStates.states.SettlementState
 import com.contractsAndStates.states.TurnTrackerState
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef
-import net.corda.core.contracts.TransactionState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
 import net.corda.core.node.services.queryBy
@@ -108,17 +107,20 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         if (indexOfRelevantHexTileNeighbour1 != -1) newSettlementsPlaced[indexOfRelevantHexTileNeighbour1][coordinateOfPotentiallyConflictingSettlement1] = true
         if (indexOfRelevantHexTileNeighbour2 != -1) newSettlementsPlaced[indexOfRelevantHexTileNeighbour2][coordinateOfPotentiallyConflictingSettlement2] = true
 
-        // Step 8. Add all states and commands to the transaction.
+        // Step 10. Add the appropriate resources to the transaction to pay for the Settlement.
+        generateInGameSpend(serviceHub, tb, CorDanFlowUtils.settlementPrice, ourIdentity)
+
+        // Step 11. Add all states and commands to the transaction.
         tb.addInputState(gameBoardStateAndRef)
         tb.addReferenceState(turnTrackerReferenceStateAndRef)
         tb.addOutputState(settlementState, BuildPhaseContract.ID)
         tb.addOutputState(gameBoardState.copy(settlementsPlaced = newSettlementsPlaced))
 
-        // Step 9. Sign initial transaction
+        // Step 12. Sign initial transaction
         tb.verify(serviceHub)
         val ptx = serviceHub.signInitialTransaction(tb)
 
-        // Step 10. Collect all signatures
+        // Step 13. Collect all signatures
         val sessions = (gameBoardState.players - ourIdentity).map { initiateFlow(it) }.toSet()
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
 

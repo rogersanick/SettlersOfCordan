@@ -14,6 +14,12 @@ class UsefulUtilityExitCodes: ExitCodes() {
     }
 }
 
+/**
+ * TODO: I assumed this class would be auto-detected by the node and implemented at startup.
+ * Instead, node-shell-extension must be run first and the node must be restarted
+ * Need to adapt this function or the deployment process.
+ */
+
 class CordanCLI : CordaCliWrapper(
         "start-game", // the alias to be used for this utility in bash. When install-shell-extensions is run
         // you will be able to invoke this command by running <useful-utility --opts> from the command line
