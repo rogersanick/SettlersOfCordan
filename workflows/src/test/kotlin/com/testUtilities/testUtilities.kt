@@ -1,19 +1,35 @@
 package com.testUtilities
 
 import com.contractsAndStates.states.*
-import com.flows.BuildInitialSettlementAndRoadFlow
-import com.flows.BuildSettlementFlow
-import com.flows.EndTurnDuringInitialPlacementFlow
+import com.flows.*
 import com.r3.corda.sdk.token.contracts.states.FungibleToken
 import com.r3.corda.sdk.token.contracts.types.IssuedTokenType
 import com.r3.corda.sdk.token.contracts.types.TokenType
+import com.sun.tools.javadoc.Start
 import net.corda.core.contracts.Amount
+import net.corda.core.contracts.UniqueIdentifier
+import net.corda.core.identity.Party
+import net.corda.core.node.ServiceHub
 import net.corda.core.node.services.queryBy
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.StartedMockNode
 import sun.tools.jstat.Token
+import javax.annotation.Signed
+
+fun setupGameBoardForTesting(gameState: GameBoardState, network: MockNetwork, arrayOfAllPlayerNodesInOrder: List<StartedMockNode>, arrayOfAllTransactions: ArrayList<SignedTransaction>) {
+    var nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(0,3), Pair(1,5), Pair(1,2))
+    var nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(9,5), Pair(9,3), Pair(10,5), Pair(10,2))
+
+    for (i in 0..3) {
+        placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
+    }
+
+    for (i in 3.downTo(0)) {
+        placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
+    }
+}
 
 fun placeAPieceFromASpecificNodeAndEndTurn(i: Int, testCoordinates: ArrayList<Pair<Int, Int>>, gameState: GameBoardState, network: MockNetwork, arrayOfAllPlayerNodesInOrder: List<StartedMockNode>, arrayOfAllTransactions: ArrayList<SignedTransaction>, initialSetupComplete: Boolean) {
     // Build an initial settlement by issuing a settlement state
@@ -65,6 +81,31 @@ fun countAllResourcesForASpecificNode(node: StartedMockNode): MapOfResources {
 
     return MapOfResources(mapOfResources)
 }
+
+fun rollDiceThenGatherThenMaybeEndTurn(gameBoardLinearId: UniqueIdentifier, node: StartedMockNode, network: MockNetwork, endTurn: Boolean = true): ResourceCollectionSignedTransactions {
+
+    // Roll the dice
+    val futureWithDiceRoll = node.startFlow(RollDiceFlow(gameBoardLinearId))
+    network.runNetwork()
+    val stxWithDiceRoll = futureWithDiceRoll.getOrThrow()
+
+    // Collect Resources
+    val futureWithResources = node.startFlow(IssueResourcesFlow(gameBoardLinearId))
+    network.runNetwork()
+    val stxWithIssuedResources = futureWithResources.getOrThrow()
+
+    // End Turn if applicable
+    var stxWithEndedTurn: SignedTransaction? = null
+    if (endTurn) {
+        val futureWithEndedTurn = node.startFlow(EndTurnFlow())
+        network.runNetwork()
+        stxWithEndedTurn = futureWithEndedTurn.getOrThrow()
+    }
+
+    return ResourceCollectionSignedTransactions(stxWithDiceRoll, stxWithIssuedResources, stxWithEndedTurn)
+}
+
+class ResourceCollectionSignedTransactions(val stxWithDiceRoll: SignedTransaction, val stxWithIssuedResources: SignedTransaction, val stxWithEndedTurn: SignedTransaction?)
 
 class MapOfResources(val mutableMap: MutableMap<TokenType, Long>) {
 

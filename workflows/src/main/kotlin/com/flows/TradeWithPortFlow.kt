@@ -27,7 +27,7 @@ import java.lang.IllegalArgumentException
 
 @InitiatingFlow
 @StartableByRPC
-class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort: Int, val coordinateOfPort: Int, val resourceAmount: Long, val resourceType: String): FlowLogic<SignedTransaction>() {
+class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort: Int, val coordinateOfPort: Int, val inputResourceType: String, val outputResourceType: String, val tradeMultiple: Int): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         // Step 1. Get reference to the notary and oracle
@@ -41,21 +41,23 @@ class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort
 
         // Step 3. Retrieve the Turn Tracker State from the vault
         val queryCriteriaForTurnTrackerState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
-        val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteriaForTurnTrackerState).states.single())
 
         // Step 4. Get access to the port with which the user wishes to trade
         val portToBeTradedWith = gameBoardState.ports.filter { it.accessPoints.any { accessPoint ->  accessPoint.hexTileIndex == indexOfPort && accessPoint.hexTileCoordinate.contains(coordinateOfPort) } }.single().portTile
 
         // Step 5. Generate an exit for the tokens that will be consumed by the port.
-        val resourceTypeParsed = Resource.getInstance(resourceType)
-        val amountOfResourceType = Amount(resourceAmount, resourceTypeParsed)
         val tb = TransactionBuilder(notary)
-        generateInGameSpend(serviceHub, tb, mapOf(Pair(resourceTypeParsed, amountOfResourceType)), ourIdentity)
+        for (i in 0..tradeMultiple) {
+            val inputRequired = portToBeTradedWith.inputRequired.filter { it.token == Resource.getInstance(inputResourceType) }.single()
+            generateInGameSpend(serviceHub, tb, mapOf(Pair(inputRequired.token, inputRequired)), ourIdentity)
+        }
 
         // Step 6. Generate all tokens and commands for issuance from the port
-        portToBeTradedWith.outputRequired.forEach {
-            tb.addOutputState(it issuedBy ourIdentity heldBy ourIdentity )
-            tb.addCommand(IssueTokenCommand(it.token issuedBy ourIdentity))
+        val outputResource = portToBeTradedWith.outputRequired.filter { it.token == Resource.getInstance(outputResourceType) }.single()
+
+        for (i in 0..tradeMultiple) {
+            tb.addOutputState(outputResource issuedBy ourIdentity heldBy ourIdentity )
+            tb.addCommand(IssueTokenCommand(outputResource.token issuedBy ourIdentity))
         }
 
         // Step 7. Add all necessary states to the transaction

@@ -8,6 +8,7 @@ import com.oracleService.flows.DiceRollRequestHandler
 import com.r3.corda.sdk.token.contracts.states.FungibleToken
 import com.testUtilities.countAllResourcesForASpecificNode
 import com.testUtilities.placeAPieceFromASpecificNodeAndEndTurn
+import com.testUtilities.setupGameBoardForTesting
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.requireThat
 import net.corda.core.identity.CordaX500Name
@@ -77,16 +78,8 @@ class TradeFlowTests {
         val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
-        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(0,3), Pair(1,5), Pair(1,2))
-        val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(10,5), Pair(10,3), Pair(11,5), Pair(11,2))
 
-        for (i in 0..3) {
-            placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
-        }
-
-        for (i in 3.downTo(0)) {
-            placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
-        }
+        setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
 
         val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
 
@@ -117,7 +110,12 @@ class TradeFlowTests {
         )
         network.runNetwork()
         val txWithIssuedTrade = futureWithIssuedTrade.getOrThrow()
-        val linearIdOfTradeToExecute = txWithIssuedTrade.coreTransaction.outputsOfType<TradeState>().single().linearId
+        val issuedTrades = txWithIssuedTrade.coreTransaction.outputsOfType<TradeState>()
+
+        requireThat {
+            "A trade must have been issued." using (issuedTrades.size == 1)
+        }
+
     }
 
     @Test
@@ -142,16 +140,8 @@ class TradeFlowTests {
         val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
-        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(0,3), Pair(1,5), Pair(1,2))
-        val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(10,5), Pair(10,3), Pair(11,5), Pair(11,2))
 
-        for (i in 0..3) {
-            placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
-        }
-
-        for (i in 3.downTo(0)) {
-            placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
-        }
+        setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
 
         val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
 

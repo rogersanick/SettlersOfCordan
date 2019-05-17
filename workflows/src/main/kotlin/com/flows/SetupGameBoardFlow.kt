@@ -87,6 +87,7 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
 
         // Step 5. Generate data for new game state
         progressTracker.currentStep = SETTING_UP_YOUR_GAMEBOARD
+
         // Storage for hexTiles that will be randomly generated.
         val hexTiles = arrayListOf<HexTile>()
 
@@ -109,10 +110,10 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
                 PortTile(listOf(2.Brick), listOf(1.Wood, 1.Sheep, 1.Ore, 1.Wheat)),
                 PortTile(listOf(2.Ore), listOf(1.Wood, 1.Sheep, 1.Brick, 1.Wheat)),
                 PortTile(listOf(2.Wheat), listOf(1.Wood, 1.Sheep, 1.Brick, 1.Sheep)),
-                PortTile(listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep), listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep)),
-                PortTile(listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep), listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep)),
-                PortTile(listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep), listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep)),
-                PortTile(listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep), listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep))
+                PortTile(listOf(3.Wheat, 3.Wood, 3.Sheep, 3.Brick, 3.Sheep), listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep)),
+                PortTile(listOf(3.Wheat, 3.Wood, 3.Sheep, 3.Brick, 3.Sheep), listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep)),
+                PortTile(listOf(3.Wheat, 3.Wood, 3.Sheep, 3.Brick, 3.Sheep), listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep)),
+                PortTile(listOf(3.Wheat, 3.Wood, 3.Sheep, 3.Brick, 3.Sheep), listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep))
         )
 
         val portHexTileAccessPointMapping = arrayListOf(
