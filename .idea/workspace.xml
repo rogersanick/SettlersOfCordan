@@ -3,7 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="a2411927-6da4-490e-8024-ff65b0375487" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/FlowUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/FlowUtils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildSettlementFlow.kt" beforeDir="false" afterPath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildSettlementFlow.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/TradeWithPortFlow.kt" beforeDir="false" afterPath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/TradeWithPortFlow.kt" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -59,35 +60,50 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildSettlementFlow.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="196">
-              <caret line="110" column="22" lean-forward="true" selection-start-line="110" selection-start-column="22" selection-end-line="110" selection-end-column="22" />
+            <state relative-caret-position="269">
+              <caret line="141" selection-start-line="141" selection-end-line="143" selection-end-column="17" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/FlowUtils.kt">
+        <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/TradeWithPortFlow.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="440">
-              <caret line="26" column="40" selection-start-line="26" selection-start-column="40" selection-end-line="26" selection-end-column="40" />
+            <state relative-caret-position="66">
+              <caret line="81" column="56" lean-forward="true" selection-start-line="81" selection-start-column="56" selection-end-line="81" selection-end-column="56" />
+              <folding>
+                <element signature="e#19#872#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="jar://$MAVEN_REPOSITORY$/com/r3/tokens-sdk/workflow/1.0-SNAPSHOT/workflow-1.0-SNAPSHOT-sources.jar!/com/r3/corda/sdk/token/workflow/selection/TokenSelection.kt">
+        <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="266" column="24" selection-start-line="266" selection-start-column="24" selection-end-line="266" selection-end-column="24" />
+            <state relative-caret-position="-526">
+              <caret line="124" column="20" lean-forward="true" selection-start-line="124" selection-start-column="20" selection-end-line="124" selection-end-column="20" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildCityFlow.kt">
+        <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/SetupGameBoardFlow.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="279">
-              <caret line="58" column="63" lean-forward="true" selection-start-line="58" selection-start-column="63" selection-end-line="58" selection-end-column="63" />
+            <state relative-caret-position="-4043">
+              <caret line="105" column="57" selection-start-line="105" selection-start-column="56" selection-end-line="105" selection-end-column="57" />
+              <folding>
+                <element signature="e#19#672#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameBoardState.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="392">
+              <caret line="75" column="31" lean-forward="true" selection-start-line="75" selection-start-column="31" selection-end-line="75" selection-end-column="31" />
             </state>
           </provider>
         </entry>
@@ -104,9 +120,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Trade</find>
-      <find>participants</find>
-      <find>FungibleToken&lt;</find>
       <find>particip</find>
       <find>arrayOfAllPlayerNodes</find>
       <find>picol</find>
@@ -134,6 +147,9 @@
       <find>gameBoard</find>
       <find>generateExi</find>
       <find>generateE</find>
+      <find>generateIn</find>
+      <find>IssueToke</find>
+      <find>PortTile</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -202,7 +218,6 @@
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/SetupGameBoardFlow.kt" />
-        <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/TradeWithPortFlow.kt" />
         <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueTradeFlow.kt" />
         <option value="$PROJECT_DIR$/clients/src/main/kotlin/com/template/CLI.kt" />
         <option value="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameCurrencyStates.kt" />
@@ -211,8 +226,9 @@
         <option value="$PROJECT_DIR$/workflows/build.gradle" />
         <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/CLI/CLI.kt" />
         <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildCityFlow.kt" />
-        <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildSettlementFlow.kt" />
         <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/FlowUtils.kt" />
+        <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildSettlementFlow.kt" />
+        <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/TradeWithPortFlow.kt" />
       </list>
     </option>
   </component>
@@ -285,6 +301,52 @@
               <item name="kotlin" type="462c0819:PsiDirectoryNode" />
               <item name="com" type="462c0819:PsiDirectoryNode" />
               <item name="flows" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
+              <item name="com" type="462c0819:PsiDirectoryNode" />
+              <item name="flows" type="462c0819:PsiDirectoryNode" />
+              <item name="BuildSettlementFlow.kt" type="24436e51:KtFileTreeNode" />
+            </path>
+            <path>
+              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
+              <item name="com" type="462c0819:PsiDirectoryNode" />
+              <item name="flows" type="462c0819:PsiDirectoryNode" />
+              <item name="BuildSettlementFlow.kt" type="24436e51:KtFileTreeNode" />
+              <item name="BuildSettlementFlow" type="2c5a2ef7:KtClassOrObjectTreeNode" />
+            </path>
+            <path>
+              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
+              <item name="com" type="462c0819:PsiDirectoryNode" />
+              <item name="flows" type="462c0819:PsiDirectoryNode" />
+              <item name="IssueResourcesFlow.kt" type="24436e51:KtFileTreeNode" />
+            </path>
+            <path>
+              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
+              <item name="com" type="462c0819:PsiDirectoryNode" />
+              <item name="flows" type="462c0819:PsiDirectoryNode" />
+              <item name="IssueResourcesFlow.kt" type="24436e51:KtFileTreeNode" />
+              <item name="GameCurrencyToClaim" type="2c5a2ef7:KtClassOrObjectTreeNode" />
             </path>
           </expand>
           <select />
@@ -481,12 +543,6 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="TradeFlowTests_player2IsAbleToExecuteATradeImposedByPlayer1 - 2019.05.01 at 16h 48m 50s.xml">
-      <configuration name="TradeFlowTests.player2IsAbleToExecuteATradeImposedByPlayer1" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="TradeFlowTests_player2IsAbleToExecuteATradeImposedByPlayer1 - 2019.05.01 at 17h 06m 05s.xml">
-      <configuration name="TradeFlowTests.player2IsAbleToExecuteATradeImposedByPlayer1" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="TradeFlowTests_player2IsAbleToExecuteATradeImposedByPlayer1 - 2019.05.02 at 08h 33m 53s.xml">
       <configuration name="TradeFlowTests.player2IsAbleToExecuteATradeImposedByPlayer1" configurationId="JUnit" />
     </history-entry>
@@ -509,6 +565,12 @@
       <configuration name="InitialSettlementPlacementFlowTests.playersAreUnableToBuildSettlementUsingThePlaceInitialSettlementFlowAfterSetup" configurationId="JUnit" />
     </history-entry>
     <history-entry file="SetupGameBoardFlowTests - 2019.05.15 at 10h 28m 40s.xml">
+      <configuration name="SetupGameBoardFlowTests" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="SetupGameBoardFlowTests - 2019.05.17 at 13h 59m 15s.xml">
+      <configuration name="SetupGameBoardFlowTests" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="SetupGameBoardFlowTests - 2019.05.17 at 14h 59m 39s.xml">
       <configuration name="SetupGameBoardFlowTests" configurationId="JUnit" />
     </history-entry>
   </component>
@@ -534,7 +596,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32714617" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4969475" weight="0.3557358" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4969475" visible="true" weight="0.3557358" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.497558" weight="0.5011601" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -543,7 +605,7 @@
       <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.502442" side_tool="true" weight="0.5063731" />
       <window_info anchor="bottom" id="Version Control" order="9" weight="0.32908458" />
       <window_info anchor="bottom" id="Build" order="10" weight="0.32908458" />
-      <window_info anchor="bottom" id="Messages" order="11" sideWeight="0.4945055" weight="0.3225058" />
+      <window_info anchor="bottom" id="Messages" order="11" sideWeight="0.4945055" weight="0.3221321" />
       <window_info anchor="bottom" id="Dependency Viewer" order="12" weight="0.32908458" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -814,13 +876,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1012">
-          <caret line="64" column="81" selection-start-line="64" selection-start-column="81" selection-end-line="64" selection-end-column="81" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/clients/src/main/kotlin/com/template/cli/jav.java" />
     <entry file="jar://$MAVEN_REPOSITORY$/com/r3/tokens-sdk/workflow/1.0-SNAPSHOT/workflow-1.0-SNAPSHOT-sources.jar!/com/r3/corda/sdk/token/workflow/flows/RedeemToken.kt">
       <provider selected="true" editor-type-id="text-editor">
@@ -918,13 +973,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameBoardState.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="286">
-          <caret line="17" column="26" selection-start-line="17" selection-start-column="26" selection-end-line="17" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/GameStateContract.kt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="462">
@@ -993,16 +1041,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/SetupGameBoardFlow.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1088">
-          <caret line="71" selection-start-line="71" selection-end-line="71" />
-          <folding>
-            <element signature="e#19#672#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/cli/out/test/classes/com/template/ContractTests.class" />
     <entry file="file://$PROJECT_DIR$/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
@@ -1048,13 +1086,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1188">
           <caret line="54" selection-start-line="54" selection-end-line="58" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/TradeWithPortFlow.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="770">
-          <caret line="49" column="12" selection-start-line="49" selection-start-column="12" selection-end-line="49" selection-end-column="12" />
         </state>
       </provider>
     </entry>
@@ -1135,24 +1166,58 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildSettlementFlow.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="196">
-          <caret line="110" column="22" lean-forward="true" selection-start-line="110" selection-start-column="22" selection-end-line="110" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildCityFlow.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="279">
-          <caret line="58" column="63" lean-forward="true" selection-start-line="58" selection-start-column="63" selection-end-line="58" selection-end-column="63" />
+        <state relative-caret-position="272">
+          <caret line="58" column="23" lean-forward="true" selection-start-line="58" selection-start-column="23" selection-end-line="58" selection-end-column="23" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/FlowUtils.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="440">
-          <caret line="26" column="40" selection-start-line="26" selection-start-column="40" selection-end-line="26" selection-end-column="40" />
+        <state relative-caret-position="288">
+          <caret line="35" column="4" selection-start-line="35" selection-start-column="4" selection-end-line="35" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameBoardState.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="392">
+          <caret line="75" column="31" lean-forward="true" selection-start-line="75" selection-start-column="31" selection-end-line="75" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-526">
+          <caret line="124" column="20" lean-forward="true" selection-start-line="124" selection-start-column="20" selection-end-line="124" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/SetupGameBoardFlow.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-4043">
+          <caret line="105" column="57" selection-start-line="105" selection-start-column="56" selection-end-line="105" selection-end-column="57" />
+          <folding>
+            <element signature="e#19#672#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/BuildSettlementFlow.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="269">
+          <caret line="141" selection-start-line="141" selection-end-line="143" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/TradeWithPortFlow.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="66">
+          <caret line="81" column="56" lean-forward="true" selection-start-line="81" selection-start-column="56" selection-end-line="81" selection-end-column="56" />
+          <folding>
+            <element signature="e#19#872#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

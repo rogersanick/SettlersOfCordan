@@ -28,8 +28,6 @@ import java.util.ArrayList
  * in the future to claim additional resources in the IssueResourcesFlow.
  */
 
-// TODO: Add the resource cost for building a settlement
-
 @InitiatingFlow(version = 1)
 @StartableByRPC
 class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: Int, val hexTileCoordinate: Int): FlowLogic<SignedTransaction>() {
