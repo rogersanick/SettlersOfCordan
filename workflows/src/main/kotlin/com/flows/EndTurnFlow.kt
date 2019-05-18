@@ -81,10 +81,7 @@ class EndTurnFlowResponder(val counterpartySession: FlowSession): FlowLogic<Sign
                 val queryCriteria = QueryCriteria.VaultQueryCriteria(stateRefs = listOf(inputTurnTrackerInTransaction))
                 val turnTrackerReferencedInTransaction = serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteria).states.single().state.data
 
-                val gameBoardReferenceStateRef = stx.references.single()
-                val gameBoardQueryCriteria = QueryCriteria.VaultQueryCriteria(stateRefs = listOf(gameBoardReferenceStateRef))
-                val gameBoard = serviceHub.vaultService.queryBy<GameBoardState>(gameBoardQueryCriteria).states.single().state.data
-
+                val gameBoard = serviceHub.vaultService.queryBy<GameBoardState>().states.single().state.data
                 val lastTurnTrackerWeHaveOnRecord = serviceHub.vaultService.queryBy<TurnTrackerState>().states.single().state.data
                 if (lastTurnTrackerWeHaveOnRecord.linearId != turnTrackerReferencedInTransaction.linearId) {
                     throw IllegalArgumentException("The TurnTracker included in the transaction is not correct for this game or turn.")

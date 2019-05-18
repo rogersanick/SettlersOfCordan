@@ -82,9 +82,7 @@ class EndTurnDuringInitialPlacementFlowResponder(val counterpartySession: FlowSe
                 val queryCriteria = QueryCriteria.VaultQueryCriteria(stateRefs = listOf(inputTurnTrackerInTransaction))
                 val turnTrackerReferencedInTransaction = serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteria).states.single().state.data
 
-                val gameBoardReferenceStateRef = stx.references.single()
-                val gameBoardQueryCriteria = QueryCriteria.VaultQueryCriteria(stateRefs = listOf(gameBoardReferenceStateRef))
-                val gameBoard = serviceHub.vaultService.queryBy<GameBoardState>(gameBoardQueryCriteria).states.single().state.data
+                val gameBoard = serviceHub.vaultService.queryBy<GameBoardState>().states.single().state.data
                 val lastTurnTrackerWeHaveOnRecord = serviceHub.vaultService.queryBy<TurnTrackerState>().states.single().state.data
 
                 if (lastTurnTrackerWeHaveOnRecord.linearId != turnTrackerReferencedInTransaction.linearId) {

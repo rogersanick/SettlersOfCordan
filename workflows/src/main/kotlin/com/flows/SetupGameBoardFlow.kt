@@ -27,6 +27,8 @@ import net.corda.core.utilities.ProgressTracker
  * matically through match making functionality.
  */
 
+// TODO: Make this flow testable by seperating GameBoard generation functionality from flow logic.
+
 @InitiatingFlow(version = 1)
 @StartableByRPC
 class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Party) : FlowLogic<SignedTransaction>() {
