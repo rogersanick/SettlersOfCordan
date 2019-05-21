@@ -25,9 +25,13 @@ data class GameBoardState(val beginner: Boolean = false,
                           val settlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(19) { MutableList(6) { false } },
                           var setUpComplete: Boolean = false,
                           var initialPiecesPlaced: Int = 0,
+                          val winner: Party,
                           override val linearId: UniqueIdentifier = UniqueIdentifier()): LinearState {
 
     override val participants: List<Party> get() = players
+
+    fun weWin(ourIdentity: Party): GameBoardState = copy(winner = ourIdentity)
+
 }
 
 @CordaSerializable

@@ -3,6 +3,7 @@ package com.contractsAndStates.contracts
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.TurnTrackerState
 import com.oracleClient.state.DiceRollState
+import com.r3.corda.sdk.token.contracts.states.FungibleToken
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
 import net.corda.core.contracts.requireSingleCommand
@@ -25,7 +26,6 @@ class GatherPhaseContract : Contract {
 
         val command = tx.commands.requireSingleCommand<Commands>()
         val gameBoardStateReferenced = tx.referenceInputRefsOfType<GameBoardState>().single().state.data
-        val turnTrackerStateReferenced = tx.referenceInputRefsOfType<TurnTrackerState>().single().state.data
         val diceRollInputState = tx.inputsOfType<DiceRollState>().single()
 
         when (command.value) {
@@ -36,12 +36,11 @@ class GatherPhaseContract : Contract {
                  */
 
                 "There are no inputs to this transaction" using (tx.inputs.isEmpty())
+                "All of the outputs of this transaction are of the FungibleTokenType" using (tx.outputs.all { it.data is FungibleToken<*> })
 
                 /**
                  *  ******** BUSINESS LOGIC ********
                  */
-
-                val listOfHexTilesTriggered = gameBoardStateReferenced.hexTiles.filter { it.roleTrigger == (diceRollInputState.randomRoll1 + diceRollInputState.randomRoll2) }
 
                 /**
                  *  ******** SIGNATURES ********
