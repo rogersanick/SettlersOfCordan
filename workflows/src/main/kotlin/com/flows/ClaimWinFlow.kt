@@ -14,14 +14,13 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import java.lang.IllegalArgumentException
 
-// *************************
-// * Build Settlement Flow *
-// *************************
+// ******************
+// * Claim Win Flow *
+// ******************
 
 /**
- * This is the flow nodes may execute to consume resources and issue a new settlement
- * state onto the ledger at a location of their choosing. New settlements will be used
- * in the future to claim additional resources in the GatherResourcesFlow.
+ * This flow can be used by any player with a valid claim as victor of the game to end the game instance
+ * and irrevocably (and immutably) establish themselves as the winner.
  */
 
 @InitiatingFlow(version = 1)

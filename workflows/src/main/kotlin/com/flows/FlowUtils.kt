@@ -11,6 +11,11 @@ import net.corda.core.transactions.TransactionBuilder
 
 class CorDanFlowUtils {
 
+    /**
+     * When building game elements in Settlers of Catan, the player must provide input resources. The companion object
+     * below represents the effective rate card shared mutually amongst participants to verify proposed transactions
+     * are consuming the appropriate number of resources.
+     */
     companion object {
 
         val cityPrice = mapOf(
@@ -33,6 +38,14 @@ class CorDanFlowUtils {
     }
 
 }
+
+/**
+ * When a player spends resources in-game, those resources are consumed as inputs to a transaction. The generateInGameSpend
+ * method leverages the token-SDK to facilitate the building of transaction proposing the consumption of tokens when they are
+ * spent (burned) and not transferred to a counter-party.
+ *
+ * This method uses the generateExit functionality from the tokenSelection and mutates an input transaction builder in place.
+ */
 
 @Suspendable
 fun generateInGameSpend(serviceHub: ServiceHub, tb: TransactionBuilder, price: Map<Resource, Amount<Resource>>, changeOwner: Party): TransactionBuilder {

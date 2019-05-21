@@ -69,6 +69,7 @@ class BuildCityFlow(val gameBoardLinearId: UniqueIdentifier, val inputSettlement
         val sessions = (gameBoardState.players - ourIdentity).map { initiateFlow(it) }.toSet()
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
 
+        // Step 11. Run the FinalityFlow
         return subFlow(FinalityFlow(stx, sessions))
     }
 }

@@ -66,41 +66,43 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<Si
             gameCurrenciesToClaim.add(GameCurrencyToClaim(hexTile.resourceType, ownerIndex))
         }
 
-        // Consolidate the list so that they is only one instance of a given token type issued with the appropriate amount.
+        // Step 8. Consolidate the list so that they is only one instance of a given token type issued with the appropriate amount.
+        // This is required right now as mutliple issuances of the same token type cause an error with transaction state grouping.
         val reducedListOfGameCurrencyToClaim = mutableMapOf<GameCurrencyToClaim, Int>()
         gameCurrenciesToClaim.forEach{
             if (reducedListOfGameCurrencyToClaim.containsKey(it)) reducedListOfGameCurrencyToClaim[it] = reducedListOfGameCurrencyToClaim[it]!!.plus(1)
             else reducedListOfGameCurrencyToClaim[it] = 1
         }
 
-        // Convert each gameCurrentToClaim into a valid fungible token.
+        // Step 9. Convert each gameCurrentToClaim into a valid fungible token.
         val fungibleTokenAmountsOfResourcesToClaim = reducedListOfGameCurrencyToClaim.map {
             amount(it.value, Resource.getInstance(it.key.resourceType)) issuedBy ourIdentity heldBy gameBoardState.players[it.key.ownerIndex]
         }
 
-        // Add commands to issue the appropriate types of resources. Convert the gameCurrencyToClaim to a set to prevent duplicate commands.
+        // Step 10. Add commands to issue the appropriate types of resources. Convert the gameCurrencyToClaim to a set to prevent duplicate commands.
         val resourceTypesToBeIssuedForWhichACommandShouldBeIncluded = gameCurrenciesToClaim.toSet()
         resourceTypesToBeIssuedForWhichACommandShouldBeIncluded.forEach {
             tb.addCommand(IssueTokenCommand(Resource.getInstance(it.resourceType) issuedBy ourIdentity), gameBoardState.players.map { it.owningKey })
         }
 
-        // Add all of the appropriate new owned token amounts to the transaction.
+        // Step 11. Add all of the new owned token amounts to the transaction.
         fungibleTokenAmountsOfResourcesToClaim.forEach {
             tb.addOutputState(it, FungibleTokenContract.contractId)
         }
 
-        // Step 8. Add reference states for turn tracker and game board. Add input state for the dice roll.
+        // Step 12. Add reference states for turn tracker and game board. Add the dice roll as an input
+        // state so that the counter-party may verify the correct number of resources have been issued.
         tb.addInputState(diceRollStateAndRef)
         tb.addReferenceState(ReferencedStateAndRef(gameBoardStateAndRef))
         tb.addReferenceState(ReferencedStateAndRef(turnTrackerStateAndRef))
 
-        // Step 9. Add the gather resources command and verify the transaction
+        // Step 13. Add the gather resources command and verify the transaction
         val commandSigners = gameBoardState.players.map {it.owningKey}
         tb.addCommand(GatherPhaseContract.Commands.IssueResourcesToAllPlayers(), commandSigners)
         tb.addCommand(DiceRollContract.Commands.ConsumeDiceRoll(), commandSigners)
         tb.verify(serviceHub)
 
-        // Step 10. Collect the signatures and sign the transaction
+        // Step 14. Collect the signatures and sign the transaction
         val ptx = serviceHub.signInitialTransaction(tb)
         val sessions = (gameBoardState.players - ourIdentity).toSet().map { initiateFlow(it) }
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))

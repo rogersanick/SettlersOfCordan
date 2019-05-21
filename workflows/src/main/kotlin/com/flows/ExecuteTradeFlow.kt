@@ -23,8 +23,8 @@ import java.util.stream.Collectors
 // **********************
 
 /**
- * This flow allows a counterparty to trigger the execution of a trade posted by
- * another node. It facillitates the exchange of tokens and checks that the balances
+ * This flow allows a counter-party to trigger the execution of a trade posted by
+ * another node. It facilitates the exchange of tokens and checks that the balances
  * of the tokens exchanged matches the TradeState original proposed.
  */
 
@@ -53,23 +53,30 @@ class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier): FlowLo
     @Suspendable
     override fun call(): SignedTransaction {
 
+        // 1. Retrieve the appropriate trade state from the linearID.
         val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(tradeStateLinearId))
         val tradeStateOnWhichToMakeAnOffer = serviceHub.vaultService.queryBy<TradeState>(queryCriteria).states.single().state.data
 
+        // 2. Create an instance of a token selector to spend the resources required to execute the trade.
         val tokenSelection = TokenSelection(serviceHub)
 
+        // 3. Use the tokenSDK to generate the movement of resources required to execute the trade.
         val tbWithOfferedTokensMovedFromUsToThem = tokenSelection.generateMove(
                 TransactionBuilder(),
                 tradeStateOnWhichToMakeAnOffer.wanted,
                 tradeStateOnWhichToMakeAnOffer.owner
         )
 
+        // 4. Get a reference to the notary and assign it to the transaction.
         require(serviceHub.networkMapCache.notaryIdentities.isNotEmpty()) { "No notary nodes registered" }
-        val notary = serviceHub.networkMapCache.notaryIdentities.first() // TODO We should pass the notary as a parameter to the flow, not leave it to random choice.
+        val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
-        // need to pick which ever party is not us
+        // 5. Get a reference to the counter-party of the trade.
         val otherParty = excludeHostNode(serviceHub, groupAbstractPartyByWellKnownParty(serviceHub, listOf(tradeStateOnWhichToMakeAnOffer.owner))).keys.single()
         progressTracker.currentStep = DEALING
+
+        // 6. Use the TwoPartyDealFlow instigation flow to kick off the execution of the trade.
+        // Note: We propose the movement of our tokens in this trade to facilitate DvP
         val session = initiateFlow(otherParty)
         val instigator = TwoPartyDealFlow.Instigator(
                 session,
@@ -92,15 +99,21 @@ class ExecuteTradeFlowResponder(otherSideSession: FlowSession): TwoPartyDealFlow
     @Suspendable
     override fun assembleSharedTX(handshake: TwoPartyDealFlow.Handshake<TwoPartyDealFlow.AutoOffer>): Triple<TransactionBuilder, List<PublicKey>, List<TransactionSignature>> {
 
+        // Retrieve the payload from the handshake
         val handShakeToAssembleSharedTX = handshake.payload.dealBeingOffered as ExtendedDealState
 
+        // Get a reference to our Identity
         val ourIdentity = serviceHub.myInfo.legalIdentities.single()
+
+        // Create a TokenSelection instance to generate the movement of tokens required to execute the trade.
         val tokenSelection = TokenSelection(serviceHub)
 
+        // Retrieve the counterParty input and outputs states
         val counterPartyInputStates = handShakeToAssembleSharedTX.informationForAcceptor!!.inputStates.stream().collect(Collectors.toList())
         val counterPartyOutputStates = handShakeToAssembleSharedTX.informationForAcceptor!!.outputStates.stream().collect(Collectors.toList())
         val counterPartyCommands = handShakeToAssembleSharedTX.informationForAcceptor!!.commands.stream().collect(Collectors.toList())
 
+        // Use the counter-party input and output states to create a new transaction builder
         val tbWithWantedMoved = tokenSelection.generateMove(
                 builder = TransactionBuilder(
                         inputs = counterPartyInputStates,
@@ -111,11 +124,7 @@ class ExecuteTradeFlowResponder(otherSideSession: FlowSession): TwoPartyDealFlow
                 recipient = otherSideSession.counterparty
         )
 
-        tbWithWantedMoved.first.addCommand(
-                TradePhaseContract.Commands.ExecuteTrade(),
-                listOf(ourIdentity.owningKey, handShakeToAssembleSharedTX.owner.owningKey)
-        )
-
+        // Use the generateAgreement method on the ExtendedDealState class to add the appropriate commands to the transaction.
         val ptx = handShakeToAssembleSharedTX.generateAgreement(tbWithWantedMoved.first)
 
         // We set the transaction's time-window: it may be that none of the contracts need this!

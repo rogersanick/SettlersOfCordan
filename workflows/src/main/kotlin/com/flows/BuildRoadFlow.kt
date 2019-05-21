@@ -23,8 +23,6 @@ import java.lang.IllegalArgumentException
  * on the game board in a non-conflicting position.
  */
 
-// TODO: Add the resource cost for issuing a road.
-
 @InitiatingFlow(version = 1)
 @StartableByRPC
 class BuildRoadFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: Int, val hexTileSide: Int): FlowLogic<SignedTransaction>() {
