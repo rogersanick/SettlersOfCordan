@@ -26,7 +26,7 @@ import java.lang.IllegalArgumentException
  * network and having them act as an inactive 'burnt-token-collector'.
  */
 
-@InitiatingFlow
+@InitiatingFlow(version = 1)
 @StartableByRPC
 class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort: Int, val coordinateOfPort: Int, val inputResourceType: String, val outputResourceType: String): FlowLogic<SignedTransaction>() {
     @Suspendable

@@ -24,7 +24,7 @@ import net.corda.core.transactions.TransactionBuilder
  * they have the appropriate settlement states to enable them to do so.
  */
 
-@InitiatingFlow
+@InitiatingFlow(version = 1)
 @StartableByRPC
 class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<SignedTransaction>() {
     @Suspendable

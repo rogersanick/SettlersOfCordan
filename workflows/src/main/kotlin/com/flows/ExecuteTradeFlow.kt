@@ -28,7 +28,7 @@ import java.util.stream.Collectors
  * of the tokens exchanged matches the TradeState original proposed.
  */
 
-@InitiatingFlow
+@InitiatingFlow(version = 1)
 @StartableByRPC
 class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier): FlowLogic<SignedTransaction>() {
 

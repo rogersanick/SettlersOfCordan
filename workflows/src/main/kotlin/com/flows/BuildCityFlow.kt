@@ -18,12 +18,10 @@ import java.lang.IllegalArgumentException
 // *************************
 
 /**
- * This is the flow nodes may execute to consume resources and issue a new settlement
- * state onto the ledger at a location of their choosing. New settlements will be used
- * in the future to claim additional resources in the GatherResourcesFlow.
+ * This is the flow nodes may execute to consume resources (in addition to an existing settlement and
+ * issue a new city state onto the ledger. Cities will be used in the future to claim additional
+ * resources in the GatherResourcesFlow.
  */
-
-// TODO: Add the resource cost for building a settlement
 
 @InitiatingFlow(version = 1)
 @StartableByRPC

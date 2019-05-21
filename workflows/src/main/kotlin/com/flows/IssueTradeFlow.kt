@@ -33,7 +33,7 @@ import java.lang.IllegalArgumentException
  * (given they haven't been cancelled) by the target counter-party.
  */
 
-@InitiatingFlow
+@InitiatingFlow(version = 1)
 @StartableByRPC
 class IssueTradeFlow(val amountOffered: Amount<TokenType>, val amountWanted: Amount<TokenType>, val targetPlayer: Party, val gameBoardLinearId: UniqueIdentifier): FlowLogic<SignedTransaction>() {
     @Suspendable
