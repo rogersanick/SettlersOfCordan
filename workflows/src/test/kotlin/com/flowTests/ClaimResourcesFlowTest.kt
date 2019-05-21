@@ -5,7 +5,6 @@ import com.flows.*
 import com.oracleService.flows.DiceRollRequestHandler
 import com.r3.corda.sdk.token.contracts.states.FungibleToken
 import com.r3.corda.sdk.token.contracts.types.TokenType
-import com.testUtilities.placeAPieceFromASpecificNodeAndEndTurn
 import com.testUtilities.setupGameBoardForTesting
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.FlowException
@@ -42,7 +41,7 @@ class ClaimResourcesFlowTest {
         startedNodes.forEach {
             it.registerInitiatedFlow(SetupGameBoardFlowResponder::class.java)
             it.registerInitiatedFlow(BuildInitialSettlementFlowResponder::class.java)
-            it.registerInitiatedFlow(IssueResourcesFlowResponder::class.java)
+            it.registerInitiatedFlow(GatherResourcesFlowResponder::class.java)
         }
 
         listOf(DiceRollRequestHandler::class.java).forEach { oracle.registerInitiatedFlow(it) }
@@ -85,7 +84,7 @@ class ClaimResourcesFlowTest {
         network.runNetwork()
         futureWithDiceRoll.getOrThrow()
 
-        val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(IssueResourcesFlow(gameBoardLinearId = gameBoardState.linearId))
+        val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(GatherResourcesFlow(gameBoardLinearId = gameBoardState.linearId))
         network.runNetwork()
         val txWithNewResources = futureWithClaimedResources.getOrThrow()
 
@@ -127,7 +126,7 @@ class ClaimResourcesFlowTest {
         network.runNetwork()
         futureWithDiceRollPlayer1.getOrThrow()
 
-        val futureWithClaimedResourcesByPlayer1 = arrayOfAllPlayerNodesInOrder[0].startFlow(IssueResourcesFlow(gameBoardLinearId = gameBoardState.linearId))
+        val futureWithClaimedResourcesByPlayer1 = arrayOfAllPlayerNodesInOrder[0].startFlow(GatherResourcesFlow(gameBoardLinearId = gameBoardState.linearId))
         network.runNetwork()
         val txWithNewResourcesOwnedByPlayer1 = futureWithClaimedResourcesByPlayer1.getOrThrow()
 
@@ -136,7 +135,7 @@ class ClaimResourcesFlowTest {
             "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)
         }
 
-        val futureWithPlayer2Turn = arrayOfAllPlayerNodesInOrder[2].startFlow(EndTurnFlow())
+        val futureWithPlayer2Turn = arrayOfAllPlayerNodesInOrder[2].startFlow(EndTurnFlow(gameBoardState.linearId))
         network.runNetwork()
         assertFailsWith<FlowException>("The player who is proposing this transaction is not currently the player whose turn it is.") { futureWithPlayer2Turn.getOrThrow() }
 
@@ -174,7 +173,7 @@ class ClaimResourcesFlowTest {
         network.runNetwork()
         futureWithDiceRollPlayer1.getOrThrow()
 
-        val futureWithClaimedResourcesByPlayer1 = arrayOfAllPlayerNodesInOrder[0].startFlow(IssueResourcesFlow(gameBoardLinearId = gameBoardState.linearId))
+        val futureWithClaimedResourcesByPlayer1 = arrayOfAllPlayerNodesInOrder[0].startFlow(GatherResourcesFlow(gameBoardLinearId = gameBoardState.linearId))
         network.runNetwork()
         val txWithNewResourcesOwnedByPlayer1 = futureWithClaimedResourcesByPlayer1.getOrThrow()
 
@@ -183,7 +182,7 @@ class ClaimResourcesFlowTest {
             "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)
         }
 
-        val futureWithPlayer2Turn = arrayOfAllPlayerNodesInOrder[0].startFlow(EndTurnFlow())
+        val futureWithPlayer2Turn = arrayOfAllPlayerNodesInOrder[0].startFlow(EndTurnFlow(gameBoardState.linearId))
         network.runNetwork()
         futureWithPlayer2Turn.getOrThrow()
 
@@ -191,7 +190,7 @@ class ClaimResourcesFlowTest {
         network.runNetwork()
         futureWithPlayer2DiceRoll.getOrThrow()
 
-        val futureWithClaimedResourcesByPlayer2 = arrayOfAllPlayerNodesInOrder[1].startFlow(IssueResourcesFlow(gameBoardState.linearId))
+        val futureWithClaimedResourcesByPlayer2 = arrayOfAllPlayerNodesInOrder[1].startFlow(GatherResourcesFlow(gameBoardState.linearId))
         network.runNetwork()
         val txWithNewResourcesOwnedByPlayer2 = futureWithClaimedResourcesByPlayer2.getOrThrow()
 
@@ -200,7 +199,7 @@ class ClaimResourcesFlowTest {
             "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)
         }
 
-        val futureWithPlayer3Turn = arrayOfAllPlayerNodesInOrder[1].startFlow(EndTurnFlow())
+        val futureWithPlayer3Turn = arrayOfAllPlayerNodesInOrder[1].startFlow(EndTurnFlow(gameBoardState.linearId))
         network.runNetwork()
         futureWithPlayer3Turn.getOrThrow()
 
@@ -208,7 +207,7 @@ class ClaimResourcesFlowTest {
         network.runNetwork()
         futureWithPlayer3DiceRoll.getOrThrow()
 
-        val futureWithClaimedResourcesByPlayer3 = arrayOfAllPlayerNodesInOrder[2].startFlow(IssueResourcesFlow(gameBoardState.linearId))
+        val futureWithClaimedResourcesByPlayer3 = arrayOfAllPlayerNodesInOrder[2].startFlow(GatherResourcesFlow(gameBoardState.linearId))
         network.runNetwork()
         val txWithNewResourcesOwnedByPlayer3 = futureWithClaimedResourcesByPlayer3.getOrThrow()
 
@@ -217,7 +216,7 @@ class ClaimResourcesFlowTest {
             "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)
         }
 
-        val futureWithPlayer4Turn = arrayOfAllPlayerNodesInOrder[2].startFlow(EndTurnFlow())
+        val futureWithPlayer4Turn = arrayOfAllPlayerNodesInOrder[2].startFlow(EndTurnFlow(gameBoardState.linearId))
         network.runNetwork()
         futureWithPlayer4Turn.getOrThrow()
 
@@ -225,7 +224,7 @@ class ClaimResourcesFlowTest {
         network.runNetwork()
         futureWithPlayer4DiceRoll.getOrThrow()
 
-        val futureWithClaimedResourcesByPlayer4 = arrayOfAllPlayerNodesInOrder[3].startFlow(IssueResourcesFlow(gameBoardState.linearId))
+        val futureWithClaimedResourcesByPlayer4 = arrayOfAllPlayerNodesInOrder[3].startFlow(GatherResourcesFlow(gameBoardState.linearId))
         network.runNetwork()
         val txWithNewResourcesOwnedByPlayer4 = futureWithClaimedResourcesByPlayer4.getOrThrow()
 

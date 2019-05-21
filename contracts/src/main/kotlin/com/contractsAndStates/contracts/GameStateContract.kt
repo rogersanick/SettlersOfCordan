@@ -16,7 +16,18 @@ class GameStateContract : Contract {
     // A transaction is valid if the verify() function of the contract of all the transaction's input and output states
     // does not throw an exception.
     override fun verify(tx: LedgerTransaction) {
-        // Verification logic goes here.
+        /**
+         *  ******** SHAPE ********
+         */
+
+        /**
+         *  ******** BUSINESS LOGIC ********
+         */
+
+        /**
+         *  ******** SIGNATURES ********
+         */
+
     }
 
     // Used to indicate the transaction's intent.

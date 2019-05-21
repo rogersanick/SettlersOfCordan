@@ -7,14 +7,9 @@ import com.oracleClient.contracts.DiceRollContract
 import com.oracleClient.state.DiceRollState
 import com.r3.corda.sdk.token.contracts.FungibleTokenContract
 import com.r3.corda.sdk.token.contracts.commands.IssueTokenCommand
-import com.r3.corda.sdk.token.contracts.states.FungibleToken
-import com.r3.corda.sdk.token.contracts.types.IssuedTokenType
 import com.r3.corda.sdk.token.contracts.utilities.heldBy
 import net.corda.core.contracts.*
 import net.corda.core.flows.*
-import net.corda.core.identity.AbstractParty
-import net.corda.core.identity.CordaX500Name
-import net.corda.core.identity.Party
 import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
@@ -31,7 +26,7 @@ import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
 @StartableByRPC
-class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<SignedTransaction>() {
+class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         // Step 1. Get reference to the notary and oracle
@@ -114,15 +109,15 @@ class IssueResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<Sig
 
 }
 
-@InitiatedBy(IssueResourcesFlow::class)
-open class IssueResourcesFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
+@InitiatedBy(GatherResourcesFlow::class)
+open class GatherResourcesFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
                 val listOfTokensIssued = stx.coreTransaction.outputsOfType<FungibleState<*>>().toMutableList()
                 val gameBoardState = serviceHub.vaultService.queryBy<GameBoardState>(QueryCriteria.VaultQueryCriteria(stateRefs = stx.references)).states.single().state.data
-                val turnTrackerState = serviceHub.vaultService.queryBy<TurnTrackerState>().states.single().state.data
+                val turnTrackerState = serviceHub.vaultService.queryBy<TurnTrackerState>(QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))).states.single().state.data
                 val diceRollState = serviceHub.vaultService.queryBy<DiceRollState>(QueryCriteria.VaultQueryCriteria(stateRefs = stx.inputs)).states.single().state.data
                 val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states.filter {
                     val diceRollTotal = diceRollState.randomRoll1 + diceRollState.randomRoll2

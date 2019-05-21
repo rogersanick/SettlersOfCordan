@@ -11,15 +11,33 @@ import java.lang.IllegalArgumentException
 import java.math.BigDecimal
 
 
-fun getCurrency(resourceType: String, amount: Int) {
-    when (resourceType) {
+fun getResourceAmount(resourceType: String, amount: Int): Amount<Resource> {
+    return when (resourceType) {
         "Field" -> Wheat(amount)
+        "Wheat" -> Wheat(amount)
         "Mountain" -> Ore(amount)
+        "Ore" -> Ore(amount)
         "Pasture" -> Sheep(amount)
+        "Sheep" -> Sheep(amount)
         "Forest" -> Wood(amount)
+        "Wood" -> Wood(amount)
         "Hill" -> Brick(amount)
+        "Brick" -> Brick(amount)
+        else -> throw IllegalArgumentException("There is no currency of that type.")
     }
 }
+
+fun getResourceByName(resourceType: String): Resource {
+    return when (resourceType) {
+        "Wheat" -> Wheat
+        "Ore" -> Ore
+        "Sheep" -> Sheep
+        "Wood" -> Wood
+        "Brick" -> Brick
+        else -> throw IllegalArgumentException("There is no currency of that type.")
+    }
+}
+
 
 // Wheat.
 val Wheat = Resource.getInstance("Field")

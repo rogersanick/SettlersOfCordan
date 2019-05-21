@@ -3,24 +3,18 @@ package com.testUtilities
 import com.contractsAndStates.states.*
 import com.flows.*
 import com.r3.corda.sdk.token.contracts.states.FungibleToken
-import com.r3.corda.sdk.token.contracts.types.IssuedTokenType
 import com.r3.corda.sdk.token.contracts.types.TokenType
-import com.sun.tools.javadoc.Start
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.UniqueIdentifier
-import net.corda.core.identity.Party
-import net.corda.core.node.ServiceHub
 import net.corda.core.node.services.queryBy
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.StartedMockNode
-import sun.tools.jstat.Token
-import javax.annotation.Signed
 
 fun setupGameBoardForTesting(gameState: GameBoardState, network: MockNetwork, arrayOfAllPlayerNodesInOrder: List<StartedMockNode>, arrayOfAllTransactions: ArrayList<SignedTransaction>) {
-    var nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(0,3), Pair(1,5), Pair(1,2))
-    var nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(9,5), Pair(9,3), Pair(10,5), Pair(10,2))
+    val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(10,5), Pair(1,3), Pair(2,5), Pair(2,2))
+    val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(0,5), Pair(10,3), Pair(11,5), Pair(11,2))
 
     for (i in 0..3) {
         placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
@@ -48,7 +42,7 @@ fun placeAPieceFromASpecificNodeAndEndTurn(i: Int, testCoordinates: ArrayList<Pa
         arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
 
         // End turn during normal game play
-        currPlayer.startFlow(EndTurnDuringInitialPlacementFlow())
+        currPlayer.startFlow(EndTurnDuringInitialPlacementFlow(gameState.linearId))
         network.runNetwork()
     } else {
         // Build an initial settlement and road
@@ -58,7 +52,7 @@ fun placeAPieceFromASpecificNodeAndEndTurn(i: Int, testCoordinates: ArrayList<Pa
         arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
 
         // End turn during initial setup phase
-        currPlayer.startFlow(EndTurnDuringInitialPlacementFlow())
+        currPlayer.startFlow(EndTurnDuringInitialPlacementFlow(gameState.linearId))
         network.runNetwork()
     }
 
@@ -90,14 +84,14 @@ fun rollDiceThenGatherThenMaybeEndTurn(gameBoardLinearId: UniqueIdentifier, node
     val stxWithDiceRoll = futureWithDiceRoll.getOrThrow()
 
     // Collect Resources
-    val futureWithResources = node.startFlow(IssueResourcesFlow(gameBoardLinearId))
+    val futureWithResources = node.startFlow(GatherResourcesFlow(gameBoardLinearId))
     network.runNetwork()
     val stxWithIssuedResources = futureWithResources.getOrThrow()
 
     // End Turn if applicable
     var stxWithEndedTurn: SignedTransaction? = null
     if (endTurn) {
-        val futureWithEndedTurn = node.startFlow(EndTurnFlow())
+        val futureWithEndedTurn = node.startFlow(EndTurnFlow(gameBoardLinearId))
         network.runNetwork()
         stxWithEndedTurn = futureWithEndedTurn.getOrThrow()
     }

@@ -2,15 +2,12 @@ package com.flowTests
 
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.Resource
-import com.contractsAndStates.states.TradeState
 import com.flows.*
 import com.oracleService.flows.DiceRollRequestHandler
-import com.r3.corda.sdk.token.contracts.states.FungibleToken
 import com.testUtilities.countAllResourcesForASpecificNode
 import com.testUtilities.rollDiceThenGatherThenMaybeEndTurn
 import com.testUtilities.setupGameBoardForTesting
 import net.corda.core.contracts.Amount
-import net.corda.core.contracts.requireThat
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
@@ -36,6 +33,15 @@ class TradeWithPortFlowTest {
     private val oracleName = CordaX500Name("Oracle", "New York", "US")
     private val oracle = network.createNode(MockNodeParameters(legalName = oracleName))
 
+    /**
+     * TODO: This flow is particularly difficult to test because after the initial setup,
+     * no party will have sufficient resources to trade with a port. All resource generation after the fact is random.
+     *
+     * Solution to this would be refactoring to generate specific test scenarios without the need for convulated flows
+     * accounting for randomness.
+     */
+
+
     @Before
     fun setup() {
         val startedNodes = arrayListOf(a, b, c, d)
@@ -43,7 +49,7 @@ class TradeWithPortFlowTest {
         startedNodes.forEach {
             it.registerInitiatedFlow(SetupGameBoardFlowResponder::class.java)
             it.registerInitiatedFlow(BuildInitialSettlementFlowResponder::class.java)
-            it.registerInitiatedFlow(IssueResourcesFlowResponder::class.java)
+            it.registerInitiatedFlow(GatherResourcesFlowResponder::class.java)
             it.registerInitiatedFlow(TradeWithPortFlowResponder::class.java)
         }
 
@@ -88,18 +94,16 @@ class TradeWithPortFlowTest {
 
         setupGameBoardForTesting(gameBoardState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
 
-        // Roll the dice and collect resources for player 1
-        val stxForFullTurn = rollDiceThenGatherThenMaybeEndTurn(gameBoardState.linearId, arrayOfAllPlayerNodesInOrder[0], network, false)
-
-        requireThat {
-            val resources = stxForFullTurn.stxWithIssuedResources.coreTransaction.outputsOfType<FungibleToken<*>>()
-            "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)
+        var currPlayer = 0
+        while (!(countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0]).mutableMap.any { it.value > 1 }) || currPlayer != 0) {
+            rollDiceThenGatherThenMaybeEndTurn(gameBoardState.linearId, arrayOfAllPlayerNodesInOrder[currPlayer], network, true)
+            currPlayer = if (currPlayer == 3) 0 else currPlayer + 1
         }
 
         val portToTradeWith = gameBoardState.ports[0]
         val inputResource: Resource = portToTradeWith.portTile.inputRequired.filter { it.token.symbol == Resource.getInstance(gameBoardState.hexTiles[0].resourceType).symbol }.single().token
         val outputResource: Resource = portToTradeWith.portTile.outputRequired.filter { it.token.symbol != inputResource.symbol }.first().token
-        val player1ResourcesPreTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
+        val playerWithPortPreTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
 
         val futureWithIssuedTrade = arrayOfAllPlayerNodesInOrder[0].startFlow(
                 TradeWithPortFlow(
@@ -107,18 +111,16 @@ class TradeWithPortFlowTest {
                         0,
                         5,
                         inputResource.symbol,
-                        outputResource.symbol,
-                        1
+                        outputResource.symbol
                 )
         )
         network.runNetwork()
-        val txWithPortTrade = futureWithIssuedTrade.getOrThrow()
-        val tradeToExecute = txWithPortTrade.coreTransaction.outputsOfType<TradeState>().single()
+        futureWithIssuedTrade.getOrThrow()
 
-        val player1ResourcesPostTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
+        val playerWithPortPostTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
 
-        assert(player1ResourcesPreTrade.addTokenState(Amount(1, outputResource)).subtractTokenState(Amount(2, inputResource)).mutableMap.all {
-            player1ResourcesPostTrade.mutableMap[it.key] == it.value
+        assert(playerWithPortPreTrade.addTokenState(Amount(1, outputResource)).subtractTokenState(Amount(2, inputResource)).mutableMap.all {
+            playerWithPortPostTrade.mutableMap[it.key] == it.value
         })
 
     }

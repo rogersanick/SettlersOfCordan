@@ -25,7 +25,7 @@ import java.util.ArrayList
 /**
  * This is the flow nodes may execute to consume resources and issue a new settlement
  * state onto the ledger at a location of their choosing. New settlements will be used
- * in the future to claim additional resources in the IssueResourcesFlow.
+ * in the future to claim additional resources in the GatherResourcesFlow.
  */
 
 @InitiatingFlow(version = 1)

@@ -7,7 +7,6 @@ import com.flows.*
 import com.oracleService.flows.DiceRollRequestHandler
 import com.r3.corda.sdk.token.contracts.states.FungibleToken
 import com.testUtilities.countAllResourcesForASpecificNode
-import com.testUtilities.placeAPieceFromASpecificNodeAndEndTurn
 import com.testUtilities.setupGameBoardForTesting
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.requireThat
@@ -44,7 +43,7 @@ class TradeFlowTests {
         startedNodes.forEach {
             it.registerInitiatedFlow(SetupGameBoardFlowResponder::class.java)
             it.registerInitiatedFlow(BuildInitialSettlementFlowResponder::class.java)
-            it.registerInitiatedFlow(IssueResourcesFlowResponder::class.java)
+            it.registerInitiatedFlow(GatherResourcesFlowResponder::class.java)
             it.registerInitiatedFlow(ExecuteTradeFlowResponder::class.java)
         }
 
@@ -88,7 +87,7 @@ class TradeFlowTests {
         network.runNetwork()
         futureWithDiceRoll.getOrThrow()
 
-        val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(IssueResourcesFlow(gameBoardLinearId = gameBoardState.linearId))
+        val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(GatherResourcesFlow(gameBoardLinearId = gameBoardState.linearId))
         network.runNetwork()
         val txWithNewResources = futureWithClaimedResources.getOrThrow()
 
@@ -150,7 +149,7 @@ class TradeFlowTests {
         network.runNetwork()
         futureWithDiceRoll.getOrThrow()
 
-        val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(IssueResourcesFlow(gameBoardLinearId = gameBoardState.linearId))
+        val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(GatherResourcesFlow(gameBoardLinearId = gameBoardState.linearId))
         network.runNetwork()
         val txWithNewResources = futureWithClaimedResources.getOrThrow()
 
@@ -178,7 +177,7 @@ class TradeFlowTests {
         val tradeToExecute = txWithIssuedTrade.coreTransaction.outputsOfType<TradeState>().single()
         val linearIdOfTradeToExecute = tradeToExecute.linearId
 
-        val futureWithPlayer1TurnEnded = arrayOfAllPlayerNodesInOrder[0].startFlow(EndTurnFlow())
+        val futureWithPlayer1TurnEnded = arrayOfAllPlayerNodesInOrder[0].startFlow(EndTurnFlow(gameBoardState.linearId))
         network.runNetwork()
         futureWithPlayer1TurnEnded.getOrThrow()
 

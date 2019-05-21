@@ -191,7 +191,7 @@ class BuildInitialSettlementFlowResponder(val counterpartySession: FlowSession):
                 val turnTrackerState = serviceHub.vaultService.queryBy<TurnTrackerState>(turnTrackerQueryCriteria).states.first().state.data
 
                 // Build query criteria to retrieve that last evolution of the turn tracker we have on record.
-                val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(turnTrackerState.linearId))
+                val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
                 val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteria).states.first().state.data
 
                 // Get all of the settlements currently allocated to this player

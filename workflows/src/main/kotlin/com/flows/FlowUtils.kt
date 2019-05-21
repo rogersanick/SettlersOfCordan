@@ -1,5 +1,6 @@
 package com.flows
 
+import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.states.*
 import com.r3.corda.sdk.token.contracts.types.TokenType
 import com.r3.corda.sdk.token.workflow.selection.TokenSelection
@@ -33,6 +34,7 @@ class CorDanFlowUtils {
 
 }
 
+@Suspendable
 fun generateInGameSpend(serviceHub: ServiceHub, tb: TransactionBuilder, price: Map<Resource, Amount<Resource>>, changeOwner: Party): TransactionBuilder {
 
     // Create a tokenSelector

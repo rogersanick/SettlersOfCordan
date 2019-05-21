@@ -6,6 +6,7 @@ import com.contractsAndStates.states.TurnTrackerState
 import com.oracleClient.contracts.DiceRollContract
 import com.oracleClient.flows.GetRandomDiceRollValues
 import com.oracleClient.state.DiceRollState
+import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
 import net.corda.core.identity.CordaX500Name
@@ -33,6 +34,7 @@ class RollDiceFlow(val gameBoardStateLinearId: UniqueIdentifier) : FlowLogic<Sig
 
         val queryCriteriaForGameBoardState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardStateLinearId))
         val gameBoardStateAndRef = serviceHub.vaultService.queryBy<GameBoardState>(queryCriteriaForGameBoardState).states.single()
+        val gameBoardReferenceStateAndRef = ReferencedStateAndRef(gameBoardStateAndRef)
         val gameBoardState = gameBoardStateAndRef.state.data
 
         val queryCriteriaForTurnTrackerState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
@@ -47,6 +49,7 @@ class RollDiceFlow(val gameBoardStateLinearId: UniqueIdentifier) : FlowLogic<Sig
         val tb = TransactionBuilder(notary)
 
         tb.addOutputState(DiceRollState(diceRoll))
+        tb.addReferenceState(gameBoardReferenceStateAndRef)
         tb.addCommand(DiceRollContract.Commands.RollDice(), gameBoardState.players.map { it.owningKey })
 
         tb.verify(serviceHub)
@@ -65,9 +68,14 @@ class RollDiceFlowResponder(val counterpartySession: FlowSession): FlowLogic<Sig
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) {
+                
+                val gameBoardStateQueryCriteria = QueryCriteria.VaultQueryCriteria(stateRefs = stx.coreTransaction.references)
+                val gameBoardState = serviceHub.vaultService.queryBy<GameBoardState>(gameBoardStateQueryCriteria).states.first().state.data
+
+                val turnTrackerStateQueryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
+                val turnTrackerState = serviceHub.vaultService.queryBy<TurnTrackerState>(turnTrackerStateQueryCriteria).states.first().state.data
+
                 val diceRollState = stx.coreTransaction.outputsOfType<DiceRollState>().first()
-                val gameBoardState = serviceHub.vaultService.queryBy<GameBoardState>().states.first().state.data
-                val turnTrackerState = serviceHub.vaultService.queryBy<TurnTrackerState>().states.first().state.data
 
                 if (diceRollState.turnTrackerUniqueIdentifier != turnTrackerState.linearId) {
                     throw FlowException("Only the current player may roll the dice.")

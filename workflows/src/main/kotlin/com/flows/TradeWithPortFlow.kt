@@ -27,7 +27,7 @@ import java.lang.IllegalArgumentException
 
 @InitiatingFlow
 @StartableByRPC
-class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort: Int, val coordinateOfPort: Int, val inputResourceType: String, val outputResourceType: String, val tradeMultiple: Int): FlowLogic<SignedTransaction>() {
+class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort: Int, val coordinateOfPort: Int, val inputResourceType: String, val outputResourceType: String): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         // Step 1. Get reference to the notary and oracle
@@ -47,18 +47,13 @@ class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort
 
         // Step 5. Generate an exit for the tokens that will be consumed by the port.
         val tb = TransactionBuilder(notary)
-        for (i in 0..tradeMultiple) {
-            val inputRequired = portToBeTradedWith.inputRequired.filter { it.token == Resource.getInstance(inputResourceType) }.single()
-            generateInGameSpend(serviceHub, tb, mapOf(Pair(inputRequired.token, inputRequired)), ourIdentity)
-        }
+        val inputRequired = portToBeTradedWith.inputRequired.filter { it.token == getResourceByName(inputResourceType) }.single()
+        generateInGameSpend(serviceHub, tb, mapOf(Pair(inputRequired.token, inputRequired)), ourIdentity)
 
         // Step 6. Generate all tokens and commands for issuance from the port
-        val outputResource = portToBeTradedWith.outputRequired.filter { it.token == Resource.getInstance(outputResourceType) }.single()
-
-        for (i in 0..tradeMultiple) {
-            tb.addOutputState(outputResource issuedBy ourIdentity heldBy ourIdentity )
-            tb.addCommand(IssueTokenCommand(outputResource.token issuedBy ourIdentity))
-        }
+        val outputResource = portToBeTradedWith.outputRequired.filter { it.token == getResourceByName(outputResourceType) }.single()
+        tb.addOutputState(outputResource issuedBy ourIdentity heldBy ourIdentity )
+        tb.addCommand(IssueTokenCommand(outputResource.token issuedBy ourIdentity), gameBoardState.players.map { it.owningKey })
 
         // Step 7. Add all necessary states to the transaction
         tb.addReferenceState(gameBoardReferenceStateAndRef)
@@ -81,8 +76,12 @@ open class TradeWithPortFlowResponder(val counterpartySession: FlowSession): Flo
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
-                val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService.queryBy<TurnTrackerState>().states.single().state.data
-                val gameBoardState = serviceHub.vaultService.queryBy<GameBoardState>().states.single().state.data
+                val gameBoardStateRef = stx.coreTransaction.references.single()
+                val gameBoardStateQueryCritera = QueryCriteria.VaultQueryCriteria(stateRefs = listOf(gameBoardStateRef))
+                val gameBoardState = serviceHub.vaultService.queryBy<GameBoardState>(gameBoardStateQueryCritera).states.single().state.data
+
+                val turnTrackerStateLinearId = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
+                val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService.queryBy<TurnTrackerState>(turnTrackerStateLinearId).states.first().state.data
 
                 if (counterpartySession.counterparty.owningKey != gameBoardState.players[lastTurnTrackerOnRecordStateAndRef.currTurnIndex].owningKey) {
                     throw IllegalArgumentException("Only the current player may propose the next move.")
