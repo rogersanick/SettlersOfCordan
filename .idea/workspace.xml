@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a2411927-6da4-490e-8024-ff65b0375487" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/ClaimWinFlow.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/GameStateContract.kt" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/GameStateContract.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/GatherPhaseContract.kt" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/GatherPhaseContract.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameBoardState.kt" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameBoardState.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/TradeWithPortFlow.kt" beforeDir="false" afterPath="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/TradeWithPortFlow.kt" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -90,10 +86,10 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/GameStateContract.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="329">
+            <state relative-caret-position="1364">
               <caret line="70" column="5" lean-forward="true" selection-start-line="70" selection-start-column="5" selection-end-line="70" selection-end-column="5" />
             </state>
           </provider>
@@ -102,8 +98,20 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/TradePhaseContract.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-10">
+            <state relative-caret-position="-112">
               <caret line="1" lean-forward="true" selection-start-line="1" selection-end-line="1" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/TradeWithPortFlow.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="145">
+              <caret line="54" column="71" lean-forward="true" selection-start-line="54" selection-start-column="71" selection-end-line="54" selection-end-column="71" />
+              <folding>
+                <element signature="e#19#872#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -120,8 +128,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>stateRef</find>
-      <find>serviceHub.vaultService.queryBy&lt;GameBoardState&gt;().states.first()</find>
       <find>addRef</find>
       <find>refer</find>
       <find>when</find>
@@ -150,6 +156,8 @@
       <find>settlementStateWe</find>
       <find>settlementState</find>
       <find>addCo</find>
+      <find>TradeWith</find>
+      <find>add</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -222,7 +230,6 @@
         <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/FlowUtils.kt" />
         <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/EndTurnFlow.kt" />
         <option value="$PROJECT_DIR$/workflows/src/test/kotlin/com/testUtilities/testUtilities.kt" />
-        <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/TradeWithPortFlow.kt" />
         <option value="$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/TradeWithPortFlowTest.kt" />
         <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/IssueResourcesFlow.kt" />
         <option value="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/BuildPhaseContract.kt" />
@@ -231,6 +238,7 @@
         <option value="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/states/GameBoardState.kt" />
         <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/ClaimWinFlow.kt" />
         <option value="$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/GameStateContract.kt" />
+        <option value="$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/TradeWithPortFlow.kt" />
       </list>
     </option>
   </component>
@@ -318,18 +326,6 @@
             <path>
               <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
               <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="contracts" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
-              <item name="contractsAndStates" type="462c0819:PsiDirectoryNode" />
-              <item name="contracts" type="462c0819:PsiDirectoryNode" />
-              <item name="TradePhaseContract" type="2c5a2ef7:KtClassOrObjectTreeNode" />
-              <item name="Companion" type="2c5a2ef7:KtClassOrObjectTreeNode" />
-            </path>
-            <path>
-              <item name="SettlersOfCordan2.0" type="b2602c69:ProjectViewProjectNode" />
-              <item name="SettlersOfCordan2.0" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="workflows" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
             </path>
           </expand>
@@ -340,7 +336,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1558430642564" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1558430925336" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="JAVA" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="project.structure.last.edited" value="Modules" />
@@ -581,12 +577,12 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3267671" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4969475" visible="true" weight="0.42178446" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4969475" weight="0.42178446" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.497558" weight="0.50057936" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.497558" weight="0.32908458" />
-      <window_info anchor="bottom" id="Terminal" order="7" sideWeight="0.496337" weight="0.43105447" />
+      <window_info anchor="bottom" id="Terminal" order="7" sideWeight="0.496337" visible="true" weight="0.43105447" />
       <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.502442" side_tool="true" weight="0.5063731" />
       <window_info anchor="bottom" id="Version Control" order="9" weight="0.32908458" />
       <window_info anchor="bottom" id="Build" order="10" weight="0.32908458" />
@@ -691,7 +687,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/TradeWithPortFlow.kt</url>
-          <line>78</line>
+          <line>80</line>
           <properties />
           <option name="timeStamp" value="355" />
         </line-breakpoint>
@@ -1137,16 +1133,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/TradeWithPortFlow.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="48">
-          <caret line="82" column="138" selection-start-line="82" selection-start-column="138" selection-end-line="82" selection-end-column="138" />
-          <folding>
-            <element signature="e#19#872#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/workflows/src/test/kotlin/com/flowTests/TradeWithPortFlowTest.kt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1643">
@@ -1215,13 +1201,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/TradePhaseContract.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-10">
-          <caret line="1" lean-forward="true" selection-start-line="1" selection-end-line="1" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/GatherPhaseContract.kt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="171">
@@ -1231,8 +1210,25 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/GameStateContract.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="329">
+        <state relative-caret-position="1364">
           <caret line="70" column="5" lean-forward="true" selection-start-line="70" selection-start-column="5" selection-end-line="70" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/contracts/src/main/kotlin/com/contractsAndStates/contracts/TradePhaseContract.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-112">
+          <caret line="1" lean-forward="true" selection-start-line="1" selection-end-line="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workflows/src/main/kotlin/com/flows/TradeWithPortFlow.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="145">
+          <caret line="54" column="71" lean-forward="true" selection-start-line="54" selection-start-column="71" selection-end-line="54" selection-end-column="71" />
+          <folding>
+            <element signature="e#19#872#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
