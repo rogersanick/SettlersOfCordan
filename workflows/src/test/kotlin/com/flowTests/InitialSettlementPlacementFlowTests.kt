@@ -66,7 +66,8 @@ class InitialSettlementPlacementFlowTests {
 
         // Build an initial settlement by issuing a settlement state
         // and updating the current turn.
-        val buildInitialSettlementFlow = BuildInitialSettlementAndRoadFlow(gameState.linearId, 0, 5, 5)
+        val hexTileIndex = if (gameState.hexTiles[0].resourceType == "Desert") 1 else 2
+        val buildInitialSettlementFlow = BuildInitialSettlementAndRoadFlow(gameState.linearId, hexTileIndex, 5, 5)
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
         val futureWithInitialSettlementBuild = arrayOfAllPlayerNodesInOrder.first().startFlow(buildInitialSettlementFlow)

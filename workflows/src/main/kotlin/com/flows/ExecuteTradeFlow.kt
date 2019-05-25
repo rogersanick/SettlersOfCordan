@@ -1,9 +1,12 @@
 package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.contractsAndStates.contracts.TradePhaseContract
 import com.contractsAndStates.states.*
-import com.r3.corda.sdk.token.workflow.selection.TokenSelection
+import com.r3.corda.sdk.token.contracts.commands.MoveTokenCommand
+import com.r3.corda.sdk.token.contracts.types.IssuedTokenType
+import com.r3.corda.sdk.token.workflow.flows.internal.selection.TokenSelection
+import com.r3.corda.sdk.token.workflow.flows.move.addMoveTokens
+import com.r3.corda.sdk.token.workflow.types.PartyAndAmount
 import net.corda.core.contracts.*
 import net.corda.core.crypto.TransactionSignature
 import net.corda.core.flows.*
@@ -61,11 +64,8 @@ class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier): FlowLo
         val tokenSelection = TokenSelection(serviceHub)
 
         // 3. Use the tokenSDK to generate the movement of resources required to execute the trade.
-        val tbWithOfferedTokensMovedFromUsToThem = tokenSelection.generateMove(
-                TransactionBuilder(),
-                tradeStateOnWhichToMakeAnOffer.wanted,
-                tradeStateOnWhichToMakeAnOffer.owner
-        )
+        val tb = TransactionBuilder()
+        this.addMoveTokens(tb, listOf(PartyAndAmount(tradeStateOnWhichToMakeAnOffer.owner, tradeStateOnWhichToMakeAnOffer.wanted)), null)
 
         // 4. Get a reference to the notary and assign it to the transaction.
         require(serviceHub.networkMapCache.notaryIdentities.isNotEmpty()) { "No notary nodes registered" }
@@ -83,9 +83,9 @@ class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier): FlowLo
                 TwoPartyDealFlow.AutoOffer(
                         notary,
                         tradeStateOnWhichToMakeAnOffer.copy(informationForAcceptor = InformationForAcceptor(
-                        tbWithOfferedTokensMovedFromUsToThem.first.inputStates(),
-                        tbWithOfferedTokensMovedFromUsToThem.first.outputStates(),
-                        tbWithOfferedTokensMovedFromUsToThem.first.commands()
+                        tb.inputStates(),
+                        tb.outputStates(),
+                        tb.commands()
                 ))),
                 progressTracker.getChildProgressTracker(DEALING)!!
         )
@@ -114,18 +114,16 @@ class ExecuteTradeFlowResponder(otherSideSession: FlowSession): TwoPartyDealFlow
         val counterPartyCommands = handShakeToAssembleSharedTX.informationForAcceptor!!.commands.stream().collect(Collectors.toList())
 
         // Use the counter-party input and output states to create a new transaction builder
-        val tbWithWantedMoved = tokenSelection.generateMove(
-                builder = TransactionBuilder(
-                        inputs = counterPartyInputStates,
-                        outputs = counterPartyOutputStates,
-                        commands = counterPartyCommands
-                ),
-                amount = handShakeToAssembleSharedTX.offering,
-                recipient = otherSideSession.counterparty
+        val tb = TransactionBuilder(
+                inputs = counterPartyInputStates,
+                outputs = counterPartyOutputStates,
+                commands = counterPartyCommands
         )
 
+        this.addMoveTokens(tb, listOf(PartyAndAmount(otherSideSession.counterparty, handShakeToAssembleSharedTX.offering)), null)
+
         // Use the generateAgreement method on the ExtendedDealState class to add the appropriate commands to the transaction.
-        val ptx = handShakeToAssembleSharedTX.generateAgreement(tbWithWantedMoved.first)
+        val ptx = handShakeToAssembleSharedTX.generateAgreement(tb)
 
         // We set the transaction's time-window: it may be that none of the contracts need this!
         // But it can't hurt to have one.

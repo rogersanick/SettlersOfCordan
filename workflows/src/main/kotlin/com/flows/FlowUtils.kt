@@ -2,8 +2,7 @@ package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.states.*
-import com.r3.corda.sdk.token.contracts.types.TokenType
-import com.r3.corda.sdk.token.workflow.selection.TokenSelection
+import com.r3.corda.sdk.token.workflow.flows.internal.selection.TokenSelection
 import net.corda.core.contracts.Amount
 import net.corda.core.identity.Party
 import net.corda.core.node.ServiceHub

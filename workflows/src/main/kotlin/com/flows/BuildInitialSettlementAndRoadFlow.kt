@@ -2,6 +2,7 @@ package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.BuildPhaseContract
+import com.contractsAndStates.contracts.GameStateContract
 import com.contractsAndStates.states.*
 import com.r3.corda.sdk.token.contracts.FungibleTokenContract
 import com.r3.corda.sdk.token.contracts.commands.IssueTokenCommand
@@ -163,6 +164,7 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         tb.addOutputState(settlementState, BuildPhaseContract.ID)
         tb.addOutputState(roadState, BuildPhaseContract.ID)
         tb.addOutputState(gameBoardState.copy(settlementsPlaced = newSettlementsPlaced, hexTiles = newHexTiles))
+        tb.addCommand(GameStateContract.Commands.UpdateWithSettlement(), gameBoardState.players.map { it.owningKey })
 
         // Step 15. Sign initial transaction
         tb.verify(serviceHub)

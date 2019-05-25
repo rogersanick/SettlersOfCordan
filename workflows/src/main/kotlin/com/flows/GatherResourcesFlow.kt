@@ -8,6 +8,7 @@ import com.oracleClient.state.DiceRollState
 import com.r3.corda.sdk.token.contracts.FungibleTokenContract
 import com.r3.corda.sdk.token.contracts.commands.IssueTokenCommand
 import com.r3.corda.sdk.token.contracts.utilities.heldBy
+import com.r3.corda.sdk.token.workflow.flows.issue.IssueTokensFlow
 import net.corda.core.contracts.*
 import net.corda.core.flows.*
 import net.corda.core.node.services.queryBy
@@ -67,7 +68,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<Si
         }
 
         // Step 8. Consolidate the list so that they is only one instance of a given token type issued with the appropriate amount.
-        // This is required right now as mutliple issuances of the same token type cause an error with transaction state grouping.
+        // This is required right now as multiple issuances of the same token type cause an error with transaction state grouping.
         val reducedListOfGameCurrencyToClaim = mutableMapOf<GameCurrencyToClaim, Int>()
         gameCurrenciesToClaim.forEach{
             if (reducedListOfGameCurrencyToClaim.containsKey(it)) reducedListOfGameCurrencyToClaim[it] = reducedListOfGameCurrencyToClaim[it]!!.plus(1)

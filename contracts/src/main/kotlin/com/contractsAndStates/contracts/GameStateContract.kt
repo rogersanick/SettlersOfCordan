@@ -2,7 +2,6 @@ package com.contractsAndStates.contracts
 
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.SettlementState
-import com.oracleClient.state.DiceRollState
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
 import net.corda.core.contracts.requireSingleCommand
@@ -67,6 +66,21 @@ class GameStateContract : Contract {
                 "All players must verify and sign the transaction to build a settlement." using(signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
 
             }
+
+            is Commands.UpdateWithSettlement -> requireThat {
+                /**
+                 *  ******** SHAPE ********
+                 */
+
+                /**
+                 *  ******** BUSINESS LOGIC ********
+                 */
+
+                /**
+                 *  ******** SIGNATURES ********
+                 */
+            }
+
         }
     }
 
@@ -74,5 +88,6 @@ class GameStateContract : Contract {
     interface Commands : CommandData {
         class SetUpGameBoard : Commands
         class WinGame: Commands
+        class UpdateWithSettlement: Commands
     }
 }

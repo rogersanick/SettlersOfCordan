@@ -2,6 +2,7 @@ package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.BuildPhaseContract
+import com.contractsAndStates.contracts.GameStateContract
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.HexTile
 import com.contractsAndStates.states.SettlementState
@@ -113,6 +114,7 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         tb.addReferenceState(turnTrackerReferenceStateAndRef)
         tb.addOutputState(settlementState, BuildPhaseContract.ID)
         tb.addOutputState(gameBoardState.copy(settlementsPlaced = newSettlementsPlaced))
+        tb.addCommand(GameStateContract.Commands.UpdateWithSettlement(), gameBoardState.players.map { it.owningKey })
 
         // Step 12. Sign initial transaction
         tb.verify(serviceHub)

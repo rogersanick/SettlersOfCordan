@@ -1,7 +1,6 @@
 package com.contractsAndStates.contracts
 
 import com.contractsAndStates.states.GameBoardState
-import com.contractsAndStates.states.TurnTrackerState
 import com.oracleClient.state.DiceRollState
 import com.r3.corda.sdk.token.contracts.states.FungibleToken
 import net.corda.core.contracts.CommandData

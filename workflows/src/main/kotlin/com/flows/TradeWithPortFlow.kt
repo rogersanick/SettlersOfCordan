@@ -1,16 +1,10 @@
 package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.contractsAndStates.contracts.GatherPhaseContract
 import com.contractsAndStates.contracts.TradePhaseContract
 import com.contractsAndStates.states.*
-import com.oracleClient.contracts.DiceRollContract
-import com.oracleClient.state.DiceRollState
 import com.r3.corda.sdk.token.contracts.commands.IssueTokenCommand
 import com.r3.corda.sdk.token.contracts.utilities.heldBy
-import com.r3.corda.sdk.token.workflow.flows.IssueToken
-import com.r3.corda.sdk.token.workflow.flows.RedeemToken
-import com.r3.corda.sdk.token.workflow.selection.TokenSelection
 import net.corda.core.contracts.*
 import net.corda.core.flows.*
 import net.corda.core.node.services.queryBy
@@ -54,7 +48,7 @@ class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort
         // Step 6. Generate all tokens and commands for issuance from the port
         val outputResource = portToBeTradedWith.outputRequired.filter { it.token == getResourceByName(outputResourceType) }.single()
         tb.addOutputState(outputResource issuedBy ourIdentity heldBy ourIdentity )
-        tb.addCommand(TradePhaseContract.Commands.TradeWithPort())
+        tb.addCommand(TradePhaseContract.Commands.TradeWithPort(), gameBoardState.players.map { it.owningKey })
         tb.addCommand(IssueTokenCommand(outputResource.token issuedBy ourIdentity), gameBoardState.players.map { it.owningKey })
 
         // Step 7. Add all necessary states to the transaction

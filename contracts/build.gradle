@@ -40,6 +40,7 @@ dependencies {
 
     // CorDapp Dependencies
     cordapp "$corda_release_distribution:corda-finance-contracts:$corda_release_version"
+    cordapp project(":oracleClient")
 
 }
 
