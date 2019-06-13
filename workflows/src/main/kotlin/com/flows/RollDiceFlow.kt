@@ -63,7 +63,7 @@ class RollDiceFlow(val gameBoardStateLinearId: UniqueIdentifier) : FlowLogic<Sig
 }
 
 @InitiatedBy(RollDiceFlow::class)
-class RollDiceFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
+open class RollDiceFlowResponder(internal val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {

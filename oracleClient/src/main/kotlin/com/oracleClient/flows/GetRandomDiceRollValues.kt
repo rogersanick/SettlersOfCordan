@@ -22,6 +22,6 @@ class GetRandomDiceRollValues(val turnTrackerStateLinearId: UniqueIdentifier, va
         val oracleSession = initiateFlow(oracle)
         val diceRolls = oracleSession.sendAndReceive<List<*>>(listOf(turnTrackerStateLinearId, gameBoardStateLinearId)).unwrap { it }
         val signature = oracleSession.receive<SignedDataWithCert<Party>>().unwrap { it }
-        return DiceRollState(diceRolls[0] as Int, diceRolls[1] as Int, turnTrackerStateLinearId, gameBoardStateLinearId, partiesInvolved, signature)
+        return DiceRollState(diceRolls[0] as Int, diceRolls[1] as Int, turnTrackerStateLinearId, gameBoardStateLinearId, partiesInvolved + ourIdentity, signature)
     }
 }
