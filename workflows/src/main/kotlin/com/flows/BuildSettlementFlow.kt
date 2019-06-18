@@ -58,7 +58,7 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         val settlementState = SettlementState(hexTileIndex, hexTileCoordinate, gameBoardState.players, ourIdentity)
 
         // Step 7. Create a new Game Board State
-        val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { kotlin.collections.MutableList(6) { false } }
+        val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { MutableList(6) { false } }
 
         // Step 8. Calculate the coordinates of neighbours that could conflict with the proposed placement were they to exist.
         class LinkedListNode(val int: Int, var next: LinkedListNode? = null)

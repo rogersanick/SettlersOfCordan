@@ -26,9 +26,8 @@ data class RoadState (
         val roadAttachedA: UniqueIdentifier? = null,
         val roadAttachedB: UniqueIdentifier? = null,
         override val linearId: UniqueIdentifier = UniqueIdentifier()
-): ContractState, LinearState {
-
-    override val participants: List<AbstractParty> get() = players
+): LinearState {
+    override val participants: List<AbstractParty> = players
 
     /**
      * In Settlers of Catan, players earn additional victory points for maintaining the longest

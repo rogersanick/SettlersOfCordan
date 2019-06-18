@@ -4,6 +4,7 @@ import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.states.*
 import com.r3.corda.sdk.token.workflow.flows.internal.selection.TokenSelection
 import net.corda.core.contracts.Amount
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
 import net.corda.core.node.ServiceHub
 import net.corda.core.transactions.TransactionBuilder
@@ -64,5 +65,13 @@ fun generateInGameSpend(serviceHub: ServiceHub, tb: TransactionBuilder, price: M
 
     // Return the mutated transaction builder
     return tb
+
+}
+
+fun getGameBoardStateFromLinearID(linearId: UniqueIdentifier): GameBoardState {
+
+}
+
+fun getTurnTrackerStateFromGameBoardLinearID(linearId: UniqueIdentifier): TurnTrackerState {
 
 }

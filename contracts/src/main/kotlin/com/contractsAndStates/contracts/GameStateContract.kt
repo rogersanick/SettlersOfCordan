@@ -23,6 +23,8 @@ class GameStateContract : Contract {
     override fun verify(tx: LedgerTransaction) {
 
         val command = tx.commands.requireSingleCommand<Commands>()
+        val inputGameBoardState = tx.inputsOfType<GameBoardState>()
+        val outputGameBoardState = tx.outputsOfType<GameBoardState>()
 
         when (command.value) {
 
@@ -31,6 +33,8 @@ class GameStateContract : Contract {
                  *  ******** SHAPE ********
                  */
 
+                "There must be one output of type GameBoardState" using (tx.outputsOfType<GameBoardState>().size == 1)
+
                 /**
                  *  ******** BUSINESS LOGIC ********
                  */
@@ -38,18 +42,22 @@ class GameStateContract : Contract {
                 /**
                  *  ******** SIGNATURES ********
                  */
+
+                val signingParties = tx.commandsOfType<Commands.SetUpGameBoard>().single().signers.toSet()
+                val participants = outputGameBoardState.single().participants.map { it.owningKey }
+                "All players must verify and sign the transaction to build a settlement." using(signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
+
             }
 
             is Commands.WinGame -> requireThat {
-
-                val inputGameBoardState = tx.inputsOfType<GameBoardState>()
 
                 /**
                  *  ******** SHAPE ********
                  */
 
-                "There is one input and it is of type GameBoardState" using (inputGameBoardState.size == 1)
-                "There is one output and it is of type GameBoardState" using (tx.outputsOfType<GameBoardState>().size == 1)
+                "There must be one output" using (tx.outputs.size == 1)
+                "There must be one input of type GameBoardState" using (inputGameBoardState.size == 1)
+                "There must be one output of type GameBoardState" using (outputGameBoardState.size == 1)
 
                 /**
                  *  ******** BUSINESS LOGIC ********
@@ -72,13 +80,25 @@ class GameStateContract : Contract {
                  *  ******** SHAPE ********
                  */
 
+                "There is one input and it is of type GameBoardState" using (inputGameBoardState.size == 1)
+                "There is one output and it is of type GameBoardState" using (tx.outputsOfType<GameBoardState>().size == 1)
+
                 /**
                  *  ******** BUSINESS LOGIC ********
                  */
 
+                val inputGameBoardSettlements = inputGameBoardState.single().settlementsPlaced.map { it.map { sub -> if(sub) 1 else 0 }.sum() }.sum()
+                val outputGameBoardSettlements = outputGameBoardState.single().settlementsPlaced.map { it.map { sub -> if(sub) 1 else 0 }.sum() }.sum()
+
                 /**
                  *  ******** SIGNATURES ********
                  */
+
+                val signingParties = tx.commandsOfType<Commands.UpdateWithSettlement>().single().signers.toSet()
+                val participants = inputGameBoardState.single().participants.map{ it.owningKey }
+                "All players must verify and sign the transaction to build a settlement." using(signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
+
+
             }
 
         }
