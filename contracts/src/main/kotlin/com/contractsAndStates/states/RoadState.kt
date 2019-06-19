@@ -7,6 +7,7 @@ import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
+import net.corda.core.serialization.CordaSerializable
 
 /**
  * Roads are pieces of infrastructure that connect your settlements and cities.
@@ -17,6 +18,7 @@ import net.corda.core.identity.Party
  * You may build roads along the coast.
  */
 
+@CordaSerializable
 @BelongsToContract(BuildPhaseContract::class)
 data class RoadState (
         val hexTileIndex: Int,

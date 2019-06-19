@@ -79,9 +79,6 @@ class GatherPhaseContract : Contract {
 
             }
 
-
-
-
         }
     }
 

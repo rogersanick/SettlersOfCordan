@@ -12,7 +12,6 @@ import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
-import org.checkerframework.common.aliasing.qual.Unique
 import java.lang.IllegalArgumentException
 
 // ******************************************

@@ -1,5 +1,6 @@
 package com.contractsAndStates.states
 
+import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.GameStateContract
 import net.corda.core.contracts.*
 import net.corda.core.identity.Party
@@ -15,12 +16,14 @@ import java.util.Collections.copy
  * future transactions. It is frequently used as a reference state (for example, in the issueResourcesFlow)
  */
 
+@CordaSerializable
 @BelongsToContract(GameStateContract::class)
 data class GameBoardState(val beginner: Boolean = false,
                           val hexTiles: MutableList<HexTile>,
                           val ports: List<Port>,
                           val players: List<Party>,
                           val turnTrackerLinearId: UniqueIdentifier,
+                          val robberLinearId: UniqueIdentifier,
                           val spectators: List<Party> = listOf(),
                           val settlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(19) { MutableList(6) { false } },
                           var setUpComplete: Boolean = false,
@@ -30,6 +33,13 @@ data class GameBoardState(val beginner: Boolean = false,
 
     override val participants: List<Party> get() = players
 
+    @Suspendable
+    fun updateHexTiles(updatedHexTiles: MutableList<HexTile>): GameBoardState = copy(hexTiles = updatedHexTiles)
+
+    @Suspendable
+    fun updateSettlementsPlaced(updatedSettlementsPlaced: MutableList<MutableList<Boolean>>): GameBoardState = copy(settlementsPlaced = updatedSettlementsPlaced)
+
+    @Suspendable
     fun weWin(ourIdentity: Party): GameBoardState = copy(winner = ourIdentity)
 
 }
@@ -47,6 +57,7 @@ class HexTile(val resourceType: String,
      * funky maths that we will use later on to calculate the validity of transactions.
      */
 
+    @Suspendable
     fun connect(sideIndex: Int, hexTileToConnect: HexTile) {
         if (sideIndex > 5) {
             throw Error("You have specified an invalid index.")
@@ -62,6 +73,7 @@ class HexTile(val resourceType: String,
      * TODO: Add functionality to connect roadStates when new roads and proposed extending existing roads.
      */
 
+    @Suspendable
     fun buildRoad(sideIndex: Int, roadStateLinearId: UniqueIdentifier, hexTiles: MutableList<HexTile>): MutableList<HexTile> {
 
         var newMutableHexTiles = hexTiles.map { it }.toMutableList()

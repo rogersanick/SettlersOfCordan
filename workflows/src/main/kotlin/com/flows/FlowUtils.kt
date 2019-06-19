@@ -4,9 +4,13 @@ import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.states.*
 import com.r3.corda.sdk.token.workflow.flows.internal.selection.TokenSelection
 import net.corda.core.contracts.Amount
+import net.corda.core.contracts.ReferencedStateAndRef
+import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
 import net.corda.core.node.ServiceHub
+import net.corda.core.node.services.queryBy
+import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.TransactionBuilder
 
 class CorDanFlowUtils {
@@ -68,10 +72,17 @@ fun generateInGameSpend(serviceHub: ServiceHub, tb: TransactionBuilder, price: M
 
 }
 
-fun getGameBoardStateFromLinearID(linearId: UniqueIdentifier): GameBoardState {
-
+fun getGameBoardStateFromLinearID(linearId: UniqueIdentifier, serviceHub: ServiceHub): StateAndRef<GameBoardState> {
+    val queryCriteriaForGameBoardState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(linearId))
+    return serviceHub.vaultService.queryBy<GameBoardState>(queryCriteriaForGameBoardState).states.single()
 }
 
-fun getTurnTrackerStateFromGameBoardLinearID(linearId: UniqueIdentifier): TurnTrackerState {
+fun getTurnTrackerStateFromLinearID(linearId: UniqueIdentifier, serviceHub: ServiceHub): StateAndRef<TurnTrackerState> {
+    val queryCriteriaForTurnTrackerState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(linearId))
+    return serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteriaForTurnTrackerState).states.single()
+}
 
+fun getRobberStateFromLinearID(linearId: UniqueIdentifier, serviceHub: ServiceHub): StateAndRef<RobberState> {
+    val queryCriteriaForTurnTrackerState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(linearId))
+    return serviceHub.vaultService.queryBy<RobberState>(queryCriteriaForTurnTrackerState).states.single()
 }
