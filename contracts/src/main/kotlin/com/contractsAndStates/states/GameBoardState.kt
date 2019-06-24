@@ -33,13 +33,10 @@ data class GameBoardState(val beginner: Boolean = false,
 
     override val participants: List<Party> get() = players
 
-    @Suspendable
     fun updateHexTiles(updatedHexTiles: MutableList<HexTile>): GameBoardState = copy(hexTiles = updatedHexTiles)
 
-    @Suspendable
     fun updateSettlementsPlaced(updatedSettlementsPlaced: MutableList<MutableList<Boolean>>): GameBoardState = copy(settlementsPlaced = updatedSettlementsPlaced)
 
-    @Suspendable
     fun weWin(ourIdentity: Party): GameBoardState = copy(winner = ourIdentity)
 
 }
