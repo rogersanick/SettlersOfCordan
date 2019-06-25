@@ -68,10 +68,10 @@ fun generateInGameSpend(serviceHub: ServiceHub, tb: TransactionBuilder, price: M
 
 }
 
-fun getGameBoardStateFromLinearID(linearId: UniqueIdentifier): GameBoardState {
-
-}
-
-fun getTurnTrackerStateFromGameBoardLinearID(linearId: UniqueIdentifier): TurnTrackerState {
-
-}
+//fun getGameBoardStateFromLinearID(linearId: UniqueIdentifier): GameBoardState {
+//
+//}
+//
+//fun getTurnTrackerStateFromGameBoardLinearID(linearId: UniqueIdentifier): TurnTrackerState {
+//
+//}
