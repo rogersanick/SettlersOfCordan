@@ -39,13 +39,12 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
         // Step 2. Retrieve the Game Board State from the vault.
-        val queryCriteriaForGameBoardState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardLinearId))
-        val gameBoardStateAndRef = serviceHub.vaultService.queryBy<GameBoardState>(queryCriteriaForGameBoardState).states.single()
+        val gameBoardStateAndRef = getGameBoardStateFromLinearID(gameBoardLinearId, serviceHub)
         val gameBoardState = gameBoardStateAndRef.state.data
 
         // Step 3. Retrieve the Turn Tracker State from the vault
-        val queryCriteriaForTurnTrackerState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
-        val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteriaForTurnTrackerState).states.single())
+        val turnTrackerStateAndRef = getTurnTrackerStateFromLinearID(gameBoardState.linearId, serviceHub)
+        val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(turnTrackerStateAndRef)
 
         // Step 4. Create a new transaction builder
         val tb = TransactionBuilder(notary)
@@ -116,6 +115,8 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         tb.addOutputState(gameBoardState.copy(settlementsPlaced = newSettlementsPlaced))
         tb.addCommand(GameStateContract.Commands.UpdateWithSettlement(), gameBoardState.players.map { it.owningKey })
 
+        serviceHub.networkMapCache.notaryIdentities.first()
+        serviceHub.networkMapCache.notaryIdentities.first()
         // Step 12. Sign initial transaction
         tb.verify(serviceHub)
         val ptx = serviceHub.signInitialTransaction(tb)

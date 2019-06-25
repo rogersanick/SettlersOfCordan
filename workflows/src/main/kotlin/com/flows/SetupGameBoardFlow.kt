@@ -2,6 +2,7 @@ package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.GameStateContract
+import com.contractsAndStates.contracts.RobberContract
 import com.contractsAndStates.contracts.TurnTrackerContract
 import com.contractsAndStates.states.HexTile
 import com.contractsAndStates.states.PortTile
@@ -27,7 +28,7 @@ import net.corda.core.utilities.ProgressTracker
  * matically through match making functionality.
  */
 
-// TODO: Make this flow testable by seperating GameBoard generation functionality from flow logic.
+// TODO: Make this flow testable by separating GameBoard generation functionality from flow logic.
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
@@ -41,6 +42,7 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         object SETTING_UP_YOUR_GAMEBOARD : ProgressTracker.Step("Setting up your personal GameBoard on Corda")
         object FINALIZING_GAMEBOARD : ProgressTracker.Step("Finalizing your GameBoard on Corda")
         object ADDING_PORTS_FOR_YOU_SEAFARING_SOULS : ProgressTracker.Step("Adding sea-ports for your sea-faring souls")
+        object FINDING_A_VILLAIN_TO_PLAY_THE_ROBBER : ProgressTracker.Step("Finding a villain to play the robber")
         object ADDING_ALL_GAME_STATES_TO_THE_TRANSACTION : ProgressTracker.Step("Adding all states to the transaction")
         object VERIFYING : ProgressTracker.Step("Verifying the transaction")
         object COLLECTING_SIGNATURES : ProgressTracker.Step("Collecting signatures from your fellow citizens of Cordan")
@@ -56,6 +58,7 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
             ADDING_PORTS_FOR_YOU_SEAFARING_SOULS,
             FINALIZING_GAMEBOARD,
             ADDING_ALL_GAME_STATES_TO_THE_TRANSACTION,
+            FINDING_A_VILLAIN_TO_PLAY_THE_ROBBER,
             VERIFYING,
             COLLECTING_SIGNATURES,
             FINALIZING_TRANSACTION
@@ -77,9 +80,10 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         val tb = TransactionBuilder(notary)
 
         // Step 3. Create a new issue command and add it to the transaction.
+        val playerKeys = listOf(p1.owningKey, p2.owningKey, p3.owningKey, p4.owningKey)
         progressTracker.currentStep = ISSUING_COMMANDS
-        val issueCommand = Command(GameStateContract.Commands.SetUpGameBoard(), listOf(p1.owningKey, p2.owningKey, p3.owningKey, p4.owningKey))
-        val createTurnTracker = Command(TurnTrackerContract.Commands.CreateTurnTracker(), listOf(p1.owningKey, p2.owningKey, p3.owningKey, p4.owningKey))
+        val issueCommand = Command(GameStateContract.Commands.SetUpGameBoard(), playerKeys)
+        val createTurnTracker = Command(TurnTrackerContract.Commands.CreateTurnTracker(), playerKeys)
         tb.addCommand(issueCommand)
         tb.addCommand(createTurnTracker)
 
@@ -246,15 +250,23 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
             }
         }
 
-        progressTracker.currentStep = FINALIZING_GAMEBOARD
-        val newGameState = GameBoardState(false, hexTiles, ports, randomizedPlayersList, turnTrackerState.linearId)
+        // Step 6. Create a robber state and issueRobber commands - add both to the transaction
+        progressTracker.currentStep = FINDING_A_VILLAIN_TO_PLAY_THE_ROBBER
+        val hexTileWithDesert = hexTiles.filter { it.resourceType == "Desert" }.single()
+        val robberState = RobberState(hexTileWithDesert.hexTileIndex, playersList)
+        val createRobberCommand = Command(RobberContract.Commands.CreateRobber(), playerKeys)
+        tb.addOutputState(robberState)
+        tb.addCommand(createRobberCommand)
 
-        // Step 6. Add the states to the transaction
+        progressTracker.currentStep = FINALIZING_GAMEBOARD
+        val newGameState = GameBoardState(false, hexTiles, ports, randomizedPlayersList, turnTrackerState.linearId, robberState.linearId)
+
+        // Step 7. Add the states to the transaction
         progressTracker.currentStep = ADDING_ALL_GAME_STATES_TO_THE_TRANSACTION
         tb.addOutputState(newGameState, GameStateContract.ID)
         tb.addOutputState(turnTrackerState, TurnTrackerContract.ID)
 
-        // Step 7. Verify and sign the transaction
+        // Step 8. Verify and sign the transaction
         progressTracker.currentStep = VERIFYING
         tb.verify(serviceHub)
         val ptx = serviceHub.signInitialTransaction(tb)

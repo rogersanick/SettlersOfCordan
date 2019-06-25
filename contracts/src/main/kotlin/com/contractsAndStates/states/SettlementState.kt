@@ -5,6 +5,7 @@ import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.ContractState
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
+import net.corda.core.serialization.CordaSerializable
 
 /**
  * Settlements are the fundamental structure one may build in Settlers of Cordan. They
@@ -13,6 +14,7 @@ import net.corda.core.identity.Party
  * receives from the dice roll and uses to propose the outcome of the next Gather phase.
  */
 
+@CordaSerializable
 @BelongsToContract(BuildPhaseContract::class)
 data class SettlementState(
         val hexTileIndex: Int,

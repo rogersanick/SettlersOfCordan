@@ -158,15 +158,19 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         // Step 13. Update the gameBoardState hextiles with the roads being built.
         val newHexTiles = gameBoardState.hexTiles[hexTileIndex].buildRoad(hexTileRoadSide, roadState.linearId, gameBoardState.hexTiles)
 
-        // Step 14. Add all states and commands to the transaction.
+        // Step 14. Update the gameBoardState with new hexTiles and built settlements.
+        val partiallyUpdatedOutputGameBoardState = gameBoardState.updateHexTiles(newHexTiles)
+        val fullyUpdatedOutputGameBoardState = partiallyUpdatedOutputGameBoardState.updateSettlementsPlaced(newSettlementsPlaced)
+
+        // Step 15. Add all states and commands to the transaction.
         tb.addInputState(gameBoardStateAndRef)
         tb.addReferenceState(ReferencedStateAndRef(turnTrackerStateAndRef))
         tb.addOutputState(settlementState, BuildPhaseContract.ID)
         tb.addOutputState(roadState, BuildPhaseContract.ID)
-        tb.addOutputState(gameBoardState.copy(settlementsPlaced = newSettlementsPlaced, hexTiles = newHexTiles))
+        tb.addOutputState(fullyUpdatedOutputGameBoardState)
         tb.addCommand(GameStateContract.Commands.UpdateWithSettlement(), gameBoardState.players.map { it.owningKey })
 
-        // Step 15. Sign initial transaction
+        // Step 16. Sign initial transaction
         tb.verify(serviceHub)
         val ptx = serviceHub.signInitialTransaction(tb)
 
