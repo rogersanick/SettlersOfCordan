@@ -34,30 +34,27 @@ class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort
         val gameBoardReferenceStateAndRef = ReferencedStateAndRef(gameBoardStateAndRef)
         val gameBoardState = gameBoardStateAndRef.state.data
 
-        // Step 3. Retrieve the Turn Tracker State from the vault
-        val queryCriteriaForTurnTrackerState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
-
-        // Step 4. Get access to the port with which the user wishes to trade
+        // Step 3. Get access to the port with which the user wishes to trade
         val portToBeTradedWith = gameBoardState.ports.filter { it.accessPoints.any { accessPoint ->  accessPoint.hexTileIndex == indexOfPort && accessPoint.hexTileCoordinate.contains(coordinateOfPort) } }.single().portTile
 
-        // Step 5. Generate an exit for the tokens that will be consumed by the port.
+        // Step 4. Generate an exit for the tokens that will be consumed by the port.
         val tb = TransactionBuilder(notary)
         val inputRequired = portToBeTradedWith.inputRequired.filter { it.token == getResourceByName(inputResourceType) }.single()
         generateInGameSpend(serviceHub, tb, mapOf(Pair(inputRequired.token, inputRequired)), ourIdentity)
 
-        // Step 6. Generate all tokens and commands for issuance from the port
+        // Step 5. Generate all tokens and commands for issuance from the port
         val outputResource = portToBeTradedWith.outputRequired.filter { it.token == getResourceByName(outputResourceType) }.single()
         tb.addOutputState(outputResource issuedBy ourIdentity heldBy ourIdentity )
         tb.addCommand(TradePhaseContract.Commands.TradeWithPort(), gameBoardState.players.map { it.owningKey })
         tb.addCommand(IssueTokenCommand(outputResource.token issuedBy ourIdentity), gameBoardState.players.map { it.owningKey })
 
-        // Step 7. Add all necessary states to the transaction
+        // Step 6. Add all necessary states to the transaction
         tb.addReferenceState(gameBoardReferenceStateAndRef)
 
-        // Step 8. Verify Transaction
+        // Step 7. Verify Transaction
         tb.verify(serviceHub)
 
-        // Step 9. Collect the signatures and sign the transaction
+        // Step 8. Collect the signatures and sign the transaction
         val ptx = serviceHub.signInitialTransaction(tb)
         val sessions = (gameBoardState.players - ourIdentity).toSet().map { initiateFlow(it) }
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))

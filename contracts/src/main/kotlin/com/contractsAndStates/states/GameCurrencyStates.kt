@@ -84,9 +84,7 @@ val Double.Brick: Amount<Resource> get() = Brick(this)
 
 // Underlying Resource Property
 data class Resource(private val currency: GameCurrency,
-               override val tokenIdentifier: String) : Money {
-    override val fractionDigits: Int
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+               override val tokenIdentifier: String) : Money() {
     val symbol: String get() = currency.currencyCode
     override val description: String get() = currency.displayName
     override val tokenClass: String get() = javaClass.canonicalName

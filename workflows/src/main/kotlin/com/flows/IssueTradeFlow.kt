@@ -46,13 +46,10 @@ class IssueTradeFlow(val amountOffered: Amount<TokenType>, val amountWanted: Amo
         val gameBoardStateAndRef = serviceHub.vaultService.queryBy<GameBoardState>(queryCriteriaForGameBoardState).states.single()
         val gameBoardState = gameBoardStateAndRef.state.data
 
-        // Step 3. Retrieve the Turn Tracker State from the vault
-        val queryCriteriaForTurnTrackerState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
-
-        // Step 4. Create a transaction builder
+        // Step 3. Create a transaction builder
         val tb = TransactionBuilder(notary = notary)
 
-        // Step 5. Generate a trade state.
+        // Step 4. Generate a trade state.
         val tradeState = TradeState(
                 amountOffered,
                 amountWanted,
@@ -63,15 +60,15 @@ class IssueTradeFlow(val amountOffered: Amount<TokenType>, val amountWanted: Amo
                 gameBoardLinearId
         )
 
-        // Step 6. Add the new trade state to the transaction.
+        // Step 5. Add the new trade state to the transaction.
         tb.addOutputState(tradeState)
 
-        // Step 7. Add the gather resources command and verify the transaction
+        // Step 6. Add the gather resources command and verify the transaction
         val commandSigners = gameBoardState.players.map {it.owningKey}
         tb.addCommand(TradePhaseContract.Commands.IssueTrade(), commandSigners)
         tb.verify(serviceHub)
 
-        // Step 10. Collect the signatures and sign the transaction
+        // Step 7. Collect the signatures and sign the transaction
         val ptx = serviceHub.signInitialTransaction(tb)
         val sessions = (gameBoardState.players - ourIdentity).toSet().map { initiateFlow(it) }
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))

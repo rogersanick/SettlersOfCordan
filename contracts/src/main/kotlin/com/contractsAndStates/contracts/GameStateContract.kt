@@ -87,6 +87,7 @@ class GameStateContract : Contract {
                  *  ******** BUSINESS LOGIC ********
                  */
 
+                // TODO: Verify that the input and output game board settlements are updating correctly.
                 val inputGameBoardSettlements = inputGameBoardState.single().settlementsPlaced.map { it.map { sub -> if(sub) 1 else 0 }.sum() }.sum()
                 val outputGameBoardSettlements = outputGameBoardState.single().settlementsPlaced.map { it.map { sub -> if(sub) 1 else 0 }.sum() }.sum()
 

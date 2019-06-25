@@ -243,7 +243,6 @@ class BuildPhaseContract : Contract {
 
                 val newCity = tx.outputsOfType<SettlementState>().single()
                 val inputSettlement = tx.inputsOfType<SettlementState>().single()
-                val hexTileCoordinate = newCity.hexTileCoordinate
                 val hexTileIndex = newCity.hexTileIndex
 
                 "A city cannot be built on a hexTile that is of type Desert" using (inputGameBoardState.hexTiles[hexTileIndex].resourceType == "Desert")

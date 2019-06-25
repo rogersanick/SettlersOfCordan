@@ -60,22 +60,19 @@ class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier): FlowLo
         val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(tradeStateLinearId))
         val tradeStateOnWhichToMakeAnOffer = serviceHub.vaultService.queryBy<TradeState>(queryCriteria).states.single().state.data
 
-        // 2. Create an instance of a token selector to spend the resources required to execute the trade.
-        val tokenSelection = TokenSelection(serviceHub)
-
-        // 3. Use the tokenSDK to generate the movement of resources required to execute the trade.
+        // 2. Use the tokenSDK to generate the movement of resources required to execute the trade.
         val tb = TransactionBuilder()
         this.addMoveTokens(tb, listOf(PartyAndAmount(tradeStateOnWhichToMakeAnOffer.owner, tradeStateOnWhichToMakeAnOffer.wanted)), null)
 
-        // 4. Get a reference to the notary and assign it to the transaction.
+        // 3. Get a reference to the notary and assign it to the transaction.
         require(serviceHub.networkMapCache.notaryIdentities.isNotEmpty()) { "No notary nodes registered" }
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
-        // 5. Get a reference to the counter-party of the trade.
+        // 4. Get a reference to the counter-party of the trade.
         val otherParty = excludeHostNode(serviceHub, groupAbstractPartyByWellKnownParty(serviceHub, listOf(tradeStateOnWhichToMakeAnOffer.owner))).keys.single()
         progressTracker.currentStep = DEALING
 
-        // 6. Use the TwoPartyDealFlow instigation flow to kick off the execution of the trade.
+        // 5. Use the TwoPartyDealFlow instigation flow to kick off the execution of the trade.
         // Note: We propose the movement of our tokens in this trade to facilitate DvP
         val session = initiateFlow(otherParty)
         val instigator = TwoPartyDealFlow.Instigator(
@@ -101,12 +98,6 @@ class ExecuteTradeFlowResponder(otherSideSession: FlowSession): TwoPartyDealFlow
 
         // Retrieve the payload from the handshake
         val handShakeToAssembleSharedTX = handshake.payload.dealBeingOffered as ExtendedDealState
-
-        // Get a reference to our Identity
-        val ourIdentity = serviceHub.myInfo.legalIdentities.single()
-
-        // Create a TokenSelection instance to generate the movement of tokens required to execute the trade.
-        val tokenSelection = TokenSelection(serviceHub)
 
         // Retrieve the counterParty input and outputs states
         val counterPartyInputStates = handShakeToAssembleSharedTX.informationForAcceptor!!.inputStates.stream().collect(Collectors.toList())
