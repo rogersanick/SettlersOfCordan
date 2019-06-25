@@ -33,11 +33,6 @@ sourceSets {
     }
 }
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
-
 configurations {
     integrationTestCompile.extendsFrom testCompile
     integrationTestRuntime.extendsFrom testRuntime
