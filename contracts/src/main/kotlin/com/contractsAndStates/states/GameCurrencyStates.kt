@@ -7,9 +7,7 @@ import net.corda.core.contracts.Amount
 import net.corda.core.identity.Party
 import net.corda.core.internal.uncheckedCast
 import net.corda.core.serialization.CordaSerializable
-import java.lang.IllegalArgumentException
 import java.math.BigDecimal
-
 
 fun getResourceAmount(resourceType: String, amount: Int): Amount<Resource> {
     return when (resourceType) {
@@ -86,7 +84,9 @@ val Double.Brick: Amount<Resource> get() = Brick(this)
 
 // Underlying Resource Property
 data class Resource(private val currency: GameCurrency,
-               override val tokenIdentifier: String) : Money() {
+               override val tokenIdentifier: String) : Money {
+    override val fractionDigits: Int
+        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
     val symbol: String get() = currency.currencyCode
     override val description: String get() = currency.displayName
     override val tokenClass: String get() = javaClass.canonicalName
