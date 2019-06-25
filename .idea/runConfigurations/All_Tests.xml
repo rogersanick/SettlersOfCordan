@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="All Tests" type="JUnit" factoryName="JUnit">
-    <module name="SettlersOfCordan" />
+    <module name="SettlersOfCordan.flowTests.test" />
     <option name="ALTERNATIVE_JRE_PATH" value="1.8" />
     <option name="PACKAGE_NAME" value="com" />
     <option name="MAIN_CLASS_NAME" value="" />
