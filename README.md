@@ -26,7 +26,7 @@ the set of shared facts is comprised of all of the relevant information of a boa
 
 So why DLT? The short answer is that we eliminate (or at least reduce) the possibility of cheating.
 
-Imagine you are playing a digital game of Catan in a traditional, centralized architecture. You and all counterparties (opposing players) are both accessing a front-end, which 
+Imagine you are playing a digital game of Catan in a traditional, centralized architecture. You and all counterparties (opposing players) are accessing a front-end, which 
 communicates with a webserver, hosted by a cloud-provider. The hosted webserver then makes updates to a hosted DB in order to persist the current version of the game state.
 
 There's nothing inherently villanous about this architecture, our issue however, stems from the fact that we cannot be 100% certain that the hosting party has not impacted 
@@ -66,28 +66,15 @@ When started via the command line, each node will display an interactive shell:
     
     Tue Nov 06 11:58:13 GMT 2018>>>
 
-You can use this shell to interact with your node. For example, enter `run networkMapSnapshot` to see a list of 
-the other nodes on the network:
+You can use this shell to interact with your node and make moves on behalf of a given player. 
 
-    Tue Nov 06 11:58:13 GMT 2018>>> run networkMapSnapshot
-    [
-      {
-      "addresses" : [ "localhost:10008" ],
-      "legalIdentitiesAndCerts" : [ "O=PartyB, L=New York, C=US" ],
-      "platformVersion" : 3,
-      "serial" : 1541505384742
-    }
-    ]
-    
-    Tue Nov 06 12:30:11 GMT 2018>>> 
+For example, to initialize between all of the nodes running locally, use the following command: 
 
-To start a game between all of the nodes running locally, use the following command.
-    
     flow start SetupGameBoardFlow p1: PartyA, p2: PartyB, p3: PartyC, p4: PartyD
 
 ### Running the tests
 
 ##### Via IntelliJ
 
-Run the `Run All Tests` run configuration in Intellij by selecting the configuration from the drop down in the 
+Run the `All Tests` run configuration in Intellij by selecting the configuration from the drop down in the 
 top right of the application and then clicking the green play button.
