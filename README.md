@@ -24,7 +24,7 @@ the set of shared facts is comprised of all of the relevant information of a boa
 
 ## Why build a board game on DLT?
 
-So why DLT? The short answer is that we eliminate the opportunity for cheating.
+So why DLT? The short answer is that we eliminate (or at least reduce) the possibility of cheating.
 
 Imagine you are playing a digital game of Catan in a traditional, centralized architecture. You and all counterparties (opposing players) are accessing a front-end, which 
 communicates with a webserver, hosted by a cloud-provider. The hosted webserver then makes updates to a hosted DB in order to persist the current version of the game state.

@@ -69,7 +69,7 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         val settlementState = SettlementState(hexTileIndex, hexTileCoordinate, gameBoardState.players, ourIdentity)
 
         // Step 7. Create a new Game Board State which will contain an updated mapping of where settlements have been placed.
-        val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { MutableList(6) { false } }
+        val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { i -> MutableList(6) { j -> gameBoardState.settlementsPlaced[i][j] } }
 
         // Step 8. Use a linkedList to calculate the coordinates of any relevant overlapping alternative location specification (e.g. 0,2; 1,4 and 5,0 all correspond to a single position)
         class LinkedListNode(val int: Int, var next: LinkedListNode? = null)
@@ -158,15 +158,18 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         // Step 13. Update the gameBoardState hextiles with the roads being built.
         val newHexTiles = gameBoardState.hexTiles[hexTileIndex].buildRoad(hexTileRoadSide, roadState.linearId, gameBoardState.hexTiles)
 
-        // Step 14. Add all states and commands to the transaction.
+        // Step 14. Update the gameBoardState with new hexTiles and built settlements.
+        val fullyUpdatedOutputGameBoardState = gameBoardState.copy(settlementsPlaced = newSettlementsPlaced, hexTiles = newHexTiles)
+
+        // Step 15. Add all states and commands to the transaction.
         tb.addInputState(gameBoardStateAndRef)
         tb.addReferenceState(ReferencedStateAndRef(turnTrackerStateAndRef))
         tb.addOutputState(settlementState, BuildPhaseContract.ID)
         tb.addOutputState(roadState, BuildPhaseContract.ID)
-        tb.addOutputState(gameBoardState.copy(settlementsPlaced = newSettlementsPlaced, hexTiles = newHexTiles))
+        tb.addOutputState(fullyUpdatedOutputGameBoardState)
         tb.addCommand(GameStateContract.Commands.UpdateWithSettlement(), gameBoardState.players.map { it.owningKey })
 
-        // Step 15. Sign initial transaction
+        // Step 16. Sign initial transaction
         tb.verify(serviceHub)
         val ptx = serviceHub.signInitialTransaction(tb)
 

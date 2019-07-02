@@ -3,8 +3,8 @@ package com.contractsAndStates.states
 import com.contractsAndStates.contracts.GameStateContract
 import net.corda.core.contracts.*
 import net.corda.core.identity.Party
+import net.corda.core.serialization.ConstructorForDeserialization
 import net.corda.core.serialization.CordaSerializable
-import java.util.Collections.copy
 
 /**
  * This state represents the same shared data that the symbolic representation of the Settlers board game
@@ -15,22 +15,25 @@ import java.util.Collections.copy
  * future transactions. It is frequently used as a reference state (for example, in the issueResourcesFlow)
  */
 
+@CordaSerializable
 @BelongsToContract(GameStateContract::class)
-data class GameBoardState(val beginner: Boolean = false,
-                          val hexTiles: MutableList<HexTile>,
+data class GameBoardState(val hexTiles: MutableList<HexTile>,
                           val ports: List<Port>,
                           val players: List<Party>,
                           val turnTrackerLinearId: UniqueIdentifier,
-                          val spectators: List<Party> = listOf(),
+                          val robberLinearId: UniqueIdentifier,
                           val settlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(19) { MutableList(6) { false } },
-                          var setUpComplete: Boolean = false,
-                          var initialPiecesPlaced: Int = 0,
+                          val setUpComplete: Boolean = false,
+                          val initialPiecesPlaced: Int = 0,
                           val winner: Party? = null,
+                          val beginner: Boolean = false,
                           override val linearId: UniqueIdentifier = UniqueIdentifier()): LinearState {
 
     override val participants: List<Party> get() = players
 
-    fun weWin(ourIdentity: Party): GameBoardState = copy(winner = ourIdentity)
+    fun weWin(ourIdentity: Party): GameBoardState {
+        return this.copy(winner = ourIdentity)
+    }
 
 }
 
