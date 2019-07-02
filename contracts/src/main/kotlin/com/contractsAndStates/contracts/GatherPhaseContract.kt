@@ -4,10 +4,7 @@ import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.RobberState
 import com.oracleClient.state.DiceRollState
 import com.r3.corda.sdk.token.contracts.states.FungibleToken
-import net.corda.core.contracts.CommandData
-import net.corda.core.contracts.Contract
-import net.corda.core.contracts.requireSingleCommand
-import net.corda.core.contracts.requireThat
+import net.corda.core.contracts.*
 import net.corda.core.transactions.LedgerTransaction
 import java.security.PublicKey
 
@@ -54,37 +51,11 @@ class GatherPhaseContract : Contract {
 
             }
 
-            is Commands.TriggerRobber -> requireThat {
-
-                /**
-                 *  ******** SHAPE ********
-                 */
-
-                "There is one inputs to this transaction" using (tx.inputs.size == 1 && tx.inputs.single().state.data is RobberState)
-                "There is one output of this transaction of type RobberState" using (tx.outputs.size == 1 && tx.outputs.single().data is RobberState)
-
-                /**
-                 *  ******** BUSINESS LOGIC ********
-                 */
-
-                "The input dice roll is equal to 7" using (diceRollInputState.randomRoll1 + diceRollInputState.randomRoll2 == 7)
-
-                /**
-                 *  ******** SIGNATURES ********
-                 */
-
-                val signingParties = tx.commandsOfType<Commands.TriggerRobber>().single().signers.toSet()
-                val participants = gameBoardStateReferenced.participants.map{ it.owningKey }
-                "All players must verify and sign the transaction to build a settlement." using(signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
-
-            }
-
         }
     }
 
     // Used to indicate the transaction's intent.
     interface Commands : CommandData {
         class IssueResourcesToAllPlayers : Commands
-        class TriggerRobber: Commands
     }
 }

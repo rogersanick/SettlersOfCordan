@@ -6,14 +6,13 @@ import com.contractsAndStates.states.RobberState
 import com.oracleClient.state.DiceRollState
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
-import net.corda.core.flows.CollectSignaturesFlow
-import net.corda.core.flows.FinalityFlow
-import net.corda.core.flows.FlowLogic
-import net.corda.core.identity.Party
+import net.corda.core.flows.*
 import net.corda.core.node.services.queryBy
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
+@InitiatingFlow(version = 1)
+@StartableByRPC
 class TriggerRobberFlow(val gameBoardLinearId: UniqueIdentifier,
                         val updatedRobberLocation: Int): FlowLogic<SignedTransaction>() {
     override fun call(): SignedTransaction {

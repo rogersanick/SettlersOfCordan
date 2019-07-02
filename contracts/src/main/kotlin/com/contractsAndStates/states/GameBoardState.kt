@@ -1,11 +1,10 @@
 package com.contractsAndStates.states
 
-import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.GameStateContract
 import net.corda.core.contracts.*
 import net.corda.core.identity.Party
+import net.corda.core.serialization.ConstructorForDeserialization
 import net.corda.core.serialization.CordaSerializable
-import java.util.Collections.copy
 
 /**
  * This state represents the same shared data that the symbolic representation of the Settlers board game
@@ -18,26 +17,23 @@ import java.util.Collections.copy
 
 @CordaSerializable
 @BelongsToContract(GameStateContract::class)
-data class GameBoardState(val beginner: Boolean = false,
-                          val hexTiles: MutableList<HexTile>,
+data class GameBoardState(val hexTiles: MutableList<HexTile>,
                           val ports: List<Port>,
                           val players: List<Party>,
                           val turnTrackerLinearId: UniqueIdentifier,
                           val robberLinearId: UniqueIdentifier,
-                          val spectators: List<Party> = listOf(),
                           val settlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(19) { MutableList(6) { false } },
-                          var setUpComplete: Boolean = false,
-                          var initialPiecesPlaced: Int = 0,
+                          val setUpComplete: Boolean = false,
+                          val initialPiecesPlaced: Int = 0,
                           val winner: Party? = null,
+                          val beginner: Boolean = false,
                           override val linearId: UniqueIdentifier = UniqueIdentifier()): LinearState {
 
     override val participants: List<Party> get() = players
 
-    fun updateHexTiles(updatedHexTiles: MutableList<HexTile>): GameBoardState = copy(hexTiles = updatedHexTiles)
-
-    fun updateSettlementsPlaced(updatedSettlementsPlaced: MutableList<MutableList<Boolean>>): GameBoardState = copy(settlementsPlaced = updatedSettlementsPlaced)
-
-    fun weWin(ourIdentity: Party): GameBoardState = copy(winner = ourIdentity)
+    fun weWin(ourIdentity: Party): GameBoardState {
+        return this.copy(winner = ourIdentity)
+    }
 
 }
 
@@ -54,7 +50,6 @@ class HexTile(val resourceType: String,
      * funky maths that we will use later on to calculate the validity of transactions.
      */
 
-    @Suspendable
     fun connect(sideIndex: Int, hexTileToConnect: HexTile) {
         if (sideIndex > 5) {
             throw Error("You have specified an invalid index.")
@@ -70,7 +65,6 @@ class HexTile(val resourceType: String,
      * TODO: Add functionality to connect roadStates when new roads and proposed extending existing roads.
      */
 
-    @Suspendable
     fun buildRoad(sideIndex: Int, roadStateLinearId: UniqueIdentifier, hexTiles: MutableList<HexTile>): MutableList<HexTile> {
 
         var newMutableHexTiles = hexTiles.map { it }.toMutableList()

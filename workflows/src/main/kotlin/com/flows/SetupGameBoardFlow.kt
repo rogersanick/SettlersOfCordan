@@ -259,7 +259,7 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         tb.addCommand(createRobberCommand)
 
         progressTracker.currentStep = FINALIZING_GAMEBOARD
-        val newGameState = GameBoardState(false, hexTiles, ports, randomizedPlayersList, turnTrackerState.linearId, robberState.linearId)
+        val newGameState = GameBoardState(hexTiles, ports, randomizedPlayersList, turnTrackerState.linearId, robberState.linearId)
 
         // Step 7. Add the states to the transaction
         progressTracker.currentStep = ADDING_ALL_GAME_STATES_TO_THE_TRANSACTION
