@@ -200,6 +200,9 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
                 "$project.group:oracleClient:$project.version",
                 "$project.group:workflows:$project.version",
                 "$project.group:contracts:$project.version",
+                "com.r3.tokens-sdk:contract:1.0-SNAPSHOT",
+                "com.r3.tokens-sdk:workflow:1.0-SNAPSHOT",
+                "com.r3.tokens-sdk:money:1.0-SNAPSHOT"
         ]
         rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
