@@ -11,6 +11,7 @@ import com.r3.corda.lib.tokens.contracts.utilities.amount
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
 import com.r3.corda.lib.tokens.workflows.flows.issue.addIssueTokens
+import com.r3.corda.lib.tokens.workflows.utilities.addTokenTypeJar
 import net.corda.core.contracts.*
 import net.corda.core.flows.*
 import net.corda.core.node.services.queryBy
@@ -84,6 +85,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<Si
 
         // Step 10. Add commands to issue the appropriate types of resources. Convert the gameCurrencyToClaim to a set to prevent duplicate commands.
         addIssueTokens(tb, fungibleTokenAmountsOfResourcesToClaim)
+        addTokenTypeJar(fungibleTokenAmountsOfResourcesToClaim, tb)
 
         // Step 12. Add reference states for turn tracker and game board. Add the dice roll as an input
         // state so that the counter-party may verify the correct number of resources have been issued.

@@ -10,6 +10,7 @@ import com.r3.corda.lib.tokens.contracts.utilities.amount
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
 import com.r3.corda.lib.tokens.workflows.flows.issue.addIssueTokens
+import com.r3.corda.lib.tokens.workflows.utilities.addTokenTypeJar
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -143,6 +144,7 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
             }
 
             addIssueTokens(tb, fungibleTokenAmountsOfResourcesToClaim)
+            addTokenTypeJar(fungibleTokenAmountsOfResourcesToClaim, tb)
         }
 
         // Step 12. Create the road state at the appropriate location specified by the user.
