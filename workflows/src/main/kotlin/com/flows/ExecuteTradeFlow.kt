@@ -2,11 +2,8 @@ package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.states.*
-import com.r3.corda.sdk.token.contracts.commands.MoveTokenCommand
-import com.r3.corda.sdk.token.contracts.types.IssuedTokenType
-import com.r3.corda.sdk.token.workflow.flows.internal.selection.TokenSelection
-import com.r3.corda.sdk.token.workflow.flows.move.addMoveTokens
-import com.r3.corda.sdk.token.workflow.types.PartyAndAmount
+import com.r3.corda.lib.tokens.workflows.flows.move.addMoveFungibleTokens
+import com.r3.corda.lib.tokens.workflows.types.PartyAndAmount
 import net.corda.core.contracts.*
 import net.corda.core.crypto.TransactionSignature
 import net.corda.core.flows.*
@@ -62,7 +59,7 @@ class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier): FlowLo
 
         // 2. Use the tokenSDK to generate the movement of resources required to execute the trade.
         val tb = TransactionBuilder()
-        this.addMoveTokens(tb, listOf(PartyAndAmount(tradeStateOnWhichToMakeAnOffer.owner, tradeStateOnWhichToMakeAnOffer.wanted)), null)
+        addMoveFungibleTokens(tb, serviceHub, listOf(PartyAndAmount(tradeStateOnWhichToMakeAnOffer.owner, tradeStateOnWhichToMakeAnOffer.wanted)), ourIdentity)
 
         // 3. Get a reference to the notary and assign it to the transaction.
         require(serviceHub.networkMapCache.notaryIdentities.isNotEmpty()) { "No notary nodes registered" }
@@ -111,7 +108,7 @@ class ExecuteTradeFlowResponder(otherSideSession: FlowSession): TwoPartyDealFlow
                 commands = counterPartyCommands
         )
 
-        this.addMoveTokens(tb, listOf(PartyAndAmount(otherSideSession.counterparty, handShakeToAssembleSharedTX.offering)), null)
+        addMoveFungibleTokens(tb, serviceHub, listOf(PartyAndAmount(otherSideSession.counterparty, handShakeToAssembleSharedTX.offering)), ourIdentity)
 
         // Use the generateAgreement method on the ExtendedDealState class to add the appropriate commands to the transaction.
         val ptx = handShakeToAssembleSharedTX.generateAgreement(tb)

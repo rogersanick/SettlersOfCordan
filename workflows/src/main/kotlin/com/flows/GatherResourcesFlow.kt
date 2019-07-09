@@ -5,9 +5,11 @@ import com.contractsAndStates.contracts.GatherPhaseContract
 import com.contractsAndStates.states.*
 import com.oracleClient.contracts.DiceRollContract
 import com.oracleClient.state.DiceRollState
-import com.r3.corda.sdk.token.contracts.FungibleTokenContract
-import com.r3.corda.sdk.token.contracts.commands.IssueTokenCommand
-import com.r3.corda.sdk.token.contracts.utilities.heldBy
+import com.r3.corda.lib.tokens.contracts.FungibleTokenContract
+import com.r3.corda.lib.tokens.contracts.commands.IssueTokenCommand
+import com.r3.corda.lib.tokens.contracts.utilities.amount
+import com.r3.corda.lib.tokens.contracts.utilities.heldBy
+import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
 import net.corda.core.contracts.*
 import net.corda.core.flows.*
 import net.corda.core.node.services.queryBy

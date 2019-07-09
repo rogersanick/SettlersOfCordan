@@ -18,7 +18,7 @@ import org.junit.Before
 import org.junit.Test
 
 class OracleClientIntegrationTest {
-    private val network = MockNetwork(listOf("com.contractsAndStates", "com.flows", "com.oracleClient", "com.r3.corda.sdk.token.workflows", "com.r3.corda.sdk.token.contracts", "com.r3.corda.sdk.token.money"),
+    private val network = MockNetwork(listOf("com.contractsAndStates", "com.flows", "com.oracleClient", "com.r3.corda.lib.tokens.workflows", "com.r3.corda.lib.tokens.contracts", "com.r3.corda.lib.tokens.money"),
             notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB"))),
             defaultParameters = MockNetworkParameters(networkParameters = testNetworkParameters(minimumPlatformVersion = 4))
     )

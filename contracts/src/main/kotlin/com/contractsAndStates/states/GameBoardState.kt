@@ -1,6 +1,7 @@
 package com.contractsAndStates.states
 
 import com.contractsAndStates.contracts.GameStateContract
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.*
 import net.corda.core.identity.Party
 import net.corda.core.serialization.ConstructorForDeserialization
@@ -86,7 +87,7 @@ class HexTile(val resourceType: String,
 }
 
 @CordaSerializable
-data class PortTile(val inputRequired: List<Amount<Resource>>, val outputRequired: List<Amount<Resource>>)
+data class PortTile(val inputRequired: List<Amount<TokenType>>, val outputRequired: List<Amount<TokenType>>)
 
 @CordaSerializable
 data class Port(val portTile: PortTile, var accessPoints: List<AccessPoint>)

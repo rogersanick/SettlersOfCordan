@@ -3,7 +3,7 @@ package com.flows
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.TradePhaseContract
 import com.contractsAndStates.states.*
-import com.r3.corda.sdk.token.contracts.types.TokenType
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.*
 import net.corda.core.flows.*
 import net.corda.core.identity.Party

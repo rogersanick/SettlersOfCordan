@@ -4,10 +4,11 @@ import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.BuildPhaseContract
 import com.contractsAndStates.contracts.GameStateContract
 import com.contractsAndStates.states.*
-import com.r3.corda.sdk.token.contracts.FungibleTokenContract
-import com.r3.corda.sdk.token.contracts.commands.IssueTokenCommand
-import com.r3.corda.sdk.token.contracts.utilities.amount
-import com.r3.corda.sdk.token.contracts.utilities.heldBy
+import com.r3.corda.lib.tokens.contracts.FungibleTokenContract
+import com.r3.corda.lib.tokens.contracts.commands.IssueTokenCommand
+import com.r3.corda.lib.tokens.contracts.utilities.amount
+import com.r3.corda.lib.tokens.contracts.utilities.heldBy
+import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier

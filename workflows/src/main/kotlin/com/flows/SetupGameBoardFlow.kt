@@ -8,6 +8,7 @@ import com.contractsAndStates.states.HexTile
 import com.contractsAndStates.states.PortTile
 import com.contractsAndStates.states.TurnTrackerState
 import com.contractsAndStates.states.*
+import com.r3.corda.lib.tokens.contracts.utilities.of
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
@@ -71,7 +72,7 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
          * The following objects define all of the steps required to execute the flow. These steps will
          * be executed in sequence to set up a game board and displayed to the user via a progress tracker.
          */
-        // Step 1. Get a reference to the notary service on the network
+        // Step 1.  Get a reference to the notary service on the network
         progressTracker.currentStep = GETTING_NOTARY
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
@@ -79,7 +80,7 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         progressTracker.currentStep = INITIALIZING_TRANSACTION
         val tb = TransactionBuilder(notary)
 
-        // Step 3. Create a new issue command and add it to the transaction.
+        // Step 3 of  Create a new issue command and add it to the transaction.
         val playerKeys = listOf(p1.owningKey, p2.owningKey, p3.owningKey, p4.owningKey)
         progressTracker.currentStep = ISSUING_COMMANDS
         val issueCommand = Command(GameStateContract.Commands.SetUpGameBoard(), playerKeys)
@@ -111,15 +112,15 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         progressTracker.nextStep()
         val portTilesTracking = BooleanArray(9)
         val portTiles: ArrayList<PortTile> = arrayListOf(
-                PortTile(listOf(2.Sheep), listOf(1.Wood, 1.Brick, 1.Ore, 1.Wheat)),
-                PortTile(listOf(2.Wood), listOf(1.Sheep, 1.Brick, 1.Ore, 1.Wheat)),
-                PortTile(listOf(2.Brick), listOf(1.Wood, 1.Sheep, 1.Ore, 1.Wheat)),
-                PortTile(listOf(2.Ore), listOf(1.Wood, 1.Sheep, 1.Brick, 1.Wheat)),
-                PortTile(listOf(2.Wheat), listOf(1.Wood, 1.Sheep, 1.Brick, 1.Sheep)),
-                PortTile(listOf(3.Wheat, 3.Wood, 3.Sheep, 3.Brick, 3.Sheep), listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep)),
-                PortTile(listOf(3.Wheat, 3.Wood, 3.Sheep, 3.Brick, 3.Sheep), listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep)),
-                PortTile(listOf(3.Wheat, 3.Wood, 3.Sheep, 3.Brick, 3.Sheep), listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep)),
-                PortTile(listOf(3.Wheat, 3.Wood, 3.Sheep, 3.Brick, 3.Sheep), listOf(1.Wheat, 1.Wood, 1.Sheep, 1.Brick, 1.Sheep))
+                PortTile(listOf(2 of Sheep), listOf(1 of Wood, 1 of Brick, 1 of Ore, 1 of Wheat)),
+                PortTile(listOf(2 of Wood), listOf(1 of Sheep, 1 of Brick, 1 of Ore, 1 of Wheat)),
+                PortTile(listOf(2 of Brick), listOf(1 of Wood, 1 of Sheep, 1 of Ore, 1 of Wheat)),
+                PortTile(listOf(2 of Ore), listOf(1 of Wood, 1 of Sheep, 1 of Brick, 1 of Wheat)),
+                PortTile(listOf(2 of Wheat), listOf(1 of Wood, 1 of Sheep, 1 of Brick, 1 of Sheep)),
+                PortTile(listOf(3 of Wheat, 3 of Wood, 3 of Sheep, 3 of Brick, 3 of Sheep), listOf(1 of Wheat, 1 of Wood, 1 of Sheep, 1 of Brick, 1 of Sheep)),
+                PortTile(listOf(3 of Wheat, 3 of Wood, 3 of Sheep, 3 of Brick, 3 of Sheep), listOf(1 of Wheat, 1 of Wood, 1 of Sheep, 1 of Brick, 1 of Sheep)),
+                PortTile(listOf(3 of Wheat, 3 of Wood, 3 of Sheep, 3 of Brick, 3 of Sheep), listOf(1 of Wheat, 1 of Wood, 1 of Sheep, 1 of Brick, 1 of Sheep)),
+                PortTile(listOf(3 of Wheat, 3 of Wood, 3 of Sheep, 3 of Brick, 3 of Sheep), listOf(1 of Wheat, 1 of Wood, 1 of Sheep, 1 of Brick, 1 of Sheep))
         )
 
         val portHexTileAccessPointMapping = arrayListOf(

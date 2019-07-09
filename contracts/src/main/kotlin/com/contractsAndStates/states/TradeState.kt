@@ -1,7 +1,7 @@
 package com.contractsAndStates.states
 
 import com.contractsAndStates.contracts.TradePhaseContract
-import com.r3.corda.sdk.token.contracts.types.TokenType
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.*
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party

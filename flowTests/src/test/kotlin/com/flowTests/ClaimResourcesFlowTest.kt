@@ -4,8 +4,7 @@ import com.contractsAndStates.states.GameBoardState
 import com.flows.*
 import com.oracleService.flows.DiceRollRequestHandler
 import com.oracleService.flows.OracleRollDiceFlowResponder
-import com.r3.corda.sdk.token.contracts.states.FungibleToken
-import com.r3.corda.sdk.token.contracts.types.TokenType
+import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.testUtilities.setupGameBoardForTesting
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.FlowException
@@ -21,7 +20,7 @@ import org.junit.Test
 import kotlin.test.assertFailsWith
 
 class ClaimResourcesFlowTest {
-    private val network = MockNetwork(listOf("com.contractsAndStates", "com.flows", "com.oracleClient", "com.r3.corda.sdk.token.workflows", "com.r3.corda.sdk.token.contracts", "com.r3.corda.sdk.token.money"),
+    private val network = MockNetwork(listOf("com.contractsAndStates", "com.flows", "com.oracleClient", "com.r3.corda.lib.tokens.workflows", "com.r3.corda.lib.tokens.contracts", "com.r3.corda.lib.tokens.money"),
             notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB"))),
             defaultParameters = MockNetworkParameters(networkParameters = testNetworkParameters(minimumPlatformVersion = 4))
     )
@@ -97,7 +96,7 @@ class ClaimResourcesFlowTest {
         val txWithNewResources = futureWithClaimedResources.getOrThrow()
 
         requireThat {
-            val resources = txWithNewResources.coreTransaction.outputsOfType<FungibleToken<*>>()
+            val resources = txWithNewResources.coreTransaction.outputsOfType<FungibleToken>()
             "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)
         }
     }
@@ -139,7 +138,7 @@ class ClaimResourcesFlowTest {
         val txWithNewResourcesOwnedByPlayer1 = futureWithClaimedResourcesByPlayer1.getOrThrow()
 
         requireThat {
-            val resources = txWithNewResourcesOwnedByPlayer1.coreTransaction.outputsOfType<FungibleToken<*>>()
+            val resources = txWithNewResourcesOwnedByPlayer1.coreTransaction.outputsOfType<FungibleToken>()
             "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)
         }
 
@@ -186,7 +185,7 @@ class ClaimResourcesFlowTest {
         val txWithNewResourcesOwnedByPlayer1 = futureWithClaimedResourcesByPlayer1.getOrThrow()
 
         requireThat {
-            val resources = txWithNewResourcesOwnedByPlayer1.coreTransaction.outputsOfType<FungibleToken<*>>()
+            val resources = txWithNewResourcesOwnedByPlayer1.coreTransaction.outputsOfType<FungibleToken>()
             "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)
         }
 
@@ -203,7 +202,7 @@ class ClaimResourcesFlowTest {
         val txWithNewResourcesOwnedByPlayer2 = futureWithClaimedResourcesByPlayer2.getOrThrow()
 
         requireThat {
-            val resources = txWithNewResourcesOwnedByPlayer2.coreTransaction.outputsOfType<FungibleToken<TokenType>>()
+            val resources = txWithNewResourcesOwnedByPlayer2.coreTransaction.outputsOfType<FungibleToken>()
             "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)
         }
 
@@ -220,7 +219,7 @@ class ClaimResourcesFlowTest {
         val txWithNewResourcesOwnedByPlayer3 = futureWithClaimedResourcesByPlayer3.getOrThrow()
 
         requireThat {
-            val resources = txWithNewResourcesOwnedByPlayer3.coreTransaction.outputsOfType<FungibleToken<TokenType>>()
+            val resources = txWithNewResourcesOwnedByPlayer3.coreTransaction.outputsOfType<FungibleToken>()
             "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)
         }
 
@@ -237,7 +236,7 @@ class ClaimResourcesFlowTest {
         val txWithNewResourcesOwnedByPlayer4 = futureWithClaimedResourcesByPlayer4.getOrThrow()
 
         requireThat {
-            val resources = txWithNewResourcesOwnedByPlayer4.coreTransaction.outputsOfType<FungibleToken<TokenType>>()
+            val resources = txWithNewResourcesOwnedByPlayer4.coreTransaction.outputsOfType<FungibleToken>()
             "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)
         }
 

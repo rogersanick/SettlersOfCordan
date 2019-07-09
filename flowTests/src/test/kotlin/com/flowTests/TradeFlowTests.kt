@@ -6,7 +6,7 @@ import com.contractsAndStates.states.TradeState
 import com.flows.*
 import com.oracleService.flows.DiceRollRequestHandler
 import com.oracleService.flows.OracleRollDiceFlowResponder
-import com.r3.corda.sdk.token.contracts.states.FungibleToken
+import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.testUtilities.countAllResourcesForASpecificNode
 import com.testUtilities.setupGameBoardForTesting
 import net.corda.core.contracts.Amount
@@ -23,7 +23,7 @@ import org.junit.Before
 import org.junit.Test
 
 class TradeFlowTests {
-    private val network = MockNetwork(listOf("com.contractsAndStates", "com.flows", "com.oracleClient", "com.r3.corda.sdk.token.workflows", "com.r3.corda.sdk.token.contracts", "com.r3.corda.sdk.token.money"),
+    private val network = MockNetwork(listOf("com.contractsAndStates", "com.flows", "com.oracleClient", "com.r3.corda.lib.tokens.workflows", "com.r3.corda.lib.tokens.contracts", "com.r3.corda.lib.tokens.money"),
             notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB"))),
             defaultParameters = MockNetworkParameters(networkParameters = testNetworkParameters(minimumPlatformVersion = 4))
     )
@@ -99,12 +99,12 @@ class TradeFlowTests {
         val txWithNewResources = futureWithClaimedResources.getOrThrow()
 
         requireThat {
-            val resources = txWithNewResources.coreTransaction.outputsOfType<FungibleToken<*>>()
+            val resources = txWithNewResources.coreTransaction.outputsOfType<FungibleToken>()
             "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)
         }
 
-        val player1Resources = arrayOfAllPlayerNodesInOrder[0].services.vaultService.queryBy<FungibleToken<*>>().states.firstOrNull()?.state?.data?.amount
-        val player2Resources = arrayOfAllPlayerNodesInOrder[1].services.vaultService.queryBy<FungibleToken<*>>().states.firstOrNull()?.state?.data?.amount
+        val player1Resources = arrayOfAllPlayerNodesInOrder[0].services.vaultService.queryBy<FungibleToken>().states.firstOrNull()?.state?.data?.amount
+        val player2Resources = arrayOfAllPlayerNodesInOrder[1].services.vaultService.queryBy<FungibleToken>().states.firstOrNull()?.state?.data?.amount
 
         val futureWithIssuedTrade = arrayOfAllPlayerNodesInOrder[0].startFlow(
                 IssueTradeFlow(
@@ -161,15 +161,15 @@ class TradeFlowTests {
         val txWithNewResources = futureWithClaimedResources.getOrThrow()
 
         requireThat {
-            val resources = txWithNewResources.coreTransaction.outputsOfType<FungibleToken<*>>()
+            val resources = txWithNewResources.coreTransaction.outputsOfType<FungibleToken>()
             "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)
         }
 
         val player1ResourcesPreTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
         val player2ResourcesPreTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[1])
 
-        val player1ResourceToTrade = arrayOfAllPlayerNodesInOrder[0].services.vaultService.queryBy<FungibleToken<Resource>>().states.filter { it.state.data.holder.owningKey == arrayOfAllPlayerNodesInOrder[0].info.legalIdentities.first().owningKey }.firstOrNull()?.state?.data?.amount
-        val player2ResourceToTrade = arrayOfAllPlayerNodesInOrder[1].services.vaultService.queryBy<FungibleToken<Resource>>().states.filter { it.state.data.holder.owningKey == arrayOfAllPlayerNodesInOrder[1].info.legalIdentities.first().owningKey && it.state.data.amount.token.tokenType != player1ResourceToTrade!!.token.tokenType }.firstOrNull()?.state?.data?.amount
+        val player1ResourceToTrade = arrayOfAllPlayerNodesInOrder[0].services.vaultService.queryBy<FungibleToken>().states.filter { it.state.data.holder.owningKey == arrayOfAllPlayerNodesInOrder[0].info.legalIdentities.first().owningKey }.firstOrNull()?.state?.data?.amount
+        val player2ResourceToTrade = arrayOfAllPlayerNodesInOrder[1].services.vaultService.queryBy<FungibleToken>().states.filter { it.state.data.holder.owningKey == arrayOfAllPlayerNodesInOrder[1].info.legalIdentities.first().owningKey && it.state.data.amount.token.tokenType != player1ResourceToTrade!!.token.tokenType }.firstOrNull()?.state?.data?.amount
 
         val futureWithIssuedTrade = arrayOfAllPlayerNodesInOrder[0].startFlow(
                 IssueTradeFlow(

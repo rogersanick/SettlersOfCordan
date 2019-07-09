@@ -2,8 +2,8 @@ package com.testUtilities
 
 import com.contractsAndStates.states.*
 import com.flows.*
-import com.r3.corda.sdk.token.contracts.states.FungibleToken
-import com.r3.corda.sdk.token.contracts.types.TokenType
+import com.r3.corda.lib.tokens.contracts.states.FungibleToken
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.node.services.queryBy
@@ -67,7 +67,7 @@ fun countAllResourcesForASpecificNode(node: StartedMockNode): MapOfResources {
             Pair(Sheep, 0)
     )
 
-    node.services.vaultService.queryBy<FungibleToken<*>>().states.filter { it.state.data.holder.owningKey == node.info.legalIdentities.first().owningKey }.forEach {
+    node.services.vaultService.queryBy<FungibleToken>().states.filter { it.state.data.holder.owningKey == node.info.legalIdentities.first().owningKey }.forEach {
         val tokenAmount = it.state.data.amount
         if (mapOfResources.containsKey<TokenType>(tokenAmount.token.tokenType)) mapOfResources[tokenAmount.token.tokenType] = mapOfResources[tokenAmount.token.tokenType]!!.plus(tokenAmount.quantity)
         else mapOfResources[tokenAmount.token.tokenType] = tokenAmount.quantity

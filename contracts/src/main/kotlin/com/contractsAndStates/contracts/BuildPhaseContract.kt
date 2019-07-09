@@ -1,8 +1,10 @@
 package com.contractsAndStates.contracts
 
 import com.contractsAndStates.states.*
-import com.r3.corda.sdk.token.contracts.states.FungibleToken
-import com.r3.corda.sdk.token.contracts.utilities.heldBy
+import com.r3.corda.lib.tokens.contracts.states.FungibleToken
+import com.r3.corda.lib.tokens.contracts.utilities.amount
+import com.r3.corda.lib.tokens.contracts.utilities.heldBy
+import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
 import net.corda.core.contracts.*
 import net.corda.core.internal.sumByLong
 import net.corda.core.transactions.LedgerTransaction
@@ -25,7 +27,7 @@ class BuildPhaseContract : Contract {
         val inputGameBoardState = tx.inputsOfType<GameBoardState>().single()
         val outputGameBoardState = tx.outputsOfType<GameBoardState>().single()
         val newRoads = tx.outputsOfType<RoadState>()
-        val outputResources = tx.outputsOfType<FungibleToken<Resource>>()
+        val outputResources = tx.outputsOfType<FungibleToken>()
 
         when (command.value) {
 
