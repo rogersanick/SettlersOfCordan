@@ -256,7 +256,7 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         val hexTileWithDesert = hexTiles.filter { it.resourceType == "Desert" }.single()
         val robberState = RobberState(hexTileWithDesert.hexTileIndex, playersList)
         val createRobberCommand = Command(RobberContract.Commands.CreateRobber(), playerKeys)
-        tb.addOutputState(robberState)
+        tb.addOutputState(robberState, RobberContract.ID)
         tb.addCommand(createRobberCommand)
 
         progressTracker.currentStep = FINALIZING_GAMEBOARD
