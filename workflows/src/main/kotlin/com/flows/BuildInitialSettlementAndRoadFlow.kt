@@ -126,13 +126,13 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         if (turnTrackerState.setUpRound1Complete) {
 
             // Calculate the currencies that should be claimed by the player proposing a move.
-            val gameCurrencyToClaim = arrayListOf<Pair<String, Long>>()
+            val gameCurrencyToClaim = arrayListOf<Pair<HexTileType, Long>>()
             gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles[settlementState.hexTileIndex].resourceType, settlementState.resourceAmountClaim.toLong()))
-            if (indexOfRelevantHexTileNeighbour1 != -1 && gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType != "Desert") gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType, settlementState.resourceAmountClaim.toLong()))
-            if (indexOfRelevantHexTileNeighbour2 != -1 && gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType != "Desert") gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType, settlementState.resourceAmountClaim.toLong()))
+            if (indexOfRelevantHexTileNeighbour1 != -1 && gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType != HexTileType.Desert) gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType, settlementState.resourceAmountClaim.toLong()))
+            if (indexOfRelevantHexTileNeighbour2 != -1 && gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType != HexTileType.Desert) gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType, settlementState.resourceAmountClaim.toLong()))
 
             // Consolidate the list so that they is only one instance of a given token type issued with the appropriate amount.
-            val reducedListOfGameCurrencyToClaim = mutableMapOf<String, Long>()
+            val reducedListOfGameCurrencyToClaim = mutableMapOf<HexTileType, Long>()
             gameCurrencyToClaim.forEach{
                 if (reducedListOfGameCurrencyToClaim.containsKey(it.first)) reducedListOfGameCurrencyToClaim[it.first] = reducedListOfGameCurrencyToClaim[it.first]!!.plus(it.second)
                 else reducedListOfGameCurrencyToClaim[it.first] = it.second
@@ -140,7 +140,8 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
 
             // Convert each gameCurrentToClaim into a valid fungible token.
             val fungibleTokenAmountsOfResourcesToClaim = reducedListOfGameCurrencyToClaim.map {
-                amount(it.value, Resource.getInstance(it.key)) issuedBy ourIdentity heldBy ourIdentity
+                // TODO make sure the it.key.resourceYielded is not null
+                amount(it.value, Resource.getInstance(it.key.resourceYielded!!)) issuedBy ourIdentity heldBy ourIdentity
             }
 
             addIssueTokens(tb, fungibleTokenAmountsOfResourcesToClaim)

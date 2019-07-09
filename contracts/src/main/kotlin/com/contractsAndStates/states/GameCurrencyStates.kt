@@ -1,12 +1,26 @@
 package com.contractsAndStates.states
 
-import com.r3.corda.lib.tokens.contracts.types.IssuedTokenType
 import com.r3.corda.lib.tokens.contracts.types.TokenType
-import net.corda.core.contracts.Amount
-import net.corda.core.identity.Party
-import net.corda.core.internal.uncheckedCast
 import net.corda.core.serialization.CordaSerializable
 import java.math.BigDecimal
+
+enum class ResourceType(val displayName: String) {
+    Wheat("Wh"),
+    Ore("Or"),
+    Sheep("Sh"),
+    Wood("Wd"),
+    Brick("Br")
+}
+
+// TODO find a way to make resourceYielded not nullable
+enum class HexTileType(val resourceYielded: ResourceType?) {
+    Field(ResourceType.Wheat),
+    Mountain(ResourceType.Ore),
+    Pasture(ResourceType.Sheep),
+    Forest(ResourceType.Wood),
+    Hill(ResourceType.Brick),
+    Desert(null)
+}
 
 fun getTokenTypeByName(resourceType: String): TokenType {
     return when (resourceType) {
@@ -19,83 +33,41 @@ fun getTokenTypeByName(resourceType: String): TokenType {
     }
 }
 
-
 // Wheat.
-val Wheat = Resource.getInstance("Field")
+val Wheat = Resource.getInstance(ResourceType.Wheat)
 
 // Ore.
-val Ore = Resource.getInstance("Mountain")
+val Ore = Resource.getInstance(ResourceType.Ore)
 
 // Sheep.
-val Sheep = Resource.getInstance("Pasture")
+val Sheep = Resource.getInstance(ResourceType.Sheep)
 
 // Wood.
-val Wood = Resource.getInstance("Forest")
+val Wood = Resource.getInstance(ResourceType.Wood)
 
 // Brick.
-val Brick = Resource.getInstance("Hill")
+val Brick = Resource.getInstance(ResourceType.Brick)
 
 // Underlying Resource Property
 @CordaSerializable
-data class Resource(private val currency: GameCurrency,
-               override val tokenIdentifier: String) : TokenType(currency.currencyCode, 0) {
-    val symbol: String get() = currency.currencyCode
+data class Resource(private val type: ResourceType) : TokenType(type.displayName, FRACTION_DIGITS) {
     override val tokenClass: Class<*> get() = javaClass
-    override val displayTokenSize: BigDecimal get() = BigDecimal.ONE.scaleByPowerOfTen(-currency.defaultFractionDigits)
-    override fun toString(): String = symbol
+    override val displayTokenSize: BigDecimal get() = BigDecimal.ONE.scaleByPowerOfTen(-FRACTION_DIGITS)
+    override fun toString(): String = type.name
 
     companion object {
-        fun getInstance(resourceType: String) = Resource(GameCurrency(resourceType), resourceType) as TokenType
+        val FRACTION_DIGITS = 0
+        fun getInstance(resourceType: ResourceType) = Resource(resourceType) as TokenType
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Resource) return false
-        if (currency != other.currency) return false
+        if (type != other.type) return false
         return true
     }
 
     override fun hashCode(): Int {
-        return currency.hashCode()
-    }
-
-}
-
-// Game Currency Utility Class
-@CordaSerializable
-data class GameCurrency(val resourceType: String) {
-    init {
-        if (!listOf("Field", "Mountain", "Pasture", "Forest", "Hill").contains(resourceType)) {
-            throw IllegalArgumentException("A game currency must be of type Wheat, Ore, Sheep, Wood or Brick.")
-        }
-    }
-
-    val currencyCode: String
-        get() = when (resourceType) {
-            "Field" -> "Wheat"
-            "Mountain" -> "Ore"
-            "Pasture" -> "Sheep"
-            "Forest" -> "Wood"
-            "Hill" -> "Brick"
-            else -> "NOTCURRENCY"
-        }
-    val displayName: String
-        get() = when (resourceType) {
-            "Field" -> "Wh"
-            "Mountain" -> "Or"
-            "Pasture" -> "Sh"
-            "Forest" -> "Wd"
-            "Hill" -> "Br"
-            else -> "NOTCURRENCY"
-        }
-    val defaultFractionDigits: Int get() = 0
-
-    override fun equals(other: Any?): Boolean {
-        if (other !is GameCurrency) return false
-        if (other.currencyCode != this.currencyCode) return false
-        if (other.defaultFractionDigits != this.defaultFractionDigits) return false
-        if (other.displayName != this.displayName) return false
-        if (other.resourceType != this.resourceType) return false
-        return true
+        return type.hashCode()
     }
 }

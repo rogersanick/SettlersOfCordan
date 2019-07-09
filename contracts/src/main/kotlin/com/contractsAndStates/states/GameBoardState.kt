@@ -2,9 +2,11 @@ package com.contractsAndStates.states
 
 import com.contractsAndStates.contracts.GameStateContract
 import com.r3.corda.lib.tokens.contracts.types.TokenType
-import net.corda.core.contracts.*
+import net.corda.core.contracts.Amount
+import net.corda.core.contracts.BelongsToContract
+import net.corda.core.contracts.LinearState
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
-import net.corda.core.serialization.ConstructorForDeserialization
 import net.corda.core.serialization.CordaSerializable
 
 /**
@@ -28,7 +30,7 @@ data class GameBoardState(val hexTiles: MutableList<HexTile>,
                           val initialPiecesPlaced: Int = 0,
                           val winner: Party? = null,
                           val beginner: Boolean = false,
-                          override val linearId: UniqueIdentifier = UniqueIdentifier()): LinearState {
+                          override val linearId: UniqueIdentifier = UniqueIdentifier()) : LinearState {
 
     override val participants: List<Party> get() = players
 
@@ -39,7 +41,7 @@ data class GameBoardState(val hexTiles: MutableList<HexTile>,
 }
 
 @CordaSerializable
-class HexTile(val resourceType: String,
+class HexTile(val resourceType: HexTileType,
               val roleTrigger: Int,
               val robberPresent: Boolean,
               val hexTileIndex: Int,
