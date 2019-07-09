@@ -20,9 +20,19 @@ import org.junit.Before
 import org.junit.Test
 
 class TradeWithPortFlowTest {
-    private val network = MockNetwork(listOf("com.contractsAndStates", "com.flows", "com.oracleClient", "com.r3.corda.sdk.token.workflows", "com.r3.corda.sdk.token.contracts", "com.r3.corda.sdk.token.money"),
+    private val network = MockNetwork(MockNetworkParameters(
             notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB"))),
-            defaultParameters = MockNetworkParameters(networkParameters = testNetworkParameters(minimumPlatformVersion = 4))
+            networkParameters = testNetworkParameters(minimumPlatformVersion = 4),
+            cordappsForAllNodes = listOf(
+                    TestCordapp.findCordapp("com.oracleService"),
+                    TestCordapp.findCordapp("com.flows"),
+                    TestCordapp.findCordapp("com.oracleClient"),
+                    TestCordapp.findCordapp("com.contractsAndStates"),
+                    TestCordapp.findCordapp("com.r3.corda.lib.tokens.workflows"),
+                    TestCordapp.findCordapp("com.r3.corda.lib.tokens.contracts"),
+                    TestCordapp.findCordapp("com.r3.corda.lib.tokens.money")
+            )
+        )
     )
     private val a = network.createNode(MockNodeParameters())
     private val b = network.createNode(MockNodeParameters())
@@ -107,8 +117,8 @@ class TradeWithPortFlowTest {
         }
 
         val portToTradeWith = gameBoardState.ports[0]
-        val inputResource: Resource = portToTradeWith.portTile.inputRequired.filter { it.token.symbol == Resource.getInstance(gameBoardState.hexTiles[0].resourceType).symbol }.single().token
-        val outputResource: Resource = portToTradeWith.portTile.outputRequired.filter { it.token.symbol != inputResource.symbol }.first().token
+        val inputResource = portToTradeWith.portTile.inputRequired.filter { it.token.tokenClass == Resource.getInstance(gameBoardState.hexTiles[0].resourceType).tokenClass }.single().token
+        val outputResource = portToTradeWith.portTile.outputRequired.filter { it.token.tokenClass != inputResource.tokenClass }.first().token
         val playerWithPortPreTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
 
         val futureWithIssuedTrade = arrayOfAllPlayerNodesInOrder[0].startFlow(
@@ -116,8 +126,8 @@ class TradeWithPortFlowTest {
                         gameBoardState.linearId,
                         0,
                         5,
-                        inputResource.symbol,
-                        outputResource.symbol
+                        inputResource.tokenIdentifier,
+                        outputResource.tokenIdentifier
                 )
         )
         network.runNetwork()

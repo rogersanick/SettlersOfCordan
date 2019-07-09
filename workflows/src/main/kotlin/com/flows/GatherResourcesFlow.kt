@@ -5,9 +5,12 @@ import com.contractsAndStates.contracts.GatherPhaseContract
 import com.contractsAndStates.states.*
 import com.oracleClient.contracts.DiceRollContract
 import com.oracleClient.state.DiceRollState
-import com.r3.corda.sdk.token.contracts.FungibleTokenContract
-import com.r3.corda.sdk.token.contracts.commands.IssueTokenCommand
-import com.r3.corda.sdk.token.contracts.utilities.heldBy
+import com.r3.corda.lib.tokens.contracts.FungibleTokenContract
+import com.r3.corda.lib.tokens.contracts.commands.IssueTokenCommand
+import com.r3.corda.lib.tokens.contracts.utilities.amount
+import com.r3.corda.lib.tokens.contracts.utilities.heldBy
+import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
+import com.r3.corda.lib.tokens.workflows.flows.issue.addIssueTokens
 import net.corda.core.contracts.*
 import net.corda.core.flows.*
 import net.corda.core.node.services.queryBy
@@ -80,15 +83,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<Si
         }
 
         // Step 10. Add commands to issue the appropriate types of resources. Convert the gameCurrencyToClaim to a set to prevent duplicate commands.
-        val resourceTypesToBeIssuedForWhichACommandShouldBeIncluded = gameCurrenciesToClaim.toSet()
-        resourceTypesToBeIssuedForWhichACommandShouldBeIncluded.forEach {
-            tb.addCommand(IssueTokenCommand(Resource.getInstance(it.resourceType) issuedBy ourIdentity), gameBoardState.players.map { it.owningKey })
-        }
-
-        // Step 11. Add all of the new owned token amounts to the transaction.
-        fungibleTokenAmountsOfResourcesToClaim.forEach {
-            tb.addOutputState(it, FungibleTokenContract.contractId)
-        }
+        addIssueTokens(tb, fungibleTokenAmountsOfResourcesToClaim)
 
         // Step 12. Add reference states for turn tracker and game board. Add the dice roll as an input
         // state so that the counter-party may verify the correct number of resources have been issued.

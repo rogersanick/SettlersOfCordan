@@ -2,9 +2,9 @@ package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.states.*
-import com.r3.corda.sdk.token.workflow.flows.internal.selection.TokenSelection
+import com.r3.corda.lib.tokens.contracts.types.TokenType
+import com.r3.corda.lib.tokens.workflows.internal.selection.TokenSelection
 import net.corda.core.contracts.Amount
-import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
@@ -52,7 +52,7 @@ class CorDanFlowUtils {
  */
 
 @Suspendable
-fun generateInGameSpend(serviceHub: ServiceHub, tb: TransactionBuilder, price: Map<Resource, Amount<Resource>>, changeOwner: Party): TransactionBuilder {
+fun generateInGameSpend(serviceHub: ServiceHub, tb: TransactionBuilder, price: Map<TokenType, Amount<TokenType>>, changeOwner: Party): TransactionBuilder {
 
     // Create a tokenSelector
     val tokenSelection = TokenSelection(serviceHub)
@@ -63,7 +63,7 @@ fun generateInGameSpend(serviceHub: ServiceHub, tb: TransactionBuilder, price: M
         tokensToSpend.forEach {
             var amountToSpendForSpecificIssuer: Long = 0
             it.value.forEach { issuedAmounts -> amountToSpendForSpecificIssuer += issuedAmounts.state.data.amount.quantity }
-            tokenSelection.generateExit(tb, it.value, Amount(amountToSpendForSpecificIssuer, tokenType), changeOwner)
+            tokenSelection.generateExit(it.value, Amount(amountToSpendForSpecificIssuer, tokenType), changeOwner)
         }
     }
 

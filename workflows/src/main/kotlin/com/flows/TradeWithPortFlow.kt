@@ -3,8 +3,9 @@ package com.flows
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.TradePhaseContract
 import com.contractsAndStates.states.*
-import com.r3.corda.sdk.token.contracts.commands.IssueTokenCommand
-import com.r3.corda.sdk.token.contracts.utilities.heldBy
+import com.r3.corda.lib.tokens.contracts.commands.IssueTokenCommand
+import com.r3.corda.lib.tokens.contracts.utilities.heldBy
+import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
 import net.corda.core.contracts.*
 import net.corda.core.flows.*
 import net.corda.core.node.services.queryBy
@@ -39,11 +40,11 @@ class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort
 
         // Step 4. Generate an exit for the tokens that will be consumed by the port.
         val tb = TransactionBuilder(notary)
-        val inputRequired = portToBeTradedWith.inputRequired.filter { it.token == getResourceByName(inputResourceType) }.single()
+        val inputRequired = portToBeTradedWith.inputRequired.filter { it.token == getTokenTypeByName(inputResourceType) }.single()
         generateInGameSpend(serviceHub, tb, mapOf(Pair(inputRequired.token, inputRequired)), ourIdentity)
 
         // Step 5. Generate all tokens and commands for issuance from the port
-        val outputResource = portToBeTradedWith.outputRequired.filter { it.token == getResourceByName(outputResourceType) }.single()
+        val outputResource = portToBeTradedWith.outputRequired.filter { it.token == getTokenTypeByName(outputResourceType) }.single()
         tb.addOutputState(outputResource issuedBy ourIdentity heldBy ourIdentity )
         tb.addCommand(TradePhaseContract.Commands.TradeWithPort(), gameBoardState.players.map { it.owningKey })
         tb.addCommand(IssueTokenCommand(outputResource.token issuedBy ourIdentity), gameBoardState.players.map { it.owningKey })

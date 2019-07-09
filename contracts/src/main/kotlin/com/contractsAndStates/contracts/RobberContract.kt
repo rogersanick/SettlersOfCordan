@@ -13,7 +13,7 @@ import java.security.PublicKey
 class RobberContract : Contract {
 
     companion object {
-        const val ID = "com.contractsAndStates.contracts.TurnTrackerContract"
+        const val ID = "com.contractsAndStates.contracts.RobberContract"
     }
 
     override fun verify(tx: LedgerTransaction) {

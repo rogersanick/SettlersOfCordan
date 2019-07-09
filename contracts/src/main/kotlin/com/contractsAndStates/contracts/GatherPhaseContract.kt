@@ -1,9 +1,8 @@
 package com.contractsAndStates.contracts
 
 import com.contractsAndStates.states.GameBoardState
-import com.contractsAndStates.states.RobberState
 import com.oracleClient.state.DiceRollState
-import com.r3.corda.sdk.token.contracts.states.FungibleToken
+import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import net.corda.core.contracts.*
 import net.corda.core.transactions.LedgerTransaction
 import java.security.PublicKey
@@ -33,7 +32,7 @@ class GatherPhaseContract : Contract {
                  */
 
                 "There are no inputs to this transaction" using (tx.inputs.isEmpty())
-                "All of the outputs of this transaction are of the FungibleTokenType" using (tx.outputs.all { it.data is FungibleToken<*> })
+                "All of the outputs of this transaction are of the FungibleTokenType" using (tx.outputs.all { it.data is FungibleToken })
 
                 /**
                  *  ******** BUSINESS LOGIC ********

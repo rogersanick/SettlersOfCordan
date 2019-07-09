@@ -4,10 +4,12 @@ import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.BuildPhaseContract
 import com.contractsAndStates.contracts.GameStateContract
 import com.contractsAndStates.states.*
-import com.r3.corda.sdk.token.contracts.FungibleTokenContract
-import com.r3.corda.sdk.token.contracts.commands.IssueTokenCommand
-import com.r3.corda.sdk.token.contracts.utilities.amount
-import com.r3.corda.sdk.token.contracts.utilities.heldBy
+import com.r3.corda.lib.tokens.contracts.FungibleTokenContract
+import com.r3.corda.lib.tokens.contracts.commands.IssueTokenCommand
+import com.r3.corda.lib.tokens.contracts.utilities.amount
+import com.r3.corda.lib.tokens.contracts.utilities.heldBy
+import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
+import com.r3.corda.lib.tokens.workflows.flows.issue.addIssueTokens
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -140,16 +142,7 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
                 amount(it.value, Resource.getInstance(it.key)) issuedBy ourIdentity heldBy ourIdentity
             }
 
-            // Add commands to issue the appropriate types of resources. Convert the gameCurrencyToClaim to a set to prevent duplicate commands.
-            val resourceTypesToBeIssuedForWhichACommandShouldBeIncluded = gameCurrencyToClaim.toSet()
-            resourceTypesToBeIssuedForWhichACommandShouldBeIncluded.forEach {
-                tb.addCommand(IssueTokenCommand(Resource.getInstance(it.first) issuedBy ourIdentity), gameBoardState.players.map { it.owningKey })
-            }
-
-            // Add all of the appropriate new owned token amounts to the transaction.
-            fungibleTokenAmountsOfResourcesToClaim.forEach {
-                tb.addOutputState(it, FungibleTokenContract.contractId)
-            }
+            addIssueTokens(tb, fungibleTokenAmountsOfResourcesToClaim)
         }
 
         // Step 12. Create the road state at the appropriate location specified by the user.
