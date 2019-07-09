@@ -40,7 +40,6 @@ configurations {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    compile 'info.picocli:picocli:4.0.0-alpha-2'
     compile "$corda_release_group:corda-tools-cliutils:$corda_release_version"
     compile "$corda_release_group:corda-shell:$corda_release_version"
     testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
