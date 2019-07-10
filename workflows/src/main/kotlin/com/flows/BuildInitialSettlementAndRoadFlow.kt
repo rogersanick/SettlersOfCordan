@@ -4,10 +4,7 @@ import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.BuildPhaseContract
 import com.contractsAndStates.contracts.GameStateContract
 import com.contractsAndStates.states.*
-import com.r3.corda.lib.tokens.contracts.FungibleTokenContract
-import com.r3.corda.lib.tokens.contracts.commands.IssueTokenCommand
 import com.r3.corda.lib.tokens.contracts.utilities.amount
-import com.r3.corda.lib.tokens.contracts.utilities.getAttachmentIdForGenericParam
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
 import com.r3.corda.lib.tokens.workflows.flows.issue.addIssueTokens
@@ -20,8 +17,7 @@ import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
-import java.lang.IllegalArgumentException
-import java.util.ArrayList
+import java.util.*
 
 // ******************************************
 // * Build Initial Settlement And Road Flow *
@@ -40,7 +36,7 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
                                         val hexTileIndex: Int,
                                         val hexTileCoordinate: Int,
                                         val hexTileRoadSide: Int
-): FlowLogic<SignedTransaction>() {
+) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
 
@@ -76,10 +72,11 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         val settlementState = SettlementState(tileIndex, cornerIndex, gameBoardState.players, ourIdentity)
 
         // Step 7. Create a new Game Board State which will contain an updated mapping of where settlements have been placed.
-        val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { i -> MutableList(6) { j -> gameBoardState.settlementsPlaced[i][j] } }
+        val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(GameBoardState.TILE_COUNT) { i -> MutableList(HexTile.SIDE_COUNT) { j -> gameBoardState.settlementsPlaced[i][j] } }
 
         // Step 8. Use a linkedList to calculate the coordinates of any relevant overlapping alternative location specification (e.g. 0,2; 1,4 and 5,0 all correspond to a single position)
         class LinkedListNode(val int: Int, var next: LinkedListNode? = null)
+
         val linkedListNode1 = LinkedListNode(1)
         val linkedListNode2 = LinkedListNode(3)
         linkedListNode1.next = linkedListNode2
@@ -116,9 +113,11 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         // The coordinate of the conflicting position allows us to access the appropriate side and get the appropriate index.
         val relevantHexTileNeighbours: ArrayList<HexTile?> = arrayListOf()
 
-        // TODO here sides[cornerIndex... does not look good. corners[cornerIndex or sides[sideIndex would be better.
-        if (gameBoardState.hexTiles[hexTileIndex].sides[cornerIndex.previous().value] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[cornerIndex.previous().value]!!.value])
-        if (gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate]!!.value])
+        gameBoardState.hexTiles[hexTileIndex].sides.getNeighborsOn(cornerIndex.getAdjacentSides())
+                .forEach {
+                    if (it != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[it.value])
+                }
+
 
         val indexOfRelevantHexTileNeighbour1 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(0))
         val indexOfRelevantHexTileNeighbour2 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(1))
@@ -138,7 +137,7 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
 
             // Consolidate the list so that they is only one instance of a given token type issued with the appropriate amount.
             val reducedListOfGameCurrencyToClaim = mutableMapOf<String, Long>()
-            gameCurrencyToClaim.forEach{
+            gameCurrencyToClaim.forEach {
                 if (reducedListOfGameCurrencyToClaim.containsKey(it.first)) reducedListOfGameCurrencyToClaim[it.first] = reducedListOfGameCurrencyToClaim[it.first]!!.plus(it.second)
                 else reducedListOfGameCurrencyToClaim[it.first] = it.second
             }
@@ -183,7 +182,7 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
 }
 
 @InitiatedBy(BuildInitialSettlementAndRoadFlow::class)
-class BuildInitialSettlementFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
+class BuildInitialSettlementFlowResponder(val counterpartySession: FlowSession) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {

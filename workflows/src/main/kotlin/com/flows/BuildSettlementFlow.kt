@@ -8,13 +8,11 @@ import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
-import net.corda.core.identity.CordaX500Name
 import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
-import java.lang.IllegalArgumentException
-import java.util.ArrayList
+import java.util.*
 
 
 // *************************
@@ -29,7 +27,7 @@ import java.util.ArrayList
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
-class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: Int, val hexTileCoordinate: Int): FlowLogic<SignedTransaction>() {
+class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: Int, val hexTileCoordinate: Int) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
 
@@ -61,6 +59,7 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
 
         // Step 8. Calculate the coordinates of neighbours that could conflict with the proposed placement were they to exist.
         class LinkedListNode(val int: Int, var next: LinkedListNode? = null)
+
         val linkedListNode1 = LinkedListNode(1)
         val linkedListNode2 = LinkedListNode(3)
         linkedListNode1.next = linkedListNode2
@@ -95,8 +94,10 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         // Step 9. Calculate the index of potentially conflicting neighbours, should they have been previously built.
         val relevantHexTileNeighbours: ArrayList<HexTile?> = arrayListOf()
 
-        if (gameBoardState.hexTiles[hexTileIndex].sides[cornerIndex.previous().value] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[cornerIndex.previous().value]!!.value])
-        if (gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate]!!.value])
+        gameBoardState.hexTiles[hexTileIndex].sides.getNeighborsOn(cornerIndex.getAdjacentSides())
+                .forEach {
+                    if (it != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[it.value])
+                }
 
         val indexOfRelevantHexTileNeighbour1 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(0))
         val indexOfRelevantHexTileNeighbour2 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(1))
@@ -130,7 +131,7 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
 }
 
 @InitiatedBy(BuildSettlementFlow::class)
-class BuildSettlementFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
+class BuildSettlementFlowResponder(val counterpartySession: FlowSession) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {

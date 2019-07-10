@@ -67,8 +67,14 @@ class BuildPhaseContract : Contract {
                 val relevantHexTileNeighbours: ArrayList<HexTile?> = arrayListOf()
 
                 // Add neighbouring hexTiles to the storage array if they exist.
-                if (inputGameBoardState.hexTiles[hexTileIndex.value].sides[hexTileCoordinate.previous().value] != null) relevantHexTileNeighbours.add(inputGameBoardState.hexTiles[inputGameBoardState.hexTiles[hexTileIndex.value].sides[hexTileCoordinate.previous().value]!!.value])
-                if (inputGameBoardState.hexTiles[hexTileIndex.value].sides[hexTileCoordinate.value] != null) relevantHexTileNeighbours.add(inputGameBoardState.hexTiles[inputGameBoardState.hexTiles[hexTileIndex.value].sides[hexTileCoordinate.value]!!.value])
+                // TODO HACK confirm this is the right numbering between corners and sides
+                val dirtySideFromCorner = TileSideIndex(hexTileCoordinate.value)
+                inputGameBoardState.hexTiles[hexTileIndex.value].sides.getNeighborsOn(listOf(
+                        dirtySideFromCorner.previous(),
+                        dirtySideFromCorner)
+                ).forEach {
+                    if (it != null) relevantHexTileNeighbours.add(inputGameBoardState.hexTiles[it.value])
+                }
 
                 // Get the index of the neighbouringHexTile
                 val indexOfRelevantHexTileNeighbour1 = inputGameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(0))
@@ -116,9 +122,11 @@ class BuildPhaseContract : Contract {
                  * We also need to ensure that the proposed road is being connected to the settlement being built.
                  */
 
+                // TODO HACK confirm this is the right numbering between corners and sides
+                val dirtySettlementSideIndex = TileSideIndex(newSettlement.hexTileIndex.value)
                 val hexTileOfNewSettlement = outputGameBoardState.hexTiles[newSettlement.hexTileIndex.value]
-                val indexOfHexTileToCheck1 = hexTileOfNewSettlement.sides[newSettlement.hexTileCoordinate.value]
-                val indexOfHexTileToCheck2 = hexTileOfNewSettlement.sides[newSettlement.hexTileCoordinate.previous().value]
+                val indexOfHexTileToCheck1 = hexTileOfNewSettlement.sides.getNeighborOn(dirtySettlementSideIndex)
+                val indexOfHexTileToCheck2 = hexTileOfNewSettlement.sides.getNeighborOn(dirtySettlementSideIndex.previous())
 
                 var checkForThirdPotentialConflictingRoad = true
 

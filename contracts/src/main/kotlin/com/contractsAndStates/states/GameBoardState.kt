@@ -58,11 +58,10 @@ class HexTile(val resourceType: String,
               val roleTrigger: Int,
               val robberPresent: Boolean,
               val hexTileIndex: HexTileIndex,
-              var sides: MutableList<HexTileIndex?> = MutableList(SIDE_COUNT) { null },
+              var sides: HexTileNeighbors = HexTileNeighbors(),
               var roads: MutableList<UniqueIdentifier?> = MutableList(SIDE_COUNT) { null }) {
 
     init {
-        require(sides.size == SIDE_COUNT) { "sides.size cannot be ${sides.size}" }
         require(roads.size == SIDE_COUNT) { "roads.size cannot be ${roads.size}" }
     }
 
@@ -76,8 +75,8 @@ class HexTile(val resourceType: String,
      */
 
     fun connect(mySideIndex: TileSideIndex, hexTileToConnect: HexTile) {
-        sides[mySideIndex.value] = hexTileToConnect.hexTileIndex
-        hexTileToConnect.sides[mySideIndex.opposite().value] = hexTileIndex
+        sides.setNeighborOn(mySideIndex, hexTileToConnect.hexTileIndex)
+        hexTileToConnect.sides.setNeighborOn(mySideIndex.opposite(), hexTileIndex)
     }
 
     /**
@@ -89,16 +88,17 @@ class HexTile(val resourceType: String,
 
     fun buildRoad(sideIndex: TileSideIndex, roadStateLinearId: UniqueIdentifier, hexTiles: MutableList<HexTile>): MutableList<HexTile> {
 
-        var newMutableHexTiles = hexTiles.map { it }.toMutableList()
+        val newMutableHexTiles = hexTiles.map { it }.toMutableList()
 
-        var newMutableListOfRoads = newMutableHexTiles[this.hexTileIndex.value].roads.map { it }.toMutableList()
+        val newMutableListOfRoads = newMutableHexTiles[this.hexTileIndex.value].roads.map { it }.toMutableList()
         newMutableListOfRoads.set(sideIndex.value, roadStateLinearId)
 
         val reciprocalSideIndex = sideIndex.opposite()
-        if (this.sides[sideIndex.value] != null) {
-            var newMutableReciprocalListOfRoads = newMutableHexTiles[this.sides[sideIndex.value]!!.value].roads.map { it }.toMutableList()
+        val neighbor = this.sides.getNeighborOn(sideIndex)
+        if (neighbor != null) {
+            val newMutableReciprocalListOfRoads = newMutableHexTiles[neighbor.value].roads.map { it }.toMutableList()
             newMutableReciprocalListOfRoads.set(reciprocalSideIndex.value, roadStateLinearId)
-            newMutableHexTiles[this.sides[sideIndex.value]!!.value].roads = newMutableReciprocalListOfRoads
+            newMutableHexTiles[neighbor.value].roads = newMutableReciprocalListOfRoads
         }
 
         newMutableHexTiles[this.hexTileIndex.value].roads = newMutableListOfRoads
@@ -115,6 +115,29 @@ data class Port(val portTile: PortTile, var accessPoints: List<AccessPoint>)
 
 @CordaSerializable
 data class AccessPoint(val hexTileIndex: HexTileIndex, val hexTileCoordinate: List<Int>)
+
+data class HexTileNeighbors(private val value: MutableList<HexTileIndex?> = MutableList(HexTile.SIDE_COUNT) { null }) {
+
+    init {
+        require(value.size == HexTile.SIDE_COUNT) { "sides.size cannot be ${value.size}" }
+        val nonNull = value.filter { it != null }.map { it as HexTileIndex }
+        require(nonNull.size == nonNull.toSet().size) {
+            "There should be no non-null duplicates in the index list"
+        }
+    }
+
+    fun getNeighborOn(sideIndex: TileSideIndex) = value[sideIndex.value]
+
+    fun getNeighborsOn(sideIndices: Iterable<TileSideIndex>) = sideIndices.map { getNeighborOn(it) }
+
+    fun hasNeighborOn(sideIndex: TileSideIndex) = getNeighborOn(sideIndex) != null
+
+    fun setNeighborOn(sideIndex: TileSideIndex, neighbor: HexTileIndex?) {
+        value[sideIndex.value] = neighbor
+    }
+
+    fun indexOf(tileIndex: HexTileIndex) = value.indexOf(tileIndex)
+}
 
 data class HexTileIndex(val value: Int) {
 
@@ -138,17 +161,21 @@ data class TileSideIndex(val value: Int) {
             else value - HexTile.SIDE_COUNT / 2)
 
     fun previous() = TileSideIndex(
-            if (value - 1 < 0) HexTile.SIDE_COUNT - 1
+            if (value < 1) HexTile.SIDE_COUNT - 1
             else value - 1)
 
     fun next() = TileSideIndex(
             if (value + 1 < HexTile.SIDE_COUNT) value + 1
             else 0)
+
+    // TODO Confirm that side 0 is between corner 0 and corner 1.
+    fun getAdjacentCorners() = TileCornerIndex(value).let {
+        listOf(it, it.next())
+    }
 }
 
 /**
  * Applies to settlements.
- * TODO Confirm that corner 1 is between side 0 and side 1.
  */
 data class TileCornerIndex(val value: Int) {
 
@@ -168,4 +195,9 @@ data class TileCornerIndex(val value: Int) {
     fun next() = TileCornerIndex(
             if (value + 1 < HexTile.SIDE_COUNT) value + 1
             else 0)
+
+    // TODO Confirm that corner 1 is between side 0 and side 1.
+    fun getAdjacentSides() = TileSideIndex(value).let {
+        listOf(it.previous(), it)
+    }
 }
