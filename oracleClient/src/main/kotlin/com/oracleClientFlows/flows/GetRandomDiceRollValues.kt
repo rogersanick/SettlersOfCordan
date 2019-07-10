@@ -1,7 +1,7 @@
-package com.oracleClient.flows
+package com.oracleClientFlows.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.oracleClient.state.DiceRollState
+import com.oracleClientStatesAndContracts.states.DiceRollState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow

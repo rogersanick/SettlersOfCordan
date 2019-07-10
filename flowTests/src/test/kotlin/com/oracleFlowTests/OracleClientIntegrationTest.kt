@@ -2,10 +2,7 @@ package com.oracleFlowTests
 
 import com.contractsAndStates.states.GameBoardState
 import com.flows.*
-import com.oracleClient.state.DiceRollState
-import com.oracleService.flows.DiceRollRequestHandler
-import com.oracleService.flows.OracleRollDiceFlowResponder
-import com.testUtilities.placeAPieceFromASpecificNodeAndEndTurn
+import com.oracleClientStatesAndContracts.states.DiceRollState
 import com.testUtilities.setupGameBoardForTesting
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.transactions.SignedTransaction
@@ -24,7 +21,7 @@ class OracleClientIntegrationTest {
             cordappsForAllNodes = listOf(
                     TestCordapp.findCordapp("com.oracleService"),
                     TestCordapp.findCordapp("com.flows"),
-                    TestCordapp.findCordapp("com.oracleClient"),
+                    TestCordapp.findCordapp("com.oracleClientFlows"),
                     TestCordapp.findCordapp("com.contractsAndStates"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.workflows"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.contracts"),

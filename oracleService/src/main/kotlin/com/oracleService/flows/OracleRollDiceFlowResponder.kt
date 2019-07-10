@@ -3,7 +3,7 @@ package com.oracleService.flows
 import co.paralleluniverse.fibers.Suspendable
 import com.flows.RollDiceFlow
 import com.flows.RollDiceFlowResponder
-import com.oracleClient.state.DiceRollState
+import com.oracleClientStatesAndContracts.states.DiceRollState
 import net.corda.core.flows.*
 import net.corda.core.transactions.SignedTransaction
 

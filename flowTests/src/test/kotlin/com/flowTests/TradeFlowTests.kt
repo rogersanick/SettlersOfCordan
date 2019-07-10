@@ -25,8 +25,8 @@ class TradeFlowTests {
             networkParameters = testNetworkParameters(minimumPlatformVersion = 4),
             cordappsForAllNodes = listOf(
                     TestCordapp.findCordapp("com.oracleService"),
-                    TestCordapp.findCordapp("com.workflows"),
-                    TestCordapp.findCordapp("com.oracleClient"),
+                    TestCordapp.findCordapp("com.flows"),
+                    TestCordapp.findCordapp("com.oracleClientFlows"),
                     TestCordapp.findCordapp("com.contractsAndStates"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.workflows"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.contracts"),

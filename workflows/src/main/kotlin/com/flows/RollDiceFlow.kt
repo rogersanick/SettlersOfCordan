@@ -3,9 +3,9 @@ package com.flows
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.TurnTrackerState
-import com.oracleClient.contracts.DiceRollContract
-import com.oracleClient.flows.GetRandomDiceRollValues
-import com.oracleClient.state.DiceRollState
+import com.oracleClientStatesAndContracts.contracts.DiceRollContract
+import com.oracleClientFlows.flows.GetRandomDiceRollValues
+import com.oracleClientStatesAndContracts.states.DiceRollState
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*

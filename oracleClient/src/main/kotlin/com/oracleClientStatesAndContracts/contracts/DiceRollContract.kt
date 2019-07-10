@@ -1,6 +1,6 @@
-package com.oracleClient.contracts
+package com.oracleClientStatesAndContracts.contracts
 
-import com.oracleClient.state.DiceRollState
+import com.oracleClientStatesAndContracts.states.DiceRollState
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
 import net.corda.core.contracts.requireThat
