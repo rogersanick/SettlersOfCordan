@@ -110,7 +110,7 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         // Available Port Tiles
         progressTracker.currentStep = ADDING_PORTS_FOR_YOU_SEAFARING_SOULS
         progressTracker.nextStep()
-        val portTilesTracking = BooleanArray(9)
+        val portTilesTracking = BooleanArray(PortTile.PORT_COUNT)
         val portTiles: ArrayList<PortTile> = arrayListOf(
                 PortTile(listOf(2 of Sheep), listOf(1 of Wood, 1 of Brick, 1 of Ore, 1 of Wheat)),
                 PortTile(listOf(2 of Wood), listOf(1 of Sheep, 1 of Brick, 1 of Ore, 1 of Wheat)),
@@ -124,20 +124,20 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         )
 
         val portHexTileAccessPointMapping = arrayListOf(
-                listOf(AccessPoint(HexTileIndex(0), listOf(5, 1))),
-                listOf(AccessPoint(HexTileIndex(1), listOf(0, 2)), AccessPoint(HexTileIndex(2), listOf(5))),
-                listOf(AccessPoint(HexTileIndex(2), listOf(2)), AccessPoint(HexTileIndex(6), listOf(0, 1))),
-                listOf(AccessPoint(HexTileIndex(11), listOf(1, 2))),
-                listOf(AccessPoint(HexTileIndex(15), listOf(2, 3)), AccessPoint(HexTileIndex(18), listOf(1))),
-                listOf(AccessPoint(HexTileIndex(18), listOf(4)), AccessPoint(HexTileIndex(17), listOf(2, 3))),
-                listOf(AccessPoint(HexTileIndex(16), listOf(3, 4))),
-                listOf(AccessPoint(HexTileIndex(12), listOf(4, 5)), AccessPoint(HexTileIndex(7), listOf(3))),
-                listOf(AccessPoint(HexTileIndex(3), listOf(4, 5)), AccessPoint(HexTileIndex(7), listOf(0)))
+                listOf(AccessPoint(HexTileIndex(0), listOf(TileCornerIndex(5), TileCornerIndex(1)))),
+                listOf(AccessPoint(HexTileIndex(1), listOf(TileCornerIndex(0), TileCornerIndex(2))), AccessPoint(HexTileIndex(2), listOf(TileCornerIndex(5)))),
+                listOf(AccessPoint(HexTileIndex(2), listOf(TileCornerIndex(2))), AccessPoint(HexTileIndex(6), listOf(TileCornerIndex(0), TileCornerIndex(1)))),
+                listOf(AccessPoint(HexTileIndex(11), listOf(TileCornerIndex(1), TileCornerIndex(2)))),
+                listOf(AccessPoint(HexTileIndex(15), listOf(TileCornerIndex(2), TileCornerIndex(3))), AccessPoint(HexTileIndex(18), listOf(TileCornerIndex(1)))),
+                listOf(AccessPoint(HexTileIndex(18), listOf(TileCornerIndex(4))), AccessPoint(HexTileIndex(17), listOf(TileCornerIndex(2), TileCornerIndex(3)))),
+                listOf(AccessPoint(HexTileIndex(16), listOf(TileCornerIndex(3), TileCornerIndex(4)))),
+                listOf(AccessPoint(HexTileIndex(12), listOf(TileCornerIndex(4), TileCornerIndex(5))), AccessPoint(HexTileIndex(7), listOf(TileCornerIndex(3)))),
+                listOf(AccessPoint(HexTileIndex(3), listOf(TileCornerIndex(4), TileCornerIndex(5))), AccessPoint(HexTileIndex(7), listOf(TileCornerIndex(0))))
         )
 
         val ports: ArrayList<Port> = arrayListOf()
 
-        for (i in 0..8) {
+        for (i in 0 until PortTile.PORT_COUNT) {
             var currPortTileIndex = Math.floor(Math.random() * (portTiles.size)).toInt()
             while (portTilesTracking[currPortTileIndex]) {
                 currPortTileIndex = Math.floor(Math.random() * (portTiles.size)).toInt()

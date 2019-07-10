@@ -58,7 +58,7 @@ class HexTile(val resourceType: String,
               val roleTrigger: Int,
               val robberPresent: Boolean,
               val hexTileIndex: HexTileIndex,
-              var sides: HexTileNeighbors = HexTileNeighbors(),
+              val sides: HexTileNeighbors = HexTileNeighbors(),
               var roads: MutableList<UniqueIdentifier?> = MutableList(SIDE_COUNT) { null }) {
 
     init {
@@ -108,14 +108,37 @@ class HexTile(val resourceType: String,
 }
 
 @CordaSerializable
-data class PortTile(val inputRequired: List<Amount<TokenType>>, val outputRequired: List<Amount<TokenType>>)
+data class PortTile(val inputRequired: List<Amount<TokenType>>, val outputRequired: List<Amount<TokenType>>) {
+
+    init {
+        val inputTypes = inputRequired.map { it.token }
+        require(inputTypes.size == inputTypes.toSet().size) {
+            "There should be no duplicates in the inputRequired list"
+        }
+        require(inputRequired.none { it.quantity == 0L }) {
+            "No inputRequired should have a 0 quantity"
+        }
+        val outputTypes = outputRequired.map { it.token }
+        require(outputTypes.size == outputTypes.toSet().size) {
+            "There should be no duplicates in the outputRequired list"
+        }
+        require(outputRequired.none { it.quantity == 0L }) {
+            "No outputRequired should have a 0 quantity"
+        }
+    }
+
+    companion object {
+        const val PORT_COUNT = 9
+    }
+}
 
 @CordaSerializable
 data class Port(val portTile: PortTile, var accessPoints: List<AccessPoint>)
 
 @CordaSerializable
-data class AccessPoint(val hexTileIndex: HexTileIndex, val hexTileCoordinate: List<Int>)
+data class AccessPoint(val hexTileIndex: HexTileIndex, val hexTileCoordinate: List<TileCornerIndex>)
 
+@CordaSerializable
 data class HexTileNeighbors(private val value: MutableList<HexTileIndex?> = MutableList(HexTile.SIDE_COUNT) { null }) {
 
     init {
@@ -139,6 +162,7 @@ data class HexTileNeighbors(private val value: MutableList<HexTileIndex?> = Muta
     fun indexOf(tileIndex: HexTileIndex) = value.indexOf(tileIndex)
 }
 
+@CordaSerializable
 data class HexTileIndex(val value: Int) {
 
     init {
@@ -146,6 +170,7 @@ data class HexTileIndex(val value: Int) {
     }
 }
 
+@CordaSerializable
 /**
  * Applies to roads.
  */
@@ -174,6 +199,7 @@ data class TileSideIndex(val value: Int) {
     }
 }
 
+@CordaSerializable
 /**
  * Applies to settlements.
  */
