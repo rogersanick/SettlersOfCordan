@@ -42,8 +42,8 @@ dependencies {
     testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
 
     // CorDapp dependencies.
-    cordapp project(":oracleClient")
-    cordapp project(":workflows")
+    cordaCompile project(":oracleClient")
+    cordaCompile project(":workflows")
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {

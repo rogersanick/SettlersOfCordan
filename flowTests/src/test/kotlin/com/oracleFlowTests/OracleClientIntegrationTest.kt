@@ -50,13 +50,6 @@ class OracleClientIntegrationTest {
     fun setup() {
         val startedNodes = arrayListOf(a, b, c, d)
 
-        startedNodes.forEach {
-            it.registerInitiatedFlow(SetupGameBoardFlowResponder::class.java)
-            it.registerInitiatedFlow(BuildInitialSettlementFlowResponder::class.java)
-            it.registerInitiatedFlow(GatherResourcesFlowResponder::class.java)
-            it.registerInitiatedFlow(RollDiceFlowResponder::class.java)
-        }
-
         listOf(
                 DiceRollRequestHandler::class.java,
                 OracleRollDiceFlowResponder::class.java

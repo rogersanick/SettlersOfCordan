@@ -59,10 +59,10 @@ dependencies {
     compile project(":oracleService")
 
     // CorDapp dependencies.
-    cordapp project(":contracts")
-    cordapp project(":oracleClient")
-    cordapp project(":oracleService")
-    cordapp "$corda_release_distribution:corda-finance-workflows:$corda_release_version"
+    cordaCompile project(":contracts")
+    cordaCompile project(":oracleClient")
+    cordaCompile project(":oracleService")
+    cordaCompile "$corda_release_distribution:corda-finance-workflows:$corda_release_version"
 }
 
 task integrationTest(type: Test, dependsOn: []) {
