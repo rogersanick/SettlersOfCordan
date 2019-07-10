@@ -213,31 +213,31 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
          */
 
         for (i in 0..2) {
-            hexTiles[i].connect(3, hexTiles[ i + 3])
-            hexTiles[i].connect(2, hexTiles[ i + 4])
-            if (i != 2) hexTiles[i].connect(1, hexTiles[ i + 1])
+            hexTiles[i].connect(TileSideIndex(3), hexTiles[ i + 3])
+            hexTiles[i].connect(TileSideIndex(2), hexTiles[ i + 4])
+            if (i != 2) hexTiles[i].connect(TileSideIndex(1), hexTiles[ i + 1])
         }
 
         for (i in 3..6) {
-            hexTiles[i].connect(3, hexTiles[ i + 4])
-            hexTiles[i].connect(2, hexTiles[ i + 5])
-            if (i != 6) hexTiles[i].connect(1, hexTiles[ i + 1])
+            hexTiles[i].connect(TileSideIndex(3), hexTiles[ i + 4])
+            hexTiles[i].connect(TileSideIndex(2), hexTiles[ i + 5])
+            if (i != 6) hexTiles[i].connect(TileSideIndex(1), hexTiles[ i + 1])
         }
 
         for (i in 7..11) {
-            if (i != 6) hexTiles[i].connect(1, hexTiles[ i + 1])
+            if (i != 6) hexTiles[i].connect(TileSideIndex(1), hexTiles[ i + 1])
         }
 
         for (i in 12..15) {
-            hexTiles[i].connect(5, hexTiles[ i - 5])
-            hexTiles[i].connect(0, hexTiles[ i - 4])
-            if (i != 15) hexTiles[i].connect(1, hexTiles[ i + 1])
+            hexTiles[i].connect(TileSideIndex(5), hexTiles[ i - 5])
+            hexTiles[i].connect(TileSideIndex(0), hexTiles[ i - 4])
+            if (i != 15) hexTiles[i].connect(TileSideIndex(1), hexTiles[ i + 1])
         }
 
         for (i in 16..18) {
-            hexTiles[i].connect(5, hexTiles[ i - 4])
-            hexTiles[i].connect(0, hexTiles[ i - 3])
-            if (i != 18) hexTiles[i].connect(1, hexTiles[ i + 1])
+            hexTiles[i].connect(TileSideIndex(5), hexTiles[ i - 4])
+            hexTiles[i].connect(TileSideIndex(0), hexTiles[ i - 3])
+            if (i != 18) hexTiles[i].connect(TileSideIndex(1), hexTiles[ i + 1])
         }
 
         // Step 5. Create a new game state

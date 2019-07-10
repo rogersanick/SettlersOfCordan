@@ -33,6 +33,8 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
     @Suspendable
     override fun call(): SignedTransaction {
 
+        val tileIndex = HexTileIndex(hexTileIndex)
+        val cornerIndex = TileCornerIndex(hexTileCoordinate)
         // Step 1. Get a reference to the notary service on the network
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
@@ -52,10 +54,10 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         tb.addCommand(buildSettlement)
 
         // Step 6. Create initial settlement
-        val settlementState = SettlementState(HexTileIndex(hexTileIndex), hexTileCoordinate, gameBoardState.players, ourIdentity)
+        val settlementState = SettlementState(tileIndex, cornerIndex, gameBoardState.players, ourIdentity)
 
         // Step 7. Create a new Game Board State
-        val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { MutableList(6) { false } }
+        val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(GameBoardState.TILE_COUNT) { MutableList(HexTile.SIDE_COUNT) { false } }
 
         // Step 8. Calculate the coordinates of neighbours that could conflict with the proposed placement were they to exist.
         class LinkedListNode(val int: Int, var next: LinkedListNode? = null)
@@ -93,7 +95,7 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         // Step 9. Calculate the index of potentially conflicting neighbours, should they have been previously built.
         val relevantHexTileNeighbours: ArrayList<HexTile?> = arrayListOf()
 
-        if (gameBoardState.hexTiles[hexTileIndex].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1]!!.value])
+        if (gameBoardState.hexTiles[hexTileIndex].sides[cornerIndex.previous().value] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[cornerIndex.previous().value]!!.value])
         if (gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate]!!.value])
 
         val indexOfRelevantHexTileNeighbour1 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(0))

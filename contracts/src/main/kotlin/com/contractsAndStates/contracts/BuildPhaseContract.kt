@@ -5,11 +5,14 @@ import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.r3.corda.lib.tokens.contracts.utilities.amount
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
-import net.corda.core.contracts.*
+import net.corda.core.contracts.CommandData
+import net.corda.core.contracts.Contract
+import net.corda.core.contracts.requireSingleCommand
+import net.corda.core.contracts.requireThat
 import net.corda.core.internal.sumByLong
 import net.corda.core.transactions.LedgerTransaction
 import java.security.PublicKey
-import java.util.ArrayList
+import java.util.*
 
 // ************************
 // * Build Phase Contract *
@@ -40,10 +43,10 @@ class BuildPhaseContract : Contract {
                  *  and five output states, depending on the round of setup we are in.
                  */
 
-                "There should only be one input of type GameBoardState." using ( tx.inputStates.size == 1 && tx.inputStates.single() is GameBoardState)
-                "There should be one output state of type GameBoardState" using ( tx.outputsOfType<GameBoardState>().size == 1 )
-                "There should be one output state of type SettlementState" using (( tx.outputsOfType<SettlementState>().size == 1 ))
-                "There should be one output state of type RoadState" using (( tx.outputsOfType<RoadState>().size == 1 ))
+                "There should only be one input of type GameBoardState." using (tx.inputStates.size == 1 && tx.inputStates.single() is GameBoardState)
+                "There should be one output state of type GameBoardState" using (tx.outputsOfType<GameBoardState>().size == 1)
+                "There should be one output state of type SettlementState" using ((tx.outputsOfType<SettlementState>().size == 1))
+                "There should be one output state of type RoadState" using ((tx.outputsOfType<RoadState>().size == 1))
 
                 /**
                  *  ******** BUSINESS LOGIC ********
@@ -64,16 +67,16 @@ class BuildPhaseContract : Contract {
                 val relevantHexTileNeighbours: ArrayList<HexTile?> = arrayListOf()
 
                 // Add neighbouring hexTiles to the storage array if they exist.
-                if (inputGameBoardState.hexTiles[hexTileIndex.value].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1] != null) relevantHexTileNeighbours.add(inputGameBoardState.hexTiles[inputGameBoardState.hexTiles[hexTileIndex.value].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1]!!.value])
-                if (inputGameBoardState.hexTiles[hexTileIndex.value].sides[hexTileCoordinate] != null) relevantHexTileNeighbours.add(inputGameBoardState.hexTiles[inputGameBoardState.hexTiles[hexTileIndex.value].sides[hexTileCoordinate]!!.value])
+                if (inputGameBoardState.hexTiles[hexTileIndex.value].sides[hexTileCoordinate.previous().value] != null) relevantHexTileNeighbours.add(inputGameBoardState.hexTiles[inputGameBoardState.hexTiles[hexTileIndex.value].sides[hexTileCoordinate.previous().value]!!.value])
+                if (inputGameBoardState.hexTiles[hexTileIndex.value].sides[hexTileCoordinate.value] != null) relevantHexTileNeighbours.add(inputGameBoardState.hexTiles[inputGameBoardState.hexTiles[hexTileIndex.value].sides[hexTileCoordinate.value]!!.value])
 
                 // Get the index of the neighbouringHexTile
                 val indexOfRelevantHexTileNeighbour1 = inputGameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(0))
                 val indexOfRelevantHexTileNeighbour2 = inputGameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(1))
 
-                "A settlement must not have previously been built in this location." using ( !inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][hexTileCoordinate] )
-                "A settlement must not have previously been built beside this location." using ( !inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][if (hexTileCoordinate != 0) hexTileCoordinate - 1 else 5] )
-                "A settlement must not have previously been built beside this location." using ( !inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][if (hexTileCoordinate != 5) hexTileCoordinate + 1 else 0] )
+                "A settlement must not have previously been built in this location." using (!inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][hexTileCoordinate.value])
+                "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][hexTileCoordinate.previous().value])
+                "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][hexTileCoordinate.next().value])
                 // TODO: Check for the third potential neighbour of any given settlement.
 
                 // Settlements cannot be build on HexTile that have a terrain type of 'Desert'.
@@ -92,7 +95,7 @@ class BuildPhaseContract : Contract {
                     if (indexOfRelevantHexTileNeighbour2 != -1 && inputGameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType != "Desert") resourcesThatShouldBeIssuedPreConsolidation.add(Pair(inputGameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType, newSettlement.resourceAmountClaim.toLong()))
 
                     val consolidatedListOfResourceThatShouldBeIssued = mutableMapOf<String, Long>()
-                    resourcesThatShouldBeIssuedPreConsolidation.forEach{
+                    resourcesThatShouldBeIssuedPreConsolidation.forEach {
                         if (consolidatedListOfResourceThatShouldBeIssued.containsKey(it.first)) consolidatedListOfResourceThatShouldBeIssued[it.first] = consolidatedListOfResourceThatShouldBeIssued[it.first]!!.plus(it.second)
                         else consolidatedListOfResourceThatShouldBeIssued[it.first] = it.second
                     }
@@ -114,8 +117,8 @@ class BuildPhaseContract : Contract {
                  */
 
                 val hexTileOfNewSettlement = outputGameBoardState.hexTiles[newSettlement.hexTileIndex.value]
-                val indexOfHexTileToCheck1 = hexTileOfNewSettlement.sides[newSettlement.hexTileCoordinate]
-                val indexOfHexTileToCheck2 = hexTileOfNewSettlement.sides[if (newSettlement.hexTileCoordinate - 1 < 0) 5 else newSettlement.hexTileCoordinate - 1]
+                val indexOfHexTileToCheck1 = hexTileOfNewSettlement.sides[newSettlement.hexTileCoordinate.value]
+                val indexOfHexTileToCheck2 = hexTileOfNewSettlement.sides[newSettlement.hexTileCoordinate.previous().value]
 
                 var checkForThirdPotentialConflictingRoad = true
 
@@ -126,10 +129,10 @@ class BuildPhaseContract : Contract {
                 }
 
                 "The new road should be adjacent to the proposed settlement" using (
-                        newRoads.single().linearId == hexTileOfNewSettlement.roads[newSettlement.hexTileCoordinate]
-                                || newRoads.single().linearId == hexTileOfNewSettlement.roads[if (newSettlement.hexTileCoordinate + 1 > 5) 0 else newSettlement.hexTileIndex.value + 1]
+                        newRoads.single().linearId == hexTileOfNewSettlement.roads[newSettlement.hexTileCoordinate.value]
+                                || newRoads.single().linearId == hexTileOfNewSettlement.roads[newSettlement.hexTileCoordinate.next().value]
                                 || checkForThirdPotentialConflictingRoad)
-                "A road must not have previously been built in this location." using ( newRoads.all { inputGameBoardState.hexTiles[it.hexTileIndex.value].roads[it.hexTileSide] == null } )
+                "A road must not have previously been built in this location." using (newRoads.all { inputGameBoardState.hexTiles[it.hexTileIndex.value].roads[it.hexTileSide.value] == null })
 
                 /**
                  *  ******** Check Signatures ********
@@ -139,8 +142,8 @@ class BuildPhaseContract : Contract {
                  */
 
                 val signingParties = tx.commandsOfType<Commands.BuildInitialSettlementAndRoad>().single().signers.toSet()
-                val participants = outputGameBoardState.participants.map{ it.owningKey }
-                "All players must verify and sign the transaction to build an initial settlement and road." using(signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
+                val participants = outputGameBoardState.participants.map { it.owningKey }
+                "All players must verify and sign the transaction to build an initial settlement and road." using (signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
 
 
             }
@@ -152,8 +155,8 @@ class BuildPhaseContract : Contract {
                  */
 
                 "There should be five input states, 4 resources and 1 gameboard state" using (tx.inputs.size == 5)
-                "There should be one output state of type GameBoardState" using ( tx.outputsOfType<GameBoardState>().size == 1 )
-                "There should be one output state of type SettlementState" using (( tx.outputsOfType<SettlementState>().size == 1 ))
+                "There should be one output state of type GameBoardState" using (tx.outputsOfType<GameBoardState>().size == 1)
+                "There should be one output state of type SettlementState" using ((tx.outputsOfType<SettlementState>().size == 1))
 
                 /**
                  *  ******** BUSINESS LOGIC ********
@@ -171,14 +174,14 @@ class BuildPhaseContract : Contract {
                 val sheepInTx = outputResources.filter { it.amount.token.tokenType == Resource.getInstance("Pasture") }.sumByLong { it.amount.quantity }
                 val woodInTx = outputResources.filter { it.amount.token.tokenType == Resource.getInstance("Forest") }.sumByLong { it.amount.quantity }
 
-                "A settlement must not have previously been built in this location." using ( !inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][hexTileCoordinate] )
-                "A settlement must not have previously been built beside this location." using ( !inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][if (hexTileCoordinate != 0) hexTileCoordinate - 1 else 5] )
-                "A settlement must not have previously been built beside this location." using ( !inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][if (hexTileCoordinate != 5) hexTileCoordinate + 1 else 0] )
+                "A settlement must not have previously been built in this location." using (!inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][hexTileCoordinate.value])
+                "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][hexTileCoordinate.previous().value])
+                "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][hexTileCoordinate.next().value])
 
-                "The player must have provided the appropriate amount of wheat to build a settlement" using ( wheatInTx == 1.toLong())
-                "The player must have provided the appropriate amount of brick to build a settlement" using ( brickInTx == 1.toLong())
-                "The player must have provided the appropriate amount of ore to build a settlement" using ( sheepInTx == 1.toLong())
-                "The player must have provided the appropriate amount of wood to build a settlement" using ( woodInTx == 1.toLong())
+                "The player must have provided the appropriate amount of wheat to build a settlement" using (wheatInTx == 1.toLong())
+                "The player must have provided the appropriate amount of brick to build a settlement" using (brickInTx == 1.toLong())
+                "The player must have provided the appropriate amount of ore to build a settlement" using (sheepInTx == 1.toLong())
+                "The player must have provided the appropriate amount of wood to build a settlement" using (woodInTx == 1.toLong())
                 "There must be no input settlements" using (tx.inputsOfType<SettlementState>().size == 1)
                 "The player must be attempting to build a single settlement" using (tx.outputsOfType<SettlementState>().size == 1)
 
@@ -188,8 +191,8 @@ class BuildPhaseContract : Contract {
                  */
 
                 val signingParties = tx.commandsOfType<Commands.BuildSettlement>().single().signers.toSet()
-                val participants = outputGameBoardState.participants.map{ it.owningKey }
-                "All players must verify and sign the transaction to build a settlement." using(signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
+                val participants = outputGameBoardState.participants.map { it.owningKey }
+                "All players must verify and sign the transaction to build a settlement." using (signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
 
             }
 
@@ -210,9 +213,9 @@ class BuildPhaseContract : Contract {
                 val brickInTx = outputResources.filter { it.amount.token.tokenType == Resource.getInstance("Hill") }.sumByLong { it.amount.quantity }
                 val woodInTx = outputResources.filter { it.amount.token.tokenType == Resource.getInstance("Forest") }.sumByLong { it.amount.quantity }
 
-                "The player must have provided the appropriate amount of brick to build a settlement" using ( brickInTx == (1 * newRoads.size).toLong())
-                "The player must have provided the appropriate amount of wood to build a settlement" using ( woodInTx == (1 * newRoads.size).toLong())
-                "A road must not have previously been built in this location." using ( newRoads.all { inputGameBoardState.hexTiles[it.hexTileIndex.value].roads[it.hexTileSide] == null } )
+                "The player must have provided the appropriate amount of brick to build a settlement" using (brickInTx == (1 * newRoads.size).toLong())
+                "The player must have provided the appropriate amount of wood to build a settlement" using (woodInTx == (1 * newRoads.size).toLong())
+                "A road must not have previously been built in this location." using (newRoads.all { inputGameBoardState.hexTiles[it.hexTileIndex.value].roads[it.hexTileSide.value] == null })
 
                 /**
                  *  ******** SIGNATURES ********
@@ -220,8 +223,8 @@ class BuildPhaseContract : Contract {
                  */
 
                 val signingParties = tx.commandsOfType<Commands.BuildRoad>().single().signers.toSet()
-                val participants = outputGameBoardState.participants.map{ it.owningKey }
-                "All players must verify and sign the transaction to build a settlement." using(signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
+                val participants = outputGameBoardState.participants.map { it.owningKey }
+                "All players must verify and sign the transaction to build a settlement." using (signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
 
 
             }
@@ -233,8 +236,8 @@ class BuildPhaseContract : Contract {
                  */
 
                 "There should be six input states, 5 resources and 1 gameboard state" using (tx.inputs.size == 6)
-                "There should be one output state of type GameBoardState" using ( tx.outputsOfType<GameBoardState>().size == 1 )
-                "There should be one output state of type SettlementState" using (( tx.outputsOfType<SettlementState>().size == 1 ))
+                "There should be one output state of type GameBoardState" using (tx.outputsOfType<GameBoardState>().size == 1)
+                "There should be one output state of type SettlementState" using ((tx.outputsOfType<SettlementState>().size == 1))
                 "There must be no input settlements" using (tx.inputsOfType<SettlementState>().size == 1)
                 "The player must be attempting to build a single city" using (tx.outputsOfType<SettlementState>().size == 1)
 
@@ -252,10 +255,10 @@ class BuildPhaseContract : Contract {
                 val wheatInTx = outputResources.filter { it.amount.token.tokenType == Resource.getInstance("Field") }.sumByLong { it.amount.quantity }
                 val oreInTx = outputResources.filter { it.amount.token.tokenType == Resource.getInstance("Mountain") }.sumByLong { it.amount.quantity }
 
-                "The city must be built in the same location as the settlement being upgraded." using ( inputSettlement.hexTileIndex == newCity.hexTileIndex && inputSettlement.hexTileCoordinate == newCity.hexTileCoordinate )
+                "The city must be built in the same location as the settlement being upgraded." using (inputSettlement.hexTileIndex == newCity.hexTileIndex && inputSettlement.hexTileCoordinate == newCity.hexTileCoordinate)
 
-                "The player must have provided the appropriate amount of wheat to build a settlement" using ( wheatInTx == 1.toLong())
-                "The player must have provided the appropriate amount of ore to build a settlement" using ( oreInTx == 1.toLong())
+                "The player must have provided the appropriate amount of wheat to build a settlement" using (wheatInTx == 1.toLong())
+                "The player must have provided the appropriate amount of ore to build a settlement" using (oreInTx == 1.toLong())
 
                 /**
                  *  ******** SIGNATURES ********
@@ -263,17 +266,17 @@ class BuildPhaseContract : Contract {
                  */
 
                 val signingParties = tx.commandsOfType<Commands.BuildCity>().single().signers.toSet()
-                val participants = outputGameBoardState.participants.map{ it.owningKey }
-                "All players must verify and sign the transaction to build a settlement." using(signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
+                val participants = outputGameBoardState.participants.map { it.owningKey }
+                "All players must verify and sign the transaction to build a settlement." using (signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
             }
         }
     }
 
     interface Commands : CommandData {
-        class BuildInitialSettlementAndRoad: Commands
-        class BuildSettlement: Commands
-        class BuildCity: Commands
-        class BuildRoad: Commands
+        class BuildInitialSettlementAndRoad : Commands
+        class BuildSettlement : Commands
+        class BuildCity : Commands
+        class BuildRoad : Commands
     }
 
 }

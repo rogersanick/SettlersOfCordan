@@ -15,6 +15,5 @@ data class RobberState(val hexTileIndex: HexTileIndex,
                        override val linearId: UniqueIdentifier = UniqueIdentifier()) : LinearState {
     override val participants: List<AbstractParty> = players
 
-
     fun move(hexTileIndex: HexTileIndex) = copy(hexTileIndex = hexTileIndex)
 }

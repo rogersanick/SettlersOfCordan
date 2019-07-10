@@ -44,6 +44,9 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
     @Suspendable
     override fun call(): SignedTransaction {
 
+        val tileIndex = HexTileIndex(hexTileIndex)
+        val cornerIndex = TileCornerIndex(hexTileCoordinate)
+        val sideIndex = TileSideIndex(hexTileRoadSide)
         /**
          * The following section defines all of the steps required to execute the flow. These steps will
          * be executed in sequence to build an initial settlement.
@@ -70,7 +73,7 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         tb.addCommand(placeInitialSettlement)
 
         // Step 6. Create an initial settlement state
-        val settlementState = SettlementState(HexTileIndex(hexTileIndex), hexTileCoordinate, gameBoardState.players, ourIdentity)
+        val settlementState = SettlementState(tileIndex, cornerIndex, gameBoardState.players, ourIdentity)
 
         // Step 7. Create a new Game Board State which will contain an updated mapping of where settlements have been placed.
         val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { i -> MutableList(6) { j -> gameBoardState.settlementsPlaced[i][j] } }
@@ -113,7 +116,8 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         // The coordinate of the conflicting position allows us to access the appropriate side and get the appropriate index.
         val relevantHexTileNeighbours: ArrayList<HexTile?> = arrayListOf()
 
-        if (gameBoardState.hexTiles[hexTileIndex].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1]!!.value])
+        // TODO here sides[cornerIndex... does not look good. corners[cornerIndex or sides[sideIndex would be better.
+        if (gameBoardState.hexTiles[hexTileIndex].sides[cornerIndex.previous().value] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[cornerIndex.previous().value]!!.value])
         if (gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate]!!.value])
 
         val indexOfRelevantHexTileNeighbour1 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(0))
@@ -149,10 +153,10 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         }
 
         // Step 12. Create the road state at the appropriate location specified by the user.
-        val roadState = RoadState(HexTileIndex(hexTileIndex), hexTileRoadSide, gameBoardState.players, ourIdentity, null, null)
+        val roadState = RoadState(tileIndex, sideIndex, gameBoardState.players, ourIdentity, null, null)
 
         // Step 13. Update the gameBoardState hextiles with the roads being built.
-        val newHexTiles = gameBoardState.hexTiles[hexTileIndex].buildRoad(hexTileRoadSide, roadState.linearId, gameBoardState.hexTiles)
+        val newHexTiles = gameBoardState.hexTiles[hexTileIndex].buildRoad(sideIndex, roadState.linearId, gameBoardState.hexTiles)
 
         // Step 14. Update the gameBoardState with new hexTiles and built settlements.
         val fullyUpdatedOutputGameBoardState = gameBoardState.copy(settlementsPlaced = newSettlementsPlaced, hexTiles = newHexTiles)

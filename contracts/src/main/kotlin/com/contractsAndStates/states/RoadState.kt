@@ -21,7 +21,7 @@ import net.corda.core.serialization.CordaSerializable
 @BelongsToContract(BuildPhaseContract::class)
 data class RoadState(
         val hexTileIndex: HexTileIndex,
-        val hexTileSide: Int,
+        val hexTileSide: TileSideIndex,
         val players: List<Party>,
         val owner: Party,
         val roadAttachedA: UniqueIdentifier? = null,
