@@ -29,7 +29,8 @@ class OracleClientIntegrationTest {
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.workflows"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.contracts"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.money")
-            )
+            ),
+            threadPerNode = true
         )
     )
     private val a = network.createNode(MockNodeParameters())
