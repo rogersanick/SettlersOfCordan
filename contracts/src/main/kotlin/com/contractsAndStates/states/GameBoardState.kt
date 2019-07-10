@@ -2,9 +2,11 @@ package com.contractsAndStates.states
 
 import com.contractsAndStates.contracts.GameStateContract
 import com.r3.corda.lib.tokens.contracts.types.TokenType
-import net.corda.core.contracts.*
+import net.corda.core.contracts.Amount
+import net.corda.core.contracts.BelongsToContract
+import net.corda.core.contracts.LinearState
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
-import net.corda.core.serialization.ConstructorForDeserialization
 import net.corda.core.serialization.CordaSerializable
 
 /**
@@ -23,14 +25,24 @@ data class GameBoardState(val hexTiles: MutableList<HexTile>,
                           val players: List<Party>,
                           val turnTrackerLinearId: UniqueIdentifier,
                           val robberLinearId: UniqueIdentifier,
-                          val settlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(19) { MutableList(6) { false } },
+                          val settlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(TILE_COUNT) { MutableList(6) { false } },
                           val setUpComplete: Boolean = false,
                           val initialPiecesPlaced: Int = 0,
                           val winner: Party? = null,
                           val beginner: Boolean = false,
-                          override val linearId: UniqueIdentifier = UniqueIdentifier()): LinearState {
+                          override val linearId: UniqueIdentifier = UniqueIdentifier()) : LinearState {
+
+    init {
+        require(settlementsPlaced.size == TILE_COUNT) {
+            "settlementsPlaced.size cannot be ${settlementsPlaced.size}"
+        }
+    }
 
     override val participants: List<Party> get() = players
+
+    companion object {
+        const val TILE_COUNT = 19
+    }
 
     fun weWin(ourIdentity: Party): GameBoardState {
         return this.copy(winner = ourIdentity)
@@ -42,8 +54,8 @@ data class GameBoardState(val hexTiles: MutableList<HexTile>,
 class HexTile(val resourceType: String,
               val roleTrigger: Int,
               val robberPresent: Boolean,
-              val hexTileIndex: Int,
-              var sides: MutableList<Int?> = MutableList(6) { null },
+              val hexTileIndex: HexTileIndex,
+              var sides: MutableList<HexTileIndex?> = MutableList(6) { null },
               var roads: MutableList<UniqueIdentifier?> = MutableList(6) { null }) {
 
     /**
@@ -70,17 +82,17 @@ class HexTile(val resourceType: String,
 
         var newMutableHexTiles = hexTiles.map { it }.toMutableList()
 
-        var newMutableListOfRoads = newMutableHexTiles[this.hexTileIndex].roads.map { it }.toMutableList()
+        var newMutableListOfRoads = newMutableHexTiles[this.hexTileIndex.value].roads.map { it }.toMutableList()
         newMutableListOfRoads.set(sideIndex, roadStateLinearId)
 
         val reciprocalSideIndex = if (sideIndex + 3 > 5) sideIndex - 3 else sideIndex + 3
         if (this.sides[sideIndex] != null) {
-            var newMutableReciprocalListOfRoads = newMutableHexTiles[this.sides[sideIndex]!!].roads.map { it }.toMutableList()
+            var newMutableReciprocalListOfRoads = newMutableHexTiles[this.sides[sideIndex]!!.value].roads.map { it }.toMutableList()
             newMutableReciprocalListOfRoads.set(reciprocalSideIndex, roadStateLinearId)
-            newMutableHexTiles[this.sides[sideIndex]!!].roads = newMutableReciprocalListOfRoads
+            newMutableHexTiles[this.sides[sideIndex]!!.value].roads = newMutableReciprocalListOfRoads
         }
 
-        newMutableHexTiles[this.hexTileIndex].roads = newMutableListOfRoads
+        newMutableHexTiles[this.hexTileIndex.value].roads = newMutableListOfRoads
         return newMutableHexTiles
     }
 
@@ -93,4 +105,13 @@ data class PortTile(val inputRequired: List<Amount<TokenType>>, val outputRequir
 data class Port(val portTile: PortTile, var accessPoints: List<AccessPoint>)
 
 @CordaSerializable
-data class AccessPoint(val hexTileIndex: Int, val hexTileCoordinate: List<Int>)
+data class AccessPoint(val hexTileIndex: HexTileIndex, val hexTileCoordinate: List<Int>)
+
+data class HexTileIndex(val value: Int) {
+
+    init {
+        require(0 <= value && value < GameBoardState.TILE_COUNT) {
+            "value cannot be $value"
+        }
+    }
+}

@@ -124,15 +124,15 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         )
 
         val portHexTileAccessPointMapping = arrayListOf(
-                listOf(AccessPoint(0, listOf(5, 1))),
-                listOf(AccessPoint(1, listOf(0, 2)), AccessPoint(2, listOf(5))),
-                listOf(AccessPoint(2, listOf(2)), AccessPoint(6, listOf(0, 1))),
-                listOf(AccessPoint(11, listOf(1, 2))),
-                listOf(AccessPoint(15, listOf(2, 3)), AccessPoint(18, listOf(1))),
-                listOf(AccessPoint(18, listOf(4)), AccessPoint(17, listOf(2, 3))),
-                listOf(AccessPoint(16, listOf(3, 4))),
-                listOf(AccessPoint(12, listOf(4, 5)), AccessPoint(7, listOf(3))),
-                listOf(AccessPoint(3, listOf(4, 5)), AccessPoint(7, listOf(0)))
+                listOf(AccessPoint(HexTileIndex(0), listOf(5, 1))),
+                listOf(AccessPoint(HexTileIndex(1), listOf(0, 2)), AccessPoint(HexTileIndex(2), listOf(5))),
+                listOf(AccessPoint(HexTileIndex(2), listOf(2)), AccessPoint(HexTileIndex(6), listOf(0, 1))),
+                listOf(AccessPoint(HexTileIndex(11), listOf(1, 2))),
+                listOf(AccessPoint(HexTileIndex(15), listOf(2, 3)), AccessPoint(HexTileIndex(18), listOf(1))),
+                listOf(AccessPoint(HexTileIndex(18), listOf(4)), AccessPoint(HexTileIndex(17), listOf(2, 3))),
+                listOf(AccessPoint(HexTileIndex(16), listOf(3, 4))),
+                listOf(AccessPoint(HexTileIndex(12), listOf(4, 5)), AccessPoint(HexTileIndex(7), listOf(3))),
+                listOf(AccessPoint(HexTileIndex(3), listOf(4, 5)), AccessPoint(HexTileIndex(7), listOf(0)))
         )
 
         val ports: ArrayList<Port> = arrayListOf()
@@ -170,7 +170,7 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         // Index adjustment variable to account desert placement
         var desertSkippedIndexAdjustment = 0
 
-        for (i in 0..18) {
+        for (i in 0 until GameBoardState.TILE_COUNT) {
 
             // Get a random index between 0 and 5 which will be used to access the HexTileTypes.
             var hexTypeIndex = (Math.random() * 6).toInt()
@@ -193,7 +193,7 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
                     hexType,
                     if (hexType.equals("Desert")) 0 else roleTriggerTilePlacementMapping.getOrElse(roleTriggerTilePlacementOrder[i - desertSkippedIndexAdjustment]) { 0 },
                     terrainTypes[hexTypeIndex] == "Desert",
-                    i))
+                    HexTileIndex(i)))
             countArray[hexTypeIndex]++
 
             // Establish the index adjustment once a desert HexTile has been encountered.

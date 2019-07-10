@@ -70,7 +70,7 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         tb.addCommand(placeInitialSettlement)
 
         // Step 6. Create an initial settlement state
-        val settlementState = SettlementState(hexTileIndex, hexTileCoordinate, gameBoardState.players, ourIdentity)
+        val settlementState = SettlementState(HexTileIndex(hexTileIndex), hexTileCoordinate, gameBoardState.players, ourIdentity)
 
         // Step 7. Create a new Game Board State which will contain an updated mapping of where settlements have been placed.
         val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { i -> MutableList(6) { j -> gameBoardState.settlementsPlaced[i][j] } }
@@ -113,8 +113,8 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         // The coordinate of the conflicting position allows us to access the appropriate side and get the appropriate index.
         val relevantHexTileNeighbours: ArrayList<HexTile?> = arrayListOf()
 
-        if (gameBoardState.hexTiles[hexTileIndex].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1]!!])
-        if (gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate]!!])
+        if (gameBoardState.hexTiles[hexTileIndex].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1]!!.value])
+        if (gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate]!!.value])
 
         val indexOfRelevantHexTileNeighbour1 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(0))
         val indexOfRelevantHexTileNeighbour2 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(1))
@@ -128,7 +128,7 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
 
             // Calculate the currencies that should be claimed by the player proposing a move.
             val gameCurrencyToClaim = arrayListOf<Pair<String, Long>>()
-            gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles[settlementState.hexTileIndex].resourceType, settlementState.resourceAmountClaim.toLong()))
+            gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles[settlementState.hexTileIndex.value].resourceType, settlementState.resourceAmountClaim.toLong()))
             if (indexOfRelevantHexTileNeighbour1 != -1 && gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType != "Desert") gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType, settlementState.resourceAmountClaim.toLong()))
             if (indexOfRelevantHexTileNeighbour2 != -1 && gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType != "Desert") gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType, settlementState.resourceAmountClaim.toLong()))
 
@@ -149,7 +149,7 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         }
 
         // Step 12. Create the road state at the appropriate location specified by the user.
-        val roadState = RoadState(hexTileIndex, hexTileRoadSide, gameBoardState.players, ourIdentity, null, null)
+        val roadState = RoadState(HexTileIndex(hexTileIndex), hexTileRoadSide, gameBoardState.players, ourIdentity, null, null)
 
         // Step 13. Update the gameBoardState hextiles with the roads being built.
         val newHexTiles = gameBoardState.hexTiles[hexTileIndex].buildRoad(hexTileRoadSide, roadState.linearId, gameBoardState.hexTiles)

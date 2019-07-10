@@ -3,10 +3,7 @@ package com.flows
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.BuildPhaseContract
 import com.contractsAndStates.contracts.GameStateContract
-import com.contractsAndStates.states.GameBoardState
-import com.contractsAndStates.states.HexTile
-import com.contractsAndStates.states.SettlementState
-import com.contractsAndStates.states.TurnTrackerState
+import com.contractsAndStates.states.*
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -55,7 +52,7 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         tb.addCommand(buildSettlement)
 
         // Step 6. Create initial settlement
-        val settlementState = SettlementState(hexTileIndex, hexTileCoordinate, gameBoardState.players, ourIdentity)
+        val settlementState = SettlementState(HexTileIndex(hexTileIndex), hexTileCoordinate, gameBoardState.players, ourIdentity)
 
         // Step 7. Create a new Game Board State
         val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { MutableList(6) { false } }
@@ -96,8 +93,8 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         // Step 9. Calculate the index of potentially conflicting neighbours, should they have been previously built.
         val relevantHexTileNeighbours: ArrayList<HexTile?> = arrayListOf()
 
-        if (gameBoardState.hexTiles[hexTileIndex].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1]!!])
-        if (gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate]!!])
+        if (gameBoardState.hexTiles[hexTileIndex].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1]!!.value])
+        if (gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate]!!.value])
 
         val indexOfRelevantHexTileNeighbour1 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(0))
         val indexOfRelevantHexTileNeighbour2 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(1))

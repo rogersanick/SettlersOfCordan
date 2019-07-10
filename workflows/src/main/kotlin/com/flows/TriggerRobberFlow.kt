@@ -1,8 +1,7 @@
 package com.flows
 
-import com.contractsAndStates.contracts.GatherPhaseContract
 import com.contractsAndStates.contracts.RobberContract
-import com.contractsAndStates.states.RobberState
+import com.contractsAndStates.states.HexTileIndex
 import com.oracleClient.state.DiceRollState
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -14,7 +13,7 @@ import net.corda.core.transactions.TransactionBuilder
 @InitiatingFlow(version = 1)
 @StartableByRPC
 class TriggerRobberFlow(val gameBoardLinearId: UniqueIdentifier,
-                        val updatedRobberLocation: Int): FlowLogic<SignedTransaction>() {
+                        val updatedRobberLocation: Int) : FlowLogic<SignedTransaction>() {
     override fun call(): SignedTransaction {
 
         // Step 1. Get a reference to the notary service on the network
@@ -36,7 +35,7 @@ class TriggerRobberFlow(val gameBoardLinearId: UniqueIdentifier,
         val robberStateAndRef = getRobberStateFromLinearID(gameBoardState.linearId, serviceHub)
 
         // Step 6. Create a new robber state
-        val movedRobberState = robberStateAndRef.state.data.move(updatedRobberLocation)
+        val movedRobberState = robberStateAndRef.state.data.move(HexTileIndex(updatedRobberLocation))
 
         // Step 7. Create the appropriate command
         val command = RobberContract.Commands.MoveRobber()

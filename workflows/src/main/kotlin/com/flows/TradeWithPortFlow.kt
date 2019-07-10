@@ -36,7 +36,7 @@ class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort
         val gameBoardState = gameBoardStateAndRef.state.data
 
         // Step 3. Get access to the port with which the user wishes to trade
-        val portToBeTradedWith = gameBoardState.ports.filter { it.accessPoints.any { accessPoint ->  accessPoint.hexTileIndex == indexOfPort && accessPoint.hexTileCoordinate.contains(coordinateOfPort) } }.single().portTile
+        val portToBeTradedWith = gameBoardState.ports.filter { it.accessPoints.any { accessPoint ->  accessPoint.hexTileIndex.value == indexOfPort && accessPoint.hexTileCoordinate.contains(coordinateOfPort) } }.single().portTile
 
         // Step 4. Generate an exit for the tokens that will be consumed by the port.
         val tb = TransactionBuilder(notary)
