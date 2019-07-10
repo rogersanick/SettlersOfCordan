@@ -53,9 +53,9 @@ dependencies {
     cordaCompile "$corda_release_distribution:corda-finance-workflows:$corda_release_version"
     cordaCompile "$corda_release_group:corda-core:$corda_release_version"
     cordaCompile "$corda_release_group:corda-node-driver:$corda_release_version"
-    cordaCompile project(":oracleService")
 
     // CorDapp dependencies.
+    cordaCompile project(":workflows")
     cordaCompile project(":contracts")
     cordaCompile project(":oracleClient")
     cordaCompile project(":oracleService")

@@ -1,11 +1,8 @@
 package com.flowTests
 
 import com.contractsAndStates.states.GameBoardState
-import com.contractsAndStates.states.Resource
 import com.contractsAndStates.states.TradeState
 import com.flows.*
-import com.oracleService.flows.DiceRollRequestHandler
-import com.oracleService.flows.OracleRollDiceFlowResponder
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.testUtilities.countAllResourcesForASpecificNode
 import com.testUtilities.setupGameBoardForTesting
@@ -28,14 +25,13 @@ class TradeFlowTests {
             networkParameters = testNetworkParameters(minimumPlatformVersion = 4),
             cordappsForAllNodes = listOf(
                     TestCordapp.findCordapp("com.oracleService"),
-                    TestCordapp.findCordapp("com.flows"),
+                    TestCordapp.findCordapp("com.workflows"),
                     TestCordapp.findCordapp("com.oracleClient"),
                     TestCordapp.findCordapp("com.contractsAndStates"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.workflows"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.contracts"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.money")
-            ),
-            threadPerNode = true
+            )
         )
     )
     private val a = network.createNode(MockNodeParameters())
@@ -53,13 +49,6 @@ class TradeFlowTests {
 
     @Before
     fun setup() {
-        val startedNodes = arrayListOf(a, b, c, d)
-
-        listOf(
-                DiceRollRequestHandler::class.java,
-                OracleRollDiceFlowResponder::class.java
-        ).forEach { oracle.registerInitiatedFlow(it) }
-
         network.runNetwork()
     }
 

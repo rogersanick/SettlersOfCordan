@@ -29,8 +29,7 @@ class OracleClientIntegrationTest {
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.workflows"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.contracts"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.money")
-            ),
-            threadPerNode = true
+            )
         )
     )
     private val a = network.createNode(MockNodeParameters())
@@ -48,13 +47,6 @@ class OracleClientIntegrationTest {
 
     @Before
     fun setup() {
-        val startedNodes = arrayListOf(a, b, c, d)
-
-        listOf(
-                DiceRollRequestHandler::class.java,
-                OracleRollDiceFlowResponder::class.java
-        ).forEach { oracle.registerInitiatedFlow(it) }
-
         network.runNetwork()
     }
 
