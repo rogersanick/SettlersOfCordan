@@ -24,7 +24,6 @@ class TradeFlowTests {
             notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB"))),
             networkParameters = testNetworkParameters(minimumPlatformVersion = 4),
             cordappsForAllNodes = listOf(
-                    TestCordapp.findCordapp("com.oracleService"),
                     TestCordapp.findCordapp("com.flows"),
                     TestCordapp.findCordapp("com.oracleClientFlows"),
                     TestCordapp.findCordapp("com.contractsAndStates"),
