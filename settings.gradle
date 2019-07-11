@@ -1,5 +1,5 @@
 include 'workflows'
-include 'flowTests'
+include 'allTests'
 include 'contracts'
 include 'clients'
 include 'oracleClient'
