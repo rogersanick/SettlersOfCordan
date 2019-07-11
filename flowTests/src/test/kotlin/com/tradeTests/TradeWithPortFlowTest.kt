@@ -1,10 +1,8 @@
-package com.flowTests
+package com.tradeTests
 
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.Resource
 import com.flows.*
-import com.oracleService.flows.DiceRollRequestHandler
-import com.oracleService.flows.OracleRollDiceFlowResponder
 import com.testUtilities.countAllResourcesForASpecificNode
 import com.testUtilities.rollDiceThenGatherThenMaybeEndTurn
 import com.testUtilities.setupGameBoardForTesting

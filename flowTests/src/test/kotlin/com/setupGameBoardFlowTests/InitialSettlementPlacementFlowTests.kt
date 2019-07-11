@@ -1,9 +1,7 @@
-package com.flowTests
+package com.setupGameBoardFlowTests
 
 import com.contractsAndStates.states.GameBoardState
 import com.flows.*
-import com.oracleService.flows.DiceRollRequestHandler
-import com.oracleService.flows.OracleRollDiceFlowResponder
 import com.testUtilities.placeAPieceFromASpecificNodeAndEndTurn
 import com.testUtilities.setupGameBoardForTesting
 import net.corda.core.contracts.TransactionVerificationException

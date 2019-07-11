@@ -1,4 +1,4 @@
-package com.flowTests
+package com.tradeTests
 
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.TradeState

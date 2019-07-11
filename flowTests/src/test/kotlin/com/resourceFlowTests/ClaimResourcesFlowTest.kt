@@ -1,9 +1,7 @@
-package com.flowTests
+package com.resourceFlowTests
 
 import com.contractsAndStates.states.GameBoardState
 import com.flows.*
-import com.oracleService.flows.DiceRollRequestHandler
-import com.oracleService.flows.OracleRollDiceFlowResponder
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.testUtilities.setupGameBoardForTesting
 import net.corda.core.contracts.requireThat

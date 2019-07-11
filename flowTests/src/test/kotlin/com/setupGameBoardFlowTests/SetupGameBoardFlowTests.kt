@@ -1,10 +1,8 @@
-package com.flowTests
+package com.setupGameBoardFlowTests
 
 import com.contractsAndStates.contracts.GameStateContract
 import com.contractsAndStates.states.GameBoardState
 import com.flows.*
-import com.oracleService.flows.DiceRollRequestHandler
-import com.oracleService.flows.OracleRollDiceFlowResponder
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.common.internal.testNetworkParameters

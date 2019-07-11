@@ -1,4 +1,4 @@
-package com.flowTests
+package com
 
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.getOrThrow
