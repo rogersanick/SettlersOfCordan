@@ -116,11 +116,11 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
                 PortTile(listOf(2 of Wood), listOf(1 of Sheep, 1 of Brick, 1 of Ore, 1 of Wheat)),
                 PortTile(listOf(2 of Brick), listOf(1 of Wood, 1 of Sheep, 1 of Ore, 1 of Wheat)),
                 PortTile(listOf(2 of Ore), listOf(1 of Wood, 1 of Sheep, 1 of Brick, 1 of Wheat)),
-                PortTile(listOf(2 of Wheat), listOf(1 of Wood, 1 of Sheep, 1 of Brick, 1 of Sheep)),
-                PortTile(listOf(3 of Wheat, 3 of Wood, 3 of Sheep, 3 of Brick, 3 of Sheep), listOf(1 of Wheat, 1 of Wood, 1 of Sheep, 1 of Brick, 1 of Sheep)),
-                PortTile(listOf(3 of Wheat, 3 of Wood, 3 of Sheep, 3 of Brick, 3 of Sheep), listOf(1 of Wheat, 1 of Wood, 1 of Sheep, 1 of Brick, 1 of Sheep)),
-                PortTile(listOf(3 of Wheat, 3 of Wood, 3 of Sheep, 3 of Brick, 3 of Sheep), listOf(1 of Wheat, 1 of Wood, 1 of Sheep, 1 of Brick, 1 of Sheep)),
-                PortTile(listOf(3 of Wheat, 3 of Wood, 3 of Sheep, 3 of Brick, 3 of Sheep), listOf(1 of Wheat, 1 of Wood, 1 of Sheep, 1 of Brick, 1 of Sheep))
+                PortTile(listOf(2 of Wheat), listOf(1 of Wood, 1 of Sheep, 1 of Brick, 1 of Ore)),
+                PortTile(listOf(3 of Wheat, 3 of Wood, 3 of Sheep, 3 of Brick, 3 of Ore), listOf(1 of Wheat, 1 of Wood, 1 of Sheep, 1 of Brick, 1 of Ore)),
+                PortTile(listOf(3 of Wheat, 3 of Wood, 3 of Sheep, 3 of Brick, 3 of Ore), listOf(1 of Wheat, 1 of Wood, 1 of Sheep, 1 of Brick, 1 of Ore)),
+                PortTile(listOf(3 of Wheat, 3 of Wood, 3 of Sheep, 3 of Brick, 3 of Ore), listOf(1 of Wheat, 1 of Wood, 1 of Sheep, 1 of Brick, 1 of Ore)),
+                PortTile(listOf(3 of Wheat, 3 of Wood, 3 of Sheep, 3 of Brick, 3 of Ore), listOf(1 of Wheat, 1 of Wood, 1 of Sheep, 1 of Brick, 1 of Ore))
         )
 
         val portHexTileAccessPointMapping = arrayListOf(
