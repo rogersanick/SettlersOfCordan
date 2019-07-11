@@ -25,7 +25,7 @@ class TradeWithPortFlowTest {
                     TestCordapp.findCordapp("com.flows"),
                     TestCordapp.findCordapp("com.oracleClientFlows"),
                     TestCordapp.findCordapp("com.contractsAndStates"),
-                    TestCordapp.findCordapp("com.r3.corda.lib.tokens.flows"),
+                    TestCordapp.findCordapp("com.r3.corda.lib.tokens.workflows"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.contracts"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.money")
             )
@@ -100,7 +100,7 @@ class TradeWithPortFlowTest {
         }
 
         val portToTradeWith = gameBoardState.ports[0]
-        val inputResource = portToTradeWith.portTile.inputRequired.filter { it.token.tokenClass == Resource.getInstance(gameBoardState.hexTiles[0].resourceType).tokenClass }.single().token
+        val inputResource = portToTradeWith.portTile.inputRequired.filter { it.token.tokenClass == Resource.getInstance(gameBoardState.hexTiles[0].resourceType).tokenClass }.first().token
         val outputResource = portToTradeWith.portTile.outputRequired.filter { it.token.tokenClass != inputResource.tokenClass }.first().token
         val playerWithPortPreTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
 
