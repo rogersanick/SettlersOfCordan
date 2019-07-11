@@ -1,8 +1,8 @@
 package com.oracleService.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.oracleClient.flows.GetRandomDiceRollValues
-import com.oracleClient.state.DiceRollState
+import com.oracleClientFlows.flows.GetRandomDiceRollValues
+import com.oracleClientStatesAndContracts.states.DiceRollState
 import com.oracleService.service.OracleService
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*

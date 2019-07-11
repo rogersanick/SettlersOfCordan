@@ -1,10 +1,9 @@
 package com.flows
 
-import co.paralleluniverse.fibers.Suspendable
-import com.contractsAndStates.contracts.GatherPhaseContract
-import com.contractsAndStates.states.*
 import com.oracleClient.contracts.DiceRollContract
 import com.oracleClient.state.DiceRollState
+import com.oracleClientStatesAndContracts.contracts.DiceRollContract
+import com.oracleClientStatesAndContracts.states.DiceRollState
 import com.r3.corda.lib.tokens.contracts.utilities.amount
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy

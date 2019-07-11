@@ -1,7 +1,7 @@
 package com.contractsAndStates.contracts
 
 import com.contractsAndStates.states.GameBoardState
-import com.oracleClient.state.DiceRollState
+import com.oracleClientStatesAndContracts.states.DiceRollState
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import net.corda.core.contracts.*
 import net.corda.core.transactions.LedgerTransaction

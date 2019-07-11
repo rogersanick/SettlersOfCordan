@@ -4,8 +4,8 @@ buildscript {
         corda_release_version = '4.1'
         tokens_release_version = '1.0'
         tokens_release_group = 'com.r3.corda.lib.tokens'
-        ext.corda_release_distribution = 'net.corda'
-        corda_gradle_plugins_version = '4.0.37'
+        corda_release_distribution = 'net.corda'
+        corda_gradle_plugins_version = '4.0.42'
         kotlin_version = '1.2.71'
         junit_version = '4.12'
         quasar_version = '0.7.10'
@@ -127,7 +127,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         cordapps = [
                 "$project.group:contracts:$project.version",
                 "$project.group:workflows:$project.version",
-                "$project.group:oracleClient:$project.version",
+                "$project.group:oracleClientFlows:$project.version",
         ]
     }
     node {
@@ -140,7 +140,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         cordapps = [
                 "$project.group:contracts:$project.version",
                 "$project.group:workflows:$project.version",
-                "$project.group:oracleClient:$project.version",
+                "$project.group:oracleClientFlows:$project.version",
         ]
         rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
@@ -154,7 +154,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         cordapps = [
                 "$project.group:contracts:$project.version",
                 "$project.group:workflows:$project.version",
-                "$project.group:oracleClient:$project.version",
+                "$project.group:oracleClientFlows:$project.version",
         ]
         rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
@@ -168,7 +168,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         cordapps = [
                 "$project.group:contracts:$project.version",
                 "$project.group:workflows:$project.version",
-                "$project.group:oracleClient:$project.version",
+                "$project.group:oracleClientFlows:$project.version",
         ]
         rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
@@ -182,7 +182,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         cordapps = [
                 "$project.group:contracts:$project.version",
                 "$project.group:workflows:$project.version",
-                "$project.group:oracleClient:$project.version",
+                "$project.group:oracleClientFlows:$project.version",
         ]
         rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
@@ -195,7 +195,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         }
         cordapps = [
                 "$project.group:oracleService:$project.version",
-                "$project.group:oracleClient:$project.version",
+                "$project.group:oracleClientFlows:$project.version",
                 "$project.group:workflows:$project.version",
                 "$project.group:contracts:$project.version",
 

@@ -3,6 +3,7 @@ package com.flows
 import com.contractsAndStates.contracts.RobberContract
 import com.contractsAndStates.states.HexTileIndex
 import com.oracleClient.state.DiceRollState
+import com.oracleClientStatesAndContracts.states.DiceRollState
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*

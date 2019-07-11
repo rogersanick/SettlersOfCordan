@@ -33,6 +33,11 @@ sourceSets {
     }
 }
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
 configurations {
     integrationTestCompile.extendsFrom testCompile
     integrationTestRuntime.extendsFrom testRuntime
@@ -40,23 +45,27 @@ configurations {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile 'info.picocli:picocli:4.0.0-alpha-2'
     testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testCompile "junit:junit:$junit_version"
 
     // Corda dependencies.
     cordaCompile "$corda_release_distribution:corda-finance-workflows:$corda_release_version"
     cordaCompile "$corda_release_group:corda-core:$corda_release_version"
-    testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
-    cordaCompile "$tokens_release_group:tokens-workflows:$tokens_release_version"
+    cordaCompile "$corda_release_group:corda-node-driver:$corda_release_version"
 
     // CorDapp dependencies.
+    cordaCompile project(":workflows")
     cordaCompile project(":contracts")
     cordaCompile project(":oracleClient")
+    cordaCompile project(":oracleService")
+    cordaCompile "$corda_release_distribution:corda-finance-workflows:$corda_release_version"
 }
 
 task integrationTest(type: Test, dependsOn: []) {
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
+    debug = true
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
