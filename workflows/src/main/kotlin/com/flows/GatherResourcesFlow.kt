@@ -10,7 +10,10 @@ import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
 import com.r3.corda.lib.tokens.workflows.flows.issue.addIssueTokens
 import com.r3.corda.lib.tokens.workflows.utilities.addTokenTypeJar
-import net.corda.core.contracts.*
+import net.corda.core.contracts.FungibleState
+import net.corda.core.contracts.ReferencedStateAndRef
+import net.corda.core.contracts.UniqueIdentifier
+import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
 import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
@@ -28,7 +31,7 @@ import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
-class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<SignedTransaction>() {
+class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         // Step 1. Get reference to the notary and oracle
@@ -53,9 +56,13 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<Si
         // Step 6. Generate valid settlements for which we will be issuing resources.
         val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states.filter {
             val diceRollTotal = diceRollState.randomRoll1 + diceRollState.randomRoll2
-            val adjacentHexTileIndex1 = gameBoardState.hexTiles[(gameBoardState.hexTiles[it.state.data.hexTileIndex].sides[it.state.data.hexTileCoordinate]) ?: 7].roleTrigger == diceRollTotal
-            val adjacentHexTileIndex2 = gameBoardState.hexTiles[(gameBoardState.hexTiles[it.state.data.hexTileIndex].sides[if (it.state.data.hexTileCoordinate - 1 < 0) 5 else it.state.data.hexTileCoordinate - 1])?: 7].roleTrigger == diceRollTotal
-            val primaryHexTile = gameBoardState.hexTiles[it.state.data.hexTileIndex].roleTrigger == diceRollTotal
+            val neighbors = gameBoardState.hexTiles.get(it.state.data.hexTileIndex).sides
+            val adjacentSideIndices = it.state.data.hexTileCoordinate.getAdjacentSides()
+            val adjacentHexTileIndex1 = gameBoardState.hexTiles.get(neighbors.getNeighborOn(adjacentSideIndices[1])
+                    ?: HexTileIndex(7)).roleTrigger == diceRollTotal
+            val adjacentHexTileIndex2 = gameBoardState.hexTiles.get(neighbors.getNeighborOn(adjacentSideIndices[0])
+                    ?: HexTileIndex(7)).roleTrigger == diceRollTotal
+            val primaryHexTile = gameBoardState.hexTiles.get(it.state.data.hexTileIndex).roleTrigger == diceRollTotal
             adjacentHexTileIndex1 || adjacentHexTileIndex2 || primaryHexTile
         }
 
@@ -63,7 +70,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<Si
         val gameCurrenciesToClaim = arrayListOf<GameCurrencyToClaim>()
         for (result in listOfValidSettlements) {
             val settlementState = result.state.data
-            val hexTile = gameBoardState.hexTiles[result.state.data.hexTileIndex]
+            val hexTile = gameBoardState.hexTiles.get(result.state.data.hexTileIndex)
             val ownerIndex = gameBoardState.players.indexOf(settlementState.owner)
             gameCurrenciesToClaim.add(GameCurrencyToClaim(hexTile.resourceType, ownerIndex))
         }
@@ -71,7 +78,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<Si
         // Step 8. Consolidate the list so that they is only one instance of a given token type issued with the appropriate amount.
         // This is required right now as multiple issuances of the same token type cause an error with transaction state grouping.
         val reducedListOfGameCurrencyToClaim = mutableMapOf<GameCurrencyToClaim, Int>()
-        gameCurrenciesToClaim.forEach{
+        gameCurrenciesToClaim.forEach {
             if (reducedListOfGameCurrencyToClaim.containsKey(it)) reducedListOfGameCurrencyToClaim[it] = reducedListOfGameCurrencyToClaim[it]!!.plus(1)
             else reducedListOfGameCurrencyToClaim[it] = 1
         }
@@ -92,7 +99,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<Si
         tb.addReferenceState(ReferencedStateAndRef(turnTrackerStateAndRef))
 
         // Step 13. Add the gather resources command and verify the transaction
-        val commandSigners = gameBoardState.players.map {it.owningKey}
+        val commandSigners = gameBoardState.players.map { it.owningKey }
         tb.addCommand(GatherPhaseContract.Commands.IssueResourcesToAllPlayers(), commandSigners)
         tb.addCommand(DiceRollContract.Commands.ConsumeDiceRoll(), commandSigners)
         tb.verify(serviceHub)
@@ -103,11 +110,10 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier): FlowLogic<Si
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
         return subFlow(FinalityFlow(stx, sessions))
     }
-
 }
 
 @InitiatedBy(GatherResourcesFlow::class)
-open class GatherResourcesFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
+open class GatherResourcesFlowResponder(val counterpartySession: FlowSession) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
@@ -118,23 +124,27 @@ open class GatherResourcesFlowResponder(val counterpartySession: FlowSession): F
                 val diceRollState = serviceHub.vaultService.queryBy<DiceRollState>(QueryCriteria.VaultQueryCriteria(stateRefs = stx.inputs)).states.single().state.data
                 val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states.filter {
                     val diceRollTotal = diceRollState.randomRoll1 + diceRollState.randomRoll2
-                    val adjacentHexTileIndex1 = gameBoardState.hexTiles[(gameBoardState.hexTiles[it.state.data.hexTileIndex].sides[it.state.data.hexTileCoordinate]) ?: 7].roleTrigger == diceRollTotal
-                    val adjacentHexTileIndex2 = gameBoardState.hexTiles[(gameBoardState.hexTiles[it.state.data.hexTileIndex].sides[if (it.state.data.hexTileCoordinate - 1 < 0) 5 else it.state.data.hexTileCoordinate - 1]) ?: 7].roleTrigger == diceRollTotal
-                    val primaryHexTile = gameBoardState.hexTiles[it.state.data.hexTileIndex].roleTrigger == diceRollTotal
+                    val neighbors = gameBoardState.hexTiles.get(it.state.data.hexTileIndex).sides
+                    val adjacentSideIndices = it.state.data.hexTileCoordinate.getAdjacentSides()
+                    val adjacentHexTileIndex1 = gameBoardState.hexTiles.get(neighbors.getNeighborOn(adjacentSideIndices[1])
+                            ?: HexTileIndex(7)).roleTrigger == diceRollTotal
+                    val adjacentHexTileIndex2 = gameBoardState.hexTiles.get(neighbors.getNeighborOn(adjacentSideIndices[0])
+                            ?: HexTileIndex(7)).roleTrigger == diceRollTotal
+                    val primaryHexTile = gameBoardState.hexTiles.get(it.state.data.hexTileIndex).roleTrigger == diceRollTotal
                     adjacentHexTileIndex1 || adjacentHexTileIndex2 || primaryHexTile
                 }
 
                 val gameCurrenciesThatShouldHaveBeenClaimed = arrayListOf<GameCurrencyToClaim>()
                 for (result in listOfValidSettlements) {
                     val settlementState = result.state.data
-                    val hexTile = gameBoardState.hexTiles[result.state.data.hexTileIndex]
+                    val hexTile = gameBoardState.hexTiles.get(result.state.data.hexTileIndex)
                     val ownerIndex = gameBoardState.players.indexOf(settlementState.owner)
                     gameCurrenciesThatShouldHaveBeenClaimed.add(GameCurrencyToClaim(hexTile.resourceType, ownerIndex))
                 }
 
                 // Consolidate the list so that they is only one instance of a given token type issued with the appropriate amount.
                 val reducedListOfGameCurrencyToClaim = mutableMapOf<GameCurrencyToClaim, Int>()
-                gameCurrenciesThatShouldHaveBeenClaimed.forEach{
+                gameCurrenciesThatShouldHaveBeenClaimed.forEach {
                     if (reducedListOfGameCurrencyToClaim.containsKey(it)) reducedListOfGameCurrencyToClaim[it] = reducedListOfGameCurrencyToClaim[it]!!.plus(1)
                     else reducedListOfGameCurrencyToClaim[it] = 1
                 }
@@ -155,7 +165,6 @@ open class GatherResourcesFlowResponder(val counterpartySession: FlowSession): F
 
         return subFlow(ReceiveFinalityFlow(otherSideSession = counterpartySession, expectedTxId = txWeJustSignedId.id))
     }
-
 }
 
 data class GameCurrencyToClaim(

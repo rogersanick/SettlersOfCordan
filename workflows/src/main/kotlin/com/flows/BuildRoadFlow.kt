@@ -29,6 +29,8 @@ class BuildRoadFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: I
     @Suspendable
     override fun call(): SignedTransaction {
 
+        val tileIndex = HexTileIndex(hexTileIndex)
+        val sideIndex = TileSideIndex(hexTileSide)
         // Step 1. Get a reference to the notary service on the network
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
@@ -50,10 +52,10 @@ class BuildRoadFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: I
         tb.addCommand(buildRoadCommand)
 
         // Step 6. Create initial road state
-        val roadState = RoadState(hexTileIndex, hexTileSide, gameBoardState.players, ourIdentity)
+        val roadState = RoadState(tileIndex, sideIndex, gameBoardState.players, ourIdentity)
 
         // Step 7. Determine if the road state is extending an existing road
-        val newHexTileSetWithRoad = gameBoardState.hexTiles[hexTileIndex].buildRoad(hexTileSide, roadState.linearId, gameBoardState.hexTiles)
+        val newHexTileSetWithRoad = gameBoardState.hexTiles.get(tileIndex).buildRoad(sideIndex, roadState.linearId, PlacedHexTiles(gameBoardState.hexTiles.value))
         val outputGameBoardState = gameBoardState.copy(hexTiles = newHexTileSetWithRoad)
 
         // Step 8. Add all states and commands to the transaction.
