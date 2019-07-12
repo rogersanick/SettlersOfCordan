@@ -277,21 +277,36 @@ data class HexTileNeighbors(val value: List<HexTileIndex?> = List(HexTile.SIDE_C
     }
 
     fun getNeighborOn(sideIndex: TileSideIndex) = value[sideIndex.value]
-
+    /**
+     * The neighbors returned are ordered as per the argument.
+     */
     fun getNeighborsOn(sideIndices: Iterable<TileSideIndex>) = sideIndices.map { getNeighborOn(it) }
-
+    /**
+     * The neighbors returned are ordered clockwise.
+     */
+    fun getNeighborsOn(cornerIndex: TileCornerIndex) = getNeighborsOn(cornerIndex.getAdjacentSides())
     fun hasNeighborOn(sideIndex: TileSideIndex) = getNeighborOn(sideIndex) != null
-
     fun indexOf(tileIndex: HexTileIndex) = value.indexOf(tileIndex)
 
-    class Builder() {
+    /**
+     * The neighbor corners returned are ordered clockwise.
+     */
+    fun getOverlappedCorners(cornerIndex: TileCornerIndex) =
+            cornerIndex.getNextOverlappedCorner().let {
+                listOf(it, it.getNextOverlappedCorner())
+            }.let { neighborCorners ->
+                cornerIndex.getAdjacentSides()
+                        .mapIndexed { index, it ->
+                            val neighbor = getNeighborOn(it)
+                            if (neighbor == null) null
+                            else AbsoluteCorner(neighbor, neighborCorners[index])
+                        }
+            }
+
+    class Builder {
         private val value: MutableList<HexTileIndex?> = MutableList(HexTile.SIDE_COUNT) { null }
 
         fun getNeighborOn(sideIndex: TileSideIndex) = value[sideIndex.value]
-        fun getNeighborsOn(sideIndices: Iterable<TileSideIndex>) = sideIndices.map { getNeighborOn(it) }
-        fun hasNeighborOn(sideIndex: TileSideIndex) = getNeighborOn(sideIndex) != null
-        fun indexOf(tileIndex: HexTileIndex) = value.indexOf(tileIndex)
-
         fun setNeighborOn(sideIndex: TileSideIndex, neighbor: HexTileIndex?) = apply {
             value[sideIndex.value] = neighbor
         }
@@ -299,6 +314,8 @@ data class HexTileNeighbors(val value: List<HexTileIndex?> = List(HexTile.SIDE_C
         fun build() = HexTileNeighbors(ImmutableList(value))
     }
 }
+
+data class AbsoluteCorner(val tileIndex: HexTileIndex, val cornerIndex: TileCornerIndex)
 
 @CordaSerializable
 data class HexTileIndex(val value: Int) {
@@ -318,23 +335,19 @@ data class TileSideIndex(val value: Int) {
         require(0 <= value && value < HexTile.SIDE_COUNT) { "value cannot be $value" }
     }
 
-    // TODO does + 3 % 5 work?
-    fun opposite() = TileSideIndex(
-            if (value + HexTile.SIDE_COUNT / 2 < HexTile.SIDE_COUNT) value + HexTile.SIDE_COUNT / 2
-            else value - HexTile.SIDE_COUNT / 2)
-
-    fun previous() = TileSideIndex(
-            if (value < 1) HexTile.SIDE_COUNT - 1
-            else value - 1)
-
-    fun next() = TileSideIndex(
-            if (value + 1 < HexTile.SIDE_COUNT) value + 1
-            else 0)
-
-    // TODO Confirm that side 0 is between corner 0 and corner 1.
-    fun getAdjacentCorners() = TileCornerIndex(value).let {
-        listOf(it, it.next())
-    }
+    fun opposite() = TileSideIndex((value + HexTile.SIDE_COUNT / 2) % HexTile.SIDE_COUNT)
+    /**
+     * Goes counter-clockwise.
+     */
+    fun previous() = TileSideIndex((value  + HexTile.SIDE_COUNT- 1) % HexTile.SIDE_COUNT)
+    /**
+     * Goes clockwise.
+     */
+    fun next() = TileSideIndex((value + 1) % HexTile.SIDE_COUNT)
+    /**
+     * The corners are ordered clockwise.
+     */
+    fun getAdjacentCorners() = TileCornerIndex(value).let { listOf(it, it.next()) }
 }
 
 @CordaSerializable
@@ -347,23 +360,23 @@ data class TileCornerIndex(val value: Int) {
         require(0 <= value && value < HexTile.SIDE_COUNT) { "value cannot be $value" }
     }
 
-    // TODO does + 3 % 5 work?
-    fun opposite() = TileCornerIndex(
-            if (value + HexTile.SIDE_COUNT / 2 < HexTile.SIDE_COUNT) value + HexTile.SIDE_COUNT / 2
-            else value - HexTile.SIDE_COUNT / 2)
-
-    fun previous() = TileCornerIndex(
-            if (value < 1) HexTile.SIDE_COUNT - 1
-            else value - 1)
-
-    fun next() = TileCornerIndex(
-            if (value + 1 < HexTile.SIDE_COUNT) value + 1
-            else 0)
-
-    // TODO Confirm that corner 1 is between side 0 and side 1.
-    fun getAdjacentSides() = TileSideIndex(value).let {
-        listOf(it.previous(), it)
-    }
+    fun opposite() = TileCornerIndex((value + HexTile.SIDE_COUNT / 2) % HexTile.SIDE_COUNT)
+    /**
+     * Goes counter-clockwise.
+     */
+    fun previous() = TileCornerIndex((value + HexTile.SIDE_COUNT - 1) % HexTile.SIDE_COUNT)
+    /**
+     * Goes clockwise.
+     */
+    fun next() = TileCornerIndex((value + 1) % HexTile.SIDE_COUNT)
+    /**
+     * The sides are ordered clockwise.
+     */
+    fun getAdjacentSides() = TileSideIndex(value).let { listOf(it.previous(), it) }
+    /**
+     * The corner applies to the adjacent tile clockwise.
+     */
+    fun getNextOverlappedCorner() = TileCornerIndex((value + 2) % HexTile.SIDE_COUNT)
 }
 
 private class ImmutableList<T>(private val inner: List<T>) : List<T> by inner
