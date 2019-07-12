@@ -1,5 +1,6 @@
 package com.contractsAndStates.states
 
+import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.GameStateContract
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.Amount
@@ -55,7 +56,7 @@ data class GameBoardState(val hexTiles: PlacedHexTiles,
 }
 
 @CordaSerializable
-data class PlacedHexTiles(val value: List<HexTile>) {
+data class PlacedHexTiles(val value: MutableList<HexTile>) {
 
     init {
         require(value.size == GameBoardState.TILE_COUNT) {
@@ -150,7 +151,7 @@ data class PlacedHexTiles(val value: List<HexTile>) {
             }
         }
 
-        fun build() = PlacedHexTiles(ImmutableList(value.map { it.build() }))
+        fun build() = PlacedHexTiles(ImmutableList(value.map { it.build() }).toMutableList())
     }
 }
 
@@ -174,6 +175,7 @@ data class HexTile(val resourceType: HexTileType,
      * TODO: Add functionality to connect roadStates when new roads and proposed extending existing roads.
      */
 
+    @Suspendable
     fun buildRoad(sideIndex: TileSideIndex, roadStateLinearId: UniqueIdentifier, hexTiles: PlacedHexTiles): PlacedHexTiles {
 
         val newMutableHexTiles = hexTiles.cloneList()
@@ -281,7 +283,7 @@ data class Port(val portTile: PortTile, var accessPoints: List<AccessPoint>)
 data class AccessPoint(val hexTileIndex: HexTileIndex, val hexTileCoordinate: List<TileCornerIndex>)
 
 @CordaSerializable
-data class HexTileNeighbors(val value: List<HexTileIndex?> = List(HexTile.SIDE_COUNT) { null }) {
+data class HexTileNeighbors(val value: MutableList<HexTileIndex?> = MutableList(HexTile.SIDE_COUNT) { null }) {
 
     init {
         require(value.size == HexTile.SIDE_COUNT) { "sides.size cannot be ${value.size}" }
@@ -331,7 +333,7 @@ data class HexTileNeighbors(val value: List<HexTileIndex?> = List(HexTile.SIDE_C
             value[sideIndex.value] = neighbor
         }
 
-        fun build() = HexTileNeighbors(ImmutableList(value))
+        fun build() = HexTileNeighbors(ImmutableList(value).toMutableList())
     }
 }
 
