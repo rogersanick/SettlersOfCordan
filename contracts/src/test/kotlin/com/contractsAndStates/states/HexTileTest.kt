@@ -6,7 +6,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class HexTileNeighborsTest {
+class HexTileTest {
 
     private fun List<Int?>.makeNeighbors() = map {
         if (it == null) null
