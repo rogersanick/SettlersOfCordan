@@ -154,6 +154,7 @@ data class HexTile(val resourceType: HexTileType,
                    val robberPresent: Boolean,
                    val hexTileIndex: HexTileIndex,
                    val sides: HexTileNeighbors = HexTileNeighbors(),
+                   // TODO make it a val
                    var roads: TileRoadIds = TileRoadIds()) {
 
     companion object {
