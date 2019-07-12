@@ -13,8 +13,8 @@ import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.StartedMockNode
 
 fun setupGameBoardForTesting(gameState: GameBoardState, network: MockNetwork, arrayOfAllPlayerNodesInOrder: List<StartedMockNode>, arrayOfAllTransactions: ArrayList<SignedTransaction>) {
-    val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(1,3), Pair(2,5), Pair(2,2))
-    val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(10,5), Pair(10,3), Pair(11,5), Pair(11,2))
+    val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0, 5), Pair(1, 3), Pair(2, 5), Pair(2, 2))
+    val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(10, 5), Pair(10, 3), Pair(11, 5), Pair(11, 2))
 
     for (i in 0..3) {
         placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
@@ -28,7 +28,7 @@ fun setupGameBoardForTesting(gameState: GameBoardState, network: MockNetwork, ar
 fun placeAPieceFromASpecificNodeAndEndTurn(i: Int, testCoordinates: ArrayList<Pair<Int, Int>>, gameState: GameBoardState, network: MockNetwork, arrayOfAllPlayerNodesInOrder: List<StartedMockNode>, arrayOfAllTransactions: ArrayList<SignedTransaction>, initialSetupComplete: Boolean) {
     // Build an initial settlement by issuing a settlement state
     // and updating the current turn.
-    if (gameState.hexTiles.get(HexTileIndex(testCoordinates[i].first)).resourceType == "Desert") {
+    if (gameState.hexTiles.get(HexTileIndex(testCoordinates[i].first)).resourceType == HexTileType.Desert) {
         testCoordinates[i] = Pair(testCoordinates[i].first + 6, testCoordinates[i].second)
     }
 

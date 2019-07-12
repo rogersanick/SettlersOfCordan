@@ -96,12 +96,12 @@ data class PlacedHexTiles(val value: List<HexTile>) {
                 12..15,
                 16..18)
         val TILE_COUNT_PER_RESOURCE = mapOf(
-                "Desert" to 1,
-                "Field" to 4,
-                "Forest" to 4,
-                "Hill" to 3,
-                "Mountain" to 3,
-                "Pasture" to 4
+                HexTileType.Desert to 1,
+                HexTileType.Field to 4,
+                HexTileType.Forest to 4,
+                HexTileType.Hill to 3,
+                HexTileType.Mountain to 3,
+                HexTileType.Pasture to 4
         )
     }
 
@@ -149,7 +149,7 @@ data class PlacedHexTiles(val value: List<HexTile>) {
 }
 
 @CordaSerializable
-data class HexTile(val resourceType: String,
+data class HexTile(val resourceType: HexTileType,
                    val roleTrigger: Int,
                    val robberPresent: Boolean,
                    val hexTileIndex: HexTileIndex,
@@ -191,7 +191,7 @@ data class HexTile(val resourceType: String,
     }
 
     class Builder {
-        var resourceType: String? = null
+        var resourceType: HexTileType? = null
             private set
         var roleTrigger: Int? = null
             private set
@@ -202,7 +202,7 @@ data class HexTile(val resourceType: String,
         val sidesBuilder: HexTileNeighbors.Builder = HexTileNeighbors.Builder()
         private var roads: MutableList<UniqueIdentifier?> = MutableList(HexTile.SIDE_COUNT) { null }
 
-        fun with(resourceType: String) = apply { this.resourceType = resourceType }
+        fun with(resourceType: HexTileType) = apply { this.resourceType = resourceType }
         fun with(roleTrigger: Int) = apply { this.roleTrigger = roleTrigger }
         fun with(robberPresent: Boolean) = apply { this.robberPresent = robberPresent }
         fun with(hexTileIndex: HexTileIndex) = apply { this.hexTileIndex = hexTileIndex }
