@@ -71,7 +71,7 @@ data class PlacedHexTiles(val value: List<HexTile>) {
             "A hexTileIndex does not match its index in the value list"
         }
         require(value.filter { it.robberPresent }.singleOrNull() != null) {
-            "A single title should have the robber"
+            "A single tile should have the robber"
         }
         val sortedResources = value
                 .map { it.resourceType to it }
@@ -304,7 +304,7 @@ data class HexTileNeighbors(val value: List<HexTileIndex?> = List(HexTile.SIDE_C
 data class HexTileIndex(val value: Int) {
 
     init {
-        require(0 <= value && value < GameBoardState.TILE_COUNT) { "value cannot be $value" }
+        require(0 <= value && value < GameBoardState.TILE_COUNT) { "Hex tile index value cannot be $value" }
     }
 }
 
@@ -315,7 +315,7 @@ data class HexTileIndex(val value: Int) {
 data class TileSideIndex(val value: Int) {
 
     init {
-        require(0 <= value && value < HexTile.SIDE_COUNT) { "value cannot be $value" }
+        require(0 <= value && value < HexTile.SIDE_COUNT) { "Hex tile side index value cannot be $value" }
     }
 
     // TODO does + 3 % 5 work?
@@ -344,7 +344,7 @@ data class TileSideIndex(val value: Int) {
 data class TileCornerIndex(val value: Int) {
 
     init {
-        require(0 <= value && value < HexTile.SIDE_COUNT) { "value cannot be $value" }
+        require(0 <= value && value < HexTile.SIDE_COUNT) { "Hex tile corner index value cannot be $value" }
     }
 
     // TODO does + 3 % 5 work?
