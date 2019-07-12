@@ -7,6 +7,7 @@ import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
+import net.corda.core.internal.toMultiMap
 import net.corda.core.serialization.CordaSerializable
 
 /**
@@ -20,12 +21,12 @@ import net.corda.core.serialization.CordaSerializable
 
 @CordaSerializable
 @BelongsToContract(GameStateContract::class)
-data class GameBoardState(val hexTiles: MutableList<HexTile>,
+data class GameBoardState(val hexTiles: PlacedHexTiles,
                           val ports: List<Port>,
                           val players: List<Party>,
                           val turnTrackerLinearId: UniqueIdentifier,
                           val robberLinearId: UniqueIdentifier,
-                          val settlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(TILE_COUNT) { MutableList(HexTile.SIDE_COUNT) { false } },
+                          val settlementsPlaced: List<List<Boolean>> = List(TILE_COUNT) { List(HexTile.SIDE_COUNT) { false } },
                           val setUpComplete: Boolean = false,
                           val initialPiecesPlaced: Int = 0,
                           val winner: Party? = null,
@@ -54,12 +55,106 @@ data class GameBoardState(val hexTiles: MutableList<HexTile>,
 }
 
 @CordaSerializable
-class HexTile(val resourceType: String,
-              val roleTrigger: Int,
-              val robberPresent: Boolean,
-              val hexTileIndex: HexTileIndex,
-              val sides: HexTileNeighbors = HexTileNeighbors(),
-              var roads: MutableList<UniqueIdentifier?> = MutableList(SIDE_COUNT) { null }) {
+data class PlacedHexTiles(val value: List<HexTile>) {
+
+    init {
+        require(value.size == GameBoardState.TILE_COUNT) {
+            "value.size cannot be ${value.size}"
+        }
+        val indices = value.map { it.hexTileIndex }
+        require(indices.size == indices.toSet().size) {
+            "There should be no duplicates in the indices list"
+        }
+        require(value.foldIndexed(true) { index, accum, tile ->
+            accum && index == tile.hexTileIndex.value
+        }) {
+            "A hexTileIndex does not match its index in the value list"
+        }
+        require(value.filter { it.robberPresent }.singleOrNull() != null) {
+            "A single title should have the robber"
+        }
+        val sortedResources = value
+                .map { it.resourceType to it }
+                .toMultiMap()
+                .map { it.key to it.value.size }
+                .toMap()
+        require(sortedResources.keys == TILE_COUNT_PER_RESOURCE.keys) {
+            "There is a mismatch between the resource types and the expected ones"
+        }
+        sortedResources.forEach { resource, count ->
+            require(TILE_COUNT_PER_RESOURCE[resource] == count) {
+                "There is a mismatch in the count of $resource tiles"
+            }
+        }
+    }
+
+    companion object {
+        val rowIndices = listOf(
+                0..2,
+                3..6,
+                7..11,
+                12..15,
+                16..18)
+        val TILE_COUNT_PER_RESOURCE = mapOf(
+                "Desert" to 1,
+                "Field" to 4,
+                "Forest" to 4,
+                "Hill" to 3,
+                "Mountain" to 3,
+                "Pasture" to 4
+        )
+    }
+
+    fun get(index: HexTileIndex) = value[index.value]
+    fun indexOf(tile: HexTile?) = value.indexOf(tile)
+    fun cloneList() = value.map { it }.toMutableList()
+
+    class Builder(private val value: MutableList<HexTile.Builder> = mutableListOf()) {
+        init {
+            connectNeighbors()
+        }
+
+        fun connectNeighbors() {
+            rowIndices.forEachIndexed { rowIndex, tileIndices ->
+                val rowLength = tileIndices.count()
+                tileIndices.forEachIndexed { index, tileIndex ->
+                    // Last row has no neighbor below it
+                    if (rowIndex < rowIndices.size - 1) {
+                        // If your row is shorter than below, you have 2 neighbors below
+                        if (rowLength < rowIndices[rowIndex + 1].count()) {
+                            value[tileIndex].connect(TileSideIndex(3), value[tileIndex + rowLength])
+                            value[tileIndex].connect(TileSideIndex(2), value[tileIndex + rowLength + 1])
+                        }
+
+                    }
+                    // First row has no neighbor above it
+                    if (0 < rowIndex) {
+                        val aboveRowLength = rowIndices[rowIndex - 1].count()
+                        // If your row is shorter than above, you have 2 neighbors above
+                        if (rowLength < aboveRowLength) {
+                            value[tileIndex].connect(TileSideIndex(5), value[tileIndex - aboveRowLength])
+                            value[tileIndex].connect(TileSideIndex(0), value[tileIndex - aboveRowLength + 1])
+                        }
+                    }
+                    // On each row, the last one has no neighbor to its right
+                    if (index < rowLength - 1) {
+                        value[tileIndex].connect(TileSideIndex(1), value[tileIndex + 1])
+                    }
+                }
+            }
+        }
+
+        fun build() = PlacedHexTiles(ImmutableList(value.map { it.build() }))
+    }
+}
+
+@CordaSerializable
+data class HexTile(val resourceType: String,
+                   val roleTrigger: Int,
+                   val robberPresent: Boolean,
+                   val hexTileIndex: HexTileIndex,
+                   val sides: HexTileNeighbors = HexTileNeighbors(),
+                   var roads: List<UniqueIdentifier?> = List(SIDE_COUNT) { null }) {
 
     init {
         require(roads.size == SIDE_COUNT) { "roads.size cannot be ${roads.size}" }
@@ -70,25 +165,15 @@ class HexTile(val resourceType: String,
     }
 
     /**
-     * This method is used to create a fully connected graph of HexTiles. This enables some
-     * funky maths that we will use later on to calculate the validity of transactions.
-     */
-
-    fun connect(mySideIndex: TileSideIndex, hexTileToConnect: HexTile) {
-        sides.setNeighborOn(mySideIndex, hexTileToConnect.hexTileIndex)
-        hexTileToConnect.sides.setNeighborOn(mySideIndex.opposite(), hexTileIndex)
-    }
-
-    /**
      * This method is used in flows to product a new version of the gameboard with a record of the location of roads, identified by
      * their specific linearID
      *
      * TODO: Add functionality to connect roadStates when new roads and proposed extending existing roads.
      */
 
-    fun buildRoad(sideIndex: TileSideIndex, roadStateLinearId: UniqueIdentifier, hexTiles: MutableList<HexTile>): MutableList<HexTile> {
+    fun buildRoad(sideIndex: TileSideIndex, roadStateLinearId: UniqueIdentifier, hexTiles: PlacedHexTiles): PlacedHexTiles {
 
-        val newMutableHexTiles = hexTiles.map { it }.toMutableList()
+        val newMutableHexTiles = hexTiles.cloneList()
 
         val newMutableListOfRoads = newMutableHexTiles[this.hexTileIndex.value].roads.map { it }.toMutableList()
         newMutableListOfRoads.set(sideIndex.value, roadStateLinearId)
@@ -102,9 +187,51 @@ class HexTile(val resourceType: String,
         }
 
         newMutableHexTiles[this.hexTileIndex.value].roads = newMutableListOfRoads
-        return newMutableHexTiles
+        return PlacedHexTiles(newMutableHexTiles)
     }
 
+    class Builder {
+        var resourceType: String? = null
+            private set
+        var roleTrigger: Int? = null
+            private set
+        var robberPresent: Boolean? = null
+            private set
+        var hexTileIndex: HexTileIndex? = null
+            private set
+        val sidesBuilder: HexTileNeighbors.Builder = HexTileNeighbors.Builder()
+        private var roads: MutableList<UniqueIdentifier?> = MutableList(HexTile.SIDE_COUNT) { null }
+
+        fun with(resourceType: String) = apply { this.resourceType = resourceType }
+        fun with(roleTrigger: Int) = apply { this.roleTrigger = roleTrigger }
+        fun with(robberPresent: Boolean) = apply { this.robberPresent = robberPresent }
+        fun with(hexTileIndex: HexTileIndex) = apply { this.hexTileIndex = hexTileIndex }
+        fun with(roads: List<UniqueIdentifier?>) = apply { this.roads = roads.toMutableList() }
+
+        fun isConnectedWith(sideIndex: TileSideIndex, tileIndex: HexTileIndex) =
+                sidesBuilder.getNeighborOn(sideIndex) == tileIndex
+
+        /**
+         * This method is used to create a fully connected graph of HexTiles. This enables some
+         * funky maths that we will use later on to calculate the validity of transactions.
+         */
+        fun connect(mySideIndex: TileSideIndex, hexTileToConnect: HexTile.Builder): Builder = apply {
+            val myTileIndex = hexTileIndex
+            require(myTileIndex != null) { "You must set your hexTileIndex before you connect" }
+            sidesBuilder.setNeighborOn(mySideIndex, hexTileToConnect.hexTileIndex)
+            if (!hexTileToConnect.isConnectedWith(mySideIndex.opposite(), myTileIndex!!))
+                hexTileToConnect.connect(mySideIndex.opposite(), this)
+        }
+
+        fun build() = HexTile(
+                resourceType!!,
+                roleTrigger!!,
+                robberPresent!!,
+                hexTileIndex!!,
+                sidesBuilder.build(),
+                ImmutableList(roads)
+        )
+    }
 }
 
 @CordaSerializable
@@ -139,7 +266,7 @@ data class Port(val portTile: PortTile, var accessPoints: List<AccessPoint>)
 data class AccessPoint(val hexTileIndex: HexTileIndex, val hexTileCoordinate: List<TileCornerIndex>)
 
 @CordaSerializable
-data class HexTileNeighbors(private val value: MutableList<HexTileIndex?> = MutableList(HexTile.SIDE_COUNT) { null }) {
+data class HexTileNeighbors(val value: List<HexTileIndex?> = List(HexTile.SIDE_COUNT) { null }) {
 
     init {
         require(value.size == HexTile.SIDE_COUNT) { "sides.size cannot be ${value.size}" }
@@ -155,11 +282,22 @@ data class HexTileNeighbors(private val value: MutableList<HexTileIndex?> = Muta
 
     fun hasNeighborOn(sideIndex: TileSideIndex) = getNeighborOn(sideIndex) != null
 
-    fun setNeighborOn(sideIndex: TileSideIndex, neighbor: HexTileIndex?) {
-        value[sideIndex.value] = neighbor
-    }
-
     fun indexOf(tileIndex: HexTileIndex) = value.indexOf(tileIndex)
+
+    class Builder() {
+        private val value: MutableList<HexTileIndex?> = MutableList(HexTile.SIDE_COUNT) { null }
+
+        fun getNeighborOn(sideIndex: TileSideIndex) = value[sideIndex.value]
+        fun getNeighborsOn(sideIndices: Iterable<TileSideIndex>) = sideIndices.map { getNeighborOn(it) }
+        fun hasNeighborOn(sideIndex: TileSideIndex) = getNeighborOn(sideIndex) != null
+        fun indexOf(tileIndex: HexTileIndex) = value.indexOf(tileIndex)
+
+        fun setNeighborOn(sideIndex: TileSideIndex, neighbor: HexTileIndex?) = apply {
+            value[sideIndex.value] = neighbor
+        }
+
+        fun build() = HexTileNeighbors(ImmutableList(value))
+    }
 }
 
 @CordaSerializable
@@ -227,3 +365,5 @@ data class TileCornerIndex(val value: Int) {
         listOf(it.previous(), it)
     }
 }
+
+private class ImmutableList<T>(private val inner: List<T>) : List<T> by inner

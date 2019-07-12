@@ -94,9 +94,9 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         // Step 9. Calculate the index of potentially conflicting neighbours, should they have been previously built.
         val relevantHexTileNeighbours: ArrayList<HexTile?> = arrayListOf()
 
-        gameBoardState.hexTiles[hexTileIndex].sides.getNeighborsOn(cornerIndex.getAdjacentSides())
+        gameBoardState.hexTiles.get(tileIndex).sides.getNeighborsOn(cornerIndex.getAdjacentSides())
                 .forEach {
-                    if (it != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[it.value])
+                    if (it != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles.get(it))
                 }
 
         val indexOfRelevantHexTileNeighbour1 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(0))

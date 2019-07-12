@@ -1,7 +1,8 @@
 package com.flows
 
-import com.oracleClient.contracts.DiceRollContract
-import com.oracleClient.state.DiceRollState
+import co.paralleluniverse.fibers.Suspendable
+import com.contractsAndStates.contracts.GatherPhaseContract
+import com.contractsAndStates.states.*
 import com.oracleClientStatesAndContracts.contracts.DiceRollContract
 import com.oracleClientStatesAndContracts.states.DiceRollState
 import com.r3.corda.lib.tokens.contracts.utilities.amount
@@ -55,13 +56,13 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         // Step 6. Generate valid settlements for which we will be issuing resources.
         val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states.filter {
             val diceRollTotal = diceRollState.randomRoll1 + diceRollState.randomRoll2
-            val neighbors = gameBoardState.hexTiles[it.state.data.hexTileIndex.value].sides
+            val neighbors = gameBoardState.hexTiles.get(it.state.data.hexTileIndex).sides
             val adjacentSideIndices = it.state.data.hexTileCoordinate.getAdjacentSides()
-            val adjacentHexTileIndex1 = gameBoardState.hexTiles[neighbors.getNeighborOn(adjacentSideIndices[1])?.value
-                    ?: 7].roleTrigger == diceRollTotal
-            val adjacentHexTileIndex2 = gameBoardState.hexTiles[neighbors.getNeighborOn(adjacentSideIndices[0])?.value
-                    ?: 7].roleTrigger == diceRollTotal
-            val primaryHexTile = gameBoardState.hexTiles[it.state.data.hexTileIndex.value].roleTrigger == diceRollTotal
+            val adjacentHexTileIndex1 = gameBoardState.hexTiles.get(neighbors.getNeighborOn(adjacentSideIndices[1])
+                    ?: HexTileIndex(7)).roleTrigger == diceRollTotal
+            val adjacentHexTileIndex2 = gameBoardState.hexTiles.get(neighbors.getNeighborOn(adjacentSideIndices[0])
+                    ?: HexTileIndex(7)).roleTrigger == diceRollTotal
+            val primaryHexTile = gameBoardState.hexTiles.get(it.state.data.hexTileIndex).roleTrigger == diceRollTotal
             adjacentHexTileIndex1 || adjacentHexTileIndex2 || primaryHexTile
         }
 
@@ -69,7 +70,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         val gameCurrenciesToClaim = arrayListOf<GameCurrencyToClaim>()
         for (result in listOfValidSettlements) {
             val settlementState = result.state.data
-            val hexTile = gameBoardState.hexTiles[result.state.data.hexTileIndex.value]
+            val hexTile = gameBoardState.hexTiles.get(result.state.data.hexTileIndex)
             val ownerIndex = gameBoardState.players.indexOf(settlementState.owner)
             gameCurrenciesToClaim.add(GameCurrencyToClaim(hexTile.resourceType, ownerIndex))
         }
@@ -123,20 +124,20 @@ open class GatherResourcesFlowResponder(val counterpartySession: FlowSession) : 
                 val diceRollState = serviceHub.vaultService.queryBy<DiceRollState>(QueryCriteria.VaultQueryCriteria(stateRefs = stx.inputs)).states.single().state.data
                 val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states.filter {
                     val diceRollTotal = diceRollState.randomRoll1 + diceRollState.randomRoll2
-                    val neighbors = gameBoardState.hexTiles[it.state.data.hexTileIndex.value].sides
+                    val neighbors = gameBoardState.hexTiles.get(it.state.data.hexTileIndex).sides
                     val adjacentSideIndices = it.state.data.hexTileCoordinate.getAdjacentSides()
-                    val adjacentHexTileIndex1 = gameBoardState.hexTiles[neighbors.getNeighborOn(adjacentSideIndices[1])?.value
-                            ?: 7].roleTrigger == diceRollTotal
-                    val adjacentHexTileIndex2 = gameBoardState.hexTiles[neighbors.getNeighborOn(adjacentSideIndices[0])?.value
-                            ?: 7].roleTrigger == diceRollTotal
-                    val primaryHexTile = gameBoardState.hexTiles[it.state.data.hexTileIndex.value].roleTrigger == diceRollTotal
+                    val adjacentHexTileIndex1 = gameBoardState.hexTiles.get(neighbors.getNeighborOn(adjacentSideIndices[1])
+                            ?: HexTileIndex(7)).roleTrigger == diceRollTotal
+                    val adjacentHexTileIndex2 = gameBoardState.hexTiles.get(neighbors.getNeighborOn(adjacentSideIndices[0])
+                            ?: HexTileIndex(7)).roleTrigger == diceRollTotal
+                    val primaryHexTile = gameBoardState.hexTiles.get(it.state.data.hexTileIndex).roleTrigger == diceRollTotal
                     adjacentHexTileIndex1 || adjacentHexTileIndex2 || primaryHexTile
                 }
 
                 val gameCurrenciesThatShouldHaveBeenClaimed = arrayListOf<GameCurrencyToClaim>()
                 for (result in listOfValidSettlements) {
                     val settlementState = result.state.data
-                    val hexTile = gameBoardState.hexTiles[result.state.data.hexTileIndex.value]
+                    val hexTile = gameBoardState.hexTiles.get(result.state.data.hexTileIndex)
                     val ownerIndex = gameBoardState.players.indexOf(settlementState.owner)
                     gameCurrenciesThatShouldHaveBeenClaimed.add(GameCurrencyToClaim(hexTile.resourceType, ownerIndex))
                 }

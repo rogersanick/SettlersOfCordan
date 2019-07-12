@@ -37,6 +37,21 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
                                         val hexTileCoordinate: Int,
                                         val hexTileRoadSide: Int
 ) : FlowLogic<SignedTransaction>() {
+
+    val tileIndex: HexTileIndex
+    val cornerIndex: TileCornerIndex
+    val sideIndex: TileSideIndex
+
+    init {
+        tileIndex = HexTileIndex(hexTileIndex)
+        cornerIndex = TileCornerIndex(hexTileCoordinate)
+        sideIndex = TileSideIndex(hexTileRoadSide)
+
+        require(cornerIndex.getAdjacentSides().contains(sideIndex)) {
+            "You must build a road next to a settlement"
+        }
+    }
+
     @Suspendable
     override fun call(): SignedTransaction {
 
@@ -49,7 +64,8 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
          */
 
         // Step 1. Get a reference to the notary service on the network
-        val notary = serviceHub.networkMapCache.notaryIdentities.first()
+        // TODO We take the notary from the game state
+        // val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
         // Step 2. Retrieve the Game Board State from the vault.
         val queryCriteriaForGameBoardState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardLinearId))
@@ -62,7 +78,7 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         val turnTrackerState = turnTrackerStateAndRef.state.data
 
         // Step 4. Create a new transaction builder
-        val tb = TransactionBuilder(notary)
+        val tb = TransactionBuilder(gameBoardStateAndRef.state.notary)
 
         // Step 5. Create new commands for placing a settlement. Add both to the transaction.
         val placeInitialSettlement = Command(BuildPhaseContract.Commands.BuildInitialSettlementAndRoad(), gameBoardState.players.map { it.owningKey })
@@ -113,11 +129,10 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         // The coordinate of the conflicting position allows us to access the appropriate side and get the appropriate index.
         val relevantHexTileNeighbours: ArrayList<HexTile?> = arrayListOf()
 
-        gameBoardState.hexTiles[hexTileIndex].sides.getNeighborsOn(cornerIndex.getAdjacentSides())
+        gameBoardState.hexTiles.get(tileIndex).sides.getNeighborsOn(cornerIndex.getAdjacentSides())
                 .forEach {
-                    if (it != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[it.value])
+                    if (it != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles.get(it))
                 }
-
 
         val indexOfRelevantHexTileNeighbour1 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(0))
         val indexOfRelevantHexTileNeighbour2 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(1))
@@ -131,9 +146,9 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
 
             // Calculate the currencies that should be claimed by the player proposing a move.
             val gameCurrencyToClaim = arrayListOf<Pair<String, Long>>()
-            gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles[settlementState.hexTileIndex.value].resourceType, settlementState.resourceAmountClaim.toLong()))
-            if (indexOfRelevantHexTileNeighbour1 != -1 && gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType != "Desert") gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour1].resourceType, settlementState.resourceAmountClaim.toLong()))
-            if (indexOfRelevantHexTileNeighbour2 != -1 && gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType != "Desert") gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles[indexOfRelevantHexTileNeighbour2].resourceType, settlementState.resourceAmountClaim.toLong()))
+            gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles.get(settlementState.hexTileIndex).resourceType, settlementState.resourceAmountClaim.toLong()))
+            if (indexOfRelevantHexTileNeighbour1 != -1 && gameBoardState.hexTiles.get(HexTileIndex(indexOfRelevantHexTileNeighbour1)).resourceType != "Desert") gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles.get(HexTileIndex(indexOfRelevantHexTileNeighbour1)).resourceType, settlementState.resourceAmountClaim.toLong()))
+            if (indexOfRelevantHexTileNeighbour2 != -1 && gameBoardState.hexTiles.get(HexTileIndex(indexOfRelevantHexTileNeighbour2)).resourceType != "Desert") gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles.get(HexTileIndex(indexOfRelevantHexTileNeighbour2)).resourceType, settlementState.resourceAmountClaim.toLong()))
 
             // Consolidate the list so that they is only one instance of a given token type issued with the appropriate amount.
             val reducedListOfGameCurrencyToClaim = mutableMapOf<String, Long>()
@@ -155,7 +170,7 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         val roadState = RoadState(tileIndex, sideIndex, gameBoardState.players, ourIdentity, null, null)
 
         // Step 13. Update the gameBoardState hextiles with the roads being built.
-        val newHexTiles = gameBoardState.hexTiles[hexTileIndex].buildRoad(sideIndex, roadState.linearId, gameBoardState.hexTiles)
+        val newHexTiles = gameBoardState.hexTiles.get(tileIndex).buildRoad(sideIndex, roadState.linearId, PlacedHexTiles(gameBoardState.hexTiles.value))
 
         // Step 14. Update the gameBoardState with new hexTiles and built settlements.
         val fullyUpdatedOutputGameBoardState = gameBoardState.copy(settlementsPlaced = newSettlementsPlaced, hexTiles = newHexTiles)
