@@ -121,11 +121,10 @@ class BuildPhaseContract : Contract {
                  * We also need to ensure that the proposed road is being connected to the settlement being built.
                  */
 
-                // TODO HACK confirm this is the right numbering between corners and sides
-                val dirtySettlementSideIndex = TileSideIndex(newSettlement.hexTileIndex.value)
+                val hexTileAdjacentSides = newSettlement.hexTileCoordinate.getAdjacentSides()
                 val hexTileOfNewSettlement = outputGameBoardState.hexTiles.get(newSettlement.hexTileIndex)
-                val indexOfHexTileToCheck1 = hexTileOfNewSettlement.sides.getNeighborOn(dirtySettlementSideIndex)
-                val indexOfHexTileToCheck2 = hexTileOfNewSettlement.sides.getNeighborOn(dirtySettlementSideIndex.previous())
+                val indexOfHexTileToCheck1 = hexTileOfNewSettlement.sides.getNeighborOn(hexTileAdjacentSides.get(0))
+                val indexOfHexTileToCheck2 = hexTileOfNewSettlement.sides.getNeighborOn(hexTileAdjacentSides.get(1))
 
                 var checkForThirdPotentialConflictingRoad = true
 

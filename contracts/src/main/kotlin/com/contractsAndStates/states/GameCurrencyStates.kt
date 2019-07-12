@@ -4,6 +4,7 @@ import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.serialization.CordaSerializable
 import java.math.BigDecimal
 
+@CordaSerializable
 enum class ResourceType(val displayName: String) {
     Wheat("Wh"),
     Ore("Or"),
@@ -13,6 +14,7 @@ enum class ResourceType(val displayName: String) {
 }
 
 // TODO find a way to make resourceYielded not nullable
+@CordaSerializable
 enum class HexTileType(val resourceYielded: ResourceType?) {
     Field(ResourceType.Wheat),
     Mountain(ResourceType.Ore),
