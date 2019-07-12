@@ -131,7 +131,7 @@ class BuildPhaseContract : Contract {
                 if (indexOfHexTileToCheck1 != null && indexOfHexTileToCheck2 != null) {
                     val hexTileToCheck1 = inputGameBoardState.hexTiles.get(indexOfHexTileToCheck1)
                     val hexTileToCheck2 = inputGameBoardState.hexTiles.get(indexOfHexTileToCheck2)
-                    checkForThirdPotentialConflictingRoad = hexTileToCheck1.roads.get(hexTileToCheck1.sides.indexOf(hexTileToCheck2.hexTileIndex)) == newRoads.single().linearId
+                    checkForThirdPotentialConflictingRoad = hexTileToCheck1.roads.get(hexTileToCheck1.sides.indexOf(hexTileToCheck2.hexTileIndex)!!) == newRoads.single().linearId
                 }
 
                 "The new road should be adjacent to the proposed settlement" using (

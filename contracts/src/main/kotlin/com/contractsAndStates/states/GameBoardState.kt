@@ -196,7 +196,7 @@ data class HexTile(val resourceType: HexTileType,
         var hexTileIndex: HexTileIndex? = null
             private set
         val sidesBuilder: HexTileNeighbors.Builder = HexTileNeighbors.Builder()
-        var roads: TileRoadIds? = null
+        var roads: TileRoadIds = TileRoadIds()
             private set
 
         fun with(resourceType: HexTileType) = apply { this.resourceType = resourceType }
@@ -226,7 +226,7 @@ data class HexTile(val resourceType: HexTileType,
                 robberPresent!!,
                 hexTileIndex!!,
                 sidesBuilder.build(),
-                roads!!
+                roads
         )
     }
 }
@@ -296,7 +296,10 @@ data class HexTileNeighbors(val value: List<HexTileIndex?> = List(HexTile.SIDE_C
     fun getNeighborsOn(cornerIndex: TileCornerIndex) = getNeighborsOn(cornerIndex.getAdjacentSides())
 
     fun hasNeighborOn(sideIndex: TileSideIndex) = getNeighborOn(sideIndex) != null
-    fun indexOf(tileIndex: HexTileIndex) = TileSideIndex(value.indexOf(tileIndex))
+    fun indexOf(tileIndex: HexTileIndex) = value.indexOf(tileIndex).let {
+        if (it < 0) null
+        else TileSideIndex(it)
+    }
 
     /**
      * The neighbor corners returned are ordered clockwise.

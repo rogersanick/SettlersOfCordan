@@ -124,6 +124,7 @@ class HexTileNeighborsTest {
         assertEquals(TileSideIndex(3), neighbors.indexOf(HexTileIndex(0)))
         assertEquals(TileSideIndex(4), neighbors.indexOf(HexTileIndex(5)))
         assertEquals(TileSideIndex(5), neighbors.indexOf(HexTileIndex(12)))
+        assertEquals(null, neighbors.indexOf(HexTileIndex(13)))
     }
 
     @Test
