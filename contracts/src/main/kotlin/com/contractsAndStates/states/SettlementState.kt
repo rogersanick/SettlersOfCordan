@@ -17,8 +17,8 @@ import net.corda.core.serialization.CordaSerializable
 @CordaSerializable
 @BelongsToContract(BuildPhaseContract::class)
 data class SettlementState(
-        val hexTileIndex: Int,
-        val hexTileCoordinate: Int,
+        val hexTileIndex: HexTileIndex,
+        val hexTileCoordinate: TileCornerIndex,
         val players: List<Party>,
         val owner: Party,
         val resourceAmountClaim: Int = 1,

@@ -1,8 +1,10 @@
 package com.setupGameBoardFlowTests
 
 import com.contractsAndStates.states.GameBoardState
+import com.contractsAndStates.states.HexTileIndex
 import com.contractsAndStates.states.HexTileType
-import com.flows.*
+import com.flows.BuildInitialSettlementAndRoadFlow
+import com.flows.SetupGameBoardFlow
 import com.testUtilities.placeAPieceFromASpecificNodeAndEndTurn
 import com.testUtilities.setupGameBoardForTesting
 import net.corda.core.contracts.TransactionVerificationException
@@ -30,7 +32,7 @@ class InitialSettlementPlacementFlowTests {
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.contracts"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.money")
             )
-        )
+    )
     )
     private val a = network.createNode(MockNodeParameters())
     private val b = network.createNode(MockNodeParameters())
@@ -74,7 +76,7 @@ class InitialSettlementPlacementFlowTests {
 
         // Build an initial settlement by issuing a settlement state
         // and updating the current turn.
-        val hexTileIndex = if (gameState.hexTiles[0].resourceType == HexTileType.Desert) 1 else 2
+        val hexTileIndex = if (gameState.hexTiles.get(HexTileIndex(0)).resourceType == HexTileType.Desert) 1 else 2
         val buildInitialSettlementFlow = BuildInitialSettlementAndRoadFlow(gameState.linearId, hexTileIndex, 5, 5)
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
@@ -140,8 +142,8 @@ class InitialSettlementPlacementFlowTests {
         val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
-        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(0,4), Pair(0,3), Pair(1,1))
-        val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(1,3), Pair(2,1), Pair(2,3), Pair(3,3))
+        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0, 5), Pair(0, 4), Pair(0, 3), Pair(1, 1))
+        val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(1, 3), Pair(2, 1), Pair(2, 3), Pair(3, 3))
 
         for (i in 0..3) {
             placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
@@ -204,7 +206,7 @@ class InitialSettlementPlacementFlowTests {
         val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
-        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0,5), Pair(0,1), Pair(0,3), Pair(1,1))
+        val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0, 5), Pair(0, 1), Pair(0, 3), Pair(1, 1))
 
 
         placeAPieceFromASpecificNodeAndEndTurn(0, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)

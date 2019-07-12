@@ -3,21 +3,16 @@ package com.flows
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.BuildPhaseContract
 import com.contractsAndStates.contracts.GameStateContract
-import com.contractsAndStates.states.GameBoardState
-import com.contractsAndStates.states.HexTile
-import com.contractsAndStates.states.SettlementState
-import com.contractsAndStates.states.TurnTrackerState
+import com.contractsAndStates.states.*
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
-import net.corda.core.identity.CordaX500Name
 import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
-import java.lang.IllegalArgumentException
-import java.util.ArrayList
+import java.util.*
 
 
 // *************************
@@ -32,10 +27,12 @@ import java.util.ArrayList
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
-class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: Int, val hexTileCoordinate: Int): FlowLogic<SignedTransaction>() {
+class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: Int, val hexTileCoordinate: Int) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
 
+        val tileIndex = HexTileIndex(hexTileIndex)
+        val cornerIndex = TileCornerIndex(hexTileCoordinate)
         // Step 1. Get a reference to the notary service on the network
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
@@ -55,13 +52,14 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         tb.addCommand(buildSettlement)
 
         // Step 6. Create initial settlement
-        val settlementState = SettlementState(hexTileIndex, hexTileCoordinate, gameBoardState.players, ourIdentity)
+        val settlementState = SettlementState(tileIndex, cornerIndex, gameBoardState.players, ourIdentity)
 
         // Step 7. Create a new Game Board State
-        val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(18) { MutableList(6) { false } }
+        val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(GameBoardState.TILE_COUNT) { MutableList(HexTile.SIDE_COUNT) { false } }
 
         // Step 8. Calculate the coordinates of neighbours that could conflict with the proposed placement were they to exist.
         class LinkedListNode(val int: Int, var next: LinkedListNode? = null)
+
         val linkedListNode1 = LinkedListNode(1)
         val linkedListNode2 = LinkedListNode(3)
         linkedListNode1.next = linkedListNode2
@@ -96,8 +94,10 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         // Step 9. Calculate the index of potentially conflicting neighbours, should they have been previously built.
         val relevantHexTileNeighbours: ArrayList<HexTile?> = arrayListOf()
 
-        if (gameBoardState.hexTiles[hexTileIndex].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[if (hexTileCoordinate - 1 < 0) 5 else hexTileCoordinate - 1]!!])
-        if (gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate] != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles[gameBoardState.hexTiles[hexTileIndex].sides[hexTileCoordinate]!!])
+        gameBoardState.hexTiles.get(tileIndex).sides.getNeighborsOn(cornerIndex.getAdjacentSides())
+                .forEach {
+                    if (it != null) relevantHexTileNeighbours.add(gameBoardState.hexTiles.get(it))
+                }
 
         val indexOfRelevantHexTileNeighbour1 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(0))
         val indexOfRelevantHexTileNeighbour2 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(1))
@@ -131,7 +131,7 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
 }
 
 @InitiatedBy(BuildSettlementFlow::class)
-class BuildSettlementFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
+class BuildSettlementFlowResponder(val counterpartySession: FlowSession) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {

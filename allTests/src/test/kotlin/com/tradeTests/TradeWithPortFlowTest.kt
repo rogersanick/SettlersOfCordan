@@ -1,6 +1,7 @@
 package com.tradeTests
 
 import com.contractsAndStates.states.GameBoardState
+import com.contractsAndStates.states.HexTileIndex
 import com.contractsAndStates.states.HexTileType
 import com.contractsAndStates.states.Resource
 import com.flows.SetupGameBoardFlow
@@ -84,7 +85,7 @@ class TradeWithPortFlowTest {
         var gameBoardState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
         while (
         // TODO make sure the it.key.resourceYielded is not null
-                gameBoardState.hexTiles[0].resourceType == HexTileType.Desert || !gameBoardState.ports[0].portTile.inputRequired.contains(Amount(2, Resource.getInstance(gameBoardState.hexTiles[0].resourceType.resourceYielded!!)))
+                gameBoardState.hexTiles.get(HexTileIndex(0)).resourceType == HexTileType.Desert || !gameBoardState.ports[0].portTile.inputRequired.contains(Amount(2, Resource.getInstance(gameBoardState.hexTiles.get(HexTileIndex(0)).resourceType.resourceYielded!!)))
         ) {
             gameBoardState = getStxWithGameState().coreTransaction.outputsOfType<GameBoardState>().single()
         }
@@ -103,7 +104,7 @@ class TradeWithPortFlowTest {
         }
 
         val portToTradeWith = gameBoardState.ports[0]
-        val inputResource = portToTradeWith.portTile.inputRequired.filter { it.token.tokenClass == Resource.getInstance(gameBoardState.hexTiles[0].resourceType.resourceYielded!!).tokenClass }.first().token
+        val inputResource = portToTradeWith.portTile.inputRequired.filter { it.token.tokenClass == Resource.getInstance(gameBoardState.hexTiles.get(HexTileIndex(0)).resourceType.resourceYielded!!).tokenClass }.first().token
         val outputResource = portToTradeWith.portTile.outputRequired.filter { it.token.tokenClass != inputResource.tokenClass }.first().token
         val playerWithPortPreTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
 

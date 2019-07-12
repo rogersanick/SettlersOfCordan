@@ -28,7 +28,7 @@ fun setupGameBoardForTesting(gameState: GameBoardState, network: MockNetwork, ar
 fun placeAPieceFromASpecificNodeAndEndTurn(i: Int, testCoordinates: ArrayList<Pair<Int, Int>>, gameState: GameBoardState, network: MockNetwork, arrayOfAllPlayerNodesInOrder: List<StartedMockNode>, arrayOfAllTransactions: ArrayList<SignedTransaction>, initialSetupComplete: Boolean) {
     // Build an initial settlement by issuing a settlement state
     // and updating the current turn.
-    if (gameState.hexTiles[testCoordinates[i].first].resourceType == HexTileType.Desert) {
+    if (gameState.hexTiles.get(HexTileIndex(testCoordinates[i].first)).resourceType == HexTileType.Desert) {
         testCoordinates[i] = Pair(testCoordinates[i].first + 6, testCoordinates[i].second)
     }
 
