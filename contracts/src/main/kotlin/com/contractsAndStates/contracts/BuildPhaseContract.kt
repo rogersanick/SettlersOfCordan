@@ -93,8 +93,8 @@ class BuildPhaseContract : Contract {
                     val resourcesThatShouldBeIssuedPreConsolidation = arrayListOf<Pair<HexTileType, Long>>()
                     resourcesThatShouldBeIssuedPreConsolidation.add(Pair(inputGameBoardState.hexTiles.get(hexTileIndex).resourceType, newSettlement.resourceAmountClaim.toLong()))
                     indexOfRelevantHexTileNeighbours.forEach {
-                        if (it != -1 && inputGameBoardState.hexTiles.get(HexTileIndex(it)).resourceType != HexTileType.Desert) {
-                            resourcesThatShouldBeIssuedPreConsolidation.add(Pair(inputGameBoardState.hexTiles.get(HexTileIndex(it)).resourceType, newSettlement.resourceAmountClaim.toLong()))
+                        if (it != null && inputGameBoardState.hexTiles.get(it).resourceType != HexTileType.Desert) {
+                            resourcesThatShouldBeIssuedPreConsolidation.add(Pair(inputGameBoardState.hexTiles.get(it).resourceType, newSettlement.resourceAmountClaim.toLong()))
                         }
                     }
 

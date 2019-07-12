@@ -106,24 +106,30 @@ data class PlacedHexTiles(val value: List<HexTile>) {
     }
 
     fun get(index: HexTileIndex) = value[index.value]
-    fun indexOf(tile: HexTile?) = value.indexOf(tile)
+    fun indexOf(tile: HexTile?) = value.indexOf(tile).let {
+        if (it < 0) null
+        else HexTileIndex(it)
+    }
     fun cloneList() = value.map { it }.toMutableList()
 
     class Builder(private val value: MutableList<HexTile.Builder> = mutableListOf()) {
         init {
+            require(value.size == GameBoardState.TILE_COUNT) {
+                "value.size cannot be ${value.size}"
+            }
             connectNeighbors()
         }
 
         fun connectNeighbors() {
-            rowIndices.forEachIndexed { rowIndex, tileIndices ->
-                val rowLength = tileIndices.count()
-                tileIndices.forEachIndexed { index, tileIndex ->
+            rowIndices.forEachIndexed { rowIndex, columnIndices ->
+                val rowLength = columnIndices.count()
+                columnIndices.forEachIndexed { index, columnIndex ->
                     // Last row has no neighbor below it
                     if (rowIndex < rowIndices.size - 1) {
                         // If your row is shorter than below, you have 2 neighbors below
                         if (rowLength < rowIndices[rowIndex + 1].count()) {
-                            value[tileIndex].connect(TileSideIndex(3), value[tileIndex + rowLength])
-                            value[tileIndex].connect(TileSideIndex(2), value[tileIndex + rowLength + 1])
+                            value[columnIndex].connect(TileSideIndex(3), value[columnIndex + rowLength])
+                            value[columnIndex].connect(TileSideIndex(2), value[columnIndex + rowLength + 1])
                         }
 
                     }
@@ -132,13 +138,13 @@ data class PlacedHexTiles(val value: List<HexTile>) {
                         val aboveRowLength = rowIndices[rowIndex - 1].count()
                         // If your row is shorter than above, you have 2 neighbors above
                         if (rowLength < aboveRowLength) {
-                            value[tileIndex].connect(TileSideIndex(5), value[tileIndex - aboveRowLength])
-                            value[tileIndex].connect(TileSideIndex(0), value[tileIndex - aboveRowLength + 1])
+                            value[columnIndex].connect(TileSideIndex(5), value[columnIndex - aboveRowLength])
+                            value[columnIndex].connect(TileSideIndex(0), value[columnIndex - aboveRowLength + 1])
                         }
                     }
                     // On each row, the last one has no neighbor to its right
                     if (index < rowLength - 1) {
-                        value[tileIndex].connect(TileSideIndex(1), value[tileIndex + 1])
+                        value[columnIndex].connect(TileSideIndex(1), value[columnIndex + 1])
                     }
                 }
             }
