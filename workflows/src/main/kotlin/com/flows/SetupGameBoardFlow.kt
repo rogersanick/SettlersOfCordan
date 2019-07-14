@@ -185,15 +185,13 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
 
             // Get the port (if relevant) to add to the HexTile
 
-
             // Create a HexTile to add to the gameboard.
             // Use role trigger placement mapping, role trigger placement order, and desertSkippedIndexAdjustment to ensure that role triggers
             // Are placed in the appropriate order.
-            hexTiles.add(i, HexTile.Builder()
+            hexTiles.add(i, HexTile.Builder(HexTileIndex(i))
                     .with(hexType)
                     .with(if (hexType == HexTileType.Desert) 0 else roleTriggerTilePlacementMapping.getOrElse(roleTriggerTilePlacementOrder[i - desertSkippedIndexAdjustment]) { 0 })
-                    .with(terrainTypes[hexTypeIndex] == HexTileType.Desert)
-                    .with(HexTileIndex(i)))
+                    .with(terrainTypes[hexTypeIndex] == HexTileType.Desert))
             countArray[hexTypeIndex]++
 
             // Establish the index adjustment once a desert HexTile has been encountered.

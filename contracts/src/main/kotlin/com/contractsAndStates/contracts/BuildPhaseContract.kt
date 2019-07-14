@@ -131,16 +131,17 @@ class BuildPhaseContract : Contract {
                 if (indexOfHexTileToCheck1 != null && indexOfHexTileToCheck2 != null) {
                     val hexTileToCheck1 = inputGameBoardState.hexTiles.get(indexOfHexTileToCheck1)
                     val hexTileToCheck2 = inputGameBoardState.hexTiles.get(indexOfHexTileToCheck2)
-                    checkForThirdPotentialConflictingRoad = hexTileToCheck1.roads.get(hexTileToCheck1.sides.indexOf(hexTileToCheck2.hexTileIndex)!!) == newRoads.single().linearId
+                    checkForThirdPotentialConflictingRoad = hexTileToCheck1.sides.getRoadIdOn(hexTileToCheck1.sides
+                            .indexOf(hexTileToCheck2.hexTileIndex)!!) == newRoads.single().linearId
                 }
 
                 "The new road should be adjacent to the proposed settlement" using (
                         newSettlement.hexTileCoordinate.getAdjacentSides().any {
-                            newRoads.single().linearId == hexTileOfNewSettlement.roads.get(it)
+                            newRoads.single().linearId == hexTileOfNewSettlement.sides.getRoadIdOn(it)
                         }
                                 || checkForThirdPotentialConflictingRoad)
                 "A road must not have previously been built in this location." using (newRoads.all {
-                    !inputGameBoardState.hexTiles.get(it.hexTileIndex).roads.hasOn(it.hexTileSide)
+                    !inputGameBoardState.hexTiles.get(it.hexTileIndex).sides.hasRoadIdOn(it.hexTileSide)
                 })
 
                 /**
@@ -226,7 +227,7 @@ class BuildPhaseContract : Contract {
                 "The player must have provided the appropriate amount of brick to build a settlement" using (brickInTx == (1 * newRoads.size).toLong())
                 "The player must have provided the appropriate amount of wood to build a settlement" using (woodInTx == (1 * newRoads.size).toLong())
                 "A road must not have previously been built in this location." using (newRoads.all {
-                    !inputGameBoardState.hexTiles.get(it.hexTileIndex).roads.hasOn(it.hexTileSide)
+                    !inputGameBoardState.hexTiles.get(it.hexTileIndex).sides.hasRoadIdOn(it.hexTileSide)
                 })
 
                 /**

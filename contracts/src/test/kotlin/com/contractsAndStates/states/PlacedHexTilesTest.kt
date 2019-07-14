@@ -10,11 +10,10 @@ class PlacedHexTilesTest {
         var tileIndex = 0
         return PlacedHexTiles.TILE_COUNT_PER_RESOURCE.flatMap { entry ->
             (0 until entry.value).map {
-                HexTile.Builder()
+                HexTile.Builder(HexTileIndex(tileIndex).also { tileIndex++ })
                         .with(entry.key)
                         .with(1)
                         .with(entry.key == HexTileType.Desert)
-                        .with(HexTileIndex(tileIndex).also { tileIndex++ })
             }
         }
     }
@@ -369,8 +368,8 @@ class PlacedHexTilesTest {
 
     @Test
     fun `Constructor rejects duplicate index`() {
-        val list = getAllTileBuilders()
-        list[5].with(HexTileIndex(4))
+        val list = getAllTileBuilders().toMutableList()
+        list[5] = list[4]
         assertFailsWith<IllegalArgumentException> {
             PlacedHexTiles(list.map { it.build() })
         }
@@ -378,9 +377,12 @@ class PlacedHexTilesTest {
 
     @Test
     fun `Constructor rejects unmatched index`() {
-        val list = getAllTileBuilders()
-        list[5].with(HexTileIndex(4))
-        list[4].with(HexTileIndex(5))
+        val list = getAllTileBuilders().toMutableList()
+        list[5] = list[5].let { element5 ->
+            val element4 = list[4]
+            list[4] = element5
+            element4
+        }
         assertFailsWith<IllegalArgumentException> {
             PlacedHexTiles(list.map { it.build() })
         }
@@ -388,8 +390,11 @@ class PlacedHexTilesTest {
 
     @Test
     fun `Constructor rejects double robber`() {
-        val list = getAllTileBuilders()
-        list[5].with(true)
+        val list = getAllTileBuilders().toMutableList()
+        list[5] = HexTile.Builder(HexTileIndex(5))
+                .with(HexTileType.Forest)
+                .with(1)
+                .with(true)
         assertFailsWith<IllegalArgumentException> {
             PlacedHexTiles(list.map { it.build() })
         }
@@ -397,8 +402,11 @@ class PlacedHexTilesTest {
 
     @Test
     fun `Constructor rejects when missing tile type`() {
-        val list = getAllTileBuilders()
-        list[0].with(HexTileType.Field)
+        val list = getAllTileBuilders().toMutableList()
+        list[0] = HexTile.Builder(HexTileIndex(0))
+                .with(HexTileType.Field)
+                .with(1)
+                .with(true)
         assertFailsWith<IllegalArgumentException> {
             PlacedHexTiles(list.map { it.build() })
         }
@@ -406,8 +414,11 @@ class PlacedHexTilesTest {
 
     @Test
     fun `Constructor rejects wrong tile type count`() {
-        val list = getAllTileBuilders()
-        list[1].with(HexTileType.Forest)
+        val list = getAllTileBuilders().toMutableList()
+        list[1]= HexTile.Builder(HexTileIndex(1))
+                .with(HexTileType.Forest)
+                .with(1)
+                .with(false)
         assertFailsWith<IllegalArgumentException> {
             PlacedHexTiles(list.map { it.build() })
         }
@@ -424,11 +435,10 @@ class PlacedHexTilesTest {
     @Test
     fun `indexOf returns proper element`() {
         val placed = buildWithBuilder()
-        val unknownTile = HexTile.Builder()
+        val unknownTile = HexTile.Builder(HexTileIndex(1))
                 .with(HexTileType.Forest)
                 .with(1)
                 .with(false)
-                .with(HexTileIndex(1))
                 .build()
 
         assertEquals(HexTileIndex(4), placed.indexOf(placed.get(HexTileIndex(4))))

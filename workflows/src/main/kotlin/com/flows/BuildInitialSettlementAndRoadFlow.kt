@@ -170,8 +170,10 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         // Step 12. Create the road state at the appropriate location specified by the user.
         val roadState = RoadState(tileIndex, sideIndex, gameBoardState.players, ourIdentity, null, null)
 
-        // Step 13. Update the gameBoardState hextiles with the roads being built.
-        val newHexTiles = gameBoardState.hexTiles.get(tileIndex).buildRoad(sideIndex, roadState.linearId, PlacedHexTiles(gameBoardState.hexTiles.value))
+        // Step 13. Update the gameBoardState hexTiles with the roads being built.
+        val newHexTiles = gameBoardState.hexTiles.toBuilder()
+                .buildRoad(tileIndex, sideIndex, roadState.linearId)
+                .build()
 
         // Step 14. Update the gameBoardState with new hexTiles and built settlements.
         val fullyUpdatedOutputGameBoardState = gameBoardState.copy(settlementsPlaced = newSettlementsPlaced, hexTiles = newHexTiles)
