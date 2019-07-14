@@ -1,5 +1,6 @@
 package com.contractsAndStates.states
 
+import com.oracleClientStatesAndContracts.states.RollTrigger
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -12,7 +13,7 @@ class PlacedHexTilesTest {
             (0 until entry.value).map {
                 HexTile.Builder(HexTileIndex(tileIndex).also { tileIndex++ })
                         .with(entry.key)
-                        .with(1)
+                        .with(RollTrigger(3))
                         .with(entry.key == HexTileType.Desert)
             }
         }
@@ -393,7 +394,7 @@ class PlacedHexTilesTest {
         val list = getAllTileBuilders().toMutableList()
         list[5] = HexTile.Builder(HexTileIndex(5))
                 .with(HexTileType.Forest)
-                .with(1)
+                .with(RollTrigger(3))
                 .with(true)
         assertFailsWith<IllegalArgumentException> {
             PlacedHexTiles(list.map { it.build() })
@@ -405,7 +406,7 @@ class PlacedHexTilesTest {
         val list = getAllTileBuilders().toMutableList()
         list[0] = HexTile.Builder(HexTileIndex(0))
                 .with(HexTileType.Field)
-                .with(1)
+                .with(RollTrigger(3))
                 .with(true)
         assertFailsWith<IllegalArgumentException> {
             PlacedHexTiles(list.map { it.build() })
@@ -417,7 +418,7 @@ class PlacedHexTilesTest {
         val list = getAllTileBuilders().toMutableList()
         list[1]= HexTile.Builder(HexTileIndex(1))
                 .with(HexTileType.Forest)
-                .with(1)
+                .with(RollTrigger(3))
                 .with(false)
         assertFailsWith<IllegalArgumentException> {
             PlacedHexTiles(list.map { it.build() })
@@ -437,7 +438,7 @@ class PlacedHexTilesTest {
         val placed = buildWithBuilder()
         val unknownTile = HexTile.Builder(HexTileIndex(1))
                 .with(HexTileType.Forest)
-                .with(1)
+                .with(RollTrigger(3))
                 .with(false)
                 .build()
 

@@ -1,5 +1,6 @@
 package com.contractsAndStates.states
 
+import com.oracleClientStatesAndContracts.states.RollTrigger
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -10,7 +11,7 @@ class HexTileTest {
 
     private fun makeBasicBuilder(tileIndex: HexTileIndex) = HexTile.Builder(tileIndex)
             .with(HexTileType.Desert)
-            .with(1)
+            .with(RollTrigger(3))
             .with(true)
 
     @Test
@@ -32,15 +33,15 @@ class HexTileTest {
     fun `Builder rejects replacing roleTrigger`() {
         val builder = makeBasicBuilder(HexTileIndex(1))
         assertFailsWith<IllegalArgumentException> {
-            builder.with(2)
+            builder.with(RollTrigger(2))
         }
     }
 
     @Test
     fun `Builder accepts setting roleTrigger to the same`() {
         val builder = makeBasicBuilder(HexTileIndex(1))
-                .with(1)
-        assertEquals(1, builder.roleTrigger)
+                .with(RollTrigger(3))
+        assertEquals(RollTrigger(3), builder.rollTrigger)
     }
 
     @Test
@@ -62,7 +63,7 @@ class HexTileTest {
     fun `Builder-build is correct`() {
         val built = makeBasicBuilder(HexTileIndex(4)).build()
         assertEquals(HexTileType.Desert, built.resourceType)
-        assertEquals(1, built.roleTrigger)
+        assertEquals(RollTrigger(3), built.rollTrigger)
         assertTrue(built.robberPresent)
         assertEquals(HexTileIndex(4), built.hexTileIndex)
         // TODO test roads?

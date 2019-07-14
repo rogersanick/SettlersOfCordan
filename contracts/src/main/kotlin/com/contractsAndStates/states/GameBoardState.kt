@@ -2,6 +2,7 @@ package com.contractsAndStates.states
 
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.GameStateContract
+import com.oracleClientStatesAndContracts.states.RollTrigger
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.BelongsToContract
@@ -115,7 +116,7 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(val value: 
     fun cloneList() = value.map { it }.toMutableList()
     fun toBuilder() = Builder(this)
 
-    class Builder(private val value: MutableList<HexTile.Builder> = mutableListOf()) {
+    class Builder(private val value: MutableList<HexTile.Builder>) {
 
         constructor(placedHexTiles: PlacedHexTiles) :
                 this(placedHexTiles.value.map { it.toBuilder() }.toMutableList())
@@ -183,7 +184,7 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(val value: 
 @CordaSerializable
 data class HexTile(
         val resourceType: HexTileType,
-        val roleTrigger: Int,
+        val rollTrigger: RollTrigger,
         val robberPresent: Boolean,
         val hexTileIndex: HexTileIndex,
         val sides: TileSides = TileSides()) {
@@ -197,27 +198,27 @@ data class HexTile(
     class Builder(
             val hexTileIndex: HexTileIndex,
             resourceType: HexTileType? = null,
-            roleTrigger: Int? = null,
+            rollTrigger: RollTrigger? = null,
             robberPresent: Boolean? = null,
             val sidesBuilder: TileSides.Builder = TileSides.Builder()) {
 
         constructor(tile: HexTile) : this(
                 tile.hexTileIndex,
                 tile.resourceType,
-                tile.roleTrigger,
+                tile.rollTrigger,
                 tile.robberPresent,
                 TileSides.Builder(tile.sides))
 
         var resourceType: HexTileType?
             private set
-        var roleTrigger: Int?
+        var rollTrigger: RollTrigger?
             private set
         var robberPresent: Boolean?
             private set
 
         init {
             this.resourceType = resourceType
-            this.roleTrigger = roleTrigger
+            this.rollTrigger = rollTrigger
             this.robberPresent = robberPresent
         }
 
@@ -228,11 +229,11 @@ data class HexTile(
             this.resourceType = resourceType
         }
 
-        fun with(roleTrigger: Int) = apply {
-            require(this.roleTrigger.let { it == null || it == roleTrigger }) {
-                "You cannot replace an existing role trigger"
+        fun with(rollTrigger: RollTrigger) = apply {
+            require(this.rollTrigger.let { it == null || it == rollTrigger }) {
+                "You cannot replace an existing rollTrigger"
             }
-            this.roleTrigger = roleTrigger
+            this.rollTrigger = rollTrigger
         }
 
         fun with(robberPresent: Boolean) = apply {
@@ -258,7 +259,7 @@ data class HexTile(
 
         fun build() = HexTile(
                 resourceType!!,
-                roleTrigger!!,
+                rollTrigger!!,
                 robberPresent!!,
                 hexTileIndex,
                 sidesBuilder.build()
