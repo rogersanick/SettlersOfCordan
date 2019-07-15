@@ -105,7 +105,7 @@ class TradeWithPortFlowTest {
 
         val portToTradeWith = gameBoardState.ports[0]
         val inputResource = portToTradeWith.portTile.inputRequired.filter { it.token.tokenClass == Resource.getInstance(gameBoardState.hexTiles.get(HexTileIndex(0)).resourceType.resourceYielded!!).tokenClass }.first().token
-        val outputResource = portToTradeWith.portTile.outputRequired.filter { it.token.tokenClass != inputResource.tokenClass }.first().token
+        val outputResource = portToTradeWith.portTile.outputRequired.filter { it.token.tokenIdentifier != inputResource.tokenIdentifier }.first().token
         val playerWithPortPreTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
 
         val futureWithIssuedTrade = arrayOfAllPlayerNodesInOrder[0].startFlow(

@@ -31,6 +31,11 @@ fun getTokenTypeByName(resourceType: String): TokenType {
         "Sheep" -> Sheep
         "Wood" -> Wood
         "Brick" -> Brick
+        "Wh" -> Wheat
+        "Or" -> Ore
+        "Sh" -> Sheep
+        "Wd" -> Wood
+        "Br" -> Brick
         else -> throw IllegalArgumentException("There is no currency of that type.")
     }
 }

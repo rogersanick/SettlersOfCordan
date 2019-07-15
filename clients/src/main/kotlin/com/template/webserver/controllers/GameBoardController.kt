@@ -1,9 +1,8 @@
-package com.template.webserver
+package com.template.webserver.controllers
 
 import com.contractsAndStates.states.GameBoardState
 import com.flows.SetupGameBoardFlow
-import jdk.nashorn.internal.ir.debug.JSONWriter
-import jdk.nashorn.internal.runtime.JSONFunctions
+import com.template.webserver.NodeRPCConnection
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.messaging.startFlow
@@ -11,15 +10,14 @@ import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.utilities.getOrThrow
 import nonapi.io.github.classgraph.json.JSONSerializer
 import org.slf4j.LoggerFactory
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 /**
  * Define your API endpoints here.
  */
 @RestController
-@RequestMapping("/") // The paths for HTTP requests are relative to this base path.
-class Controller(rpc: NodeRPCConnection) {
+@RequestMapping("/gameboard") // The paths for HTTP requests are relative to this base path.
+class GameBoardController(rpc: NodeRPCConnection) {
 
     companion object {
         private val logger = LoggerFactory.getLogger(RestController::class.java)
@@ -27,7 +25,7 @@ class Controller(rpc: NodeRPCConnection) {
 
     private val proxy = rpc.proxy
 
-    @PutMapping(value = "/gameboard", produces = arrayOf("text/plain"))
+    @PutMapping(value = "/", produces = arrayOf("text/plain"))
     private fun putGameBoard(@RequestBody listOfPlayers: ListOfPlayers): String {
         val player1 = proxy.wellKnownPartyFromX500Name(listOfPlayers.p1)!!
         val player2 = proxy.wellKnownPartyFromX500Name(listOfPlayers.p2)!!
@@ -38,12 +36,19 @@ class Controller(rpc: NodeRPCConnection) {
         return JSONSerializer.serializeObject(producedGameBoardState)
     }
 
-    @GetMapping(value = "/gameboard/{linearId:.+}", produces = arrayOf("text/plain"))
+    @GetMapping(value = "/{linearId:.+}", produces = arrayOf("text/plain"))
     private fun getGameBoard(@PathVariable linearId: String?): String {
         val gameBoardLinearId = UniqueIdentifier(linearId)
-        val listOfReturnedGameBoardStates = proxy.vaultQueryByCriteria<GameBoardState>(QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardLinearId)), GameBoardState::class.java)
+        val listOfReturnedGameBoardStates = proxy.vaultQueryByCriteria(QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardLinearId)), GameBoardState::class.java)
         val gameBoardState = listOfReturnedGameBoardStates.states.single().state.data
         return JSONSerializer.serializeObject(gameBoardState)
+    }
+
+    @GetMapping(value = "/", produces = arrayOf("text/plain"))
+    private fun getGameBoards(): String {
+        val listOfReturnedGameBoardStates = proxy.vaultQueryByCriteria(QueryCriteria.LinearStateQueryCriteria(), GameBoardState::class.java)
+        val gameBoardStates = listOfReturnedGameBoardStates.states.map { it.state.data }
+        return JSONSerializer.serializeObject(gameBoardStates)
     }
 }
 
