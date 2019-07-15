@@ -52,11 +52,10 @@ class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort
         generateInGameSpend(serviceHub, tb, mapOf(Pair(inputRequired.token, inputRequired)), ourIdentity)
 
         // Step 5. Generate all tokens and commands for issuance from the port
-        val playerKeys = gameBoardState.players.map { it.owningKey }
-        val outputResource = portToBeTradedWith.outputRequired.single { it.token == getTokenTypeByName(outputResourceType) }
-        tb.addOutputState(outputResource issuedBy ourIdentity heldBy ourIdentity)
-        tb.addCommand(TradePhaseContract.Commands.TradeWithPort(), playerKeys)
-        tb.addCommand(IssueTokenCommand(outputResource.token issuedBy ourIdentity), playerKeys)
+        val outputResource = portToBeTradedWith.outputRequired.filter { it.token == getTokenTypeByName(outputResourceType) }.single()
+        tb.addOutputState(outputResource issuedBy ourIdentity heldBy ourIdentity )
+        tb.addCommand(TradePhaseContract.Commands.TradeWithPort(), gameBoardState.players.map { it.owningKey })
+        tb.addCommand(IssueTokenCommand(outputResource.token issuedBy ourIdentity, listOf(0)), gameBoardState.players.map { it.owningKey })
 
         // Step 6. Add all necessary states to the transaction
         tb.addReferenceState(gameBoardReferenceStateAndRef)

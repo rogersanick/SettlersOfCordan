@@ -118,7 +118,7 @@ class TradeWithPortFlowTest {
                 )
         )
         network.runNetwork()
-        futureWithIssuedTrade.getOrThrow()
+        val txWithExecutedPortTrade = futureWithIssuedTrade.getOrThrow()
 
         val playerWithPortPostTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
 
