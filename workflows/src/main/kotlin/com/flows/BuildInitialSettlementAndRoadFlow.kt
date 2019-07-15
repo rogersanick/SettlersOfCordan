@@ -138,8 +138,8 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         val indexOfRelevantHexTileNeighbour2 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(1))
 
         newSettlementsPlaced[hexTileIndex][hexTileCoordinate] = true
-        if (indexOfRelevantHexTileNeighbour1 != -1) newSettlementsPlaced[indexOfRelevantHexTileNeighbour1][coordinateOfPotentiallyConflictingSettlement1] = true
-        if (indexOfRelevantHexTileNeighbour2 != -1) newSettlementsPlaced[indexOfRelevantHexTileNeighbour2][coordinateOfPotentiallyConflictingSettlement2] = true
+        if (indexOfRelevantHexTileNeighbour1 != null) newSettlementsPlaced[indexOfRelevantHexTileNeighbour1.value][coordinateOfPotentiallyConflictingSettlement1] = true
+        if (indexOfRelevantHexTileNeighbour2 != null) newSettlementsPlaced[indexOfRelevantHexTileNeighbour2.value][coordinateOfPotentiallyConflictingSettlement2] = true
 
         // Step 11. Add self-issued resources if we are in the second round of initial placement
         if (turnTrackerState.setUpRound1Complete) {
@@ -147,8 +147,8 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
             // Calculate the currencies that should be claimed by the player proposing a move.
             val gameCurrencyToClaim = arrayListOf<Pair<HexTileType, Long>>()
             gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles.get(settlementState.hexTileIndex).resourceType, settlementState.resourceAmountClaim.toLong()))
-            if (indexOfRelevantHexTileNeighbour1 != -1 && gameBoardState.hexTiles.get(HexTileIndex(indexOfRelevantHexTileNeighbour1)).resourceType != HexTileType.Desert) gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles.get(HexTileIndex(indexOfRelevantHexTileNeighbour1)).resourceType, settlementState.resourceAmountClaim.toLong()))
-            if (indexOfRelevantHexTileNeighbour2 != -1 && gameBoardState.hexTiles.get(HexTileIndex(indexOfRelevantHexTileNeighbour2)).resourceType != HexTileType.Desert) gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles.get(HexTileIndex(indexOfRelevantHexTileNeighbour2)).resourceType, settlementState.resourceAmountClaim.toLong()))
+            if (indexOfRelevantHexTileNeighbour1 != null && gameBoardState.hexTiles.get(indexOfRelevantHexTileNeighbour1).resourceType != HexTileType.Desert) gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles.get(indexOfRelevantHexTileNeighbour1).resourceType, settlementState.resourceAmountClaim.toLong()))
+            if (indexOfRelevantHexTileNeighbour2 != null && gameBoardState.hexTiles.get(indexOfRelevantHexTileNeighbour2).resourceType != HexTileType.Desert) gameCurrencyToClaim.add(Pair(gameBoardState.hexTiles.get(indexOfRelevantHexTileNeighbour2).resourceType, settlementState.resourceAmountClaim.toLong()))
 
             // Consolidate the list so that they is only one instance of a given token type issued with the appropriate amount.
             val reducedListOfGameCurrencyToClaim = mutableMapOf<HexTileType, Long>()
@@ -170,8 +170,10 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         // Step 12. Create the road state at the appropriate location specified by the user.
         val roadState = RoadState(tileIndex, sideIndex, gameBoardState.players, ourIdentity, null, null)
 
-        // Step 13. Update the gameBoardState hextiles with the roads being built.
-        val newHexTiles = gameBoardState.hexTiles.get(tileIndex).buildRoad(sideIndex, roadState.linearId, PlacedHexTiles(gameBoardState.hexTiles.value))
+        // Step 13. Update the gameBoardState hexTiles with the roads being built.
+        val newHexTiles = gameBoardState.hexTiles.toBuilder()
+                .buildRoad(tileIndex, sideIndex, roadState.linearId)
+                .build()
 
         // Step 14. Update the gameBoardState with new hexTiles and built settlements.
         val fullyUpdatedOutputGameBoardState = gameBoardState.copy(settlementsPlaced = newSettlementsPlaced, hexTiles = newHexTiles)

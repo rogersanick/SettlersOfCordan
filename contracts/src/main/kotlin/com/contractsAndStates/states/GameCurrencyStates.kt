@@ -1,6 +1,7 @@
 package com.contractsAndStates.states
 
 import com.r3.corda.lib.tokens.contracts.types.TokenType
+import com.r3.corda.lib.tokens.contracts.utilities.of
 import net.corda.core.serialization.CordaSerializable
 import java.math.BigDecimal
 
@@ -40,8 +41,8 @@ fun getTokenTypeByName(resourceType: String): TokenType {
     }
 }
 
-// Wheat.
-val Wheat = Resource.getInstance(ResourceType.Wheat)
+// Brick.
+val Brick = Resource.getInstance(ResourceType.Brick)
 
 // Ore.
 val Ore = Resource.getInstance(ResourceType.Ore)
@@ -49,11 +50,15 @@ val Ore = Resource.getInstance(ResourceType.Ore)
 // Sheep.
 val Sheep = Resource.getInstance(ResourceType.Sheep)
 
+// Wheat.
+val Wheat = Resource.getInstance(ResourceType.Wheat)
+
 // Wood.
 val Wood = Resource.getInstance(ResourceType.Wood)
 
-// Brick.
-val Brick = Resource.getInstance(ResourceType.Brick)
+val ALL_RESOURCES = listOf(Brick, Ore, Sheep, Wheat, Wood)
+
+fun Iterable<TokenType>.mapOf(amount: Int) = map { amount of it }
 
 // Underlying Resource Property
 @CordaSerializable

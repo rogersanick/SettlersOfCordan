@@ -93,8 +93,8 @@ class BuildPhaseContract : Contract {
                     val resourcesThatShouldBeIssuedPreConsolidation = arrayListOf<Pair<HexTileType, Long>>()
                     resourcesThatShouldBeIssuedPreConsolidation.add(Pair(inputGameBoardState.hexTiles.get(hexTileIndex).resourceType, newSettlement.resourceAmountClaim.toLong()))
                     indexOfRelevantHexTileNeighbours.forEach {
-                        if (it != -1 && inputGameBoardState.hexTiles.get(HexTileIndex(it)).resourceType != HexTileType.Desert) {
-                            resourcesThatShouldBeIssuedPreConsolidation.add(Pair(inputGameBoardState.hexTiles.get(HexTileIndex(it)).resourceType, newSettlement.resourceAmountClaim.toLong()))
+                        if (it != null && inputGameBoardState.hexTiles.get(it).resourceType != HexTileType.Desert) {
+                            resourcesThatShouldBeIssuedPreConsolidation.add(Pair(inputGameBoardState.hexTiles.get(it).resourceType, newSettlement.resourceAmountClaim.toLong()))
                         }
                     }
 
@@ -131,14 +131,18 @@ class BuildPhaseContract : Contract {
                 if (indexOfHexTileToCheck1 != null && indexOfHexTileToCheck2 != null) {
                     val hexTileToCheck1 = inputGameBoardState.hexTiles.get(indexOfHexTileToCheck1)
                     val hexTileToCheck2 = inputGameBoardState.hexTiles.get(indexOfHexTileToCheck2)
-                    checkForThirdPotentialConflictingRoad = hexTileToCheck1.roads[hexTileToCheck1.sides.indexOf(hexTileToCheck2.hexTileIndex)] == newRoads.single().linearId
+                    checkForThirdPotentialConflictingRoad = hexTileToCheck1.sides.getRoadIdOn(hexTileToCheck1.sides
+                            .indexOf(hexTileToCheck2.hexTileIndex)!!) == newRoads.single().linearId
                 }
 
                 "The new road should be adjacent to the proposed settlement" using (
-                        newRoads.single().linearId == hexTileOfNewSettlement.roads[newSettlement.hexTileCoordinate.value]
-                                || newRoads.single().linearId == hexTileOfNewSettlement.roads[newSettlement.hexTileCoordinate.next().value]
+                        newSettlement.hexTileCoordinate.getAdjacentSides().any {
+                            newRoads.single().linearId == hexTileOfNewSettlement.sides.getRoadIdOn(it)
+                        }
                                 || checkForThirdPotentialConflictingRoad)
-                "A road must not have previously been built in this location." using (newRoads.all { inputGameBoardState.hexTiles.get(it.hexTileIndex).roads[it.hexTileSide.value] == null })
+                "A road must not have previously been built in this location." using (newRoads.all {
+                    !inputGameBoardState.hexTiles.get(it.hexTileIndex).sides.hasRoadIdOn(it.hexTileSide)
+                })
 
                 /**
                  *  ******** Check Signatures ********
@@ -150,7 +154,6 @@ class BuildPhaseContract : Contract {
                 val signingParties = tx.commandsOfType<Commands.BuildInitialSettlementAndRoad>().single().signers.toSet()
                 val participants = outputGameBoardState.participants.map { it.owningKey }
                 "All players must verify and sign the transaction to build an initial settlement and road." using (signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
-
 
             }
 
@@ -223,7 +226,9 @@ class BuildPhaseContract : Contract {
 
                 "The player must have provided the appropriate amount of brick to build a settlement" using (brickInTx == (1 * newRoads.size).toLong())
                 "The player must have provided the appropriate amount of wood to build a settlement" using (woodInTx == (1 * newRoads.size).toLong())
-                "A road must not have previously been built in this location." using (newRoads.all { inputGameBoardState.hexTiles.get(it.hexTileIndex).roads[it.hexTileSide.value] == null })
+                "A road must not have previously been built in this location." using (newRoads.all {
+                    !inputGameBoardState.hexTiles.get(it.hexTileIndex).sides.hasRoadIdOn(it.hexTileSide)
+                })
 
                 /**
                  *  ******** SIGNATURES ********
@@ -233,7 +238,6 @@ class BuildPhaseContract : Contract {
                 val signingParties = tx.commandsOfType<Commands.BuildRoad>().single().signers.toSet()
                 val participants = outputGameBoardState.participants.map { it.owningKey }
                 "All players must verify and sign the transaction to build a settlement." using (signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
-
 
             }
 

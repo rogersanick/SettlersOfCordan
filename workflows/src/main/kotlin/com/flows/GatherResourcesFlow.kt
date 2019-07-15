@@ -55,14 +55,14 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
 
         // Step 6. Generate valid settlements for which we will be issuing resources.
         val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states.filter {
-            val diceRollTotal = diceRollState.randomRoll1 + diceRollState.randomRoll2
+            val diceRollTotal = diceRollState.getRollTrigger()
             val neighbors = gameBoardState.hexTiles.get(it.state.data.hexTileIndex).sides
             val adjacentSideIndices = it.state.data.hexTileCoordinate.getAdjacentSides()
             val adjacentHexTileIndex1 = gameBoardState.hexTiles.get(neighbors.getNeighborOn(adjacentSideIndices[1])
-                    ?: HexTileIndex(7)).roleTrigger == diceRollTotal
+                    ?: HexTileIndex(7)).rollTrigger == diceRollTotal
             val adjacentHexTileIndex2 = gameBoardState.hexTiles.get(neighbors.getNeighborOn(adjacentSideIndices[0])
-                    ?: HexTileIndex(7)).roleTrigger == diceRollTotal
-            val primaryHexTile = gameBoardState.hexTiles.get(it.state.data.hexTileIndex).roleTrigger == diceRollTotal
+                    ?: HexTileIndex(7)).rollTrigger == diceRollTotal
+            val primaryHexTile = gameBoardState.hexTiles.get(it.state.data.hexTileIndex).rollTrigger == diceRollTotal
             adjacentHexTileIndex1 || adjacentHexTileIndex2 || primaryHexTile
         }
 
@@ -124,14 +124,14 @@ open class GatherResourcesFlowResponder(val counterpartySession: FlowSession) : 
                 val turnTrackerState = serviceHub.vaultService.queryBy<TurnTrackerState>(QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))).states.single().state.data
                 val diceRollState = serviceHub.vaultService.queryBy<DiceRollState>(QueryCriteria.VaultQueryCriteria(stateRefs = stx.inputs)).states.single().state.data
                 val listOfValidSettlements = serviceHub.vaultService.queryBy<SettlementState>().states.filter {
-                    val diceRollTotal = diceRollState.randomRoll1 + diceRollState.randomRoll2
+                    val diceRollTotal = diceRollState.getRollTrigger()
                     val neighbors = gameBoardState.hexTiles.get(it.state.data.hexTileIndex).sides
                     val adjacentSideIndices = it.state.data.hexTileCoordinate.getAdjacentSides()
                     val adjacentHexTileIndex1 = gameBoardState.hexTiles.get(neighbors.getNeighborOn(adjacentSideIndices[1])
-                            ?: HexTileIndex(7)).roleTrigger == diceRollTotal
+                            ?: HexTileIndex(7)).rollTrigger == diceRollTotal
                     val adjacentHexTileIndex2 = gameBoardState.hexTiles.get(neighbors.getNeighborOn(adjacentSideIndices[0])
-                            ?: HexTileIndex(7)).roleTrigger == diceRollTotal
-                    val primaryHexTile = gameBoardState.hexTiles.get(it.state.data.hexTileIndex).roleTrigger == diceRollTotal
+                            ?: HexTileIndex(7)).rollTrigger == diceRollTotal
+                    val primaryHexTile = gameBoardState.hexTiles.get(it.state.data.hexTileIndex).rollTrigger == diceRollTotal
                     adjacentHexTileIndex1 || adjacentHexTileIndex2 || primaryHexTile
                 }
 

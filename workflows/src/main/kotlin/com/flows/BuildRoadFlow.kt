@@ -55,7 +55,9 @@ class BuildRoadFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: I
         val roadState = RoadState(tileIndex, sideIndex, gameBoardState.players, ourIdentity)
 
         // Step 7. Determine if the road state is extending an existing road
-        val newHexTileSetWithRoad = gameBoardState.hexTiles.get(tileIndex).buildRoad(sideIndex, roadState.linearId, PlacedHexTiles(gameBoardState.hexTiles.value))
+        val newHexTileSetWithRoad = gameBoardState.hexTiles.toBuilder()
+                .buildRoad(tileIndex, sideIndex, roadState.linearId)
+                .build()
         val outputGameBoardState = gameBoardState.copy(hexTiles = newHexTileSetWithRoad)
 
         // Step 8. Add all states and commands to the transaction.
