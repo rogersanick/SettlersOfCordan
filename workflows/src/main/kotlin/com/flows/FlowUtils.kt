@@ -63,7 +63,9 @@ fun generateInGameSpend(serviceHub: ServiceHub, tb: TransactionBuilder, price: M
         tokensToSpend.forEach {
             var amountToSpendForSpecificIssuer: Long = 0
             it.value.forEach { issuedAmounts -> amountToSpendForSpecificIssuer += issuedAmounts.state.data.amount.quantity }
-            tb.withItems(tokenSelection.generateExit(it.value, Amount(amountToSpendForSpecificIssuer, tokenType), changeOwner).first)
+            tokenSelection.generateExit(it.value, Amount(amountToSpendForSpecificIssuer, tokenType), changeOwner).first.forEach { token ->
+                tb.withItems(token)
+            }
         }
     }
 
