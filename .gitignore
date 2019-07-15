@@ -56,7 +56,7 @@ lib/dokka.jar
 
 # IntelliJ
 /out/
-flowTests/out/
+allTests/out/
 workflows/out/
 contracts/out/
 clients/out/
