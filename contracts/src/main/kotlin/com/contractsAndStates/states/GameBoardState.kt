@@ -280,6 +280,12 @@ data class PlacedPorts(val value: List<Port>) {
         const val PORT_COUNT = 9
     }
 
+    fun getPortAt(hexTile: HexTileIndex, tileCorner: TileCornerIndex) = value.single {
+        it.accessPoints.any { accessPoint ->
+            accessPoint.hexTileIndex == hexTile && accessPoint.hexTileCoordinate.contains(tileCorner)
+        }
+    }
+
     fun toBuilder() = Builder(
             value.map { it.portTile }.toMutableList(),
             value.map { it.accessPoints }.toMutableList())
@@ -356,6 +362,11 @@ data class PortTile(val inputRequired: List<Amount<TokenType>>, val outputRequir
             "No outputRequired should have a 0 quantity"
         }
     }
+
+    fun getInputOf(token: TokenType) = inputRequired.single { it.token == token }
+    fun getInputOf(resourceType: ResourceType) = getInputOf(Resource(resourceType))
+    fun getOutputOf(token: TokenType) = outputRequired.single { it.token == token }
+    fun getOutputOf(resourceType: ResourceType) = getOutputOf(Resource(resourceType))
 }
 
 @CordaSerializable
