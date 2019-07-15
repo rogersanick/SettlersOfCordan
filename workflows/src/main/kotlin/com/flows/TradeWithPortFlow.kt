@@ -2,17 +2,21 @@ package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.TradePhaseContract
-import com.contractsAndStates.states.*
+import com.contractsAndStates.states.GameBoardState
+import com.contractsAndStates.states.TileCornerIndex
+import com.contractsAndStates.states.TurnTrackerState
+import com.contractsAndStates.states.getTokenTypeByName
 import com.r3.corda.lib.tokens.contracts.commands.IssueTokenCommand
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
-import net.corda.core.contracts.*
+import net.corda.core.contracts.ReferencedStateAndRef
+import net.corda.core.contracts.UniqueIdentifier
+import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
 import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
-import java.lang.IllegalArgumentException
 
 /**
  * This flow will allow users to exchange their existing assets at a port at the specified exchange rate. It is
@@ -23,7 +27,7 @@ import java.lang.IllegalArgumentException
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
-class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort: Int, val coordinateOfPort: Int, val inputResourceType: String, val outputResourceType: String): FlowLogic<SignedTransaction>() {
+class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort: Int, val coordinateOfPort: Int, val inputResourceType: String, val outputResourceType: String) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         // Step 1. Get reference to the notary and oracle
@@ -36,18 +40,23 @@ class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort
         val gameBoardState = gameBoardStateAndRef.state.data
 
         // Step 3. Get access to the port with which the user wishes to trade
-        val portToBeTradedWith = gameBoardState.ports.filter { it.accessPoints.any { accessPoint ->  accessPoint.hexTileIndex.value == indexOfPort && accessPoint.hexTileCoordinate.contains(TileCornerIndex(coordinateOfPort)) } }.single().portTile
+        val portToBeTradedWith = gameBoardState.ports.value.single {
+            it.accessPoints.any { accessPoint ->
+                accessPoint.hexTileIndex.value == indexOfPort && accessPoint.hexTileCoordinate.contains(TileCornerIndex(coordinateOfPort))
+            }
+        }.portTile
 
         // Step 4. Generate an exit for the tokens that will be consumed by the port.
         val tb = TransactionBuilder(notary)
-        val inputRequired = portToBeTradedWith.inputRequired.filter { it.token == getTokenTypeByName(inputResourceType) }.single()
+        val inputRequired = portToBeTradedWith.inputRequired.single { it.token == getTokenTypeByName(inputResourceType) }
         generateInGameSpend(serviceHub, tb, mapOf(Pair(inputRequired.token, inputRequired)), ourIdentity)
 
         // Step 5. Generate all tokens and commands for issuance from the port
-        val outputResource = portToBeTradedWith.outputRequired.filter { it.token == getTokenTypeByName(outputResourceType) }.single()
-        tb.addOutputState(outputResource issuedBy ourIdentity heldBy ourIdentity )
-        tb.addCommand(TradePhaseContract.Commands.TradeWithPort(), gameBoardState.players.map { it.owningKey })
-        tb.addCommand(IssueTokenCommand(outputResource.token issuedBy ourIdentity), gameBoardState.players.map { it.owningKey })
+        val playerKeys = gameBoardState.players.map { it.owningKey }
+        val outputResource = portToBeTradedWith.outputRequired.single { it.token == getTokenTypeByName(outputResourceType) }
+        tb.addOutputState(outputResource issuedBy ourIdentity heldBy ourIdentity)
+        tb.addCommand(TradePhaseContract.Commands.TradeWithPort(), playerKeys)
+        tb.addCommand(IssueTokenCommand(outputResource.token issuedBy ourIdentity), playerKeys)
 
         // Step 6. Add all necessary states to the transaction
         tb.addReferenceState(gameBoardReferenceStateAndRef)
@@ -65,7 +74,7 @@ class TradeWithPortFlow(val gameBoardLinearId: UniqueIdentifier, val indexOfPort
 }
 
 @InitiatedBy(TradeWithPortFlow::class)
-open class TradeWithPortFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
+open class TradeWithPortFlowResponder(val counterpartySession: FlowSession) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {

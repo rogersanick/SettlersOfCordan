@@ -7,7 +7,6 @@ import com.contractsAndStates.contracts.TurnTrackerContract
 import com.contractsAndStates.states.*
 import com.contractsAndStates.states.HexTile
 import com.oracleClientStatesAndContracts.states.RollTrigger
-import com.r3.corda.lib.tokens.contracts.utilities.of
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
@@ -80,7 +79,8 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         val tb = TransactionBuilder(notary)
 
         // Step 3 of  Create a new issue command and add it to the transaction.
-        val playerKeys = listOf(p1.owningKey, p2.owningKey, p3.owningKey, p4.owningKey)
+        val playersList = listOf(p1, p2, p3, p4)
+        val playerKeys = playersList.map { it.owningKey }
         progressTracker.currentStep = ISSUING_COMMANDS
         val issueCommand = Command(GameStateContract.Commands.SetUpGameBoard(), playerKeys)
         val createTurnTracker = Command(TurnTrackerContract.Commands.CreateTurnTracker(), playerKeys)
@@ -89,7 +89,7 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
 
         // Step 4. Create a new turn tracker state
         progressTracker.currentStep = CREATING_A_TURN_TRACKER
-        val turnTrackerState = TurnTrackerState(participants = listOf(p1, p2, p3, p4))
+        val turnTrackerState = TurnTrackerState(participants = playersList)
 
         // Step 5. Generate data for new game state
         progressTracker.currentStep = SETTING_UP_YOUR_GAMEBOARD
@@ -106,42 +106,8 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         // Available Port Tiles
         progressTracker.currentStep = ADDING_PORTS_FOR_YOU_SEAFARING_SOULS
         progressTracker.nextStep()
-        val portTilesTracking = BooleanArray(PortTile.PORT_COUNT)
-        val portTiles: ArrayList<PortTile> = arrayListOf(
-                PortTile(listOf(2 of Sheep), listOf(1 of Wood, 1 of Brick, 1 of Ore, 1 of Wheat)),
-                PortTile(listOf(2 of Wood), listOf(1 of Sheep, 1 of Brick, 1 of Ore, 1 of Wheat)),
-                PortTile(listOf(2 of Brick), listOf(1 of Wood, 1 of Sheep, 1 of Ore, 1 of Wheat)),
-                PortTile(listOf(2 of Ore), listOf(1 of Wood, 1 of Sheep, 1 of Brick, 1 of Wheat)),
-                PortTile(listOf(2 of Wheat), listOf(1 of Wood, 1 of Sheep, 1 of Brick, 1 of Ore)),
-                PortTile(listOf(3 of Wheat, 3 of Wood, 3 of Sheep, 3 of Brick, 3 of Ore), listOf(1 of Wheat, 1 of Wood, 1 of Sheep, 1 of Brick, 1 of Ore)),
-                PortTile(listOf(3 of Wheat, 3 of Wood, 3 of Sheep, 3 of Brick, 3 of Ore), listOf(1 of Wheat, 1 of Wood, 1 of Sheep, 1 of Brick, 1 of Ore)),
-                PortTile(listOf(3 of Wheat, 3 of Wood, 3 of Sheep, 3 of Brick, 3 of Ore), listOf(1 of Wheat, 1 of Wood, 1 of Sheep, 1 of Brick, 1 of Ore)),
-                PortTile(listOf(3 of Wheat, 3 of Wood, 3 of Sheep, 3 of Brick, 3 of Ore), listOf(1 of Wheat, 1 of Wood, 1 of Sheep, 1 of Brick, 1 of Ore))
-        )
-
-        val portHexTileAccessPointMapping = arrayListOf(
-                listOf(AccessPoint(HexTileIndex(0), listOf(TileCornerIndex(5), TileCornerIndex(1)))),
-                listOf(AccessPoint(HexTileIndex(1), listOf(TileCornerIndex(0), TileCornerIndex(2))), AccessPoint(HexTileIndex(2), listOf(TileCornerIndex(5)))),
-                listOf(AccessPoint(HexTileIndex(2), listOf(TileCornerIndex(2))), AccessPoint(HexTileIndex(6), listOf(TileCornerIndex(0), TileCornerIndex(1)))),
-                listOf(AccessPoint(HexTileIndex(11), listOf(TileCornerIndex(1), TileCornerIndex(2)))),
-                listOf(AccessPoint(HexTileIndex(15), listOf(TileCornerIndex(2), TileCornerIndex(3))), AccessPoint(HexTileIndex(18), listOf(TileCornerIndex(1)))),
-                listOf(AccessPoint(HexTileIndex(18), listOf(TileCornerIndex(4))), AccessPoint(HexTileIndex(17), listOf(TileCornerIndex(2), TileCornerIndex(3)))),
-                listOf(AccessPoint(HexTileIndex(16), listOf(TileCornerIndex(3), TileCornerIndex(4)))),
-                listOf(AccessPoint(HexTileIndex(12), listOf(TileCornerIndex(4), TileCornerIndex(5))), AccessPoint(HexTileIndex(7), listOf(TileCornerIndex(3)))),
-                listOf(AccessPoint(HexTileIndex(3), listOf(TileCornerIndex(4), TileCornerIndex(5))), AccessPoint(HexTileIndex(7), listOf(TileCornerIndex(0))))
-        )
-
-        val ports: ArrayList<Port> = arrayListOf()
-
-        for (i in 0 until PortTile.PORT_COUNT) {
-            var currPortTileIndex = Math.floor(Math.random() * (portTiles.size)).toInt()
-            while (portTilesTracking[currPortTileIndex]) {
-                currPortTileIndex = Math.floor(Math.random() * (portTiles.size)).toInt()
-            }
-
-            val currPortTile = portTiles[currPortTileIndex]
-            ports.add(i, Port(currPortTile, portHexTileAccessPointMapping[i]))
-        }
+        // TODO is shuffling really necessary since we already have the tile indices set?
+        val ports = PlacedPorts.Builder.createAllPorts().also { it.portTiles.shuffle() }.build()
 
         /**
          * Role trigger tiles are placed on hexTiles to denote the dice roll that gives the player the right to harvest
@@ -165,7 +131,7 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
             it.key to 0
         }.toMap().toMutableMap()
 
-        // Index adjustment variable to account desert placement
+        // Index adjustment variable to account for desert placement
         var desertSkippedIndexAdjustment = 0
 
         val hexTypes = HexTileType.values()
@@ -216,25 +182,25 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
 
         // Step 5. Create a new game state
         // Randomize turn order
-        val playersList = listOf(p1, p2, p3, p4)
-        val randomizedPlayersList = arrayListOf<Party>()
-        while (randomizedPlayersList.size < 4) {
-            val randomNumber = (Math.random() * 3.99).toInt()
-            if (!randomizedPlayersList.contains(playersList[randomNumber])) {
-                randomizedPlayersList.add(playersList[randomNumber])
-            }
-        }
+        val randomizedPlayersList = playersList.shuffled()
 
         // Step 6. Create a robber state and issueRobber commands - add both to the transaction
         progressTracker.currentStep = FINDING_A_VILLAIN_TO_PLAY_THE_ROBBER
-        val hexTileWithDesert = hexTiles.filter { it.resourceType == HexTileType.Desert }.single().build()
-        val robberState = RobberState(hexTileWithDesert.hexTileIndex, playersList)
-        val createRobberCommand = Command(RobberContract.Commands.CreateRobber(), playerKeys)
+        val desertTile = hexTiles.single { it.resourceType == HexTileType.Desert }.build()
+        val robberState = RobberState(desertTile.hexTileIndex, playersList)
+        val createRobberCommand = Command(
+                RobberContract.Commands.CreateRobber(),
+                playerKeys)
         tb.addOutputState(robberState, RobberContract.ID)
         tb.addCommand(createRobberCommand)
 
         progressTracker.currentStep = FINALIZING_GAMEBOARD
-        val newGameState = GameBoardState(PlacedHexTiles.Builder(hexTiles).build(), ports, randomizedPlayersList, turnTrackerState.linearId, robberState.linearId)
+        val newGameState = GameBoardState(
+                hexTiles = PlacedHexTiles.Builder(hexTiles).build(),
+                ports = ports,
+                players = randomizedPlayersList,
+                turnTrackerLinearId = turnTrackerState.linearId,
+                robberLinearId = robberState.linearId)
 
         // Step 7. Add the states to the transaction
         progressTracker.currentStep = ADDING_ALL_GAME_STATES_TO_THE_TRANSACTION
