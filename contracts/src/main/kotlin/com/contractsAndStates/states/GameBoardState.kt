@@ -57,6 +57,52 @@ data class GameBoardState(val hexTiles: PlacedHexTiles,
 }
 
 @CordaSerializable
+data class PlacedSettlements @ConstructorForDeserialization constructor(
+        val value: List<List<Boolean>> = List(GameBoardState.TILE_COUNT) {
+            List(HexTile.SIDE_COUNT) { false }
+        }) {
+
+    init {
+        require(value.size == GameBoardState.TILE_COUNT) {
+            "value.size cannot be ${value.size}"
+        }
+        require(value.all { it.size == HexTile.SIDE_COUNT }) {
+            "Each value list must be of ${HexTile.SIDE_COUNT} size"
+        }
+    }
+
+    fun hasOn(corner: AbsoluteCorner) = hasOn(corner.tileIndex, corner.cornerIndex)
+    fun hasOn(tileIndex: HexTileIndex, corner: TileCornerIndex) = value[tileIndex.value][corner.value]
+
+    class Builder(private val value: List<MutableList<Boolean>> = List(GameBoardState.TILE_COUNT) {
+        MutableList(HexTile.SIDE_COUNT) { false }
+    }) {
+
+        init {
+            require(value.size == GameBoardState.TILE_COUNT) {
+                "value.size cannot be ${value.size}"
+            }
+            require(value.all { it.size == HexTile.SIDE_COUNT }) {
+                "Each value list must be of ${HexTile.SIDE_COUNT} size"
+            }
+        }
+
+        fun hasOn(corner: AbsoluteCorner) = hasOn(corner.tileIndex, corner.cornerIndex)
+        fun hasOn(tileIndex: HexTileIndex, corner: TileCornerIndex) = value[tileIndex.value][corner.value]
+        fun placeOn(corner: AbsoluteCorner, sides: TileSides = TileSides()) =
+                placeOn(corner.tileIndex, corner.cornerIndex, sides)
+
+        fun placeOn(tileIndex: HexTileIndex, corner: TileCornerIndex, sides: TileSides = TileSides()): Builder = apply {
+            require(!value[tileIndex.value][corner.value]) { "You cannot set a settlement twice" }
+            value[tileIndex.value][corner.value] = true
+            sides.getOverlappedCorners(corner).filterNotNull().forEach { if (!hasOn(it)) placeOn(it) }
+        }
+
+        fun build() = PlacedSettlements(value.map { ImmutableList(it) })
+    }
+}
+
+@CordaSerializable
 data class PlacedHexTiles @ConstructorForDeserialization constructor(val value: List<HexTile>) {
 
     init {
@@ -551,6 +597,13 @@ data class TileCornerIndex(val value: Int) {
      * The corner applies to the adjacent tile clockwise.
      */
     fun getNextOverlappedCorner() = TileCornerIndex((value + 2) % HexTile.SIDE_COUNT)
+
+    /**
+     * The corners of the adjacent tiles clockwise.
+     */
+    fun getOverlappedCorners() = getNextOverlappedCorner().let {
+        listOf(it, it.getNextOverlappedCorner())
+    }
 }
 
 private class ImmutableList<T>(private val inner: List<T>) : List<T> by inner
