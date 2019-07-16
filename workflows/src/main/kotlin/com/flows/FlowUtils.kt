@@ -3,6 +3,7 @@ package com.flows
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.states.*
 import com.r3.corda.lib.tokens.contracts.types.TokenType
+import com.r3.corda.lib.tokens.workflows.flows.redeem.addFungibleTokensToRedeem
 import com.r3.corda.lib.tokens.workflows.internal.selection.TokenSelection
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.StateAndRef
@@ -61,11 +62,7 @@ fun generateInGameSpend(serviceHub: ServiceHub, tb: TransactionBuilder, price: M
     price.forEach { tokenType, amount ->
         val tokensToSpend = tokenSelection.attemptSpend(amount, tb.lockId).groupBy { it.state.data.issuer }
         tokensToSpend.forEach {
-            var amountToSpendForSpecificIssuer: Long = 0
-            it.value.forEach { issuedAmounts -> amountToSpendForSpecificIssuer += issuedAmounts.state.data.amount.quantity }
-            tokenSelection.generateExit(it.value, Amount(amountToSpendForSpecificIssuer, tokenType), changeOwner).first.forEach { token ->
-                tb.withItems(token)
-            }
+            addFungibleTokensToRedeem(tb, serviceHub, amount, it.key, changeOwner)
         }
     }
 
