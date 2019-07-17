@@ -370,7 +370,7 @@ data class HexTile(
 
         fun build() = HexTile(
                 resourceType!!,
-                rollTrigger!!,
+                rollTrigger,
                 robberPresent!!,
                 hexTileIndex,
                 sidesBuilder.build()
@@ -379,7 +379,7 @@ data class HexTile(
 }
 
 @CordaSerializable
-data class PlacedPorts(val value: List<Port>) {
+data class PlacedPorts @ConstructorForDeserialization constructor(val value: List<Port>) {
 
     init {
         require(value.size == PORT_COUNT) {
@@ -445,7 +445,7 @@ data class PlacedPorts(val value: List<Port>) {
 }
 
 @CordaSerializable
-data class Port(val portTile: PortTile, val accessPoints: MutableList<AccessPoint>) {
+data class Port @ConstructorForDeserialization constructor(val portTile: PortTile, val accessPoints: List<AccessPoint>) {
 
     init {
         require(accessPoints.isNotEmpty()) { "accessPoints must not be empty" }
@@ -496,7 +496,7 @@ data class AccessPoint @ConstructorForDeserialization constructor(
 
 @CordaSerializable
 data class TileSides @ConstructorForDeserialization constructor(
-        val value: MutableList<TileSide> = MutableList(HexTile.SIDE_COUNT) { TileSide() }) {
+        val value: List<TileSide> = List(HexTile.SIDE_COUNT) { TileSide() }) {
 
     init {
         require(value.size == HexTile.SIDE_COUNT) { "value.size cannot be ${value.size}" }
