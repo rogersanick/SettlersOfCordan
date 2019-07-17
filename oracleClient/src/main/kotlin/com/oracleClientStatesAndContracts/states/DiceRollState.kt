@@ -62,5 +62,8 @@ data class RollTrigger(val real: Boolean, val total: Int) {
         require(!real || total <= 2 * DiceRollState.MAX_ROLL) {
             "A real one's total has to smaller than ${DiceRollState.MAX_ROLL * 2}"
         }
+        require(!real || total != 7) {
+            "A real one's total cannot be 7"
+        }
     }
 }
