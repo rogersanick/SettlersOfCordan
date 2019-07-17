@@ -295,7 +295,7 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(val value: 
 @CordaSerializable
 data class HexTile(
         val resourceType: HexTileType,
-        val rollTrigger: RollTrigger,
+        val rollTrigger: RollTrigger?,
         val robberPresent: Boolean,
         val hexTileIndex: HexTileIndex,
         val sides: TileSides = TileSides()) {
@@ -340,7 +340,7 @@ data class HexTile(
             this.resourceType = resourceType
         }
 
-        fun with(rollTrigger: RollTrigger) = apply {
+        fun with(rollTrigger: RollTrigger?) = apply {
             require(this.rollTrigger.let { it == null || it == rollTrigger }) {
                 "You cannot replace an existing rollTrigger"
             }

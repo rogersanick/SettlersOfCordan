@@ -151,10 +151,10 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
             hexTiles.add(i, HexTile.Builder(HexTileIndex(i))
                     .with(hexType)
                     .with(
-                            if (hexType == HexTileType.Desert) RollTrigger()
+                            if (hexType == HexTileType.Desert) null
                             else rollTriggerTilePlacementMapping
                                     .getOrElse(rollTriggerTilePlacementOrder[i - desertSkippedIndexAdjustment]) {
-                                        RollTrigger()
+                                        null
                                     })
                     .with(hexType == HexTileType.Desert))
 

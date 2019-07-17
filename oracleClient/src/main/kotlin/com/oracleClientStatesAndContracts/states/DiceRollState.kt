@@ -47,22 +47,16 @@ data class DiceRollState(
 }
 
 @CordaSerializable
-data class RollTrigger(val real: Boolean, val total: Int) {
-
-    constructor() : this(false, 0)
-    constructor(total: Int) : this(true, total)
+data class RollTrigger(val total: Int) {
 
     init {
-        require(real || total == 0) {
-            "Not real one should have a total of 0"
-        }
-        require(!real || 2 * DiceRollState.MIN_ROLL <= total) {
+        require(2 * DiceRollState.MIN_ROLL <= total) {
             "A real one's total has to larger than ${DiceRollState.MIN_ROLL * 2}"
         }
-        require(!real || total <= 2 * DiceRollState.MAX_ROLL) {
+        require(total <= 2 * DiceRollState.MAX_ROLL) {
             "A real one's total has to smaller than ${DiceRollState.MAX_ROLL * 2}"
         }
-        require(!real || total != 7) {
+        require(total != 7) {
             "A real one's total cannot be 7"
         }
     }
