@@ -88,7 +88,7 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         val settlementState = SettlementState(tileIndex, cornerIndex, gameBoardState.players, ourIdentity)
 
         // Step 7. Create a new Game Board State which will contain an updated mapping of where settlements have been placed.
-        val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(GameBoardState.TILE_COUNT) { i -> MutableList(HexTile.SIDE_COUNT) { j -> gameBoardState.settlementsPlaced[i][j] } }
+        val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(GameBoardState.TILE_COUNT) { i -> MutableList(HexTile.SIDE_COUNT) { j -> gameBoardState.settlementsPlaced.value[i][j] } }
 
         // Step 8. Use a linkedList to calculate the coordinates of any relevant overlapping alternative location specification (e.g. 0,2; 1,4 and 5,0 all correspond to a single position)
         class LinkedListNode(val int: Int, var next: LinkedListNode? = null)
@@ -176,7 +176,9 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
                 .build()
 
         // Step 14. Update the gameBoardState with new hexTiles and built settlements.
-        val fullyUpdatedOutputGameBoardState = gameBoardState.copy(settlementsPlaced = newSettlementsPlaced, hexTiles = newHexTiles)
+        val fullyUpdatedOutputGameBoardState = gameBoardState.copy(
+                hexTiles = newHexTiles,
+                settlementsPlaced = PlacedSettlements(newSettlementsPlaced))
 
         // Step 15. Add all states and commands to the transaction.
         tb.addInputState(gameBoardStateAndRef)

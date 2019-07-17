@@ -28,11 +28,18 @@ import java.util.*
 @InitiatingFlow(version = 1)
 @StartableByRPC
 class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: Int, val hexTileCoordinate: Int) : FlowLogic<SignedTransaction>() {
+
+    val tileIndex: HexTileIndex
+    val cornerIndex: TileCornerIndex
+
+    init {
+        tileIndex = HexTileIndex(hexTileIndex)
+        cornerIndex = TileCornerIndex(hexTileCoordinate)
+    }
+
     @Suspendable
     override fun call(): SignedTransaction {
 
-        val tileIndex = HexTileIndex(hexTileIndex)
-        val cornerIndex = TileCornerIndex(hexTileCoordinate)
         // Step 1. Get a reference to the notary service on the network
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
@@ -55,7 +62,7 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         val settlementState = SettlementState(tileIndex, cornerIndex, gameBoardState.players, ourIdentity)
 
         // Step 7. Create a new Game Board State
-        val newSettlementsPlaced: MutableList<MutableList<Boolean>> = MutableList(GameBoardState.TILE_COUNT) { MutableList(HexTile.SIDE_COUNT) { false } }
+        val newSettlementsPlaced = PlacedSettlements.Builder()
 
         // Step 8. Calculate the coordinates of neighbours that could conflict with the proposed placement were they to exist.
         class LinkedListNode(val int: Int, var next: LinkedListNode? = null)
@@ -102,9 +109,9 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         val indexOfRelevantHexTileNeighbour1 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(0))
         val indexOfRelevantHexTileNeighbour2 = gameBoardState.hexTiles.indexOf(relevantHexTileNeighbours.getOrNull(1))
 
-        newSettlementsPlaced[hexTileIndex][hexTileCoordinate] = true
-        if (indexOfRelevantHexTileNeighbour1 != null) newSettlementsPlaced[indexOfRelevantHexTileNeighbour1.value][coordinateOfPotentiallyConflictingSettlement1] = true
-        if (indexOfRelevantHexTileNeighbour2 != null) newSettlementsPlaced[indexOfRelevantHexTileNeighbour2.value][coordinateOfPotentiallyConflictingSettlement2] = true
+        newSettlementsPlaced.placeOn(tileIndex, cornerIndex)
+        if (indexOfRelevantHexTileNeighbour1 != null) newSettlementsPlaced.placeOn(indexOfRelevantHexTileNeighbour1, TileCornerIndex(coordinateOfPotentiallyConflictingSettlement1))
+        if (indexOfRelevantHexTileNeighbour2 != null) newSettlementsPlaced.placeOn(indexOfRelevantHexTileNeighbour2, TileCornerIndex(coordinateOfPotentiallyConflictingSettlement2))
 
         // Step 10. Add the appropriate resources to the transaction to pay for the Settlement.
         generateInGameSpend(serviceHub, tb, CorDanFlowUtils.settlementPrice, ourIdentity)
@@ -113,7 +120,7 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         tb.addInputState(gameBoardStateAndRef)
         tb.addReferenceState(turnTrackerReferenceStateAndRef)
         tb.addOutputState(settlementState, BuildPhaseContract.ID)
-        tb.addOutputState(gameBoardState.copy(settlementsPlaced = newSettlementsPlaced))
+        tb.addOutputState(gameBoardState.copy(settlementsPlaced = newSettlementsPlaced.build()))
         tb.addCommand(GameStateContract.Commands.UpdateWithSettlement(), gameBoardState.players.map { it.owningKey })
 
         serviceHub.networkMapCache.notaryIdentities.first()

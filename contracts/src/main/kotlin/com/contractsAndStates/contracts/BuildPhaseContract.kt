@@ -75,9 +75,9 @@ class BuildPhaseContract : Contract {
                 // Get the index of the neighbouringHexTile
                 val indexOfRelevantHexTileNeighbours = relevantHexTileNeighbours.map { inputGameBoardState.hexTiles.indexOf(it) }
 
-                "A settlement must not have previously been built in this location." using (!inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][hexTileCoordinate.value])
-                "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][hexTileCoordinate.previous().value])
-                "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][hexTileCoordinate.next().value])
+                "A settlement must not have previously been built in this location." using (!inputGameBoardState.settlementsPlaced.value[newSettlement.hexTileIndex.value][hexTileCoordinate.value])
+                "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced.value[newSettlement.hexTileIndex.value][hexTileCoordinate.previous().value])
+                "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced.value[newSettlement.hexTileIndex.value][hexTileCoordinate.next().value])
                 // TODO: Check for the third potential neighbour of any given settlement.
 
                 // Settlements cannot be build on HexTile that have a terrain type of 'Desert'.
@@ -184,9 +184,9 @@ class BuildPhaseContract : Contract {
                 val sheepInTx = outputResources.filter { it.amount.token.tokenType == Resource.getInstance(HexTileType.Pasture.resourceYielded!!) }.sumByLong { it.amount.quantity }
                 val woodInTx = outputResources.filter { it.amount.token.tokenType == Resource.getInstance(HexTileType.Forest.resourceYielded!!) }.sumByLong { it.amount.quantity }
 
-                "A settlement must not have previously been built in this location." using (!inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][hexTileCoordinate.value])
-                "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][hexTileCoordinate.previous().value])
-                "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced[newSettlement.hexTileIndex.value][hexTileCoordinate.next().value])
+                "A settlement must not have previously been built in this location." using (!inputGameBoardState.settlementsPlaced.value[newSettlement.hexTileIndex.value][hexTileCoordinate.value])
+                "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced.value[newSettlement.hexTileIndex.value][hexTileCoordinate.previous().value])
+                "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced.value[newSettlement.hexTileIndex.value][hexTileCoordinate.next().value])
 
                 "The player must have provided the appropriate amount of wheat to build a settlement" using (wheatInTx == 1.toLong())
                 "The player must have provided the appropriate amount of brick to build a settlement" using (brickInTx == 1.toLong())

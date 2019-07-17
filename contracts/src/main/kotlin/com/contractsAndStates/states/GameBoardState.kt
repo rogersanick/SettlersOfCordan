@@ -29,21 +29,12 @@ data class GameBoardState(val hexTiles: PlacedHexTiles,
                           val players: List<Party>,
                           val turnTrackerLinearId: UniqueIdentifier,
                           val robberLinearId: UniqueIdentifier,
-                          val settlementsPlaced: List<List<Boolean>> = List(TILE_COUNT) { List(HexTile.SIDE_COUNT) { false } },
+                          val settlementsPlaced: PlacedSettlements = PlacedSettlements(),
                           val setUpComplete: Boolean = false,
                           val initialPiecesPlaced: Int = 0,
                           val winner: Party? = null,
                           val beginner: Boolean = false,
                           override val linearId: UniqueIdentifier = UniqueIdentifier()) : LinearState {
-
-    init {
-        require(settlementsPlaced.size == TILE_COUNT) {
-            "settlementsPlaced.size cannot be ${settlementsPlaced.size}"
-        }
-        require(settlementsPlaced.all { it.size == HexTile.SIDE_COUNT }) {
-            "Each settlementsPlaced list must be of ${HexTile.SIDE_COUNT}"
-        }
-    }
 
     override val participants: List<Party> get() = players
 
