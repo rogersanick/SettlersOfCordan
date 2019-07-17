@@ -28,8 +28,8 @@ class TradeWithPortFlow(
         val gameBoardLinearId: UniqueIdentifier,
         tileOfPort: Int,
         tileCornerOfPort: Int,
-        val soldResource: ResourceType,
-        val purchasedResource: ResourceType) : FlowLogic<SignedTransaction>() {
+        val soldResource: Resource,
+        val purchasedResource: Resource) : FlowLogic<SignedTransaction>() {
 
     val hexTileOfPort: HexTileIndex
     val tileCorner: TileCornerIndex

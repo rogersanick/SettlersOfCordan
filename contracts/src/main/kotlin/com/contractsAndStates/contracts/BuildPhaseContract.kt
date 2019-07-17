@@ -107,7 +107,7 @@ class BuildPhaseContract : Contract {
 
                     val fungibleTokenAmountsOfResourcesThatShouldBeIssued = consolidatedListOfResourceThatShouldBeIssued.map {
                         // TODO make sure the it.key.resourceYielded is not null
-                        amount(it.value, Resource.getInstance(it.key.resourceYielded!!)) issuedBy inputGameBoardState.players[turnTracker.currTurnIndex] heldBy inputGameBoardState.players[turnTracker.currTurnIndex]
+                        amount(it.value, it.key.resourceYielded!!) issuedBy inputGameBoardState.players[turnTracker.currTurnIndex] heldBy inputGameBoardState.players[turnTracker.currTurnIndex]
                     }
 
                     "The player should be issuing themselves resources of the appropriate amount and type" using (outputResources.containsAll(fungibleTokenAmountsOfResourcesThatShouldBeIssued))

@@ -34,15 +34,15 @@ data class PlacedPorts @ConstructorForDeserialization constructor(val value: Lis
 
         companion object {
             fun createAllPorts() = Builder()
-                    .add(PortTile(listOf(Sheep).mapOf(2), ALL_RESOURCES.minus(Sheep).mapOf(1)))
-                    .add(PortTile(listOf(Wood).mapOf(2), ALL_RESOURCES.minus(Wood).mapOf(1)))
-                    .add(PortTile(listOf(Brick).mapOf(2), ALL_RESOURCES.minus(Brick).mapOf(1)))
-                    .add(PortTile(listOf(Ore).mapOf(2), ALL_RESOURCES.minus(Ore).mapOf(1)))
-                    .add(PortTile(listOf(Wheat).mapOf(2), ALL_RESOURCES.minus(Wheat).mapOf(1)))
-                    .add(PortTile(ALL_RESOURCES.mapOf(3), ALL_RESOURCES.mapOf(1)))
-                    .add(PortTile(ALL_RESOURCES.mapOf(3), ALL_RESOURCES.mapOf(1)))
-                    .add(PortTile(ALL_RESOURCES.mapOf(3), ALL_RESOURCES.mapOf(1)))
-                    .add(PortTile(ALL_RESOURCES.mapOf(3), ALL_RESOURCES.mapOf(1)))
+                    .add(PortTile(listOf(Sheep).mapOf(2), allResources.minus(Sheep).mapOf(1)))
+                    .add(PortTile(listOf(Wood).mapOf(2), allResources.minus(Wood).mapOf(1)))
+                    .add(PortTile(listOf(Brick).mapOf(2), allResources.minus(Brick).mapOf(1)))
+                    .add(PortTile(listOf(Ore).mapOf(2), allResources.minus(Ore).mapOf(1)))
+                    .add(PortTile(listOf(Wheat).mapOf(2), allResources.minus(Wheat).mapOf(1)))
+                    .add(PortTile(allResources.mapOf(3), allResources.mapOf(1)))
+                    .add(PortTile(allResources.mapOf(3), allResources.mapOf(1)))
+                    .add(PortTile(allResources.mapOf(3), allResources.mapOf(1)))
+                    .add(PortTile(allResources.mapOf(3), allResources.mapOf(1)))
                     .add(listOf(AccessPoint(0, listOf(5, 1))))
                     .add(listOf(AccessPoint(1, listOf(0, 2)), AccessPoint(2, listOf(5))))
                     .add(listOf(AccessPoint(2, listOf(2)), AccessPoint(6, listOf(0, 1))))
@@ -102,9 +102,7 @@ data class PortTile(val inputRequired: List<Amount<TokenType>>, val outputRequir
     }
 
     fun getInputOf(token: TokenType) = inputRequired.single { it.token == token }
-    fun getInputOf(resourceType: ResourceType) = getInputOf(Resource(resourceType))
     fun getOutputOf(token: TokenType) = outputRequired.single { it.token == token }
-    fun getOutputOf(resourceType: ResourceType) = getOutputOf(Resource(resourceType))
 }
 
 @CordaSerializable
