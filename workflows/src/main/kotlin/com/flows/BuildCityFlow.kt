@@ -54,7 +54,7 @@ class BuildCityFlow(val gameBoardLinearId: UniqueIdentifier, val inputSettlement
         val outputCityState = inputSettlementStateAndRef.state.data.upgradeToCity()
 
         // Step 7. Add the appropriate resources to the transaction to pay for the City.
-        generateInGameSpend(serviceHub, tb, CorDanFlowUtils.cityPrice, ourIdentity)
+        generateInGameSpend(serviceHub, tb, getBuildableCosts(Buildable.City), ourIdentity)
 
         // Step 8. Add all states and commands to the transaction.
         tb.addInputState(inputSettlementStateAndRef)

@@ -114,7 +114,7 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
         if (indexOfRelevantHexTileNeighbour2 != null) newSettlementsPlaced.placeOn(indexOfRelevantHexTileNeighbour2, TileCornerIndex(coordinateOfPotentiallyConflictingSettlement2))
 
         // Step 10. Add the appropriate resources to the transaction to pay for the Settlement.
-        generateInGameSpend(serviceHub, tb, CorDanFlowUtils.settlementPrice, ourIdentity)
+        generateInGameSpend(serviceHub, tb, getBuildableCosts(Buildable.Settlement), ourIdentity)
 
         // Step 11. Add all states and commands to the transaction.
         tb.addInputState(gameBoardStateAndRef)

@@ -2,6 +2,7 @@ package com.contractsAndStates.contracts
 
 import com.contractsAndStates.states.*
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.amount
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
@@ -178,20 +179,12 @@ class BuildPhaseContract : Contract {
 
                 "A settlement cannot be built on a hexTile that is of type Desert" using (inputGameBoardState.hexTiles.get(hexTileIndex).resourceType == HexTileType.Desert)
 
-                // TODO make sure the it.key.resourceYielded is not null
-                val wheatInTx = outputResources.filter { it.amount.token.tokenType == Resource.getInstance(HexTileType.Field.resourceYielded!!) }.sumByLong { it.amount.quantity }
-                val brickInTx = outputResources.filter { it.amount.token.tokenType == Resource.getInstance(HexTileType.Hill.resourceYielded!!) }.sumByLong { it.amount.quantity }
-                val sheepInTx = outputResources.filter { it.amount.token.tokenType == Resource.getInstance(HexTileType.Pasture.resourceYielded!!) }.sumByLong { it.amount.quantity }
-                val woodInTx = outputResources.filter { it.amount.token.tokenType == Resource.getInstance(HexTileType.Forest.resourceYielded!!) }.sumByLong { it.amount.quantity }
+                verifyPaymentIsEnough(getBuildableCosts(Buildable.Settlement), outputResources)
 
                 "A settlement must not have previously been built in this location." using (!inputGameBoardState.settlementsPlaced.value[newSettlement.hexTileIndex.value][hexTileCoordinate.value])
                 "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced.value[newSettlement.hexTileIndex.value][hexTileCoordinate.previous().value])
                 "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced.value[newSettlement.hexTileIndex.value][hexTileCoordinate.next().value])
 
-                "The player must have provided the appropriate amount of wheat to build a settlement" using (wheatInTx == 1.toLong())
-                "The player must have provided the appropriate amount of brick to build a settlement" using (brickInTx == 1.toLong())
-                "The player must have provided the appropriate amount of ore to build a settlement" using (sheepInTx == 1.toLong())
-                "The player must have provided the appropriate amount of wood to build a settlement" using (woodInTx == 1.toLong())
                 "There must be no input settlements" using (tx.inputsOfType<SettlementState>().size == 1)
                 "The player must be attempting to build a single settlement" using (tx.outputsOfType<SettlementState>().size == 1)
 
@@ -220,12 +213,8 @@ class BuildPhaseContract : Contract {
                  *  Check that the counter party is proposing a move that is allowed by the rules of the game.
                  */
 
-                // TODO make sure the it.key.resourceYielded is not null
-                val brickInTx = outputResources.filter { it.amount.token.tokenType == Resource.getInstance(HexTileType.Hill.resourceYielded!!) }.sumByLong { it.amount.quantity }
-                val woodInTx = outputResources.filter { it.amount.token.tokenType == Resource.getInstance(HexTileType.Forest.resourceYielded!!) }.sumByLong { it.amount.quantity }
+                verifyPaymentIsEnough(getBuildableCosts(Buildable.Road), outputResources)
 
-                "The player must have provided the appropriate amount of brick to build a settlement" using (brickInTx == (1 * newRoads.size).toLong())
-                "The player must have provided the appropriate amount of wood to build a settlement" using (woodInTx == (1 * newRoads.size).toLong())
                 "A road must not have previously been built in this location." using (newRoads.all {
                     !inputGameBoardState.hexTiles.get(it.hexTileIndex).sides.hasRoadIdOn(it.hexTileSide)
                 })
@@ -264,14 +253,9 @@ class BuildPhaseContract : Contract {
 
                 "A city cannot be built on a hexTile that is of type Desert" using (inputGameBoardState.hexTiles.get(hexTileIndex).resourceType == HexTileType.Desert)
 
-                // TODO make sure the it.key.resourceYielded is not null
-                val wheatInTx = outputResources.filter { it.amount.token.tokenType == Resource.getInstance(HexTileType.Field.resourceYielded!!) }.sumByLong { it.amount.quantity }
-                val oreInTx = outputResources.filter { it.amount.token.tokenType == Resource.getInstance(HexTileType.Mountain.resourceYielded!!) }.sumByLong { it.amount.quantity }
+                verifyPaymentIsEnough(getBuildableCosts(Buildable.City), outputResources)
 
                 "The city must be built in the same location as the settlement being upgraded." using (inputSettlement.hexTileIndex == newCity.hexTileIndex && inputSettlement.hexTileCoordinate == newCity.hexTileCoordinate)
-
-                "The player must have provided the appropriate amount of wheat to build a settlement" using (wheatInTx == 1.toLong())
-                "The player must have provided the appropriate amount of ore to build a settlement" using (oreInTx == 1.toLong())
 
                 /**
                  *  ******** SIGNATURES ********
@@ -284,6 +268,27 @@ class BuildPhaseContract : Contract {
             }
         }
     }
+
+    fun verifyPaymentIsEnough(buildableCosts: Map<TokenType, Long>, outputResources: List<FungibleToken>) =
+            verifyPaymentIsEnough(
+                    buildableCosts,
+                    outputResources.extractTokenAmounts(buildableCosts.keys))
+
+    fun verifyPaymentIsEnough(required: Map<TokenType, Long>, payment: Map<TokenType, Long>) = requireThat {
+        required.forEach { entry ->
+            "The player must provide at least ${entry.value} of ${entry.key} to ${required::class.simpleName}" using
+                    payment[entry.key].let { paid ->
+                        paid != null && entry.value <= paid
+                    }
+        }
+    }
+
+    fun List<FungibleToken>.extractTokenAmounts(types: Iterable<TokenType>) = types
+            .map { type ->
+                type to filter { it.amount.token.tokenType == type }
+                        .sumByLong { it.amount.quantity }
+            }
+            .toMap()
 
     interface Commands : CommandData {
         class BuildInitialSettlementAndRoad : Commands
