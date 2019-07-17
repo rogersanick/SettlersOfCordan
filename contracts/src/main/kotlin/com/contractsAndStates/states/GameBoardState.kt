@@ -438,14 +438,14 @@ data class PlacedPorts(val value: List<Port>) {
                 "ports and accessPointsList must have the same size"
             }
             return PlacedPorts(portTiles.mapIndexed { index, portTile ->
-                Port(portTile, accessPointsList[index])
+                Port(portTile, accessPointsList[index].toMutableList())
             })
         }
     }
 }
 
 @CordaSerializable
-data class Port(val portTile: PortTile, val accessPoints: List<AccessPoint>) {
+data class Port(val portTile: PortTile, val accessPoints: MutableList<AccessPoint>) {
 
     init {
         require(accessPoints.isNotEmpty()) { "accessPoints must not be empty" }
@@ -496,7 +496,7 @@ data class AccessPoint @ConstructorForDeserialization constructor(
 
 @CordaSerializable
 data class TileSides @ConstructorForDeserialization constructor(
-        val value: List<TileSide> = List(HexTile.SIDE_COUNT) { TileSide() }) {
+        val value: MutableList<TileSide> = MutableList(HexTile.SIDE_COUNT) { TileSide() }) {
 
     init {
         require(value.size == HexTile.SIDE_COUNT) { "value.size cannot be ${value.size}" }
@@ -584,7 +584,7 @@ data class TileSides @ConstructorForDeserialization constructor(
             setSideOn(sideIndex, getSideOn(sideIndex).copy(roadId = roadId))
         }
 
-        fun build() = TileSides(ImmutableList(value))
+        fun build() = TileSides(ImmutableList(value).toMutableList())
     }
 }
 

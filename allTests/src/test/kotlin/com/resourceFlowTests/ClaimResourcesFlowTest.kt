@@ -2,6 +2,7 @@ package com.resourceFlowTests
 
 import com.contractsAndStates.states.GameBoardState
 import com.flows.*
+import com.r3.corda.lib.tokens.contracts.AbstractTokenContract
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.testUtilities.setupGameBoardForTesting
 import net.corda.core.contracts.requireThat

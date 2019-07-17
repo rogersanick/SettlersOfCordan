@@ -66,6 +66,7 @@ class TradeWithPortFlowTest {
     @Test
     fun player1IsAbleToMakeMultipleTradesWithAPortOnTheirTurn() {
 
+        assert(false);
         // Get an identity for each of the players of the game.
         val p1 = a.info.chooseIdentity()
         val p2 = b.info.chooseIdentity()
@@ -119,7 +120,7 @@ class TradeWithPortFlowTest {
                 )
         )
         network.runNetwork()
-        futureWithIssuedTrade.getOrThrow()
+        val txWithExecutedPortTrade = futureWithIssuedTrade.getOrThrow()
 
         val playerWithPortPostTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
 
