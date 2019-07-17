@@ -82,7 +82,7 @@ class TradeWithPortFlowTest {
         }
 
         // Ensure that player 1 will be able to trade with the port with access from the HexTile at index 0.
-        var stxGameState = getStxWithGameState()
+        val stxGameState = getStxWithGameState()
         var gameBoardState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
         while (
         // TODO make sure the it.key.resourceYielded is not null
@@ -105,8 +105,9 @@ class TradeWithPortFlowTest {
         }
 
         val portToTradeWith = gameBoardState.ports.value[0]
-        val inputResource = portToTradeWith.portTile.inputRequired.filter { it.token.tokenClass == Resource.getInstance(gameBoardState.hexTiles.get(HexTileIndex(0)).resourceType.resourceYielded!!).tokenClass }.first().token
-        val outputResource = portToTradeWith.portTile.outputRequired.filter { it.token.tokenIdentifier != inputResource.tokenIdentifier }.first().token
+        val inputResource = portToTradeWith.portTile.getInputOf(
+                gameBoardState.hexTiles.get(HexTileIndex(0)).resourceType.resourceYielded!!).token as Resource
+        val outputResource = portToTradeWith.portTile.getOutputOf(inputResource).token as Resource
         val playerWithPortPreTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
 
         val futureWithIssuedTrade = arrayOfAllPlayerNodesInOrder[0].startFlow(
@@ -114,8 +115,8 @@ class TradeWithPortFlowTest {
                         gameBoardState.linearId,
                         0,
                         5,
-                        inputResource.tokenIdentifier,
-                        outputResource.tokenIdentifier
+                        inputResource.type,
+                        outputResource.type
                 )
         )
         network.runNetwork()

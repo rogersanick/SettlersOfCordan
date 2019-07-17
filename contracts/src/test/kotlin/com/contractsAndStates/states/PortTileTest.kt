@@ -55,4 +55,40 @@ class PortTileTest {
             PortTile(listOf(1 of Sheep), listOf(0 of Ore))
         }
     }
+
+    @Test
+    fun `getInputOf is correct`() {
+        val tile = PortTile(listOf(Sheep).mapOf(2), ALL_RESOURCES.minus(Sheep).mapOf(1))
+        assertEquals(2 of Sheep, tile.getInputOf(Sheep))
+        assertEquals(2 of Sheep, tile.getInputOf(ResourceType.Sheep))
+    }
+
+    @Test
+    fun `getInputOf rejects missing type`() {
+        val tile = PortTile(listOf(Sheep).mapOf(2), ALL_RESOURCES.minus(Sheep).mapOf(1))
+        assertFailsWith<NoSuchElementException> {
+            tile.getInputOf(Ore)
+        }
+        assertFailsWith<NoSuchElementException> {
+            tile.getInputOf(ResourceType.Ore)
+        }
+    }
+
+    @Test
+    fun `getOutputOf is correct`() {
+        val tile = PortTile(listOf(Sheep).mapOf(2), ALL_RESOURCES.minus(Sheep).mapOf(1))
+        assertEquals(1 of Ore, tile.getOutputOf(Ore))
+        assertEquals(1 of Ore, tile.getOutputOf(ResourceType.Ore))
+    }
+
+    @Test
+    fun `getOutputOf rejects missing type`() {
+        val tile = PortTile(listOf(Sheep).mapOf(2), ALL_RESOURCES.minus(Sheep).mapOf(1))
+        assertFailsWith<NoSuchElementException> {
+            tile.getOutputOf(Sheep)
+        }
+        assertFailsWith<NoSuchElementException> {
+            tile.getOutputOf(ResourceType.Sheep)
+        }
+    }
 }

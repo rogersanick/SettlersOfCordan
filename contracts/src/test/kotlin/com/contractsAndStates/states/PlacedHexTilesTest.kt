@@ -4,6 +4,7 @@ import com.oracleClientStatesAndContracts.states.RollTrigger
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 
 class PlacedHexTilesTest {
 
@@ -20,8 +21,11 @@ class PlacedHexTilesTest {
     }
 
     private fun buildWithBuilder() = PlacedHexTiles.Builder(getAllTileBuilders().toMutableList()).build()
-
     private fun getAllTiles() = getAllTileBuilders().map { it.build() }
+    private fun Pair<Int, Int>.toAbsoluteSide() = AbsoluteSide(HexTileIndex(first), TileSideIndex(second))
+    private fun List<Pair<Int, Int>>.toAbsoluteSides() = map { it.toAbsoluteSide() }
+    private fun Pair<Int, Int>.toAbsoluteCorner() = AbsoluteCorner(HexTileIndex(first), TileCornerIndex(second))
+    private fun List<Pair<Int, Int>>.toAbsoluteCorners() = map { it.toAbsoluteCorner() }
 
     @Test
     fun `Builder rejects too short list`() {
@@ -416,7 +420,7 @@ class PlacedHexTilesTest {
     @Test
     fun `Constructor rejects wrong tile type count`() {
         val list = getAllTileBuilders().toMutableList()
-        list[1]= HexTile.Builder(HexTileIndex(1))
+        list[1] = HexTile.Builder(HexTileIndex(1))
                 .with(HexTileType.Forest)
                 .with(RollTrigger(3))
                 .with(false)
@@ -445,5 +449,124 @@ class PlacedHexTilesTest {
         assertEquals(HexTileIndex(4), placed.indexOf(placed.get(HexTileIndex(4))))
         assertEquals(HexTileIndex(14), placed.indexOf(placed.get(HexTileIndex(14))))
         assertEquals(null, placed.indexOf(unknownTile))
+    }
+
+    @Test
+    fun `getOpposite is correct`() {
+        val placed = buildWithBuilder()
+
+        assertNull(placed.getOpposite((0 to 0).toAbsoluteSide()))
+        assertEquals((1 to 4).toAbsoluteSide(), placed.getOpposite((0 to 1).toAbsoluteSide()))
+        assertEquals((3 to 0).toAbsoluteSide(), placed.getOpposite((0 to 3).toAbsoluteSide()))
+        assertNull(placed.getOpposite((0 to 4).toAbsoluteSide()))
+        assertEquals((3 to 2).toAbsoluteSide(), placed.getOpposite((8 to 5).toAbsoluteSide()))
+    }
+
+    @Test
+    fun `getSmallerEquivalent side is correct`() {
+        val placed = buildWithBuilder()
+
+        assertEquals((0 to 0).toAbsoluteSide(), placed.getSmallerEquivalent((0 to 0).toAbsoluteSide()))
+        assertEquals((0 to 1).toAbsoluteSide(), placed.getSmallerEquivalent((0 to 1).toAbsoluteSide()))
+        assertEquals((0 to 1).toAbsoluteSide(), placed.getSmallerEquivalent((1 to 4).toAbsoluteSide()))
+        assertEquals((4 to 2).toAbsoluteSide(), placed.getSmallerEquivalent((4 to 2).toAbsoluteSide()))
+        assertEquals((4 to 2).toAbsoluteSide(), placed.getSmallerEquivalent((9 to 5).toAbsoluteSide()))
+    }
+
+    @Test
+    fun `getSideHash is correct`() {
+        val placed = buildWithBuilder()
+
+        assertEquals(0, placed.getSideHash((0 to 0).toAbsoluteSide()))
+        assertEquals(1, placed.getSideHash((0 to 1).toAbsoluteSide()))
+        assertEquals(1, placed.getSideHash((1 to 4).toAbsoluteSide()))
+        assertEquals(5, placed.getSideHash((0 to 5).toAbsoluteSide()))
+        assertEquals(6, placed.getSideHash((1 to 0).toAbsoluteSide()))
+        assertEquals(86, placed.getSideHash((14 to 2).toAbsoluteSide()))
+        assertEquals(86, placed.getSideHash((18 to 5).toAbsoluteSide()))
+    }
+
+    @Test
+    fun `SideComparator is correct`() {
+        val placed = buildWithBuilder()
+        val sides = listOf(
+                0 to 0, 18 to 2, 11 to 1, // orphans
+                0 to 1, 1 to 4, // opposites
+                9 to 5, 4 to 2 // opposites
+        ).toAbsoluteSides()
+        val sorted = sides
+                .sortedWith(placed.getSideComparator())
+
+        assertEquals(
+                listOf(0 to 0, 0 to 1, 1 to 4, 4 to 2, 9 to 5, 11 to 1, 18 to 2).toAbsoluteSides(),
+                sorted)
+        assertEquals(
+                listOf(0 to 0, 0 to 1, 4 to 2, 11 to 1, 18 to 2).toAbsoluteSides(),
+                sorted.distinctBy { placed.getSideHash(it) })
+    }
+
+    @Test
+    fun `getOverlappedCorners is correct`() {
+        val placed = buildWithBuilder()
+
+        assertEquals(
+                listOf(null, null),
+                placed.getOverlappedCorners((0 to 0).toAbsoluteCorner()))
+        assertEquals(
+                listOf(null, (1 to 5).toAbsoluteCorner()),
+                placed.getOverlappedCorners((0 to 1).toAbsoluteCorner()))
+        assertEquals(
+                listOf((4 to 5).toAbsoluteCorner(), (3 to 1).toAbsoluteCorner()),
+                placed.getOverlappedCorners((0 to 3).toAbsoluteCorner()))
+        assertEquals(
+                listOf((3 to 2).toAbsoluteCorner(), (4 to 4).toAbsoluteCorner()),
+                placed.getOverlappedCorners((8 to 0).toAbsoluteCorner()))
+        assertEquals(
+                listOf((15 to 3).toAbsoluteCorner(), null),
+                placed.getOverlappedCorners((18 to 1).toAbsoluteCorner()))
+    }
+
+    @Test
+    fun `getSmallestEquivalent corner is correct`() {
+        val placed = buildWithBuilder()
+
+        assertEquals((0 to 0).toAbsoluteCorner(), placed.getSmallestEquivalent((0 to 0).toAbsoluteCorner()))
+        assertEquals((0 to 1).toAbsoluteCorner(), placed.getSmallestEquivalent((0 to 1).toAbsoluteCorner()))
+        assertEquals((0 to 1).toAbsoluteCorner(), placed.getSmallestEquivalent((1 to 5).toAbsoluteCorner()))
+        assertEquals((0 to 4).toAbsoluteCorner(), placed.getSmallestEquivalent((0 to 4).toAbsoluteCorner()))
+        assertEquals((0 to 4).toAbsoluteCorner(), placed.getSmallestEquivalent((3 to 0).toAbsoluteCorner()))
+    }
+
+    @Test
+    fun `getCornerHash is correct`() {
+        val placed = buildWithBuilder()
+
+        assertEquals(0, placed.getCornerHash((0 to 0).toAbsoluteCorner()))
+        assertEquals(1, placed.getCornerHash((0 to 1).toAbsoluteCorner()))
+        assertEquals(1, placed.getCornerHash((1 to 5).toAbsoluteCorner()))
+        assertEquals(3, placed.getCornerHash((0 to 3).toAbsoluteCorner()))
+        assertEquals(3, placed.getCornerHash((3 to 1).toAbsoluteCorner()))
+        assertEquals(3, placed.getCornerHash((4 to 5).toAbsoluteCorner()))
+        assertEquals(86, placed.getCornerHash((14 to 2).toAbsoluteCorner()))
+        assertEquals(86, placed.getCornerHash((18 to 0).toAbsoluteCorner()))
+    }
+
+    @Test
+    fun `CornerComparator is correct`() {
+        val placed = buildWithBuilder()
+        val corners = listOf(
+                0 to 0, 18 to 2, 11 to 1, // orphans
+                0 to 1, 1 to 5, // overlapping
+                9 to 5, 8 to 1, 4 to 3 // overlapping
+        ).toAbsoluteCorners()
+        val sorted = corners
+                .sortedWith(placed.getCornerComparator())
+
+        assertEquals(
+                listOf(0 to 0, 0 to 1, 1 to 5, 4 to 3, 8 to 1, 9 to 5, 11 to 1, 18 to 2).toAbsoluteCorners(),
+                sorted)
+        assertEquals(
+                listOf(0 to 0, 0 to 1, 4 to 3, 11 to 1, 18 to 2).toAbsoluteCorners(),
+                sorted.distinctBy { placed.getCornerHash(it) })
     }
 }

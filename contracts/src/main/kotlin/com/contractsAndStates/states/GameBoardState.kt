@@ -29,21 +29,12 @@ data class GameBoardState(val hexTiles: PlacedHexTiles,
                           val players: List<Party>,
                           val turnTrackerLinearId: UniqueIdentifier,
                           val robberLinearId: UniqueIdentifier,
-                          val settlementsPlaced: List<List<Boolean>> = List(TILE_COUNT) { List(HexTile.SIDE_COUNT) { false } },
+                          val settlementsPlaced: PlacedSettlements = PlacedSettlements(),
                           val setUpComplete: Boolean = false,
                           val initialPiecesPlaced: Int = 0,
                           val winner: Party? = null,
                           val beginner: Boolean = false,
                           override val linearId: UniqueIdentifier = UniqueIdentifier()) : LinearState {
-
-    init {
-        require(settlementsPlaced.size == TILE_COUNT) {
-            "settlementsPlaced.size cannot be ${settlementsPlaced.size}"
-        }
-        require(settlementsPlaced.all { it.size == HexTile.SIDE_COUNT }) {
-            "Each settlementsPlaced list must be of ${HexTile.SIDE_COUNT}"
-        }
-    }
 
     override val participants: List<Party> get() = players
 
@@ -57,7 +48,53 @@ data class GameBoardState(val hexTiles: PlacedHexTiles,
 }
 
 @CordaSerializable
-data class PlacedHexTiles @ConstructorForDeserialization constructor(val value: MutableList<HexTile>) {
+data class PlacedSettlements @ConstructorForDeserialization constructor(
+        val value: List<List<Boolean>> = List(GameBoardState.TILE_COUNT) {
+            List(HexTile.SIDE_COUNT) { false }
+        }) {
+
+    init {
+        require(value.size == GameBoardState.TILE_COUNT) {
+            "value.size cannot be ${value.size}"
+        }
+        require(value.all { it.size == HexTile.SIDE_COUNT }) {
+            "Each value list must be of ${HexTile.SIDE_COUNT} size"
+        }
+    }
+
+    fun hasOn(corner: AbsoluteCorner) = hasOn(corner.tileIndex, corner.cornerIndex)
+    fun hasOn(tileIndex: HexTileIndex, corner: TileCornerIndex) = value[tileIndex.value][corner.value]
+
+    class Builder(private val value: List<MutableList<Boolean>> = List(GameBoardState.TILE_COUNT) {
+        MutableList(HexTile.SIDE_COUNT) { false }
+    }) {
+
+        init {
+            require(value.size == GameBoardState.TILE_COUNT) {
+                "value.size cannot be ${value.size}"
+            }
+            require(value.all { it.size == HexTile.SIDE_COUNT }) {
+                "Each value list must be of ${HexTile.SIDE_COUNT} size"
+            }
+        }
+
+        fun hasOn(corner: AbsoluteCorner) = hasOn(corner.tileIndex, corner.cornerIndex)
+        fun hasOn(tileIndex: HexTileIndex, corner: TileCornerIndex) = value[tileIndex.value][corner.value]
+        fun placeOn(corner: AbsoluteCorner, sides: TileSides = TileSides()) =
+                placeOn(corner.tileIndex, corner.cornerIndex, sides)
+
+        fun placeOn(tileIndex: HexTileIndex, corner: TileCornerIndex, sides: TileSides = TileSides()): Builder = apply {
+            require(!value[tileIndex.value][corner.value]) { "You cannot set a settlement twice" }
+            value[tileIndex.value][corner.value] = true
+            sides.getOverlappedCorners(corner).filterNotNull().forEach { if (!hasOn(it)) placeOn(it) }
+        }
+
+        fun build() = PlacedSettlements(value.map { ImmutableList(it) })
+    }
+}
+
+@CordaSerializable
+data class PlacedHexTiles @ConstructorForDeserialization constructor(val value: List<HexTile>) {
 
     init {
         require(value.size == GameBoardState.TILE_COUNT) {
@@ -111,6 +148,80 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(val value: 
     fun indexOf(tile: HexTile?) = value.indexOf(tile).let {
         if (it < 0) null
         else HexTileIndex(it)
+    }
+
+    fun getOpposite(absoluteSide: AbsoluteSide) = get(absoluteSide.tileIndex)
+            .sides
+            .getNeighborOn(absoluteSide.sideIndex)
+            .let { AbsoluteSide.create(it, absoluteSide.sideIndex.opposite()) }
+
+    /**
+     * When 1 or 2 AbsoluteSides are neighbors, the smaller equivalent is the one with the lower tileIndex.
+     */
+    fun getSmallerEquivalent(side: AbsoluteSide) = getOpposite(side).let { opposite ->
+        if (opposite == null || side.tileIndex.value <= opposite.tileIndex.value) side
+        else opposite
+    }
+
+    fun getSideHash(side: AbsoluteSide) = getSmallerEquivalent(side).let {
+        it.tileIndex.value * HexTile.SIDE_COUNT + it.sideIndex.value
+    }
+
+    /**
+     * When opposite sides, then the one with the lower tile index is smaller.
+     * When different sides, then, with the opposites, the one with the lower tile index is smaller,
+     * and if equal, the one with the smaller side index is smaller.
+     */
+    fun getSideComparator() = Comparator<AbsoluteSide> { left, right ->
+        if (left == null && right == null) return@Comparator 0
+        if (left == null) return@Comparator -1
+        if (right == null) return@Comparator 1
+        val leftEq = getSmallerEquivalent(left)
+        val rightEq = getSmallerEquivalent(right)
+        if (left == right) 0
+        else if (leftEq == rightEq) left.tileIndex.value - right.tileIndex.value
+        else (leftEq.tileIndex.value - rightEq.tileIndex.value).let {
+            if (it != 0) it
+            else leftEq.sideIndex.value - rightEq.sideIndex.value
+        }
+    }
+
+    fun getOverlappedCorners(absoluteCorner: AbsoluteCorner) = get(absoluteCorner.tileIndex)
+            .sides
+            .getNeighborsOn(absoluteCorner.cornerIndex)
+            .zip(absoluteCorner.cornerIndex.getOverlappedCorners())
+            .map { AbsoluteCorner.create(it.first, it.second) }
+
+    /**
+     * When 1, 2 or 3 AbsoluteCorners are neighbors, the smaller equivalent is the one with the lower tileIndex.
+     */
+    fun getSmallestEquivalent(corner: AbsoluteCorner) = getOverlappedCorners(corner)
+            .fold(corner) { choice, next ->
+                if (next == null || choice.tileIndex.value <= next.tileIndex.value) choice
+                else next
+            }
+
+    fun getCornerHash(corner: AbsoluteCorner) = getSmallestEquivalent(corner).let {
+        it.tileIndex.value * HexTile.SIDE_COUNT + it.cornerIndex.value
+    }
+
+    /**
+     * When overlapping corner, then they are ordered by their tile index.
+     * When different corners, then, they are ordered by the tile order of their smallest overlapping ones,
+     * and if equal, the one with the smaller side index is smaller.
+     */
+    fun getCornerComparator() = Comparator<AbsoluteCorner> { left, right ->
+        if (left == null && right == null) return@Comparator 0
+        if (left == null) return@Comparator -1
+        if (right == null) return@Comparator 1
+        val leftEq = getSmallestEquivalent(left)
+        val rightEq = getSmallestEquivalent(right)
+        if (left == right) 0
+        else if (leftEq == rightEq) left.tileIndex.value - right.tileIndex.value
+        else (leftEq.tileIndex.value - rightEq.tileIndex.value).let {
+            if (it != 0) it
+            else leftEq.cornerIndex.value - rightEq.cornerIndex.value
+        }
     }
 
     fun cloneList() = value.map { it }.toMutableList()
@@ -184,7 +295,7 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(val value: 
 @CordaSerializable
 data class HexTile(
         val resourceType: HexTileType,
-        val rollTrigger: RollTrigger,
+        val rollTrigger: RollTrigger?,
         val robberPresent: Boolean,
         val hexTileIndex: HexTileIndex,
         val sides: TileSides = TileSides()) {
@@ -229,7 +340,7 @@ data class HexTile(
             this.resourceType = resourceType
         }
 
-        fun with(rollTrigger: RollTrigger) = apply {
+        fun with(rollTrigger: RollTrigger?) = apply {
             require(this.rollTrigger.let { it == null || it == rollTrigger }) {
                 "You cannot replace an existing rollTrigger"
             }
@@ -259,7 +370,7 @@ data class HexTile(
 
         fun build() = HexTile(
                 resourceType!!,
-                rollTrigger!!,
+                rollTrigger,
                 robberPresent!!,
                 hexTileIndex,
                 sidesBuilder.build()
@@ -268,7 +379,7 @@ data class HexTile(
 }
 
 @CordaSerializable
-data class PlacedPorts(val value: List<Port>) {
+data class PlacedPorts @ConstructorForDeserialization constructor(val value: List<Port>) {
 
     init {
         require(value.size == PORT_COUNT) {
@@ -278,6 +389,12 @@ data class PlacedPorts(val value: List<Port>) {
 
     companion object {
         const val PORT_COUNT = 9
+    }
+
+    fun getPortAt(hexTile: HexTileIndex, tileCorner: TileCornerIndex) = value.single {
+        it.accessPoints.any { accessPoint ->
+            accessPoint.hexTileIndex == hexTile && accessPoint.hexTileCoordinate.contains(tileCorner)
+        }
     }
 
     fun toBuilder() = Builder(
@@ -328,7 +445,7 @@ data class PlacedPorts(val value: List<Port>) {
 }
 
 @CordaSerializable
-data class Port(val portTile: PortTile, val accessPoints: MutableList<AccessPoint>) {
+data class Port @ConstructorForDeserialization constructor(val portTile: PortTile, val accessPoints: List<AccessPoint>) {
 
     init {
         require(accessPoints.isNotEmpty()) { "accessPoints must not be empty" }
@@ -356,6 +473,11 @@ data class PortTile(val inputRequired: List<Amount<TokenType>>, val outputRequir
             "No outputRequired should have a 0 quantity"
         }
     }
+
+    fun getInputOf(token: TokenType) = inputRequired.single { it.token == token }
+    fun getInputOf(resourceType: ResourceType) = getInputOf(Resource(resourceType))
+    fun getOutputOf(token: TokenType) = outputRequired.single { it.token == token }
+    fun getOutputOf(resourceType: ResourceType) = getOutputOf(Resource(resourceType))
 }
 
 @CordaSerializable
@@ -374,7 +496,7 @@ data class AccessPoint @ConstructorForDeserialization constructor(
 
 @CordaSerializable
 data class TileSides @ConstructorForDeserialization constructor(
-        val value: MutableList<TileSide> = MutableList(HexTile.SIDE_COUNT) { TileSide() }) {
+        val value: List<TileSide> = List(HexTile.SIDE_COUNT) { TileSide() }) {
 
     init {
         require(value.size == HexTile.SIDE_COUNT) { "value.size cannot be ${value.size}" }
@@ -421,16 +543,13 @@ data class TileSides @ConstructorForDeserialization constructor(
     /**
      * The neighbor corners returned are ordered clockwise.
      */
-    fun getOverlappedCorners(cornerIndex: TileCornerIndex) =
-            cornerIndex.getNextOverlappedCorner().let {
-                listOf(it, it.getNextOverlappedCorner())
-            }.let { neighborCorners ->
-                cornerIndex.getAdjacentSides()
-                        .mapIndexed { index, it ->
-                            val neighbor = getNeighborOn(it)
-                            if (neighbor == null) null
-                            else AbsoluteCorner(neighbor, neighborCorners[index])
-                        }
+    fun getOverlappedCorners(cornerIndex: TileCornerIndex) = getNeighborsOn(cornerIndex)
+            .zip(cornerIndex.getOverlappedCorners())
+            .map { pair ->
+                pair.first.let {
+                    if (it == null) null
+                    else AbsoluteCorner(it, pair.second)
+                }
             }
 
     class Builder(
@@ -470,7 +589,26 @@ data class TileSides @ConstructorForDeserialization constructor(
 }
 
 @CordaSerializable
-data class AbsoluteCorner(val tileIndex: HexTileIndex, val cornerIndex: TileCornerIndex)
+data class AbsoluteSide(val tileIndex: HexTileIndex, val sideIndex: TileSideIndex) {
+
+    companion object {
+        fun create(tileIndex: HexTileIndex?, sideIndex: TileSideIndex) =
+                if (tileIndex == null) null
+                else AbsoluteSide(tileIndex, sideIndex)
+    }
+}
+
+@CordaSerializable
+data class AbsoluteCorner @ConstructorForDeserialization constructor(
+        val tileIndex: HexTileIndex,
+        val cornerIndex: TileCornerIndex) {
+
+    companion object {
+        fun create(tileIndex: HexTileIndex?, cornerIndex: TileCornerIndex) =
+                if (tileIndex == null) null
+                else AbsoluteCorner(tileIndex, cornerIndex)
+    }
+}
 
 @CordaSerializable
 data class HexTileIndex(val value: Int) {
@@ -540,6 +678,13 @@ data class TileCornerIndex(val value: Int) {
      * The corner applies to the adjacent tile clockwise.
      */
     fun getNextOverlappedCorner() = TileCornerIndex((value + 2) % HexTile.SIDE_COUNT)
+
+    /**
+     * The corners of the adjacent tiles clockwise.
+     */
+    fun getOverlappedCorners() = getNextOverlappedCorner().let {
+        listOf(it, it.getNextOverlappedCorner())
+    }
 }
 
 private class ImmutableList<T>(private val inner: List<T>) : List<T> by inner

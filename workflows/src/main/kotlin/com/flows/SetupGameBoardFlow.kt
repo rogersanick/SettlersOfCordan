@@ -131,23 +131,17 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
             it.key to 0
         }.toMap().toMutableMap()
 
+        val shuffledHexTypes = PlacedHexTiles.TILE_COUNT_PER_RESOURCE
+                .flatMap { entry -> List(entry.value) { entry.key } }
+                .shuffled()
+
         // Index adjustment variable to account for desert placement
         var desertSkippedIndexAdjustment = 0
-
-        val hexTypes = HexTileType.values()
-        fun getNextRandomHexType(): HexTileType {
-            var hexType = hexTypes[(Math.random() * hexTypes.size).toInt()]
-            while (PlacedHexTiles.TILE_COUNT_PER_RESOURCE[hexType]!! <= countedHexTypes[hexType]!!) {
-                hexType = hexTypes[(Math.random() * hexTypes.size).toInt()]
-            }
-            return hexType
-        }
 
         for (i in 0 until GameBoardState.TILE_COUNT) {
 
             // Get a random resource type which will be used.
-            val hexType = getNextRandomHexType()
-            countedHexTypes[hexType] = countedHexTypes[hexType]!! + 1
+            val hexType = shuffledHexTypes[i]
 
             // Get the port (if relevant) to add to the HexTile
 
@@ -157,10 +151,10 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
             hexTiles.add(i, HexTile.Builder(HexTileIndex(i))
                     .with(hexType)
                     .with(
-                            if (hexType == HexTileType.Desert) RollTrigger()
+                            if (hexType == HexTileType.Desert) null
                             else rollTriggerTilePlacementMapping
                                     .getOrElse(rollTriggerTilePlacementOrder[i - desertSkippedIndexAdjustment]) {
-                                        RollTrigger()
+                                        null
                                     })
                     .with(hexType == HexTileType.Desert))
 
@@ -223,9 +217,8 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         progressTracker.currentStep = FINALIZING_TRANSACTION
 
         val linearIDToBePrinted = newGameState.linearId
-        val players = newGameState.players
-        val playerNames = players.map { it.name.toString() }
-        val currPlayer = players[0]
+        val playerNames = randomizedPlayersList.map { it.name.toString() }
+        val currPlayer = randomizedPlayersList[0]
 
         // TODO: This messaging is not displaying
         System.out.println("\nYour unique game board identified is $linearIDToBePrinted")
@@ -238,7 +231,6 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         }
 
         return subFlow(FinalityFlow(stx, sessions))
-
     }
 }
 
@@ -262,7 +254,6 @@ class SetupGameBoardFlowResponder(val counterpartySession: FlowSession) : FlowLo
                 } else {
                     System.out.println("\nIt is $currPlayer's turn")
                 }
-
             }
         }
 

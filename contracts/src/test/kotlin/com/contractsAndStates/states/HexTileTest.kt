@@ -38,10 +38,28 @@ class HexTileTest {
     }
 
     @Test
+    fun `Builder rejects putting roleTrigger back to null`() {
+        val builder = makeBasicBuilder(HexTileIndex(1))
+        assertFailsWith<IllegalArgumentException> {
+            builder.with(null)
+        }
+    }
+
+    @Test
     fun `Builder accepts setting roleTrigger to the same`() {
         val builder = makeBasicBuilder(HexTileIndex(1))
                 .with(RollTrigger(3))
         assertEquals(RollTrigger(3), builder.rollTrigger)
+    }
+
+    @Test
+    fun `Builder accepts setting roleTrigger to null`() {
+        val builder = HexTile.Builder(HexTileIndex(1))
+                .with(HexTileType.Desert)
+                .with(null)
+                .with(true)
+
+        assertEquals(null, builder.rollTrigger)
     }
 
     @Test

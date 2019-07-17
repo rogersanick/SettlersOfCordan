@@ -98,4 +98,26 @@ class TileCornerIndexTest {
                 TileCornerIndex(2),
                 TileCornerIndex(0).getNextOverlappedCorner())
     }
+
+    @Test
+    fun `it gets the right overlapped corners`() {
+        assertEquals(
+                listOf(TileCornerIndex(3), TileCornerIndex(5)),
+                TileCornerIndex(1).getOverlappedCorners())
+        assertEquals(
+                listOf(TileCornerIndex(4), TileCornerIndex(0)),
+                TileCornerIndex(2).getOverlappedCorners())
+        assertEquals(
+                listOf(TileCornerIndex(5), TileCornerIndex(1)),
+                TileCornerIndex(3).getOverlappedCorners())
+        assertEquals(
+                listOf(TileCornerIndex(0), TileCornerIndex(2)),
+                TileCornerIndex(4).getOverlappedCorners())
+        assertEquals(
+                listOf(TileCornerIndex(1), TileCornerIndex(3)),
+                TileCornerIndex(5).getOverlappedCorners())
+        assertEquals(
+                listOf(TileCornerIndex(2), TileCornerIndex(4)),
+                TileCornerIndex(0).getOverlappedCorners())
+    }
 }

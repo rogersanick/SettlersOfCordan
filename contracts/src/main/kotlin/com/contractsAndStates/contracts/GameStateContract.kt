@@ -88,8 +88,8 @@ class GameStateContract : Contract {
                  */
 
                 // TODO: Verify that the input and output game board settlements are updating correctly.
-                val inputGameBoardSettlements = inputGameBoardState.single().settlementsPlaced.map { it.map { sub -> if(sub) 1 else 0 }.sum() }.sum()
-                val outputGameBoardSettlements = outputGameBoardState.single().settlementsPlaced.map { it.map { sub -> if(sub) 1 else 0 }.sum() }.sum()
+                val inputGameBoardSettlements = inputGameBoardState.single().settlementsPlaced.value.map { it.map { sub -> if(sub) 1 else 0 }.sum() }.sum()
+                val outputGameBoardSettlements = outputGameBoardState.single().settlementsPlaced.value.map { it.map { sub -> if(sub) 1 else 0 }.sum() }.sum()
                 "There should be exactly one more input settlements than output settlements" using (inputGameBoardSettlements < outputGameBoardSettlements && inputGameBoardSettlements + 3 >= outputGameBoardSettlements)
 
                 /**
