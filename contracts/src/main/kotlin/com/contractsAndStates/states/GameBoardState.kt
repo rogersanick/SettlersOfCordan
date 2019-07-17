@@ -159,6 +159,80 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(val value: 
         else HexTileIndex(it)
     }
 
+    fun getOpposite(absoluteSide: AbsoluteSide) = get(absoluteSide.tileIndex)
+            .sides
+            .getNeighborOn(absoluteSide.sideIndex)
+            .let { AbsoluteSide.create(it, absoluteSide.sideIndex.opposite()) }
+
+    /**
+     * When 1 or 2 AbsoluteSides are neighbors, the smaller equivalent is the one with the lower tileIndex.
+     */
+    fun getSmallerEquivalent(side: AbsoluteSide) = getOpposite(side).let { opposite ->
+        if (opposite == null || side.tileIndex.value <= opposite.tileIndex.value) side
+        else opposite
+    }
+
+    fun getSideHash(side: AbsoluteSide) = getSmallerEquivalent(side).let {
+        it.tileIndex.value * HexTile.SIDE_COUNT + it.sideIndex.value
+    }
+
+    /**
+     * When opposite sides, then the one with the lower tile index is smaller.
+     * When different sides, then, with the opposites, the one with the lower tile index is smaller,
+     * and if equal, the one with the smaller side index is smaller.
+     */
+    fun getSideComparator() = Comparator<AbsoluteSide> { left, right ->
+        if (left == null && right == null) return@Comparator 0
+        if (left == null) return@Comparator -1
+        if (right == null) return@Comparator 1
+        val leftEq = getSmallerEquivalent(left)
+        val rightEq = getSmallerEquivalent(right)
+        if (left == right) 0
+        else if (leftEq == rightEq) left.tileIndex.value - right.tileIndex.value
+        else (leftEq.tileIndex.value - rightEq.tileIndex.value).let {
+            if (it != 0) it
+            else leftEq.sideIndex.value - rightEq.sideIndex.value
+        }
+    }
+
+    fun getOverlappedCorners(absoluteCorner: AbsoluteCorner) = get(absoluteCorner.tileIndex)
+            .sides
+            .getNeighborsOn(absoluteCorner.cornerIndex)
+            .zip(absoluteCorner.cornerIndex.getOverlappedCorners())
+            .map { AbsoluteCorner.create(it.first, it.second) }
+
+    /**
+     * When 1, 2 or 3 AbsoluteCorners are neighbors, the smaller equivalent is the one with the lower tileIndex.
+     */
+    fun getSmallestEquivalent(corner: AbsoluteCorner) = getOverlappedCorners(corner)
+            .fold(corner) { choice, next ->
+                if (next == null || choice.tileIndex.value <= next.tileIndex.value) choice
+                else next
+            }
+
+    fun getCornerHash(corner: AbsoluteCorner) = getSmallestEquivalent(corner).let {
+        it.tileIndex.value * HexTile.SIDE_COUNT + it.cornerIndex.value
+    }
+
+    /**
+     * When overlapping corner, then they are ordered by their tile index.
+     * When different corners, then, they are ordered by the tile order of their smallest overlapping ones,
+     * and if equal, the one with the smaller side index is smaller.
+     */
+    fun getCornerComparator() = Comparator<AbsoluteCorner> { left, right ->
+        if (left == null && right == null) return@Comparator 0
+        if (left == null) return@Comparator -1
+        if (right == null) return@Comparator 1
+        val leftEq = getSmallestEquivalent(left)
+        val rightEq = getSmallestEquivalent(right)
+        if (left == right) 0
+        else if (leftEq == rightEq) left.tileIndex.value - right.tileIndex.value
+        else (leftEq.tileIndex.value - rightEq.tileIndex.value).let {
+            if (it != 0) it
+            else leftEq.cornerIndex.value - rightEq.cornerIndex.value
+        }
+    }
+
     fun cloneList() = value.map { it }.toMutableList()
     fun toBuilder() = Builder(this)
 
@@ -478,16 +552,13 @@ data class TileSides @ConstructorForDeserialization constructor(
     /**
      * The neighbor corners returned are ordered clockwise.
      */
-    fun getOverlappedCorners(cornerIndex: TileCornerIndex) =
-            cornerIndex.getNextOverlappedCorner().let {
-                listOf(it, it.getNextOverlappedCorner())
-            }.let { neighborCorners ->
-                cornerIndex.getAdjacentSides()
-                        .mapIndexed { index, it ->
-                            val neighbor = getNeighborOn(it)
-                            if (neighbor == null) null
-                            else AbsoluteCorner(neighbor, neighborCorners[index])
-                        }
+    fun getOverlappedCorners(cornerIndex: TileCornerIndex) = getNeighborsOn(cornerIndex)
+            .zip(cornerIndex.getOverlappedCorners())
+            .map { pair ->
+                pair.first.let {
+                    if (it == null) null
+                    else AbsoluteCorner(it, pair.second)
+                }
             }
 
     class Builder(
@@ -527,7 +598,26 @@ data class TileSides @ConstructorForDeserialization constructor(
 }
 
 @CordaSerializable
-data class AbsoluteCorner(val tileIndex: HexTileIndex, val cornerIndex: TileCornerIndex)
+data class AbsoluteSide(val tileIndex: HexTileIndex, val sideIndex: TileSideIndex) {
+
+    companion object {
+        fun create(tileIndex: HexTileIndex?, sideIndex: TileSideIndex) =
+                if (tileIndex == null) null
+                else AbsoluteSide(tileIndex, sideIndex)
+    }
+}
+
+@CordaSerializable
+data class AbsoluteCorner @ConstructorForDeserialization constructor(
+        val tileIndex: HexTileIndex,
+        val cornerIndex: TileCornerIndex) {
+
+    companion object {
+        fun create(tileIndex: HexTileIndex?, cornerIndex: TileCornerIndex) =
+                if (tileIndex == null) null
+                else AbsoluteCorner(tileIndex, cornerIndex)
+    }
+}
 
 @CordaSerializable
 data class HexTileIndex(val value: Int) {
