@@ -6,54 +6,39 @@ import net.corda.core.serialization.CordaSerializable
 import java.math.BigDecimal
 
 @CordaSerializable
-enum class ResourceType(val displayName: String) {
-    Wheat("Wh"),
-    Ore("Or"),
-    Sheep("Sh"),
-    Wood("Wd"),
-    Brick("Br")
-}
-
-// TODO find a way to make resourceYielded not nullable
-@CordaSerializable
-enum class HexTileType(val resourceYielded: ResourceType?) {
-    Field(ResourceType.Wheat),
-    Mountain(ResourceType.Ore),
-    Pasture(ResourceType.Sheep),
-    Forest(ResourceType.Wood),
-    Hill(ResourceType.Brick),
+enum class HexTileType(val resourceYielded: TokenType?) {
+    Field(Wheat),
+    Mountain(Ore),
+    Pasture(Sheep),
+    Forest(Wood),
+    Hill(Brick),
     Desert(null)
 }
 
-// Brick.
-val Brick = Resource.getInstance(ResourceType.Brick)
-
-// Ore.
-val Ore = Resource.getInstance(ResourceType.Ore)
-
-// Sheep.
-val Sheep = Resource.getInstance(ResourceType.Sheep)
-
-// Wheat.
-val Wheat = Resource.getInstance(ResourceType.Wheat)
-
-// Wood.
-val Wood = Resource.getInstance(ResourceType.Wood)
-
-val ALL_RESOURCES = ResourceType.values().map { Resource(it) }
+val Brick = Resource.getInstance("BRICK")
+val Ore = Resource.getInstance("ORE")
+val Sheep = Resource.getInstance("SHEEP")
+val Wheat = Resource.getInstance("WHEAT")
+val Wood = Resource.getInstance("WOOD")
+val allResourceTypes = listOf("BRICK", "ORE", "SHEEP", "WHEAT", "WOOD")
+val allResources = allResourceTypes.map { Resource.getInstance(it) }
 
 fun Iterable<TokenType>.mapOf(amount: Int) = map { amount of it }
 
 // Underlying Resource Property
 @CordaSerializable
-data class Resource(val type: ResourceType) : TokenType(type.displayName, FRACTION_DIGITS) {
+data class Resource(val type: String) : TokenType(type, FRACTION_DIGITS) {
     override val tokenClass: Class<*> get() = javaClass
     override val displayTokenSize: BigDecimal get() = BigDecimal.ONE.scaleByPowerOfTen(-FRACTION_DIGITS)
-    override fun toString(): String = type.name
+    override fun toString(): String = type
+
+    init {
+        require(allResourceTypes.contains(type)) { "$type is not a valid type" }
+    }
 
     companion object {
         const val FRACTION_DIGITS = 0
-        fun getInstance(resourceType: ResourceType) = Resource(resourceType) as TokenType
+        internal fun getInstance(resourceType: String) = Resource(resourceType) as TokenType
     }
 
     override fun equals(other: Any?): Boolean {

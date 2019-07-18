@@ -86,7 +86,7 @@ class TradeWithPortFlowTest {
         var gameBoardState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
         while (
         // TODO make sure the it.key.resourceYielded is not null
-                gameBoardState.hexTiles.get(HexTileIndex(0)).resourceType == HexTileType.Desert || !gameBoardState.ports.value[0].portTile.inputRequired.contains(Amount(2, Resource.getInstance(gameBoardState.hexTiles.get(HexTileIndex(0)).resourceType.resourceYielded!!)))
+                gameBoardState.hexTiles.get(HexTileIndex(0)).resourceType == HexTileType.Desert || !gameBoardState.ports.value[0].portTile.inputRequired.contains(Amount(2, gameBoardState.hexTiles.get(HexTileIndex(0)).resourceType.resourceYielded!!))
         ) {
             gameBoardState = getStxWithGameState().coreTransaction.outputsOfType<GameBoardState>().single()
         }
@@ -115,8 +115,8 @@ class TradeWithPortFlowTest {
                         gameBoardState.linearId,
                         0,
                         5,
-                        inputResource.type,
-                        outputResource.type
+                        inputResource,
+                        outputResource
                 )
         )
         network.runNetwork()
