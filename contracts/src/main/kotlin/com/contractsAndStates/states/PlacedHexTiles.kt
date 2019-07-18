@@ -68,6 +68,10 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(val value: 
             .getNeighborOn(absoluteSide.sideIndex)
             .let { AbsoluteSide.create(it, absoluteSide.sideIndex.opposite()) }
 
+    fun getAdjacentCorners(absoluteSide: AbsoluteSide) = absoluteSide.sideIndex
+            .getAdjacentCorners()
+            .map { AbsoluteCorner(absoluteSide.tileIndex, it) }
+
     /**
      * When 1 or 2 AbsoluteSides are neighbors, the smaller equivalent is the one with the lower tileIndex.
      */
@@ -104,6 +108,10 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(val value: 
             .getNeighborsOn(absoluteCorner.cornerIndex)
             .zip(absoluteCorner.cornerIndex.getOverlappedCorners())
             .map { AbsoluteCorner.create(it.first, it.second) }
+
+    fun getAdjacentSides(absoluteCorner: AbsoluteCorner) = absoluteCorner.cornerIndex
+            .getAdjacentSides()
+            .map { AbsoluteSide(absoluteCorner.tileIndex, it) }
 
     /**
      * When 1, 2 or 3 AbsoluteCorners are neighbors, the smaller equivalent is the one with the lower tileIndex.

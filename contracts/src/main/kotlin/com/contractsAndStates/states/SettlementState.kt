@@ -24,6 +24,7 @@ data class SettlementState(
         val resourceAmountClaim: Int = 1,
         val upgradedToCity: Boolean = false
 ): ContractState {
+    fun getAbsoluteCorner() = AbsoluteCorner(hexTileIndex, hexTileCoordinate)
     fun upgradeToCity() = copy(resourceAmountClaim = 2, upgradedToCity = true)
     override val participants: List<AbstractParty> get() = players
 }

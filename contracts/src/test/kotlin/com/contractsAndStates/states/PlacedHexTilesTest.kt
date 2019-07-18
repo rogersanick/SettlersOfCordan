@@ -463,6 +463,18 @@ class PlacedHexTilesTest {
     }
 
     @Test
+    fun `getAdjacentCorners is correct`() {
+        val placed = buildWithBuilder()
+
+        assertEquals(
+                listOf((0 to 3).toAbsoluteCorner(), (0 to 4).toAbsoluteCorner()),
+                placed.getAdjacentCorners((0 to 3).toAbsoluteSide()))
+        assertEquals(
+                listOf((5 to 5).toAbsoluteCorner(), (5 to 0).toAbsoluteCorner()),
+                placed.getAdjacentCorners((5 to 5).toAbsoluteSide()))
+    }
+
+    @Test
     fun `getSmallerEquivalent side is correct`() {
         val placed = buildWithBuilder()
 
@@ -524,6 +536,18 @@ class PlacedHexTilesTest {
         assertEquals(
                 listOf((15 to 3).toAbsoluteCorner(), null),
                 placed.getOverlappedCorners((18 to 1).toAbsoluteCorner()))
+    }
+
+    @Test
+    fun `getAdjacentSides is correct`() {
+        val placed = buildWithBuilder()
+
+        assertEquals(
+                listOf((0 to 5).toAbsoluteSide(), (0 to 0).toAbsoluteSide()),
+                placed.getAdjacentSides((0 to 0).toAbsoluteCorner()))
+        assertEquals(
+                listOf((5 to 3).toAbsoluteSide(), (5 to 4).toAbsoluteSide()),
+                placed.getAdjacentSides((5 to 4).toAbsoluteCorner()))
     }
 
     @Test

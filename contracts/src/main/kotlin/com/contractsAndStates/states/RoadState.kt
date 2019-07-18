@@ -30,6 +30,8 @@ data class RoadState(
 ) : LinearState {
     override val participants: List<AbstractParty> = players
 
+    fun getAbsoluteSide() = AbsoluteSide(hexTileIndex, hexTileSide)
+
     /**
      * In Settlers of Catan, players earn additional victory points for maintaining the longest
      * road - so long as that continuous road is comprised of 5 or more adjacent roads. The methods
