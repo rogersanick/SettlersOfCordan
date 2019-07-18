@@ -95,6 +95,14 @@ class RoadStateTest {
         buildBoard()
         assertEquals(8, longestRoad(board, roads))
     }
+
+    @Test
+    fun `longest road of 13 with 2 loops`() {
+        buildRoads(p1.party, listOf(0 to 0, 0 to 1, 0 to 2, 0 to 3, 0 to 4, 0 to 5, 1 to 3, 1 to 2,
+                                    5 to 0, 5 to 1, 5 to 2, 5 to 3, 5 to 4))
+        buildBoard()
+        assertEquals(13, longestRoad(board, roads))
+    }
 }
 
 fun longestRoad(board: PlacedHexTiles, roads: List<RoadState>): Int {
@@ -107,9 +115,10 @@ fun longestRoad(board: PlacedHexTiles, roads: List<RoadState>): Int {
 
         if (candidate.count() > longestRoad.count()) {
             longestRoad = candidate
-            neverVisitedRoads = neverVisitedRoads - candidate
         }
-    }
+
+        neverVisitedRoads = neverVisitedRoads - candidate
+   }
 
     return longestRoad.count()
 }
