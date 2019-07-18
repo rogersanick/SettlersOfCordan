@@ -3,22 +3,21 @@ package com.contractsAndStates.contracts
 import com.contractsAndStates.states.*
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.r3.corda.lib.tokens.contracts.types.TokenType
-import com.r3.corda.lib.tokens.contracts.utilities.amount
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
+import com.r3.corda.lib.tokens.contracts.utilities.of
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
 import net.corda.core.contracts.requireSingleCommand
 import net.corda.core.contracts.requireThat
 import net.corda.core.internal.sumByLong
+import net.corda.core.internal.toMultiMap
 import net.corda.core.transactions.LedgerTransaction
 import java.security.PublicKey
-import java.util.*
 
 // ************************
 // * Build Phase Contract *
 // ************************
-
 class BuildPhaseContract : Contract {
     companion object {
         const val ID = "com.contractsAndStates.contracts.BuildPhaseContract"
@@ -28,122 +27,114 @@ class BuildPhaseContract : Contract {
 
         // Get access to all of the pieces of the transaction that will be used to verify the contract.
         val command = tx.commands.requireSingleCommand<Commands>()
-        val inputGameBoardState = tx.inputsOfType<GameBoardState>().single()
-        val outputGameBoardState = tx.outputsOfType<GameBoardState>().single()
-        val newRoads = tx.outputsOfType<RoadState>()
+        val inputBoards = tx.inputsOfType<GameBoardState>()
+        val outputBoards = tx.outputsOfType<GameBoardState>()
+        val inputSettlements = tx.inputsOfType<SettlementState>()
+        val outputSettlements = tx.outputsOfType<SettlementState>()
+        val outputRoads = tx.outputsOfType<RoadState>()
+        val inputResources = tx.inputsOfType<FungibleToken>()
         val outputResources = tx.outputsOfType<FungibleToken>()
+
+        /**
+         *  ******** SHAPE ********
+         */
+        requireThat {
+            "There should only be one input of type GameBoardState." using (inputBoards.size == 1)
+            "There should be one output state of type GameBoardState" using (outputBoards.size == 1)
+        }
+
+        val inputBoard = inputBoards.single()
+        val outputBoard = outputBoards.single()
 
         when (command.value) {
 
             is Commands.BuildInitialSettlementAndRoad -> requireThat {
 
+                val turnTrackers = tx.referenceInputsOfType<TurnTrackerState>()
+
                 /**
                  *  ******** SHAPE ********
-                 *  Check for appropriate 'Shape'. This includes ensuring the appropriate number and type of inputs and outputs.
-                 *  In this case the proposing party should include only one input state - the game board itself - and between two
-                 *  and five output states, depending on the round of setup we are in.
+                 *  Check for appropriate 'Shape'. This includes ensuring the appropriate number and type of inputs
+                 *  and outputs. In this case the proposing party should include only one input state - the game board
+                 *  itself - and between two and five output states, depending on the round of setup we are in.
                  */
-
-                "There should only be one input of type GameBoardState." using (tx.inputStates.size == 1 && tx.inputStates.single() is GameBoardState)
-                "There should be one output state of type GameBoardState" using (tx.outputsOfType<GameBoardState>().size == 1)
-                "There should be one output state of type SettlementState" using ((tx.outputsOfType<SettlementState>().size == 1))
-                "There should be one output state of type RoadState" using ((tx.outputsOfType<RoadState>().size == 1))
+                "There should be one output state of type SettlementState" using (outputSettlements.size == 1)
+                "There should be one output state of type RoadState" using (outputRoads.size == 1)
+                "There should be no resource input states" using (inputResources.isEmpty())
+                "There should be one ref input state of type TurnTrackerState" using (turnTrackers.size == 1)
 
                 /**
                  *  ******** BUSINESS LOGIC ********
-                 *  Check that the counter party is proposing a move that is allowed by the rules of the game.
+                 *  Check that the party is proposing a move that is allowed by the rules of the game.
                  */
-
-                val newSettlement = tx.outputsOfType<SettlementState>().single()
-                val hexTileCoordinate = newSettlement.hexTileCoordinate
-                val hexTileIndex = newSettlement.hexTileIndex
-                val turnTracker = tx.referenceInputsOfType<TurnTrackerState>().single()
+                val newSettlement = outputSettlements.single()
+                val onCorner = newSettlement.getAbsoluteCorner()
+                val newRoad = outputRoads.single()
+                val onSide = newRoad.getAbsoluteSide()
+                val turnTracker = turnTrackers.single()
+                val currentPlayer = inputBoard.players[turnTracker.currTurnIndex]
 
                 /**
-                 * Check Settlements - In order to determine whether or not a settlement has been previously placed in a given location,
-                 * we first have to determine which hexTiles lay adjacent to the one in question.
+                 * Check Settlements - no previous settlement should be on the place, on the neighboring corners,
+                 * and for the overlapping ones.
                  */
-
-                // Here we Initialize storage for a relevant list of relevant HexTiles.
-                val relevantHexTileNeighbours: ArrayList<HexTile?> = arrayListOf()
-
-                // Add neighbouring hexTiles to the storage array if they exist.
-                inputGameBoardState.hexTiles.get(hexTileIndex).sides.getNeighborsOn(hexTileCoordinate.getAdjacentSides())
-                        .forEach {
-                            if (it != null) relevantHexTileNeighbours.add(inputGameBoardState.hexTiles.get(it))
+                val itAndNeighboringCorners = inputBoard.hexTiles
+                        .getItAndNeighboringCorners(onCorner)
+                "A settlement must not have previously been built in this vicinity." using
+                        itAndNeighboringCorners.none { inputBoard.settlementsPlaced.hasOn(it) }
+                "A settlement cannot be built on a hexTile that is of type Desert" using
+                        itAndNeighboringCorners.none {
+                            inputBoard.hexTiles.get(it.tileIndex).resourceType == HexTileType.Desert
                         }
-
-                // Get the index of the neighbouringHexTile
-                val indexOfRelevantHexTileNeighbours = relevantHexTileNeighbours.map { inputGameBoardState.hexTiles.indexOf(it) }
-
-                "A settlement must not have previously been built in this location." using (!inputGameBoardState.settlementsPlaced.value[newSettlement.hexTileIndex.value][hexTileCoordinate.value])
-                "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced.value[newSettlement.hexTileIndex.value][hexTileCoordinate.previous().value])
-                "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced.value[newSettlement.hexTileIndex.value][hexTileCoordinate.next().value])
-                // TODO: Check for the third potential neighbour of any given settlement.
-
-                // Settlements cannot be build on HexTile that have a terrain type of 'Desert'.
-                "A settlement cannot be built on a hexTile that is of type Desert" using (inputGameBoardState.hexTiles.get(hexTileIndex).resourceType != HexTileType.Desert)
 
                 /**
                  * Check Issued Resources - If we are in the first round of setup, the player should not be issuing themselves any resources.
                  * If we are in the second round of setup, the player should be issuing themselves between 1 and 3 resources.
                  */
-
                 if (turnTracker.setUpRound1Complete) {
-                    // Initialize storage for a list of resources that should be issued in this transaction.
-                    val resourcesThatShouldBeIssuedPreConsolidation = arrayListOf<Pair<HexTileType, Long>>()
-                    resourcesThatShouldBeIssuedPreConsolidation.add(Pair(inputGameBoardState.hexTiles.get(hexTileIndex).resourceType, newSettlement.resourceAmountClaim.toLong()))
-                    indexOfRelevantHexTileNeighbours.forEach {
-                        if (it != null && inputGameBoardState.hexTiles.get(it).resourceType != HexTileType.Desert) {
-                            resourcesThatShouldBeIssuedPreConsolidation.add(Pair(inputGameBoardState.hexTiles.get(it).resourceType, newSettlement.resourceAmountClaim.toLong()))
-                        }
+                    // The list of resources that should be issued in this transaction.
+                    val consolidatedResources = inputBoard.hexTiles
+                            .getOverlappedCorners(onCorner)
+                            .filterNotNull()
+                            .plus(onCorner)
+                            .mapNotNull { corner ->
+                                inputBoard.hexTiles.get(corner.tileIndex).resourceType.let { tileType ->
+                                    if (tileType != HexTileType.Desert) {
+                                        Pair(
+                                                tileType.resourceYielded!!,
+                                                newSettlement.resourceAmountClaim.toLong())
+                                    } else null
+                                }
+                            }
+                            .toMultiMap()
+                            .mapValues { it.value.sum() }
+
+                    val tokenAmountsToBeIssued = consolidatedResources.map {
+                        it.value of it.key issuedBy currentPlayer heldBy currentPlayer
                     }
 
-                    val consolidatedListOfResourceThatShouldBeIssued = mutableMapOf<HexTileType, Long>()
-                    resourcesThatShouldBeIssuedPreConsolidation.forEach {
-                        if (consolidatedListOfResourceThatShouldBeIssued.containsKey(it.first)) consolidatedListOfResourceThatShouldBeIssued[it.first] = consolidatedListOfResourceThatShouldBeIssued[it.first]!!.plus(it.second)
-                        else consolidatedListOfResourceThatShouldBeIssued[it.first] = it.second
-                    }
-
-                    val fungibleTokenAmountsOfResourcesThatShouldBeIssued = consolidatedListOfResourceThatShouldBeIssued.map {
-                        // TODO make sure the it.key.resourceYielded is not null
-                        amount(it.value, it.key.resourceYielded!!) issuedBy inputGameBoardState.players[turnTracker.currTurnIndex] heldBy inputGameBoardState.players[turnTracker.currTurnIndex]
-                    }
-
-                    "The player should be issuing themselves resources of the appropriate amount and type" using (outputResources.containsAll(fungibleTokenAmountsOfResourcesThatShouldBeIssued))
-                    "The player should not be issuing themselves any additional, undeserved resources" using (outputResources.size == fungibleTokenAmountsOfResourcesThatShouldBeIssued.size)
+                    "The player should be issuing itself resources of the appropriate amount and type" using
+                            (outputResources.containsAll(tokenAmountsToBeIssued))
+                    "The player should not be issuing itself any additional, undeserved resources" using
+                            (outputResources.size == tokenAmountsToBeIssued.size)
                 } else {
-                    "The player should not be issuing them self any resources as this is the first round of placement" using (outputResources.isEmpty())
+                    "The player should not be issuing itself any resources in first round of placement" using
+                            outputResources.isEmpty()
                 }
 
-
-                /**
-                 * Check Roads - We need to check to ensure that the proposed road is not being built on top of an existing road.
-                 * We also need to ensure that the proposed road is being connected to the settlement being built.
-                 */
-
-                val hexTileAdjacentSides = newSettlement.hexTileCoordinate.getAdjacentSides()
-                val hexTileOfNewSettlement = outputGameBoardState.hexTiles.get(newSettlement.hexTileIndex)
-                val indexOfHexTileToCheck1 = hexTileOfNewSettlement.sides.getNeighborOn(hexTileAdjacentSides.get(0))
-                val indexOfHexTileToCheck2 = hexTileOfNewSettlement.sides.getNeighborOn(hexTileAdjacentSides.get(1))
-
-                var checkForThirdPotentialConflictingRoad = true
-
-                if (indexOfHexTileToCheck1 != null && indexOfHexTileToCheck2 != null) {
-                    val hexTileToCheck1 = inputGameBoardState.hexTiles.get(indexOfHexTileToCheck1)
-                    val hexTileToCheck2 = inputGameBoardState.hexTiles.get(indexOfHexTileToCheck2)
-                    checkForThirdPotentialConflictingRoad = hexTileToCheck1.sides.getRoadIdOn(hexTileToCheck1.sides
-                            .indexOf(hexTileToCheck2.hexTileIndex)!!) == newRoads.single().linearId
-                }
-
-                "The new road should be adjacent to the proposed settlement" using (
-                        newSettlement.hexTileCoordinate.getAdjacentSides().any {
-                            newRoads.single().linearId == hexTileOfNewSettlement.sides.getRoadIdOn(it)
+                "A road must not have previously been built in this location." using
+                        inputBoard.hexTiles.getItAndOppositeSides(onSide).none {
+                            inputBoard.hexTiles.hasRoadIdOn(it)
                         }
-                                || checkForThirdPotentialConflictingRoad)
-                "A road must not have previously been built in this location." using (newRoads.all {
-                    !inputGameBoardState.hexTiles.get(it.hexTileIndex).sides.hasRoadIdOn(it.hexTileSide)
-                })
+
+                outputBoard.hexTiles.getItAndOppositeSides(onSide).also { sides ->
+                    "The new road must have been built in this location." using sides.all {
+                        outputBoard.hexTiles.hasRoadIdOn(it)
+                    }
+                    "The new road should be adjacent to the proposed settlement" using sides.all { side ->
+                        side.getAdjacentCorners().any { it == onCorner }
+                    }
+                }
 
                 /**
                  *  ******** Check Signatures ********
@@ -151,11 +142,10 @@ class BuildPhaseContract : Contract {
                  *  Given that we are attempting to maintain a shared fact (that state of the game board) amongst mutually distrusting
                  *  parties, we will often check that all players have signed and verified a transaction.
                  */
-
-                val signingParties = tx.commandsOfType<Commands.BuildInitialSettlementAndRoad>().single().signers.toSet()
-                val participants = outputGameBoardState.participants.map { it.owningKey }
-                "All players must verify and sign the transaction to build an initial settlement and road." using (signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
-
+                val signingParties = command.signers.toSet()
+                val participants = outputBoard.participants.map { it.owningKey }
+                "All players must verify and sign the transaction to build an initial settlement and road." using
+                        (signingParties.containsAll(participants) && signingParties.size == 4)
             }
 
             is Commands.BuildSettlement -> requireThat {
@@ -163,40 +153,36 @@ class BuildPhaseContract : Contract {
                 /**
                  *  ******** SHAPE ********
                  */
-
-                "There should be five input states, 4 resources and 1 gameboard state" using (tx.inputs.size == 5)
-                "There should be one output state of type GameBoardState" using (tx.outputsOfType<GameBoardState>().size == 1)
-                "There should be one output state of type SettlementState" using ((tx.outputsOfType<SettlementState>().size == 1))
+                "There must be no input settlements" using (inputSettlements.isEmpty())
+                "There should be one output state of type SettlementState" using (outputSettlements.size == 1)
+                "There should be 4 resource input states" using (inputResources.size == 4)
 
                 /**
                  *  ******** BUSINESS LOGIC ********
                  *  Check that the counter party is proposing a move that is allowed by the rules of the game.
                  */
+                val newSettlement = outputSettlements.single()
+                val onCorner = newSettlement.getAbsoluteCorner()
 
-                val newSettlement = tx.outputsOfType<SettlementState>().single()
-                val hexTileCoordinate = newSettlement.hexTileCoordinate
-                val hexTileIndex = newSettlement.hexTileIndex
+                val itAndNeighboringCorners = inputBoard.hexTiles
+                        .getItAndNeighboringCorners(onCorner)
+                "A settlement must not have previously been built in this vicinity." using
+                        itAndNeighboringCorners.none { inputBoard.settlementsPlaced.hasOn(it) }
+                "A settlement cannot be built on a hexTile that is of type Desert" using
+                        itAndNeighboringCorners.none {
+                            inputBoard.hexTiles.get(it.tileIndex).resourceType == HexTileType.Desert
+                        }
 
-                "A settlement cannot be built on a hexTile that is of type Desert" using (inputGameBoardState.hexTiles.get(hexTileIndex).resourceType == HexTileType.Desert)
-
-                verifyPaymentIsEnough(getBuildableCosts(Buildable.Settlement), outputResources)
-
-                "A settlement must not have previously been built in this location." using (!inputGameBoardState.settlementsPlaced.value[newSettlement.hexTileIndex.value][hexTileCoordinate.value])
-                "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced.value[newSettlement.hexTileIndex.value][hexTileCoordinate.previous().value])
-                "A settlement must not have previously been built beside this location." using (!inputGameBoardState.settlementsPlaced.value[newSettlement.hexTileIndex.value][hexTileCoordinate.next().value])
-
-                "There must be no input settlements" using (tx.inputsOfType<SettlementState>().size == 1)
-                "The player must be attempting to build a single settlement" using (tx.outputsOfType<SettlementState>().size == 1)
+                verifyPaymentIsEnough(getBuildableCosts(Buildable.Settlement), outputResources, "settlement")
 
                 /**
                  *  ******** SIGNATURES ********
                  *  Check that the necessary parties have signed the transaction.
                  */
-
-                val signingParties = tx.commandsOfType<Commands.BuildSettlement>().single().signers.toSet()
-                val participants = outputGameBoardState.participants.map { it.owningKey }
-                "All players must verify and sign the transaction to build a settlement." using (signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
-
+                val signingParties = command.signers.toSet()
+                val participants = outputBoard.participants.map { it.owningKey }
+                "All players must verify and sign the transaction to build a settlement." using
+                        (signingParties.containsAll(participants) && signingParties.size == 4)
             }
 
             is Commands.BuildRoad -> requireThat {
@@ -204,30 +190,39 @@ class BuildPhaseContract : Contract {
                 /**
                  *  ******** SHAPE ********
                  */
-
-                "There should be three input states, 2 resources and 1 gameboard state" using (tx.inputs.size == 3)
-                "There should be two output states, 1 road and 1 gameboard state" using (tx.outputs.size == 2)
+                "There should be 1 road state" using (outputRoads.size == 1)
+                "There should be 2 resource input states" using (inputResources.size == 2)
 
                 /**
                  *  ******** BUSINESS LOGIC ********
                  *  Check that the counter party is proposing a move that is allowed by the rules of the game.
                  */
+                val newRoad = outputRoads.single()
+                val onSide = newRoad.getAbsoluteSide()
 
-                verifyPaymentIsEnough(getBuildableCosts(Buildable.Road), outputResources)
+                verifyPaymentIsEnough(getBuildableCosts(Buildable.Road), outputResources, "road")
 
-                "A road must not have previously been built in this location." using (newRoads.all {
-                    !inputGameBoardState.hexTiles.get(it.hexTileIndex).sides.hasRoadIdOn(it.hexTileSide)
-                })
+                "A road must not have previously been built in this location." using
+                        inputBoard.hexTiles.getItAndOppositeSides(onSide).none {
+                            inputBoard.hexTiles.hasRoadIdOn(it)
+                        }
+                outputBoard.hexTiles.getItAndOppositeSides(onSide).also { sides ->
+                    "The new road must have been built in this location." using sides.all {
+                        outputBoard.hexTiles.hasRoadIdOn(it)
+                    }
+//                    TODO "The new road should be adjacent to a settlement" using sides.all { side ->
+//                        side.getAdjacentCorners().any { it == onCorner }
+//                    }
+                }
 
                 /**
                  *  ******** SIGNATURES ********
                  *  Check that the necessary parties have signed the transaction.
                  */
-
-                val signingParties = tx.commandsOfType<Commands.BuildRoad>().single().signers.toSet()
-                val participants = outputGameBoardState.participants.map { it.owningKey }
-                "All players must verify and sign the transaction to build a settlement." using (signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
-
+                val signingParties = command.signers.toSet()
+                val participants = outputBoard.participants.map { it.owningKey }
+                "All players must verify and sign the transaction to build a settlement." using
+                        (signingParties.containsAll(participants) && signingParties.size == 4)
             }
 
             is Commands.BuildCity -> requireThat {
@@ -235,60 +230,68 @@ class BuildPhaseContract : Contract {
                 /**
                  *  ******** SHAPE ********
                  */
-
-                "There should be six input states, 5 resources and 1 gameboard state" using (tx.inputs.size == 6)
-                "There should be one output state of type GameBoardState" using (tx.outputsOfType<GameBoardState>().size == 1)
-                "There should be one output state of type SettlementState" using ((tx.outputsOfType<SettlementState>().size == 1))
-                "There must be no input settlements" using (tx.inputsOfType<SettlementState>().size == 1)
-                "The player must be attempting to build a single city" using (tx.outputsOfType<SettlementState>().size == 1)
+                "There should be 1 input state of type SettlementState" using (inputSettlements.size == 1)
+                "There should be 1 output state of type SettlementState" using ((outputSettlements.size == 1))
+                "There should be 6 resource input states" using (inputResources.size == 6)
 
                 /**
                  *  ******** BUSINESS LOGIC ********
                  *  Check that the counter party is proposing a move that is allowed by the rules of the game.
                  */
+                val inputSettlement = inputSettlements.single()
+                val newCity = outputSettlements.single()
 
-                val newCity = tx.outputsOfType<SettlementState>().single()
-                val inputSettlement = tx.inputsOfType<SettlementState>().single()
-                val hexTileIndex = newCity.hexTileIndex
+                "A city cannot be built on a hexTile that is of type Desert" using
+                        (inputBoard.hexTiles.get(newCity.hexTileIndex).resourceType == HexTileType.Desert)
 
-                "A city cannot be built on a hexTile that is of type Desert" using (inputGameBoardState.hexTiles.get(hexTileIndex).resourceType == HexTileType.Desert)
+                verifyPaymentIsEnough(getBuildableCosts(Buildable.City), outputResources, "city")
 
-                verifyPaymentIsEnough(getBuildableCosts(Buildable.City), outputResources)
-
-                "The city must be built in the same location as the settlement being upgraded." using (inputSettlement.hexTileIndex == newCity.hexTileIndex && inputSettlement.hexTileCoordinate == newCity.hexTileCoordinate)
+                "The city must be built in the same location as the settlement being upgraded." using
+                        (inputSettlement.getAbsoluteCorner() == newCity.getAbsoluteCorner())
 
                 /**
                  *  ******** SIGNATURES ********
                  *  Check that the necessary parties have signed the transaction.
                  */
-
-                val signingParties = tx.commandsOfType<Commands.BuildCity>().single().signers.toSet()
-                val participants = outputGameBoardState.participants.map { it.owningKey }
-                "All players must verify and sign the transaction to build a settlement." using (signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
+                val signingParties = command.signers.toSet()
+                val participants = outputBoard.participants.map { it.owningKey }
+                "All players must verify and sign the transaction to build a settlement." using
+                        (signingParties.containsAll(participants) && signingParties.size == 4)
             }
         }
     }
 
-    fun verifyPaymentIsEnough(buildableCosts: Map<TokenType, Long>, outputResources: List<FungibleToken>) =
+    fun PlacedHexTiles.getItAndNeighboringCorners(onCorner: AbsoluteCorner) =
+            listOf(onCorner.previous(), onCorner, onCorner.next())
+                    .flatMap { getOverlappedCorners(it).plus(it) }
+                    .filterNotNull()
+
+    fun PlacedHexTiles.getItAndOppositeSides(onSide: AbsoluteSide) =
+            listOfNotNull(onSide, getOpposite(onSide))
+
+    fun verifyPaymentIsEnough(buildableCosts: Map<TokenType, Long>, outputResources: List<FungibleToken>, what: String) =
             verifyPaymentIsEnough(
                     buildableCosts,
-                    outputResources.extractTokenAmounts(buildableCosts.keys))
+                    outputResources.extractTokenAmounts(buildableCosts.keys),
+                    what)
 
-    fun verifyPaymentIsEnough(required: Map<TokenType, Long>, payment: Map<TokenType, Long>) = requireThat {
-        required.forEach { entry ->
-            "The player must provide at least ${entry.value} of ${entry.key} to ${required::class.simpleName}" using
-                    payment[entry.key].let { paid ->
-                        paid != null && entry.value <= paid
-                    }
-        }
-    }
+    fun verifyPaymentIsEnough(required: Map<TokenType, Long>, payment: Map<TokenType, Long>, what: String) =
+            requireThat {
+                required.forEach { entry ->
+                    "The player must provide at least ${entry.value} of ${entry.key} to purchase $what" using
+                            payment[entry.key].let { paid ->
+                                paid != null && entry.value <= paid
+                            }
+                }
+            }
 
     fun List<FungibleToken>.extractTokenAmounts(types: Iterable<TokenType>) = types
             .map { type ->
                 type to filter { it.amount.token.tokenType == type }
                         .sumByLong { it.amount.quantity }
             }
-            .toMap()
+            .toMultiMap()
+            .mapValues { it.value.sum() }
 
     interface Commands : CommandData {
         class BuildInitialSettlementAndRoad : Commands
@@ -296,5 +299,4 @@ class BuildPhaseContract : Contract {
         class BuildCity : Commands
         class BuildRoad : Commands
     }
-
 }
