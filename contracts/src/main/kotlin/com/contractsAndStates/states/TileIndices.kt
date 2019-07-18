@@ -12,6 +12,20 @@ data class AbsoluteSide(val tileIndex: HexTileIndex, val sideIndex: TileSideInde
                 if (tileIndex == null) null
                 else AbsoluteSide(tileIndex, sideIndex)
     }
+
+    /**
+     * Goes counter-clockwise.
+     */
+    fun previous() = copy(sideIndex = sideIndex.previous())
+
+    /**
+     * Goes clockwise.
+     */
+    fun next() = copy(sideIndex = sideIndex.next())
+
+    fun getAdjacentCorners() = sideIndex
+            .getAdjacentCorners()
+            .map { AbsoluteCorner(tileIndex, it) }
 }
 
 @CordaSerializable
@@ -24,6 +38,21 @@ data class AbsoluteCorner @ConstructorForDeserialization constructor(
                 if (tileIndex == null) null
                 else AbsoluteCorner(tileIndex, cornerIndex)
     }
+
+    /**
+     * Goes counter-clockwise.
+     */
+    fun previous() = copy(cornerIndex = cornerIndex.previous())
+
+    /**
+     * Goes clockwise.
+     */
+    fun next() = copy(cornerIndex = cornerIndex.next())
+
+    fun getAdjacentSides() = cornerIndex
+            .getAdjacentSides()
+            .map { AbsoluteSide(tileIndex, it) }
+
 }
 
 @CordaSerializable
