@@ -98,16 +98,34 @@ class RoadStateTest {
 }
 
 fun longestRoad(board: PlacedHexTiles, roads: List<RoadState>): Int {
-    val first = roads.first()
+    var neverVisitedRoads = roads.map { it.linearId }.toSet()
 
-    val absCorners = first.hexTileSide.getAdjacentCorners().map { AbsoluteCorner(first.hexTileIndex, it) }
-    val absSide = AbsoluteSide(first.hexTileIndex, first.hexTileSide)
+    var longestRoad = listOf<UniqueIdentifier>()
 
-    val visited = longestRoad(board, absSide, absCorners.first(), listOf(), roads.map { it.linearId })
+    while (neverVisitedRoads.isNotEmpty()) {
+        val candidate = longestRoadFromRoad(board, roads.first { it.linearId == neverVisitedRoads.first() }, roads)
 
-    var visited2 = longestRoad(board, absSide, absCorners.last(), visited - first.linearId, roads.map { it.linearId } - visited + first.linearId)
+        if (candidate.count() > longestRoad.count()) {
+            longestRoad = candidate
+            neverVisitedRoads = neverVisitedRoads - candidate
+        }
+    }
 
-    return visited2.count()
+    return longestRoad.count()
+}
+
+fun longestRoadFromRoad(board: PlacedHexTiles, startFrom: RoadState, roads: List<RoadState>): List<UniqueIdentifier> {
+    val absCorners = startFrom.hexTileSide.getAdjacentCorners().map { AbsoluteCorner(startFrom.hexTileIndex, it) }
+    val absSide = AbsoluteSide(startFrom.hexTileIndex, startFrom.hexTileSide)
+
+    val roadIdsA = roads.map { it.linearId }
+
+    val visitedA = longestRoad(board, absSide, absCorners.first(), listOf(), roadIdsA)
+
+    val visitedB = visitedA - startFrom.linearId
+    val roadIdsB = roadIdsA - visitedA + startFrom.linearId
+
+    return longestRoad(board, absSide, absCorners.last(), visitedB, roadIdsB)
 }
 
 fun longestRoad(board: PlacedHexTiles, candidate: AbsoluteSide, lastVisitedCorner: AbsoluteCorner, visited: List<UniqueIdentifier>, available: List<UniqueIdentifier>): List<UniqueIdentifier> {
