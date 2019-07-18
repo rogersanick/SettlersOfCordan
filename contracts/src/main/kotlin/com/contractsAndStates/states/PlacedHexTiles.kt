@@ -137,6 +137,8 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(val value: 
         }
     }
 
+    fun hasRoadIdOn(side: AbsoluteSide) = get(side.tileIndex).sides.hasRoadIdOn(side.sideIndex)
+
     fun cloneList() = value.map { it }.toMutableList()
     fun toBuilder() = Builder(this)
 
@@ -188,6 +190,10 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(val value: 
          *
          * TODO: Add functionality to connect roadStates when new roads and proposed extending existing roads.
          */
+        @Suspendable
+        fun buildRoad(side: AbsoluteSide, roadStateLinearId: UniqueIdentifier) =
+                buildRoad(side.tileIndex, side.sideIndex, roadStateLinearId)
+
         @Suspendable
         fun buildRoad(
                 tileIndex: HexTileIndex,

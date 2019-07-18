@@ -1,10 +1,9 @@
 package com.contractsAndStates.states
 
 import com.oracleClientStatesAndContracts.states.RollTrigger
+import net.corda.core.contracts.UniqueIdentifier
 import org.junit.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNull
+import kotlin.test.*
 
 class PlacedHexTilesTest {
 
@@ -347,6 +346,19 @@ class PlacedHexTilesTest {
         assertEquals(
                 HexTileIndex(14),
                 placed.value[18].sides.getNeighborOn(TileSideIndex(5)))
+    }
+
+    @Test
+    fun `Builder-buildRoad is correct`() {
+        val placed = PlacedHexTiles.Builder(getAllTileBuilders().toMutableList())
+                .buildRoad((4 to 4).toAbsoluteSide(), UniqueIdentifier())
+                .buildRoad((2 to 0).toAbsoluteSide(), UniqueIdentifier())
+                .build()
+
+        assertFalse(placed.hasRoadIdOn((0 to 0).toAbsoluteSide()))
+        assertTrue(placed.hasRoadIdOn((2 to 0).toAbsoluteSide()))
+        assertTrue(placed.hasRoadIdOn((4 to 4).toAbsoluteSide()))
+        assertTrue(placed.hasRoadIdOn((3 to 1).toAbsoluteSide()))
     }
 
     @Test
