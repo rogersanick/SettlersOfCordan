@@ -41,9 +41,12 @@ data class DiceRollState(
     companion object {
         const val MIN_ROLL = 1
         const val MAX_ROLL = 6
+        const val TOTAL_ROBBER = 7
     }
 
-    fun getRollTrigger() = RollTrigger(randomRoll1 + randomRoll2)
+    fun getRollTotal() = randomRoll1 + randomRoll2
+    fun isRobberTotal() = getRollTotal() == TOTAL_ROBBER
+    fun getRollTrigger() = RollTrigger(getRollTotal())
 }
 
 @CordaSerializable
@@ -56,8 +59,8 @@ data class RollTrigger(val total: Int) {
         require(total <= 2 * DiceRollState.MAX_ROLL) {
             "A real one's total has to smaller than ${DiceRollState.MAX_ROLL * 2}"
         }
-        require(total != 7) {
-            "A real one's total cannot be 7"
+        require(total != DiceRollState.TOTAL_ROBBER) {
+            "A real one's total cannot be ${DiceRollState.TOTAL_ROBBER}"
         }
     }
 }
