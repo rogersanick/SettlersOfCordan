@@ -2,7 +2,10 @@ package com.contractsAndStates.contracts
 
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.RobberState
-import net.corda.core.contracts.*
+import net.corda.core.contracts.CommandData
+import net.corda.core.contracts.Contract
+import net.corda.core.contracts.requireSingleCommand
+import net.corda.core.contracts.requireThat
 import net.corda.core.transactions.LedgerTransaction
 import java.security.PublicKey
 
@@ -20,73 +23,72 @@ class RobberContract : Contract {
 
         val command = tx.commands.requireSingleCommand<Commands>()
 
-        val listOfRobberInputStates = tx.inputsOfType<RobberState>()
-        val listOfRobberOutputStates = tx.outputsOfType<RobberState>()
-        val outputRobberState = listOfRobberOutputStates.first()
+        val robberInputStates = tx.inputsOfType<RobberState>()
+        val robberOutputStates = tx.outputsOfType<RobberState>()
+
+        requireThat {
+            "There should be a single output RobberState" using (robberOutputStates.size == 1)
+        }
+
+        val outputRobberState = robberOutputStates.single()
 
         when (command.value) {
 
             is Commands.CreateRobber -> requireThat {
 
-                val outputGameBoard = tx.outputsOfType<GameBoardState>().single()
-
                 /**
                  *  ******** SHAPE ********
                  */
-
-                "There must be exactly one output state of type Robber." using (listOfRobberOutputStates.size == 1)
+                val outputGameBoards = tx.outputsOfType<GameBoardState>()
+                "There should be a single output GameBoardState" using (outputGameBoards.size == 1)
+                val outputGameBoard = tx.outputsOfType<GameBoardState>().single()
 
                 /**
                  *  ******** BUSINESS LOGIC ********
                  */
-
-                "The robber state must have the same gameBoardStateLinearID as the output game board" using (outputGameBoard.robberLinearId == outputRobberState.linearId)
+                "The robber state must have the same gameBoardStateLinearID as the output game board" using
+                        (outputGameBoard.robberLinearId == outputRobberState.linearId)
 
                 /**
                  *  ******** SIGNATURES ********
                  */
-
-                val signingParties = tx.commandsOfType<Commands.CreateRobber>().single().signers.toSet()
-                val participants = outputGameBoard.participants.map{ it.owningKey }
-                "All players must verify and sign the transaction to build a settlement." using(signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
-
+                val signingParties = command.signers.toSet()
+                val participants = outputGameBoard.participants.map { it.owningKey }
+                "All players must verify and sign the transaction to build a settlement." using
+                        (signingParties.containsAll(participants) && signingParties.size == 4)
             }
 
             is Commands.MoveRobber -> requireThat {
 
-                val referencedGameBoardState = tx.referenceInputRefsOfType<GameBoardState>().single().state.data
-
                 /**
                  *  ******** SHAPE ********
                  */
-
-                "There must be exactly one Robber input state." using (listOfRobberInputStates.size == 1)
-                "There must be exactly one Robber output state." using (listOfRobberOutputStates.size == 1)
+                val referencedGameBoardStates = tx.referenceInputRefsOfType<GameBoardState>()
+                "There should be a single input reference GameBoardState" using (referencedGameBoardStates.size == 1)
+                "There must be exactly one Robber input state." using (robberInputStates.size == 1)
+                val referencedGameBoardState = referencedGameBoardStates.single().state.data
 
                 /**
                  *  ******** BUSINESS LOGIC ********
                  */
-
-                "The robber state must have the same gameBoardStateLinearID as the output game board" using (referencedGameBoardState.robberLinearId == outputRobberState.linearId)
+                "The input and output RobberStates should have the same id" using
+                        (robberInputStates.single().linearId == outputRobberState.linearId)
+                "The robber state must have the same gameBoardStateLinearID as the output game board" using
+                        (referencedGameBoardState.robberLinearId == outputRobberState.linearId)
 
                 /**
                  *  ******** SIGNATURES ********
                  */
-
-                val signingParties = tx.commandsOfType<Commands.MoveRobber>().single().signers.toSet()
-                val participants = referencedGameBoardState.participants.map{ it.owningKey }
-                "All players must verify and sign the transaction to build a settlement." using(signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
-
-
+                val signingParties = command.signers.toSet()
+                val participants = referencedGameBoardState.participants.map { it.owningKey }
+                "All players must verify and sign the transaction to build a settlement." using
+                        (signingParties.containsAll(participants) && signingParties.size == 4)
             }
         }
-
-
     }
 
     interface Commands : CommandData {
-        class CreateRobber: Commands
-        class MoveRobber: Commands
+        class CreateRobber : Commands
+        class MoveRobber : Commands
     }
-
 }

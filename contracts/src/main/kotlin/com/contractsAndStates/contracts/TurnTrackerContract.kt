@@ -18,43 +18,48 @@ class TurnTrackerContract : Contract {
 
         val command = tx.commands.requireSingleCommand<Commands>()
 
-        val listOfTurnTrackerInputStates = tx.inputsOfType<TurnTrackerState>()
-        val listOfTurnTrackerOutputStates = tx.outputsOfType<TurnTrackerState>()
-        val outputTurnTrackerState = listOfTurnTrackerOutputStates.first()
+        val turnTrackerInputs = tx.inputsOfType<TurnTrackerState>()
+        val turnTrackerOutputs = tx.outputsOfType<TurnTrackerState>()
+
+        requireThat {
+            "There must be exactly one Turn Tracker output state." using (turnTrackerOutputs.size == 1)
+        }
+
+        val outputTurnTracker = turnTrackerOutputs.single()
 
         tx.commandsOfType<Commands.EndTurnDuringInitialPlacementPhase>()
 
         when (command.value) {
 
             is Commands.EndTurn -> requireThat {
-                val inputTurnTrackerState = tx.inputsOfType<TurnTrackerState>().firstOrNull() as TurnTrackerState
-                "There must be exactly one Turn Tracker input state." using (listOfTurnTrackerInputStates.size == 1)
-                "There must be exactly one Turn Tracker output state." using (listOfTurnTrackerOutputStates.size == 1)
-                "Both setup rounds must have been completed" using (outputTurnTrackerState.setUpRound1Complete && outputTurnTrackerState.setUpRound2Complete)
-                "The turn tracker must be incremented by 1." using (outputTurnTrackerState.currTurnIndex == inputTurnTrackerState.currTurnIndex + 1 || (outputTurnTrackerState.currTurnIndex == 0 && inputTurnTrackerState.currTurnIndex == 3))
+                "There must be exactly one Turn Tracker input state." using (turnTrackerInputs.size == 1)
+                val inputTurnTrackerState = turnTrackerInputs.single()
+                "Both setup rounds must have been completed" using
+                        (outputTurnTracker.setUpRound1Complete && outputTurnTracker.setUpRound2Complete)
+                "The turn tracker must be incremented by 1" using
+                        (outputTurnTracker.currTurnIndex == inputTurnTrackerState.currTurnIndex + 1 ||
+                                (outputTurnTracker.currTurnIndex == 0 && inputTurnTrackerState.currTurnIndex == 3))
             }
 
             is Commands.EndTurnDuringInitialPlacementPhase -> requireThat {
-                val inputTurnTrackerState = tx.inputsOfType<TurnTrackerState>().firstOrNull() as TurnTrackerState
-                "There must be exactly one Turn Tracker input state." using (listOfTurnTrackerInputStates.size == 1)
-                "There must be exactly one Turn Tracker output state." using (listOfTurnTrackerOutputStates.size == 1)
-                if (inputTurnTrackerState.setUpRound1Complete && !outputTurnTrackerState.setUpRound2Complete) {
-                    "The turn tracker must be decremented to reflect the reverse placement order" using (inputTurnTrackerState.currTurnIndex - 1 == outputTurnTrackerState.currTurnIndex)
-                } else if (outputTurnTrackerState.setUpRound2Complete) {
-                    "The turn tracker must reset when both setup rounds are complete" using (outputTurnTrackerState.currTurnIndex == 0)
-                } else if (!outputTurnTrackerState.setUpRound1Complete) {
-                    "The turn tracker must be incremented to reflect the placement order" using (inputTurnTrackerState.currTurnIndex + 1 == outputTurnTrackerState.currTurnIndex)
+                "There must be exactly one Turn Tracker input state." using (turnTrackerInputs.size == 1)
+                val inputTurnTrackerState = turnTrackerInputs.single()
+                if (inputTurnTrackerState.setUpRound1Complete && !outputTurnTracker.setUpRound2Complete) {
+                    "The turn tracker must be decremented to reflect the reverse placement order" using
+                            (inputTurnTrackerState.currTurnIndex - 1 == outputTurnTracker.currTurnIndex)
+                } else if (outputTurnTracker.setUpRound2Complete) {
+                    "The turn tracker must reset when both setup rounds are complete" using
+                            (outputTurnTracker.currTurnIndex == 0)
+                } else if (!outputTurnTracker.setUpRound1Complete) {
+                    "The turn tracker must be incremented to reflect the placement order" using
+                            (inputTurnTrackerState.currTurnIndex + 1 == outputTurnTracker.currTurnIndex)
                 }
             }
 
             is Commands.CreateTurnTracker -> requireThat {
-                "There must be exactly one Turn Tracker output state." using (listOfTurnTrackerOutputStates.size == 1)
-                "The turn tracker must be initialized at a 0 index." using (outputTurnTrackerState.currTurnIndex == 0)
+                "The turn tracker must be initialized at a 0 index." using (outputTurnTracker.currTurnIndex == 0)
             }
-
         }
-
-
     }
 
     interface Commands : CommandData {
@@ -62,5 +67,4 @@ class TurnTrackerContract : Contract {
         class EndTurnDuringInitialPlacementPhase: Commands
         class CreateTurnTracker: Commands
     }
-
 }

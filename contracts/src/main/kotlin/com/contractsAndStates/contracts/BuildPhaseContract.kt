@@ -13,7 +13,6 @@ import net.corda.core.contracts.requireThat
 import net.corda.core.internal.sumByLong
 import net.corda.core.internal.toMultiMap
 import net.corda.core.transactions.LedgerTransaction
-import java.security.PublicKey
 
 // ************************
 // * Build Phase Contract *

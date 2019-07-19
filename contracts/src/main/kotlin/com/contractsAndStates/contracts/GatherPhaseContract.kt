@@ -3,9 +3,11 @@ package com.contractsAndStates.contracts
 import com.contractsAndStates.states.GameBoardState
 import com.oracleClientStatesAndContracts.states.DiceRollState
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
-import net.corda.core.contracts.*
+import net.corda.core.contracts.CommandData
+import net.corda.core.contracts.Contract
+import net.corda.core.contracts.requireSingleCommand
+import net.corda.core.contracts.requireThat
 import net.corda.core.transactions.LedgerTransaction
-import java.security.PublicKey
 
 // ***********************
 // * Gather Phase Contract *
@@ -21,8 +23,16 @@ class GatherPhaseContract : Contract {
     override fun verify(tx: LedgerTransaction) {
 
         val command = tx.commands.requireSingleCommand<Commands>()
-        val gameBoardStateReferenced = tx.referenceInputRefsOfType<GameBoardState>().single().state.data
-        val diceRollInputState = tx.inputsOfType<DiceRollState>().single()
+        val gameBoardStatesReferenced = tx.referenceInputRefsOfType<GameBoardState>()
+        val diceRollInputStates = tx.inputsOfType<DiceRollState>()
+
+        requireThat {
+            "There should be a single input reference GameBoardState" using (gameBoardStatesReferenced.size == 1)
+            "There should be a single input DiceRollState" using (diceRollInputStates.size == 1)
+        }
+
+        val gameBoardStateReferenced = gameBoardStatesReferenced.single().state.data
+        val diceRollInputState = diceRollInputStates.single()
 
         when (command.value) {
             is Commands.IssueResourcesToAllPlayers -> requireThat {
@@ -30,26 +40,23 @@ class GatherPhaseContract : Contract {
                 /**
                  *  ******** SHAPE ********
                  */
-
                 "There are no inputs to this transaction" using (tx.inputs.isEmpty())
-                "All of the outputs of this transaction are of the FungibleTokenType" using (tx.outputs.all { it.data is FungibleToken })
+                "All of the outputs of this transaction are of the FungibleTokenType" using
+                        (tx.outputs.all { it.data is FungibleToken })
 
                 /**
                  *  ******** BUSINESS LOGIC ********
                  */
-
-                "The input dice roll is not equal to 7" using (diceRollInputState.randomRoll1 + diceRollInputState.randomRoll2 != 7)
+                "The input dice roll is not equal to 7" using !diceRollInputState.isRobberTotal()
 
                 /**
                  *  ******** SIGNATURES ********
                  */
-
-                val signingParties = tx.commandsOfType<Commands.IssueResourcesToAllPlayers>().single().signers.toSet()
-                val participants = gameBoardStateReferenced.participants.map{ it.owningKey }
-                "All players must verify and sign the transaction to build a settlement." using(signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
-
+                val signingParties = command.signers.toSet()
+                val participants = gameBoardStateReferenced.participants.map { it.owningKey }
+                "All players must verify and sign the transaction to build a settlement." using
+                        (signingParties.containsAll(participants) && signingParties.size == 4)
             }
-
         }
     }
 
