@@ -40,6 +40,14 @@ data class GameBoardState(val hexTiles: PlacedHexTiles,
     fun weWin(ourIdentity: Party): GameBoardState {
         return this.copy(winner = ourIdentity)
     }
+
+    /**
+     * Returns the count of settlements built. It takes care not to include duplicates.
+     */
+    fun getSettlementsCount() = settlementsPlaced
+            .allBuiltCorners()
+            .distinctBy { hexTiles.getCornerHash(it) }
+            .size
 }
 
 @CordaSerializable
