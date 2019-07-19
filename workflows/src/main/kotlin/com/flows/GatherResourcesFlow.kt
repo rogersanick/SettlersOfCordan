@@ -86,7 +86,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         // Step 9. Convert each gameCurrentToClaim into a valid fungible token.
         val fungibleTokenAmountsOfResourcesToClaim = reducedListOfGameCurrencyToClaim.map {
             // TODO make sure the it.key.resourceYielded is not null
-            amount(it.value, Resource.getInstance(it.key.resourceType.resourceYielded!!)) issuedBy ourIdentity heldBy gameBoardState.players[it.key.ownerIndex]
+            amount(it.value, it.key.resourceType.resourceYielded!!) issuedBy ourIdentity heldBy gameBoardState.players[it.key.ownerIndex]
         }
 
         // Step 10. Add commands to issue the appropriate types of resources. Convert the gameCurrencyToClaim to a set to prevent duplicate commands.
@@ -153,7 +153,7 @@ open class GatherResourcesFlowResponder(val counterpartySession: FlowSession) : 
                 // Convert each gameCurrentToClaim into a valid fungible token.
                 val listOfTokensThatShouldHaveBeenIssued = reducedListOfGameCurrencyToClaim.map {
                     // TODO make sure the it.key.resourceYielded is not null
-                    amount(it.value, Resource.getInstance(it.key.resourceType.resourceYielded!!)) issuedBy gameBoardState.players[turnTrackerState.currTurnIndex] heldBy gameBoardState.players[it.key.ownerIndex]
+                    amount(it.value, it.key.resourceType.resourceYielded!!) issuedBy gameBoardState.players[turnTrackerState.currTurnIndex] heldBy gameBoardState.players[it.key.ownerIndex]
                 }
 
                 "The correct number of resources must be produced for each respective party" using (listOfTokensThatShouldHaveBeenIssued.filter {
