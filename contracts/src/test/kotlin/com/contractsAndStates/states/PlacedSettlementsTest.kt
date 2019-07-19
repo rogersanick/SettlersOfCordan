@@ -1,6 +1,7 @@
 package com.contractsAndStates.states
 
 import org.junit.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -73,6 +74,31 @@ class PlacedSettlementsTest {
         assertTrue(placed.hasOn(HexTileIndex(3), TileCornerIndex(1)))
         assertTrue(placed.hasOn(HexTileIndex(7), TileCornerIndex(4)))
         assertFalse(placed.hasOn(HexTileIndex(7), TileCornerIndex(5)))
+    }
+
+    @Test
+    fun `allCorners is correct`() {
+        val builder = PlacedSettlements.Builder(List(GameBoardState.TILE_COUNT) {
+            MutableList(HexTile.SIDE_COUNT) { false }
+        })
+        val sides = TileSides.Builder()
+                .setNeighborOn(TileSideIndex(1), HexTileIndex(2))
+                .build()
+        val placed = builder
+                .placeOn(HexTileIndex(3), TileCornerIndex(2), sides)
+                .placeOn(HexTileIndex(3), TileCornerIndex(1), sides)
+                .placeOn(HexTileIndex(7), TileCornerIndex(4))
+                .build()
+
+        assertEquals(
+                listOf(
+                        AbsoluteCorner(HexTileIndex(2), TileCornerIndex(4)),
+                        AbsoluteCorner(HexTileIndex(2), TileCornerIndex(5)),
+                        AbsoluteCorner(HexTileIndex(3), TileCornerIndex(1)),
+                        AbsoluteCorner(HexTileIndex(3), TileCornerIndex(2)),
+                        AbsoluteCorner(HexTileIndex(7), TileCornerIndex(4))
+                ),
+                placed.allBuiltCorners())
     }
 
     @Test

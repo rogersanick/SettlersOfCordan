@@ -60,6 +60,19 @@ data class PlacedSettlements @ConstructorForDeserialization constructor(
     fun hasOn(corner: AbsoluteCorner) = hasOn(corner.tileIndex, corner.cornerIndex)
     fun hasOn(tileIndex: HexTileIndex, corner: TileCornerIndex) = value[tileIndex.value][corner.value]
 
+    /**
+     * Returns all absolute corners on which there are settlements.
+     * That includes duplicates, or triplicates, as there can be overlapping corners.
+     */
+    fun allBuiltCorners() = value
+            .mapIndexed { tileIndex, corners ->
+                corners.mapIndexedNotNull { cornerIndex, has ->
+                    if (has) AbsoluteCorner(HexTileIndex(tileIndex), TileCornerIndex(cornerIndex))
+                    else null
+                }
+            }
+            .flatten()
+
     class Builder(private val value: List<MutableList<Boolean>> = List(GameBoardState.TILE_COUNT) {
         MutableList(HexTile.SIDE_COUNT) { false }
     }) {
