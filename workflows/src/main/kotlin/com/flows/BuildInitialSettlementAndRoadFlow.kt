@@ -160,7 +160,7 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
             // Convert each gameCurrentToClaim into a valid fungible token.
             val fungibleTokenAmountsOfResourcesToClaim = reducedListOfGameCurrencyToClaim.map {
                 // TODO make sure the it.key.resourceYielded is not null
-                amount(it.value, Resource.getInstance(it.key.resourceYielded!!)) issuedBy ourIdentity heldBy ourIdentity
+                amount(it.value, it.key.resourceYielded!!) issuedBy ourIdentity heldBy ourIdentity
             }
 
             addIssueTokens(tb, fungibleTokenAmountsOfResourcesToClaim)
