@@ -3,11 +3,13 @@ package com.flows
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.BuildPhaseContract
 import com.contractsAndStates.contracts.GameStateContract
+import com.contractsAndStates.contracts.LongestRoadContract
 import com.contractsAndStates.states.*
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
+import net.corda.core.node.services.Vault
 import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
@@ -40,6 +42,11 @@ class BuildRoadFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: I
         val gameBoardReferenceStateAndRef = ReferencedStateAndRef(gameBoardStateAndRef)
         val gameBoardState = gameBoardStateAndRef.state.data
 
+        // Step *. Retrieve roads, settlements and current longest road state
+        val roadStates = serviceHub.vaultService.queryBy<RoadState>().states.map { it.state.data }
+        val settlementStates = serviceHub.vaultService.queryBy<SettlementState>().states.map { it.state.data }
+        val longestRoadState = serviceHub.vaultService.queryBy<LongestRoadState>().states.map { it.state.data }.first()
+
         // Step 3. Retrieve the Turn Tracker State from the vault
         val queryCriteriaForTurnTrackerState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
         val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteriaForTurnTrackerState).states.single())
@@ -60,11 +67,17 @@ class BuildRoadFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: I
                 .build()
         val outputGameBoardState = gameBoardState.copy(hexTiles = newHexTileSetWithRoad)
 
+        // Step *. Determine new longest road holder
+        val longestRoadHolder = longestRoad(gameBoardState.hexTiles, roadStates, settlementStates, gameBoardState.players, longestRoadState.holder)
+        val outputLongestRoadState = LongestRoadState(longestRoadHolder, longestRoadState.participants)
+
         // Step 8. Add all states and commands to the transaction.
         tb.addReferenceState(gameBoardReferenceStateAndRef)
         tb.addReferenceState(turnTrackerReferenceStateAndRef)
         tb.addOutputState(roadState, BuildPhaseContract.ID)
         tb.addOutputState(outputGameBoardState, GameStateContract.ID)
+        if (outputLongestRoadState.holder != longestRoadState.holder)
+            tb.addOutputState(outputLongestRoadState, LongestRoadContract.ID)
 
         // Step 9. Sign initial transaction
         tb.verify(serviceHub)
