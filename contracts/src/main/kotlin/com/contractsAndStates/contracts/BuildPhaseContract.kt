@@ -67,7 +67,7 @@ class BuildPhaseContract : Contract {
                  *  Check that the party is proposing a move that is allowed by the rules of the game.
                  */
                 val newSettlement = outputSettlements.single()
-                val onCorner = newSettlement.getAbsoluteCorner()
+                val onCorner = newSettlement.absoluteCorner
                 val newRoad = outputRoads.single()
                 val onSide = newRoad.getAbsoluteSide()
                 val turnTracker = turnTrackers.single()
@@ -161,7 +161,7 @@ class BuildPhaseContract : Contract {
                  *  Check that the counter party is proposing a move that is allowed by the rules of the game.
                  */
                 val newSettlement = outputSettlements.single()
-                val onCorner = newSettlement.getAbsoluteCorner()
+                val onCorner = newSettlement.absoluteCorner
 
                 val itAndNeighboringCorners = inputBoard.hexTiles
                         .getItAndNeighboringCorners(onCorner)
@@ -241,12 +241,12 @@ class BuildPhaseContract : Contract {
                 val newCity = outputSettlements.single()
 
                 "A city cannot be built on a hexTile that is of type Desert" using
-                        (inputBoard.hexTiles.get(newCity.hexTileIndex).resourceType == HexTileType.Desert)
+                        (inputBoard.hexTiles.get(newCity.absoluteCorner.tileIndex).resourceType == HexTileType.Desert)
 
                 verifyPaymentIsEnough(getBuildableCosts(Buildable.City), outputResources, "city")
 
                 "The city must be built in the same location as the settlement being upgraded." using
-                        (inputSettlement.getAbsoluteCorner() == newCity.getAbsoluteCorner())
+                        (inputSettlement.absoluteCorner == newCity.absoluteCorner)
 
                 /**
                  *  ******** SIGNATURES ********

@@ -1,15 +1,17 @@
 package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.contractsAndStates.states.*
+import com.contractsAndStates.states.ExtendedDealState
+import com.contractsAndStates.states.InformationForAcceptor
+import com.contractsAndStates.states.TradeState
 import com.r3.corda.lib.tokens.workflows.flows.move.addMoveFungibleTokens
 import com.r3.corda.lib.tokens.workflows.types.PartyAndAmount
-import net.corda.core.contracts.*
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.TransactionSignature
 import net.corda.core.flows.*
-import net.corda.core.identity.*
-import net.corda.core.node.services.queryBy
-import net.corda.core.node.services.vault.QueryCriteria
+import net.corda.core.identity.Party
+import net.corda.core.identity.excludeHostNode
+import net.corda.core.identity.groupAbstractPartyByWellKnownParty
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
@@ -30,7 +32,7 @@ import java.util.stream.Collectors
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
-class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier): FlowLogic<SignedTransaction>() {
+class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier) : FlowLogic<SignedTransaction>() {
 
     companion object {
         object RECEIVED : ProgressTracker.Step("Received API call")
@@ -54,19 +56,21 @@ class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier): FlowLo
     override fun call(): SignedTransaction {
 
         // 1. Retrieve the appropriate trade state from the linearID.
-        val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(tradeStateLinearId))
-        val tradeStateOnWhichToMakeAnOffer = serviceHub.vaultService.queryBy<TradeState>(queryCriteria).states.single().state.data
+        val tradeStateAndRef = serviceHub.vaultService
+                .querySingleState<TradeState>(tradeStateLinearId)
+                .state
+        val tradeState = tradeStateAndRef.data
 
         // 2. Use the tokenSDK to generate the movement of resources required to execute the trade.
         val tb = TransactionBuilder()
-        addMoveFungibleTokens(tb, serviceHub, listOf(PartyAndAmount(tradeStateOnWhichToMakeAnOffer.owner, tradeStateOnWhichToMakeAnOffer.wanted)), ourIdentity)
+        addMoveFungibleTokens(tb, serviceHub, listOf(PartyAndAmount(tradeState.owner, tradeState.wanted)), ourIdentity)
 
         // 3. Get a reference to the notary and assign it to the transaction.
         require(serviceHub.networkMapCache.notaryIdentities.isNotEmpty()) { "No notary nodes registered" }
-        val notary = serviceHub.networkMapCache.notaryIdentities.first()
+        val notary = tradeStateAndRef.notary
 
         // 4. Get a reference to the counter-party of the trade.
-        val otherParty = excludeHostNode(serviceHub, groupAbstractPartyByWellKnownParty(serviceHub, listOf(tradeStateOnWhichToMakeAnOffer.owner))).keys.single()
+        val otherParty = excludeHostNode(serviceHub, groupAbstractPartyByWellKnownParty(serviceHub, listOf(tradeState.owner))).keys.single()
         progressTracker.currentStep = DEALING
 
         // 5. Use the TwoPartyDealFlow instigation flow to kick off the execution of the trade.
@@ -76,11 +80,11 @@ class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier): FlowLo
                 session,
                 TwoPartyDealFlow.AutoOffer(
                         notary,
-                        tradeStateOnWhichToMakeAnOffer.copy(informationForAcceptor = InformationForAcceptor(
-                        tb.inputStates(),
-                        tb.outputStates(),
-                        tb.commands()
-                ))),
+                        tradeState.copy(informationForAcceptor = InformationForAcceptor(
+                                tb.inputStates(),
+                                tb.outputStates(),
+                                tb.commands()
+                        ))),
                 progressTracker.getChildProgressTracker(DEALING)!!
         )
         return subFlow(instigator)
@@ -88,7 +92,7 @@ class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier): FlowLo
 }
 
 @InitiatedBy(ExecuteTradeFlow::class)
-class ExecuteTradeFlowResponder(otherSideSession: FlowSession): TwoPartyDealFlow.Acceptor(otherSideSession) {
+class ExecuteTradeFlowResponder(otherSideSession: FlowSession) : TwoPartyDealFlow.Acceptor(otherSideSession) {
 
     @Suspendable
     override fun assembleSharedTX(handshake: TwoPartyDealFlow.Handshake<TwoPartyDealFlow.AutoOffer>): Triple<TransactionBuilder, List<PublicKey>, List<TransactionSignature>> {

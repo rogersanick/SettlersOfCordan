@@ -3,14 +3,13 @@ package com.flows
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.TurnTrackerState
-import com.oracleClientStatesAndContracts.contracts.DiceRollContract
 import com.oracleClientFlows.flows.GetRandomDiceRollValues
+import com.oracleClientStatesAndContracts.contracts.DiceRollContract
 import com.oracleClientStatesAndContracts.states.DiceRollState
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
 import net.corda.core.identity.CordaX500Name
-import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
@@ -32,13 +31,14 @@ class RollDiceFlow(val gameBoardStateLinearId: UniqueIdentifier) : FlowLogic<Sig
     @Suspendable
     override fun call(): SignedTransaction {
 
-        val queryCriteriaForGameBoardState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardStateLinearId))
-        val gameBoardStateAndRef = serviceHub.vaultService.queryBy<GameBoardState>(queryCriteriaForGameBoardState).states.single()
+        val gameBoardStateAndRef = serviceHub.vaultService
+                .querySingleState<GameBoardState>(gameBoardStateLinearId)
         val gameBoardReferenceStateAndRef = ReferencedStateAndRef(gameBoardStateAndRef)
         val gameBoardState = gameBoardStateAndRef.state.data
 
-        val queryCriteriaForTurnTrackerState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
-        val turnTrackerState = serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteriaForTurnTrackerState).states.first().state.data
+        val turnTrackerState = serviceHub.vaultService
+                .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
+                .state.data
         val turnTrackerStateLinearId = turnTrackerState.linearId
 
         val oracleLegalName = CordaX500Name("Oracle", "New York", "US")
@@ -63,19 +63,22 @@ class RollDiceFlow(val gameBoardStateLinearId: UniqueIdentifier) : FlowLogic<Sig
 }
 
 @InitiatedBy(RollDiceFlow::class)
-open class RollDiceFlowResponder(internal val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
+open class RollDiceFlowResponder(internal val counterpartySession: FlowSession) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) {
-                
-                val gameBoardStateQueryCriteria = QueryCriteria.VaultQueryCriteria(stateRefs = stx.coreTransaction.references)
-                val gameBoardState = serviceHub.vaultService.queryBy<GameBoardState>(gameBoardStateQueryCriteria).states.first().state.data
+
+                val gameBoardState = serviceHub.vaultService
+                        .querySingleState<GameBoardState>(stx.coreTransaction.references.single())
+                        .state.data
 
                 val turnTrackerStateQueryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
-                val turnTrackerState = serviceHub.vaultService.queryBy<TurnTrackerState>(turnTrackerStateQueryCriteria).states.first().state.data
+                val turnTrackerState = serviceHub.vaultService
+                        .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
+                        .state.data
 
-                val diceRollState = stx.coreTransaction.outputsOfType<DiceRollState>().first()
+                val diceRollState = stx.coreTransaction.outputsOfType<DiceRollState>().single()
 
                 if (diceRollState.turnTrackerUniqueIdentifier != turnTrackerState.linearId) {
                     throw FlowException("Only the current player may roll the dice.")

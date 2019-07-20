@@ -8,7 +8,6 @@ import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
-import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
@@ -27,7 +26,11 @@ import java.util.*
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
-class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIndex: Int, val hexTileCoordinate: Int) : FlowLogic<SignedTransaction>() {
+class BuildSettlementFlow(
+        val gameBoardLinearId: UniqueIdentifier,
+        hexTileIndex: Int,
+        val hexTileCoordinate: Int
+) : FlowLogic<SignedTransaction>() {
 
     val tileIndex: HexTileIndex
     val cornerIndex: TileCornerIndex
@@ -40,15 +43,17 @@ class BuildSettlementFlow(val gameBoardLinearId: UniqueIdentifier, val hexTileIn
     @Suspendable
     override fun call(): SignedTransaction {
 
-        // Step 1. Get a reference to the notary service on the network
-        val notary = serviceHub.networkMapCache.notaryIdentities.first()
-
-        // Step 2. Retrieve the Game Board State from the vault.
-        val gameBoardStateAndRef = getGameBoardStateFromLinearID(gameBoardLinearId, serviceHub)
+        // Step 1. Retrieve the Game Board State from the vault.
+        val gameBoardStateAndRef = serviceHub.vaultService
+                .querySingleState<GameBoardState>(gameBoardLinearId)
         val gameBoardState = gameBoardStateAndRef.state.data
 
+        // Step 2. Get a reference to the notary service on the network
+        val notary = gameBoardStateAndRef.state.notary
+
         // Step 3. Retrieve the Turn Tracker State from the vault
-        val turnTrackerStateAndRef = getTurnTrackerStateFromLinearID(gameBoardState.linearId, serviceHub)
+        val turnTrackerStateAndRef = serviceHub.vaultService
+                .querySingleState<TurnTrackerState>(gameBoardState.linearId)
         val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(turnTrackerStateAndRef)
 
         // Step 4. Create a new transaction builder
@@ -145,12 +150,17 @@ class BuildSettlementFlowResponder(val counterpartySession: FlowSession) : FlowL
             override fun checkTransaction(stx: SignedTransaction) {
                 val gameBoardState = stx.coreTransaction.outputsOfType<GameBoardState>().first()
                 val turnTrackerStateRef = stx.coreTransaction.references.single()
-                val turnTrackerState = serviceHub.vaultService.queryBy<TurnTrackerState>(QueryCriteria.VaultQueryCriteria(stateRefs = listOf(turnTrackerStateRef))).states.single().state.data
+                val turnTrackerState = serviceHub.vaultService
+                        .querySingleState<TurnTrackerState>(turnTrackerStateRef)
+                        .state.data
 
                 val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(turnTrackerState.linearId))
-                val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteria).states.first().state.data
+                val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService
+                        .querySingleState<TurnTrackerState>(turnTrackerState.linearId)
+                        .state.data
 
-                if (counterpartySession.counterparty.owningKey != gameBoardState.players[lastTurnTrackerOnRecordStateAndRef.currTurnIndex].owningKey) {
+                if (counterpartySession.counterparty.owningKey !=
+                        gameBoardState.players[lastTurnTrackerOnRecordStateAndRef.currTurnIndex].owningKey) {
                     throw IllegalArgumentException("Only the current player may propose the next move.")
                 }
             }

@@ -10,8 +10,6 @@ import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
-import net.corda.core.node.services.queryBy
-import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
@@ -41,14 +39,15 @@ class TradeWithPortFlow(
 
     @Suspendable
     override fun call(): SignedTransaction {
-        // Step 1. Get reference to the notary and oracle
-        val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
-        // Step 2. Retrieve the Game Board State from the vault.
-        val queryCriteriaForGameBoardState = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardLinearId))
-        val gameBoardStateAndRef = serviceHub.vaultService.queryBy<GameBoardState>(queryCriteriaForGameBoardState).states.single()
+        // Step 1. Retrieve the Game Board State from the vault.
+        val gameBoardStateAndRef = serviceHub.vaultService
+                .querySingleState<GameBoardState>(gameBoardLinearId)
         val gameBoardReferenceStateAndRef = ReferencedStateAndRef(gameBoardStateAndRef)
         val gameBoardState = gameBoardStateAndRef.state.data
+
+        // Step 2. Get reference to the notary and oracle
+        val notary = gameBoardStateAndRef.state.notary
 
         // Step 3. Get access to the port with which the user wishes to trade
         val portToBeTradedWith = gameBoardState.ports.getPortAt(hexTileOfPort, tileCorner).portTile
@@ -87,17 +86,16 @@ open class TradeWithPortFlowResponder(val counterpartySession: FlowSession) : Fl
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
                 val gameBoardStateRef = stx.coreTransaction.references.single()
-                val gameBoardStateQueryCriteria = QueryCriteria.VaultQueryCriteria(stateRefs = listOf(gameBoardStateRef))
                 val gameBoardState = serviceHub.vaultService
-                        .queryBy<GameBoardState>(gameBoardStateQueryCriteria)
-                        .states.single().state.data
+                        .querySingleState<GameBoardState>(gameBoardStateRef)
+                        .state.data
 
-                val turnTrackerStateLinearId = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
                 val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService
-                        .queryBy<TurnTrackerState>(turnTrackerStateLinearId)
-                        .states.first().state.data
+                        .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
+                        .state.data
 
-                if (counterpartySession.counterparty.owningKey != gameBoardState.players[lastTurnTrackerOnRecordStateAndRef.currTurnIndex].owningKey) {
+                if (counterpartySession.counterparty.owningKey != gameBoardState
+                                .players[lastTurnTrackerOnRecordStateAndRef.currTurnIndex].owningKey) {
                     throw IllegalArgumentException("Only the current player may propose the next move.")
                 }
             }

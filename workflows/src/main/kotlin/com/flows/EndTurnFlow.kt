@@ -8,11 +8,8 @@ import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
-import net.corda.core.node.services.queryBy
-import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
-import java.lang.IllegalArgumentException
 
 // *****************
 // * End Turn Flow *
@@ -25,7 +22,7 @@ import java.lang.IllegalArgumentException
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
-class EndTurnFlow(val gameBoardStateLinearId: UniqueIdentifier): FlowLogic<SignedTransaction>() {
+class EndTurnFlow(val gameBoardStateLinearId: UniqueIdentifier) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
 
@@ -33,20 +30,22 @@ class EndTurnFlow(val gameBoardStateLinearId: UniqueIdentifier): FlowLogic<Signe
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
         // Step 2. Retrieve the TurnTracker State from the vault.
-        val gameBoardStateQueryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardStateLinearId))
-        val gameBoardStateAndRef = serviceHub.vaultService.queryBy<GameBoardState>(gameBoardStateQueryCriteria).states.first()
+        val gameBoardStateAndRef = serviceHub.vaultService
+                .querySingleState<GameBoardState>(gameBoardStateLinearId)
         val gameBoardState = gameBoardStateAndRef.state.data
 
         // Step 3. Retrieve the TurnTracker State from the vault.
-        val turnTrackerStateQueryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
-        val turnTrackerStateAndRef = serviceHub.vaultService.queryBy<TurnTrackerState>(turnTrackerStateQueryCriteria).states.first()
+        val turnTrackerStateAndRef = serviceHub.vaultService
+                .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
         val turnTrackerState = turnTrackerStateAndRef.state.data
 
         // Step 4. Create a new transaction builder using the notary
         val tb = TransactionBuilder(notary)
 
         // Step 5. Create a new command for ending our turns
-        val endTurnCommand = Command(TurnTrackerContract.Commands.EndTurn(), gameBoardState.players.map { it.owningKey })
+        val endTurnCommand = Command(
+                TurnTrackerContract.Commands.EndTurn(),
+                gameBoardState.players.map { it.owningKey })
         tb.addCommand(endTurnCommand)
 
         // Step 6. Add the old turn tracker state as an input.
@@ -68,24 +67,27 @@ class EndTurnFlow(val gameBoardStateLinearId: UniqueIdentifier): FlowLogic<Signe
 
         // Step 11. Run the FinalityFlow
         return subFlow(FinalityFlow(stx, sessions))
-
     }
 }
 
 @InitiatedBy(EndTurnFlow::class)
-class EndTurnFlowResponder(val counterpartySession: FlowSession): FlowLogic<SignedTransaction>() {
+class EndTurnFlowResponder(val counterpartySession: FlowSession) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) {
                 val inputTurnTrackerInTransaction = stx.coreTransaction.inputs.single()
-                val queryCriteria = QueryCriteria.VaultQueryCriteria(stateRefs = listOf(inputTurnTrackerInTransaction))
-                val turnTrackerReferencedInTransaction = serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteria).states.single().state.data
+                val turnTrackerReferencedInTransaction = serviceHub.vaultService
+                        .querySingleState<TurnTrackerState>(inputTurnTrackerInTransaction)
+                        .state.data
 
                 val gameBoardStateRef = stx.coreTransaction.references.single()
-                val gameBoard = serviceHub.vaultService.queryBy<GameBoardState>(QueryCriteria.VaultQueryCriteria(stateRefs = listOf(gameBoardStateRef))).states.single().state.data
-                val queryCriteriaForLastTurnTrackerWeHaveOnRecord = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoard.turnTrackerLinearId))
-                val lastTurnTrackerWeHaveOnRecord = serviceHub.vaultService.queryBy<TurnTrackerState>(queryCriteriaForLastTurnTrackerWeHaveOnRecord).states.single().state.data
+                val gameBoard = serviceHub.vaultService
+                        .querySingleState<GameBoardState>(gameBoardStateRef)
+                        .state.data
+                val lastTurnTrackerWeHaveOnRecord = serviceHub.vaultService
+                        .querySingleState<TurnTrackerState>(gameBoard.turnTrackerLinearId)
+                        .state.data
                 if (lastTurnTrackerWeHaveOnRecord.linearId != turnTrackerReferencedInTransaction.linearId) {
                     throw IllegalArgumentException("The TurnTracker included in the transaction is not correct for this game or turn.")
                 }

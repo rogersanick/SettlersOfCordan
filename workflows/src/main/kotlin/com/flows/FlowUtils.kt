@@ -1,17 +1,19 @@
 package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.contractsAndStates.states.GameBoardState
-import com.contractsAndStates.states.RobberState
-import com.contractsAndStates.states.TurnTrackerState
+import com.oracleClientStatesAndContracts.states.DiceRollState
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.of
 import com.r3.corda.lib.tokens.workflows.flows.redeem.addFungibleTokensToRedeem
 import com.r3.corda.lib.tokens.workflows.internal.selection.TokenSelection
 import net.corda.core.contracts.ContractState
+import net.corda.core.contracts.StateAndRef
+import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.UniqueIdentifier
+import net.corda.core.flows.FlowException
 import net.corda.core.identity.Party
 import net.corda.core.node.ServiceHub
+import net.corda.core.node.services.VaultService
 import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.TransactionBuilder
@@ -49,16 +51,42 @@ fun generateInGameSpend(
     return tb
 }
 
-inline fun <reified T : ContractState> getSingleStateByLinearId(linearId: UniqueIdentifier, serviceHub: ServiceHub) =
-        QueryCriteria.LinearStateQueryCriteria(linearId = listOf(linearId)).let { criteria ->
-            serviceHub.vaultService.queryBy<T>(criteria).states.single()
-        }
+inline fun <reified T : ContractState> VaultService.querySingleState(linearId: UniqueIdentifier) =
+        QueryCriteria.LinearStateQueryCriteria(linearId = listOf(linearId))
+                .let { criteria ->
+                    queryBy<T>(criteria).states
+                }
+                .also { stateAndRefs ->
+                    if (stateAndRefs.size != 1) {
+                        throw FlowException("There should be a single ${T::class.simpleName} of id $linearId")
+                    }
+                }
+                .single()
 
-fun getGameBoardStateFromLinearID(linearId: UniqueIdentifier, serviceHub: ServiceHub) =
-        getSingleStateByLinearId<GameBoardState>(linearId, serviceHub)
+inline fun <reified T : ContractState> VaultService.querySingleState(stateRef: StateRef): StateAndRef<T> =
+        querySingleState<T>(listOf(stateRef))
 
-fun getTurnTrackerStateFromLinearID(linearId: UniqueIdentifier, serviceHub: ServiceHub) =
-        getSingleStateByLinearId<TurnTrackerState>(linearId, serviceHub)
+inline fun <reified T : ContractState> VaultService.querySingleState(stateRefs: List<StateRef>) =
+        QueryCriteria.VaultQueryCriteria(stateRefs = stateRefs)
+                .let { criteria ->
+                    queryBy<T>(criteria).states
+                }
+                .also { stateAndRefs ->
+                    if(stateAndRefs.size != 1) {
+                        throw FlowException("There should be a single ${T::class.simpleName} for this ref")
+                    }
+                }
+                .single()
 
-fun getRobberStateFromLinearID(linearId: UniqueIdentifier, serviceHub: ServiceHub) =
-        getSingleStateByLinearId<RobberState>(linearId, serviceHub)
+fun VaultService.queryDiceRoll(gameBoardLinearId: UniqueIdentifier) =
+        queryBy<DiceRollState>()
+                .states
+                .filter {
+                    it.state.data.gameBoardStateUniqueIdentifier == gameBoardLinearId
+                }
+                .also { stateAndRefs ->
+                    if(stateAndRefs.size != 1) {
+                        throw FlowException("There should be a single DiceRollState for id $gameBoardLinearId")
+                    }
+                }
+                .single()
