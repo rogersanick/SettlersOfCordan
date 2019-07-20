@@ -6,7 +6,8 @@ import net.corda.core.serialization.CordaSerializable
 
 @CordaSerializable
 data class TileSides @ConstructorForDeserialization constructor(
-        val value: List<TileSide> = List(HexTile.SIDE_COUNT) { TileSide() }) {
+        val value: List<TileSide> = List(HexTile.SIDE_COUNT) { TileSide() }
+) : TileSideLocator, CornerLocator, RoadLocator, NeighborLocator {
 
     init {
         require(value.size == HexTile.SIDE_COUNT) { "value.size cannot be ${value.size}" }
@@ -20,40 +21,25 @@ data class TileSides @ConstructorForDeserialization constructor(
         }
     }
 
-    fun getSideOn(sideIndex: TileSideIndex) = value[sideIndex.value]
-    fun indexOf(tileSide: TileSide) = value.indexOf(tileSide).let {
+    override fun getSideOn(sideIndex: TileSideIndex) = value[sideIndex.value]
+    override fun indexOf(tileSide: TileSide) = value.indexOf(tileSide).let {
         if (it < 0) null
         else TileSideIndex(it)
     }
 
-    fun getNeighborOn(sideIndex: TileSideIndex) = getSideOn(sideIndex).neighbor
-    /**
-     * The neighbors returned are ordered as per the argument.
-     */
-    fun getNeighborsOn(sideIndices: Iterable<TileSideIndex>) = sideIndices.map { getNeighborOn(it) }
-
-    /**
-     * The neighbors returned are ordered clockwise.
-     */
-    fun getNeighborsOn(cornerIndex: TileCornerIndex) = getNeighborsOn(cornerIndex.getAdjacentSides())
-
-    fun hasNeighborOn(sideIndex: TileSideIndex) = getNeighborOn(sideIndex) != null
+    override fun getNeighborOn(sideIndex: TileSideIndex) = getSideOn(sideIndex).neighbor
     fun indexOf(tileIndex: HexTileIndex) = value.map { it.neighbor }.indexOf(tileIndex).let {
         if (it < 0) null
         else TileSideIndex(it)
     }
 
-    fun getRoadIdOn(sideIndex: TileSideIndex) = getSideOn(sideIndex).roadId
-    fun hasRoadIdOn(sideIndex: TileSideIndex) = getRoadIdOn(sideIndex) != null
-    fun indexOf(roadId: UniqueIdentifier) = value.map { it.roadId }.indexOf(roadId).let {
-        if (it < 0) null
-        else TileSideIndex(it)
-    }
+    override fun getRoadIdOn(sideIndex: TileSideIndex) = getSideOn(sideIndex).roadId
+    override fun getRoadIds() = value.map { it.roadId }
 
     /**
      * The neighbor corners returned are ordered clockwise.
      */
-    fun getOverlappedCorners(cornerIndex: TileCornerIndex) = getNeighborsOn(cornerIndex)
+    override fun getOverlappedCorners(cornerIndex: TileCornerIndex) = getNeighborsOn(cornerIndex)
             .zip(cornerIndex.getOverlappedCorners())
             .map { pair ->
                 pair.first.let {
@@ -63,12 +49,18 @@ data class TileSides @ConstructorForDeserialization constructor(
             }
 
     class Builder(
-            private val value: MutableList<TileSide> = MutableList(HexTile.SIDE_COUNT) { TileSide() }) {
+            private val value: MutableList<TileSide> = MutableList(HexTile.SIDE_COUNT) { TileSide() }
+    ) : TileSideLocator, TileSideBuilder, CornerLocator, RoadLocator, RoadBuilder, NeighborLocator, NeighborBuilder {
 
         constructor(tileSides: TileSides) : this(tileSides.value.toMutableList())
 
-        fun getSideOn(sideIndex: TileSideIndex) = value[sideIndex.value]
-        fun setSideOn(sideIndex: TileSideIndex, tileSide: TileSide) = apply {
+        override fun getSideOn(sideIndex: TileSideIndex) = value[sideIndex.value]
+        override fun indexOf(tileSide: TileSide) = value.indexOf(tileSide).let {
+            if (it < 0) null
+            else TileSideIndex(it)
+        }
+
+        override fun setSideOn(sideIndex: TileSideIndex, tileSide: TileSide) = apply {
             require(getNeighborOn(sideIndex).let { it == null || it == tileSide.neighbor }) {
                 "You cannot replace an existing neighbor"
             }
@@ -78,16 +70,29 @@ data class TileSides @ConstructorForDeserialization constructor(
             value[sideIndex.value] = tileSide
         }
 
-        fun getNeighborOn(sideIndex: TileSideIndex) = getSideOn(sideIndex).neighbor
-        fun setNeighborOn(sideIndex: TileSideIndex, neighbor: HexTileIndex) = apply {
+        /**
+         * The neighbor corners returned are ordered clockwise.
+         */
+        override fun getOverlappedCorners(cornerIndex: TileCornerIndex) = getNeighborsOn(cornerIndex)
+                .zip(cornerIndex.getOverlappedCorners())
+                .map { pair ->
+                    pair.first.let {
+                        if (it == null) null
+                        else AbsoluteCorner(it, pair.second)
+                    }
+                }
+
+        override fun getNeighborOn(sideIndex: TileSideIndex) = getSideOn(sideIndex).neighbor
+        override fun setNeighborOn(sideIndex: TileSideIndex, neighbor: HexTileIndex) = apply {
             require(getNeighborOn(sideIndex).let { it == null || it == neighbor }) {
                 "You cannot replace an existing neighbor"
             }
             setSideOn(sideIndex, getSideOn(sideIndex).copy(neighbor = neighbor))
         }
 
-        fun getRoadIdOn(sideIndex: TileSideIndex) = getSideOn(sideIndex).roadId
-        fun setRoadIdOn(sideIndex: TileSideIndex, roadId: UniqueIdentifier) = apply {
+        override fun getRoadIdOn(sideIndex: TileSideIndex) = getSideOn(sideIndex).roadId
+        override fun getRoadIds() = value.map { it.roadId }
+        override fun setRoadIdOn(sideIndex: TileSideIndex, roadId: UniqueIdentifier) = apply {
             require(getRoadIdOn(sideIndex).let { it == null || it == roadId }) {
                 "You cannot build a new road on top of a current one"
             }
@@ -96,4 +101,50 @@ data class TileSides @ConstructorForDeserialization constructor(
 
         fun build() = TileSides(ImmutableList(value).toMutableList())
     }
+}
+
+interface TileSideLocator {
+    fun getSideOn(sideIndex: TileSideIndex): TileSide
+    fun indexOf(tileSide: TileSide): TileSideIndex?
+}
+
+interface TileSideBuilder {
+    fun setSideOn(sideIndex: TileSideIndex, tileSide: TileSide): TileSideBuilder
+}
+
+interface CornerLocator {
+    fun getOverlappedCorners(cornerIndex: TileCornerIndex): List<AbsoluteCorner?>
+}
+
+interface RoadLocator {
+    fun getRoadIdOn(sideIndex: TileSideIndex): UniqueIdentifier?
+    fun hasRoadIdOn(sideIndex: TileSideIndex) = getRoadIdOn(sideIndex) != null
+    fun getRoadIds(): List<UniqueIdentifier?>
+    fun indexOf(roadId: UniqueIdentifier) = getRoadIds().indexOf(roadId).let {
+        if (it < 0) null
+        else TileSideIndex(it)
+    }
+}
+
+interface RoadBuilder {
+    fun setRoadIdOn(sideIndex: TileSideIndex, roadId: UniqueIdentifier): RoadBuilder
+}
+
+interface NeighborLocator {
+    fun getNeighborOn(sideIndex: TileSideIndex): HexTileIndex?
+    fun isNeighborOn(sideIndex: TileSideIndex, tileIndex: HexTileIndex) = getNeighborOn(sideIndex) == tileIndex
+    fun hasNeighborOn(sideIndex: TileSideIndex) = getNeighborOn(sideIndex) != null
+    /**
+     * The neighbors returned are ordered as per the argument.
+     */
+    fun getNeighborsOn(sideIndices: Iterable<TileSideIndex>) = sideIndices.map { getNeighborOn(it) }
+
+    /**
+     * The neighbors returned are ordered clockwise.
+     */
+    fun getNeighborsOn(cornerIndex: TileCornerIndex) = getNeighborsOn(cornerIndex.getAdjacentSides())
+}
+
+interface NeighborBuilder {
+    fun setNeighborOn(sideIndex: TileSideIndex, neighbor: HexTileIndex): NeighborBuilder
 }

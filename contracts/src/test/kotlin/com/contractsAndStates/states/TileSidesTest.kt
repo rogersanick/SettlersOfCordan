@@ -108,6 +108,47 @@ class TileSidesTest {
     }
 
     @Test
+    fun `Builder-setRoadIdOn rejects if already set`() {
+        val indices = listOf(2, null, null, 0, 5, 12)
+        val ids = listOf(UniqueIdentifier(), null, null,
+                UniqueIdentifier(), UniqueIdentifier(), UniqueIdentifier())
+        val builder = TileSides.Builder()
+                .addNeighbors(indices)
+                .addRoads(ids)
+
+        assertFailsWith<java.lang.IllegalArgumentException> {
+            builder.setRoadIdOn(TileSideIndex(0), UniqueIdentifier())
+        }
+    }
+
+    @Test
+    fun `Builder-setRoadIdOn accepts idempotent`() {
+        val indices = listOf(2, null, null, 0, 5, 12)
+        val ids = mutableListOf(UniqueIdentifier(), null, null,
+                UniqueIdentifier(), UniqueIdentifier(), UniqueIdentifier())
+        val builder = TileSides.Builder()
+                .addNeighbors(indices)
+                .addRoads(ids)
+                .setRoadIdOn(TileSideIndex(0), ids[0]!!)
+
+        assertEquals(ids[0], builder.getRoadIdOn(TileSideIndex(0)))
+    }
+
+    @Test
+    fun `Builder-setRoadIdOn accepts setting id`() {
+        val indices = listOf(2, null, null, 0, 5, 12)
+        val ids = mutableListOf(null, null, null,
+                UniqueIdentifier(), UniqueIdentifier(), UniqueIdentifier())
+        val builder = TileSides.Builder()
+                .addNeighbors(indices)
+                .addRoads(ids)
+        ids[0] = UniqueIdentifier()
+        builder.setRoadIdOn(TileSideIndex(0), ids[0]!!)
+
+        assertEquals(ids[0], builder.getRoadIdOn(TileSideIndex(0)))
+    }
+
+    @Test
     fun `Builder-getSideOn is correct`() {
         val indices = listOf(2, null, null, 0, 5, 12)
         val tileIndices = indices.makeNeighbors()
@@ -121,6 +162,142 @@ class TileSidesTest {
                     TileSide(it, ids[index]),
                     builder.getSideOn(TileSideIndex(index)))
         }
+    }
+
+    @Test
+    fun `Builder-setSideOn rejects if already set`() {
+        val indices = listOf(2, null, null, 0, 5, 12)
+        val ids = listOf(UniqueIdentifier(), null, null,
+                UniqueIdentifier(), UniqueIdentifier(), UniqueIdentifier())
+        val builder = TileSides.Builder()
+                .addNeighbors(indices)
+                .addRoads(ids)
+
+        assertFailsWith<java.lang.IllegalArgumentException> {
+            builder.setSideOn(TileSideIndex(0), TileSide(HexTileIndex(3), null))
+        }
+        assertFailsWith<java.lang.IllegalArgumentException> {
+            builder.setSideOn(TileSideIndex(0), TileSide(HexTileIndex(2), UniqueIdentifier()))
+        }
+    }
+
+    @Test
+    fun `Builder-setSideOn accepts if idempotent with road`() {
+        val indices = listOf(2, null, null, 0, 5, 12)
+        val tileIndices = indices.makeNeighbors()
+        val ids = listOf(UniqueIdentifier(), null, null,
+                UniqueIdentifier(), UniqueIdentifier(), UniqueIdentifier())
+        val builder = TileSides.Builder()
+                .addNeighbors(indices)
+                .addRoads(ids)
+                .setSideOn(TileSideIndex(0), TileSide(HexTileIndex(2), ids[0]))
+
+        tileIndices.forEachIndexed { index, it ->
+            assertEquals(
+                    TileSide(it, ids[index]),
+                    builder.getSideOn(TileSideIndex(index)))
+        }
+    }
+
+    @Test
+    fun `Builder-setSideOn accepts if idempotent with null road`() {
+        val indices = listOf(2, null, null, 0, 5, 12)
+        val tileIndices = indices.makeNeighbors()
+        val ids = listOf(null, null, null,
+                UniqueIdentifier(), UniqueIdentifier(), UniqueIdentifier())
+        val builder = TileSides.Builder()
+                .addNeighbors(indices)
+                .addRoads(ids)
+                .setSideOn(TileSideIndex(0), TileSide(HexTileIndex(2), null))
+
+        tileIndices.forEachIndexed { index, it ->
+            assertEquals(
+                    TileSide(it, ids[index]),
+                    builder.getSideOn(TileSideIndex(index)))
+        }
+    }
+
+    @Test
+    fun `Builder-setSideOn accepts a road setting`() {
+        val indices = listOf(2, null, null, 0, 5, 12)
+        val tileIndices = indices.makeNeighbors()
+        val ids = mutableListOf(null, null, null,
+                UniqueIdentifier(), UniqueIdentifier(), UniqueIdentifier())
+        val builder = TileSides.Builder()
+                .addNeighbors(indices)
+                .addRoads(ids)
+        ids[0] = UniqueIdentifier()
+        builder.setSideOn(TileSideIndex(0), TileSide(HexTileIndex(2), ids[0]))
+
+        tileIndices.forEachIndexed { index, it ->
+            assertEquals(
+                    TileSide(it, ids[index]),
+                    builder.getSideOn(TileSideIndex(index)))
+        }
+    }
+
+    @Test
+    fun `Builder-setSideOn is correct`() {
+        val indices = listOf(2, null, null, 0, 5, 12)
+        val ids = listOf(UniqueIdentifier(), null, null,
+                UniqueIdentifier(), UniqueIdentifier(), UniqueIdentifier())
+        val builder = TileSides.Builder()
+                .addNeighbors(indices)
+                .addRoads(ids)
+                .setSideOn(TileSideIndex(1), TileSide(HexTileIndex(3), null))
+
+        listOf(2, 3, null, 0, 5, 12).makeNeighbors().forEachIndexed { index, it ->
+            assertEquals(
+                    TileSide(it, ids[index]),
+                    builder.getSideOn(TileSideIndex(index)))
+        }
+    }
+
+    @Test
+    fun `Builder-getOverlappedCorners is correct`() {
+        val neighbors = TileSides.Builder().addNeighbors(listOf(2, null, null, 0, 5, 12))
+        assertEquals(
+                listOf(
+                        AbsoluteCorner(HexTileIndex(12), TileCornerIndex(2)),
+                        AbsoluteCorner(HexTileIndex(2), TileCornerIndex(4))
+                ),
+                neighbors.getOverlappedCorners(TileCornerIndex(0))
+        )
+        assertEquals(
+                listOf(
+                        AbsoluteCorner(HexTileIndex(2), TileCornerIndex(3)),
+                        null
+                ),
+                neighbors.getOverlappedCorners(TileCornerIndex(1))
+        )
+        assertEquals(
+                listOf(
+                        null,
+                        null
+                ),
+                neighbors.getOverlappedCorners(TileCornerIndex(2))
+        )
+        assertEquals(
+                listOf(
+                        null,
+                        AbsoluteCorner(HexTileIndex(0), TileCornerIndex(1))
+                ),
+                neighbors.getOverlappedCorners(TileCornerIndex(3))
+        )
+        assertEquals(
+                listOf(
+                        AbsoluteCorner(HexTileIndex(0), TileCornerIndex(0)),
+                        AbsoluteCorner(HexTileIndex(5), TileCornerIndex(2))
+                ),
+                neighbors.getOverlappedCorners(TileCornerIndex(4))
+        )
+        assertEquals(
+                listOf(
+                        AbsoluteCorner(HexTileIndex(5), TileCornerIndex(1)),
+                        AbsoluteCorner(HexTileIndex(12), TileCornerIndex(3))
+                ),
+                neighbors.getOverlappedCorners(TileCornerIndex(5))
+        )
     }
 
     @Test
