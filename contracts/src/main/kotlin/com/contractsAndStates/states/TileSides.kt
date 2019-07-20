@@ -103,6 +103,9 @@ data class TileSides @ConstructorForDeserialization constructor(
     }
 }
 
+@CordaSerializable
+data class TileSide(val neighbor: HexTileIndex? = null, val roadId: UniqueIdentifier? = null)
+
 interface TileSideLocator {
     fun getSideOn(sideIndex: TileSideIndex): TileSide
     fun indexOf(tileSide: TileSide): TileSideIndex?

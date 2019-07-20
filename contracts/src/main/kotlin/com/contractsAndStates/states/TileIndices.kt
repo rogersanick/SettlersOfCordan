@@ -1,6 +1,5 @@
 package com.contractsAndStates.states
 
-import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.serialization.ConstructorForDeserialization
 import net.corda.core.serialization.CordaSerializable
 
@@ -62,9 +61,6 @@ data class HexTileIndex(val value: Int) {
         require(0 <= value && value < GameBoardState.TILE_COUNT) { "Hex tile index value cannot be $value" }
     }
 }
-
-@CordaSerializable
-data class TileSide(val neighbor: HexTileIndex? = null, val roadId: UniqueIdentifier? = null)
 
 @CordaSerializable
 /**
