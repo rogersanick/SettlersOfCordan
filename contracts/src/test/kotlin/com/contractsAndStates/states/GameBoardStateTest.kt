@@ -6,6 +6,8 @@ import net.corda.core.identity.Party
 import org.junit.Test
 import org.mockito.Mockito.mock
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class GameBoardStateTest {
 
@@ -26,10 +28,9 @@ class GameBoardStateTest {
 
     @Test
     fun `getSettlementsCount is correct`() {
+
         val placedTiles = buildWithBuilder()
-        val settlementBuilder = PlacedSettlements.Builder(List(GameBoardState.TILE_COUNT) {
-            MutableList(HexTile.SIDE_COUNT) { false }
-        })
+        val settlementBuilder = PlacedSettlements.Builder()
         val settlementsPlaced = settlementBuilder
                 .placeOn((1 to 2).toAbsoluteCorner(), placedTiles.get(HexTileIndex(1)).sides)
                 .placeOn((1 to 1).toAbsoluteCorner(), placedTiles.get(HexTileIndex(1)).sides)
@@ -44,5 +45,32 @@ class GameBoardStateTest {
                 settlementsPlaced = settlementsPlaced)
 
         assertEquals(3, boardState.getSettlementsCount())
+    }
+
+    @Test
+    fun `hasSettlementOn is correct`() {
+        val placedTiles = buildWithBuilder()
+        val settlementBuilder = PlacedSettlements.Builder()
+        val settlementsPlaced = settlementBuilder
+                .placeOn((1 to 2).toAbsoluteCorner(), placedTiles.get(HexTileIndex(1)).sides)
+                .placeOn((1 to 1).toAbsoluteCorner(), placedTiles.get(HexTileIndex(1)).sides)
+                .placeOn((7 to 4).toAbsoluteCorner(), placedTiles.get(HexTileIndex(7)).sides)
+                .build()
+        val boardState = GameBoardState(
+                hexTiles = placedTiles,
+                ports = PlacedPorts.Builder.createAllPorts().build(),
+                players = listOf(mock(Party::class.java), mock(Party::class.java), mock(Party::class.java)),
+                turnTrackerLinearId = UniqueIdentifier(),
+                robberLinearId = UniqueIdentifier(),
+                settlementsPlaced = settlementsPlaced)
+
+        assertFalse(boardState.hasSettlementOn((1 to 0).toAbsoluteCorner()))
+        assertTrue(boardState.hasSettlementOn((1 to 2).toAbsoluteCorner()))
+        assertTrue(boardState.hasSettlementOn((2 to 4).toAbsoluteCorner()))
+        assertTrue(boardState.hasSettlementOn((5 to 0).toAbsoluteCorner()))
+        assertTrue(boardState.hasSettlementOn((1 to 1).toAbsoluteCorner()))
+        assertTrue(boardState.hasSettlementOn((2 to 5).toAbsoluteCorner()))
+        assertTrue(boardState.hasSettlementOn((7 to 4).toAbsoluteCorner()))
+        assertFalse(boardState.hasSettlementOn((7 to 5).toAbsoluteCorner()))
     }
 }
