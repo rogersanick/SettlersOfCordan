@@ -91,12 +91,12 @@ class HexTileTest {
     fun `connect is correct 1-5`() {
         val builder1 = makeBasicBuilder(HexTileIndex(1))
         val builder5 = makeBasicBuilder(HexTileIndex(5))
-        assertFalse(builder1.isConnectedWith(TileSideIndex(3), builder5.hexTileIndex))
-        assertFalse(builder5.isConnectedWith(TileSideIndex(0), builder1.hexTileIndex))
+        assertFalse(builder1.isNeighborOn(TileSideIndex(3), builder5.hexTileIndex))
+        assertFalse(builder5.isNeighborOn(TileSideIndex(0), builder1.hexTileIndex))
 
         builder5.connect(TileSideIndex(0), builder1)
-        assertTrue(builder1.isConnectedWith(TileSideIndex(3), builder5.hexTileIndex))
-        assertTrue(builder5.isConnectedWith(TileSideIndex(0), builder1.hexTileIndex))
+        assertTrue(builder1.isNeighborOn(TileSideIndex(3), builder5.hexTileIndex))
+        assertTrue(builder5.isNeighborOn(TileSideIndex(0), builder1.hexTileIndex))
     }
 
     @Test

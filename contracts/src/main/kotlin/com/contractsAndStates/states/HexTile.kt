@@ -9,7 +9,8 @@ data class HexTile(
         val rollTrigger: RollTrigger?,
         val robberPresent: Boolean,
         val hexTileIndex: HexTileIndex,
-        val sides: TileSides = TileSides()) {
+        val sides: TileSides = TileSides()
+) : TileSideLocator by sides, RoadLocator by sides, NeighborLocator by sides {
 
     companion object {
         const val SIDE_COUNT = 6
@@ -22,7 +23,9 @@ data class HexTile(
             resourceType: HexTileType? = null,
             rollTrigger: RollTrigger? = null,
             robberPresent: Boolean? = null,
-            val sidesBuilder: TileSides.Builder = TileSides.Builder()) {
+            val sidesBuilder: TileSides.Builder = TileSides.Builder()
+    ): TileSideLocator by sidesBuilder, TileSideBuilder by sidesBuilder, RoadLocator by sidesBuilder,
+            RoadBuilder by sidesBuilder, NeighborLocator by sidesBuilder, NeighborBuilder by sidesBuilder {
 
         constructor(tile: HexTile) : this(
                 tile.hexTileIndex,
@@ -65,17 +68,14 @@ data class HexTile(
             this.robberPresent = robberPresent
         }
 
-        fun isConnectedWith(sideIndex: TileSideIndex, tileIndex: HexTileIndex) =
-                sidesBuilder.getNeighborOn(sideIndex) == tileIndex
-
         /**
          * This method is used to create a fully connected graph of HexTiles. This enables some
          * funky maths that we will use later on to calculate the validity of transactions.
          */
         fun connect(mySideIndex: TileSideIndex, hexTileToConnect: Builder): Builder = apply {
             val myTileIndex = hexTileIndex
-            sidesBuilder.setNeighborOn(mySideIndex, hexTileToConnect.hexTileIndex)
-            if (!hexTileToConnect.isConnectedWith(mySideIndex.opposite(), myTileIndex))
+            setNeighborOn(mySideIndex, hexTileToConnect.hexTileIndex)
+            if (!hexTileToConnect.isNeighborOn(mySideIndex.opposite(), myTileIndex))
                 hexTileToConnect.connect(mySideIndex.opposite(), this)
         }
 
