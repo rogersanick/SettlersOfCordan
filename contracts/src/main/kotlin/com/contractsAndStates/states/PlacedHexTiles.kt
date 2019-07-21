@@ -1,6 +1,7 @@
 package com.contractsAndStates.states
 
 import co.paralleluniverse.fibers.Suspendable
+import com.oracleClientStatesAndContracts.states.RollTrigger
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.internal.toMultiMap
 import net.corda.core.serialization.ConstructorForDeserialization
@@ -61,12 +62,22 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
                 HexTileType.Mountain to 3,
                 HexTileType.Pasture to 4)
 
+        val rollTriggers = listOf(2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12)
+                .map { RollTrigger(it) }
+
         fun getAllAbsoluteCorners() = (0 until GameBoardState.TILE_COUNT).flatMap { tile ->
             (0 until HexTile.SIDE_COUNT).map { AbsoluteCorner(HexTileIndex(tile), TileCornerIndex(it)) }
         }
     }
 
     override fun get(index: HexTileIndex) = value[index.value]
+    /**
+     * Excludes tiles that have a robber.
+     */
+    override fun getTilesBy(rollTrigger: RollTrigger, robberPresent: Boolean) =
+            value.filter { it.rollTrigger == rollTrigger && it.robberPresent == robberPresent }
+
+    override fun getTilesBy(type: HexTileType) = value.filter { it.resourceType == type }
     fun indexOf(tile: HexTile?) = value.indexOf(tile).let {
         if (it < 0) null
         else HexTileIndex(it)
@@ -101,8 +112,7 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
     fun toBuilder() = Builder(this)
 
     class Builder(
-            private val value: MutableList<HexTile.Builder> =
-                    (0 until GameBoardState.TILE_COUNT).map { HexTile.Builder(HexTileIndex(it)) }.toMutableList()
+            private val value: MutableList<HexTile.Builder>
     ) : TileLocator<HexTile.Builder>,
             AbsoluteSideLocator,
             AbsoluteCornerLocator,
@@ -118,6 +128,15 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
                 "value.size cannot be ${value.size}"
             }
             connectNeighbors()
+        }
+
+        companion object {
+            fun createFullTileList() = (0 until GameBoardState.TILE_COUNT)
+                    .map { HexTile.Builder(HexTileIndex(it)) }.toMutableList()
+
+            fun createFull() = Builder(createFullTileList())
+                    .assignShuffledTypes()
+                    .assignShuffledRollTriggers()
         }
 
         fun connectNeighbors() {
@@ -156,11 +175,31 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
                     .shuffled()
                     .zip(value)
                     .forEach {
-                        it.second.with(it.first).with(it.first == HexTileType.Desert)
+                        it.second.with(it.first)
+                                .with(it.first == HexTileType.Desert)
                     }
         }
 
+        fun assignShuffledRollTriggers() = apply {
+            val shuffled = rollTriggers.shuffled()
+            value.foldIndexed(false) { index, hadDessert, tile ->
+                val rollTrigger = shuffled[index - if (hadDessert) 1 else 0]
+                if (tile.resourceType == HexTileType.Desert) true
+                else {
+                    tile.with(rollTrigger)
+                    hadDessert
+                }
+            }
+        }
+
         override fun get(index: HexTileIndex) = value[index.value]
+        /**
+         * Excludes tiles that have a robber.
+         */
+        override fun getTilesBy(rollTrigger: RollTrigger, robberPresent: Boolean) =
+                value.filter { it.rollTrigger == rollTrigger && it.robberPresent == robberPresent }
+
+        override fun getTilesBy(type: HexTileType) = value.filter { it.resourceType == type }
         override fun getOpposite(absoluteSide: AbsoluteSide) = get(absoluteSide.tileIndex)
                 .getNeighborOn(absoluteSide.sideIndex)
                 .let { AbsoluteSide.create(it, absoluteSide.sideIndex.opposite()) }
@@ -215,6 +254,8 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
 
 interface TileLocator<T> {
     fun get(index: HexTileIndex): T
+    fun getTilesBy(rollTrigger: RollTrigger, robberPresent: Boolean): List<T>
+    fun getTilesBy(type: HexTileType): List<T>
 }
 
 interface AbsoluteSideLocator {

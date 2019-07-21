@@ -41,7 +41,8 @@ data class PlacedSettlements @ConstructorForDeserialization constructor(
             value[corner.value] = settlementId
         }
 
-        fun build() = PlacedSettlements(ImmutableList(value))
+        fun getAllSettlements(): List<UniqueIdentifier?> = ImmutableList(value)
+        fun build() = PlacedSettlements(getAllSettlements())
     }
 }
 

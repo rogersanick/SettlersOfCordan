@@ -14,7 +14,9 @@ class PlacedHexTilesTest {
             (0 until entry.value).map {
                 HexTile.Builder(HexTileIndex(tileIndex).also { tileIndex++ })
                         .with(entry.key)
-                        .with(RollTrigger(3))
+                        .also { builder ->
+                            if (entry.key != HexTileType.Desert) builder.with(RollTrigger(3))
+                        }
                         .with(entry.key == HexTileType.Desert)
             }
         }
@@ -36,7 +38,7 @@ class PlacedHexTilesTest {
 
     @Test
     fun `Builder default value is correct`() {
-        val builder = PlacedHexTiles.Builder()
+        val builder = PlacedHexTiles.Builder(PlacedHexTiles.Builder.createFullTileList())
         (0 until GameBoardState.TILE_COUNT).forEach {
             assertEquals(HexTileIndex(it), builder.get(HexTileIndex(it)).hexTileIndex)
         }
@@ -359,8 +361,7 @@ class PlacedHexTilesTest {
 
     @Test
     fun `Builder-assignShuffledTypes is correct`() {
-        PlacedHexTiles.Builder()
-                .assignShuffledTypes()
+        PlacedHexTiles.Builder.createFull()
                 .build()
                 .value
                 .map { it.resourceType to 1 }
@@ -369,6 +370,17 @@ class PlacedHexTilesTest {
                 .forEach { (type, count) ->
                     assertEquals(PlacedHexTiles.tileCountPerType[type], count)
                 }
+    }
+
+    @Test
+    fun `Builder-assignShuffledRollTriggers is correct`() {
+        val placed = PlacedHexTiles.Builder.createFull()
+                .build()
+                .value
+        placed.forEach {
+            assertEquals(it.resourceType == HexTileType.Desert, it.rollTrigger == null)
+        }
+        assertEquals(PlacedHexTiles.rollTriggers, placed.mapNotNull { it.rollTrigger }.sortedBy { it.total })
     }
 
     @Test
@@ -461,6 +473,22 @@ class PlacedHexTilesTest {
                 .with(false)
         assertFailsWith<IllegalArgumentException> {
             PlacedHexTiles(list.map { it.build() })
+        }
+    }
+
+    @Test
+    fun `Constructor rejects null rollTrigger on non-desert tile`() {
+        val builder = PlacedHexTiles.Builder(PlacedHexTiles.Builder.createFullTileList())
+                .assignShuffledTypes()
+        (0 until GameBoardState.TILE_COUNT).fold(false) { doneYet, index ->
+            val tile = builder.get(HexTileIndex(index))
+            if (tile.resourceType != HexTileType.Desert) {
+                if (doneYet) tile.with(RollTrigger(2))
+                true
+            } else doneYet
+        }
+        assertFailsWith<java.lang.IllegalArgumentException> {
+            builder.build()
         }
     }
 

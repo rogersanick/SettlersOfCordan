@@ -1,6 +1,5 @@
 package com.contractsAndStates.states
 
-import com.oracleClientStatesAndContracts.states.RollTrigger
 import net.corda.core.contracts.UniqueIdentifier
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -9,20 +8,8 @@ import kotlin.test.assertTrue
 
 class GameBoardStateTest {
 
-    private fun getAllTileBuilders(): List<HexTile.Builder> {
-        var tileIndex = 0
-        return PlacedHexTiles.tileCountPerType.flatMap { entry ->
-            (0 until entry.value).map {
-                HexTile.Builder(HexTileIndex(tileIndex).also { tileIndex++ })
-                        .with(entry.key)
-                        .with(RollTrigger(3))
-                        .with(entry.key == HexTileType.Desert)
-            }
-        }
-    }
-
     private fun boardBuilder() = GameBoardState.Builder(
-            hexTiles = PlacedHexTiles.Builder(getAllTileBuilders().toMutableList()),
+            hexTiles = PlacedHexTiles.Builder.createFull(),
             ports = PlacedPorts.Builder.createAllPorts(),
             turnTrackerLinearId = UniqueIdentifier(),
             robberLinearId = UniqueIdentifier())

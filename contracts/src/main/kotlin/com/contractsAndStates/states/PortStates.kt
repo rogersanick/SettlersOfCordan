@@ -79,6 +79,12 @@ data class Port @ConstructorForDeserialization constructor(val portTile: PortTil
     }
 }
 
+/**
+ * Ports in Settlers of Cordan enable users to exchange resources at more favourable rates than those available to
+ * players generally.
+ * To access a port, a player must have previously built a settlement on a hex tile with an adjacent port.
+ * The settlement must also be built on one of the designated access point specified below.
+ */
 @CordaSerializable
 data class PortTile(val inputRequired: List<Amount<TokenType>>, val outputRequired: List<Amount<TokenType>>) {
 

@@ -75,6 +75,13 @@ data class GameBoardState(
             AbsoluteSettlementLocator by hexTiles,
             AbsoluteSettlementBuilder by hexTiles {
 
+        companion object {
+            fun createFull() = Builder(
+                    hexTiles = PlacedHexTiles.Builder.createFull(),
+                    ports = PlacedPorts.Builder.createAllPorts()
+            )
+        }
+
         fun addPlayers(newPlayers: List<Party>) = apply { players.addAll(newPlayers) }
         fun withTurnTracker(id: UniqueIdentifier) = apply {
             require(turnTrackerLinearId == null || turnTrackerLinearId == id) {
