@@ -24,7 +24,8 @@ data class PlacedSettlements @ConstructorForDeserialization constructor(
 
     class Builder(private val value: MutableList<UniqueIdentifier?> =
                           MutableList(HexTile.SIDE_COUNT) { null }
-    ) : SettlementLocator, SettlementBuilder {
+    ) : SettlementLocator,
+            SettlementBuilder {
 
         init {
             require(value.size == HexTile.SIDE_COUNT) {

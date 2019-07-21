@@ -29,8 +29,12 @@ data class GameBoardState(
         val initialPiecesPlaced: Int = 0,
         val winner: Party? = null,
         val beginner: Boolean = false
-) : LinearState, TileLocator<HexTile> by hexTiles, AbsoluteSideLocator by hexTiles, AbsoluteCornerLocator by hexTiles,
-        AbsoluteRoadLocator by hexTiles, AbsoluteSettlementLocator by hexTiles {
+) : LinearState,
+        TileLocator<HexTile> by hexTiles,
+        AbsoluteSideLocator by hexTiles,
+        AbsoluteCornerLocator by hexTiles,
+        AbsoluteRoadLocator by hexTiles,
+        AbsoluteSettlementLocator by hexTiles {
 
     override val participants: List<Party> get() = players
 
@@ -39,19 +43,6 @@ data class GameBoardState(
     }
 
     fun weWin(ourIdentity: Party) = copy(winner = ourIdentity)
-
-    /**
-     * Also checks the overlapping corners.
-     */
-    override fun getSettlementOn(corner: AbsoluteCorner) = getOverlappedCorners(corner)
-            .plus(corner)
-            .map { it ->
-                if (it != null) get(corner.tileIndex).getSettlementOn(corner.cornerIndex)
-                else null
-            }
-            .toSet()
-            .also { require(it.size == 1) { "There should be a single id on overlapped corners" } }
-            .single()
 
     fun toBuilder() = Builder(
             linearId = linearId,
@@ -76,8 +67,12 @@ data class GameBoardState(
             private var initialPiecesPlaced: Int = 0,
             private var winner: Party? = null,
             private var beginner: Boolean = false
-    ) : TileLocator<HexTile.Builder> by hexTiles, AbsoluteSideLocator by hexTiles, AbsoluteCornerLocator by hexTiles,
-            AbsoluteRoadLocator by hexTiles, AbsoluteRoadBuilder by hexTiles, AbsoluteSettlementLocator by hexTiles,
+    ) : TileLocator<HexTile.Builder> by hexTiles,
+            AbsoluteSideLocator by hexTiles,
+            AbsoluteCornerLocator by hexTiles,
+            AbsoluteRoadLocator by hexTiles,
+            AbsoluteRoadBuilder by hexTiles,
+            AbsoluteSettlementLocator by hexTiles,
             AbsoluteSettlementBuilder by hexTiles {
 
         fun addPlayers(newPlayers: List<Party>) = apply { players.addAll(newPlayers) }

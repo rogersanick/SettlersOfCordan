@@ -23,10 +23,11 @@ class GameBoardStateTest {
         }
     }
 
-    private fun buildWithBuilder() = PlacedHexTiles.Builder(getAllTileBuilders().toMutableList()).build()
     private fun boardBuilder() = GameBoardState.Builder(
             hexTiles = PlacedHexTiles.Builder(getAllTileBuilders().toMutableList()),
-            ports = PlacedPorts.Builder())
+            ports = PlacedPorts.Builder.createAllPorts(),
+            turnTrackerLinearId = UniqueIdentifier(),
+            robberLinearId = UniqueIdentifier())
 
     private fun Pair<Int, Int>.toAbsoluteCorner() = AbsoluteCorner(HexTileIndex(first), TileCornerIndex(second))
 

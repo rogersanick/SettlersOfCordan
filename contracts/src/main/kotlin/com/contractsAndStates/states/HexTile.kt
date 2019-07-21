@@ -11,7 +11,10 @@ data class HexTile(
         val hexTileIndex: HexTileIndex,
         val sides: TileSides = TileSides(),
         val settlements: PlacedSettlements = PlacedSettlements()
-) : TileSideLocator by sides, RoadLocator by sides, SettlementLocator by settlements, NeighborLocator by sides {
+) : TileSideLocator by sides,
+        RoadLocator by sides,
+        SettlementLocator by settlements,
+        NeighborLocator by sides {
 
     companion object {
         const val SIDE_COUNT = 6
@@ -26,9 +29,14 @@ data class HexTile(
             robberPresent: Boolean? = null,
             val sidesBuilder: TileSides.Builder = TileSides.Builder(),
             val settlementsBuilder: PlacedSettlements.Builder = PlacedSettlements.Builder()
-    ) : TileSideLocator by sidesBuilder, TileSideBuilder by sidesBuilder, RoadLocator by sidesBuilder,
-            RoadBuilder by sidesBuilder, SettlementLocator by settlementsBuilder,
-            SettlementBuilder by settlementsBuilder, NeighborLocator by sidesBuilder, NeighborBuilder by sidesBuilder {
+    ) : TileSideLocator by sidesBuilder,
+            TileSideBuilder by sidesBuilder,
+            RoadLocator by sidesBuilder,
+            RoadBuilder by sidesBuilder,
+            SettlementLocator by settlementsBuilder,
+            SettlementBuilder by settlementsBuilder,
+            NeighborLocator by sidesBuilder,
+            NeighborBuilder by sidesBuilder {
 
         constructor(tile: HexTile) : this(
                 tile.hexTileIndex,

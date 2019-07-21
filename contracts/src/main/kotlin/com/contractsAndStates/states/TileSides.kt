@@ -7,7 +7,10 @@ import net.corda.core.serialization.CordaSerializable
 @CordaSerializable
 data class TileSides @ConstructorForDeserialization constructor(
         val value: List<TileSide> = List(HexTile.SIDE_COUNT) { TileSide() }
-) : TileSideLocator, CornerLocator, RoadLocator, NeighborLocator {
+) : TileSideLocator,
+        CornerLocator,
+        RoadLocator,
+        NeighborLocator {
 
     init {
         require(value.size == HexTile.SIDE_COUNT) { "value.size cannot be ${value.size}" }
@@ -50,7 +53,13 @@ data class TileSides @ConstructorForDeserialization constructor(
 
     class Builder(
             private val value: MutableList<TileSide> = MutableList(HexTile.SIDE_COUNT) { TileSide() }
-    ) : TileSideLocator, TileSideBuilder, CornerLocator, RoadLocator, RoadBuilder, NeighborLocator, NeighborBuilder {
+    ) : TileSideLocator,
+            TileSideBuilder,
+            CornerLocator,
+            RoadLocator,
+            RoadBuilder,
+            NeighborLocator,
+            NeighborBuilder {
 
         constructor(tileSides: TileSides) : this(tileSides.value.toMutableList())
 

@@ -9,7 +9,11 @@ import net.corda.core.serialization.CordaSerializable
 @CordaSerializable
 data class PlacedHexTiles @ConstructorForDeserialization constructor(
         val value: List<HexTile>
-) : TileLocator<HexTile>, AbsoluteSideLocator, AbsoluteCornerLocator, AbsoluteRoadLocator, AbsoluteSettlementLocator {
+) : TileLocator<HexTile>,
+        AbsoluteSideLocator,
+        AbsoluteCornerLocator,
+        AbsoluteRoadLocator,
+        AbsoluteSettlementLocator {
 
     init {
         require(value.size == GameBoardState.TILE_COUNT) {
@@ -81,10 +85,8 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
     override fun getRoadOn(side: AbsoluteSide) = get(side.tileIndex).getRoadOn(side.sideIndex)
     override fun getSettlementOn(corner: AbsoluteCorner) = getOverlappedCorners(corner)
             .plus(corner)
-            .map { it ->
-                if (it != null) get(corner.tileIndex).getSettlementOn(corner.cornerIndex)
-                else null
-            }
+            .filterNotNull()
+            .map { get(it.tileIndex).getSettlementOn(it.cornerIndex) }
             .toSet()
             .also { require(it.size == 1) { "There should be a single id on overlapped corners" } }
             .single()
@@ -101,8 +103,13 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
 
     class Builder(
             private val value: MutableList<HexTile.Builder>
-    ) : TileLocator<HexTile.Builder>, AbsoluteSideLocator, AbsoluteCornerLocator, AbsoluteRoadLocator,
-            AbsoluteRoadBuilder, AbsoluteSettlementLocator, AbsoluteSettlementBuilder {
+    ) : TileLocator<HexTile.Builder>,
+            AbsoluteSideLocator,
+            AbsoluteCornerLocator,
+            AbsoluteRoadLocator,
+            AbsoluteRoadBuilder,
+            AbsoluteSettlementLocator,
+            AbsoluteSettlementBuilder {
         constructor(placedHexTiles: PlacedHexTiles) :
                 this(placedHexTiles.value.map { it.toBuilder() }.toMutableList())
 
@@ -171,8 +178,16 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
                     }
         }
 
-        override fun getSettlementOn(corner: AbsoluteCorner) =
-                get(corner.tileIndex).getSettlementOn(corner.cornerIndex)
+        /**
+         * Also checks the overlapping corners.
+         */
+        override fun getSettlementOn(corner: AbsoluteCorner) = getOverlappedCorners(corner)
+                .plus(corner)
+                .filterNotNull()
+                .map { get(it.tileIndex).getSettlementOn(it.cornerIndex) }
+                .toSet()
+                .also { require(it.size == 1) { "There should be a single id on overlapped corners" } }
+                .single()
 
         override fun getAllSettlements() = getAllAbsoluteCorners()
                 .mapNotNull { getSettlementOn(it) }
