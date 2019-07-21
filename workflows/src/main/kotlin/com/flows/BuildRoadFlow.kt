@@ -24,14 +24,19 @@ import net.corda.core.transactions.TransactionBuilder
 @StartableByRPC
 class BuildRoadFlow(
         val gameBoardLinearId: UniqueIdentifier,
-        val hexTileIndex: Int,
-        val hexTileSide: Int
+        hexTileIndex: Int,
+        hexTileSide: Int
 ) : FlowLogic<SignedTransaction>() {
+
+    val absoluteSide: AbsoluteSide
+
+    init {
+        absoluteSide = AbsoluteSide(HexTileIndex(hexTileIndex), TileSideIndex(hexTileSide))
+    }
+
     @Suspendable
     override fun call(): SignedTransaction {
 
-        val tileIndex = HexTileIndex(hexTileIndex)
-        val sideIndex = TileSideIndex(hexTileSide)
 
         // Step 1. Retrieve the Game Board State from the vault.
         val gameBoardStateAndRef = serviceHub.vaultService
@@ -56,11 +61,11 @@ class BuildRoadFlow(
         tb.addCommand(buildRoadCommand)
 
         // Step 6. Create initial road state
-        val roadState = RoadState(tileIndex, sideIndex, gameBoardState.players, ourIdentity)
+        val roadState = RoadState(absoluteSide, gameBoardState.players, ourIdentity)
 
         // Step 7. Determine if the road state is extending an existing road
         val newBoardStateBuilder = gameBoardState.toBuilder()
-        newBoardStateBuilder.buildRoadOn(tileIndex, sideIndex, roadState.linearId)
+        newBoardStateBuilder.setRoadOn(absoluteSide, roadState.linearId)
         val outputGameBoardState = newBoardStateBuilder.build()
 
         // Step 8. Add all states and commands to the transaction.

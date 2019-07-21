@@ -69,7 +69,6 @@ class BuildPhaseContract : Contract {
                 val newSettlement = outputSettlements.single()
                 val onCorner = newSettlement.absoluteCorner
                 val newRoad = outputRoads.single()
-                val onSide = newRoad.getAbsoluteSide()
                 val turnTracker = turnTrackers.single()
                 val currentPlayer = inputBoard.players[turnTracker.currTurnIndex]
 
@@ -77,13 +76,12 @@ class BuildPhaseContract : Contract {
                  * Check Settlements - no previous settlement should be on the place, on the neighboring corners,
                  * and for the overlapping ones.
                  */
-                val itAndNeighboringCorners = inputBoard.hexTiles
-                        .getItAndNeighboringCorners(onCorner)
+                val itAndNeighboringCorners = inputBoard.getItAndNeighboringCorners(onCorner)
                 "A settlement must not have previously been built in this vicinity." using
-                        itAndNeighboringCorners.none { inputBoard.settlementsPlaced.hasOn(it) }
+                        itAndNeighboringCorners.none { inputBoard.hasSettlementOn(it) }
                 "A settlement cannot be built on a hexTile that is of type Desert" using
                         itAndNeighboringCorners.none {
-                            inputBoard.hexTiles.get(it.tileIndex).resourceType == HexTileType.Desert
+                            inputBoard.get(it.tileIndex).resourceType == HexTileType.Desert
                         }
 
                 /**
@@ -92,12 +90,12 @@ class BuildPhaseContract : Contract {
                  */
                 if (turnTracker.setUpRound1Complete) {
                     // The list of resources that should be issued in this transaction.
-                    val consolidatedResources = inputBoard.hexTiles
+                    val consolidatedResources = inputBoard
                             .getOverlappedCorners(onCorner)
                             .filterNotNull()
                             .plus(onCorner)
                             .mapNotNull { corner ->
-                                inputBoard.hexTiles.get(corner.tileIndex).resourceType.let { tileType ->
+                                inputBoard.get(corner.tileIndex).resourceType.let { tileType ->
                                     if (tileType != HexTileType.Desert) {
                                         Pair(
                                                 tileType.resourceYielded!!,
@@ -122,13 +120,13 @@ class BuildPhaseContract : Contract {
                 }
 
                 "A road must not have previously been built in this location." using
-                        inputBoard.hexTiles.getItAndOppositeSides(onSide).none {
-                            inputBoard.hexTiles.hasRoadIdOn(it)
+                        inputBoard.getItAndOppositeSides(newRoad.absoluteSide).none {
+                            inputBoard.hasRoadOn(it)
                         }
 
-                outputBoard.hexTiles.getItAndOppositeSides(onSide).also { sides ->
+                outputBoard.getItAndOppositeSides(newRoad.absoluteSide).also { sides ->
                     "The new road must have been built in this location." using sides.all {
-                        outputBoard.hexTiles.hasRoadIdOn(it)
+                        outputBoard.hasRoadOn(it)
                     }
                     "The new road should be adjacent to the proposed settlement" using sides.all { side ->
                         side.getAdjacentCorners().any { it == onCorner }
@@ -163,13 +161,12 @@ class BuildPhaseContract : Contract {
                 val newSettlement = outputSettlements.single()
                 val onCorner = newSettlement.absoluteCorner
 
-                val itAndNeighboringCorners = inputBoard.hexTiles
-                        .getItAndNeighboringCorners(onCorner)
+                val itAndNeighboringCorners = inputBoard.getItAndNeighboringCorners(onCorner)
                 "A settlement must not have previously been built in this vicinity." using
-                        itAndNeighboringCorners.none { inputBoard.settlementsPlaced.hasOn(it) }
+                        itAndNeighboringCorners.none { inputBoard.hasSettlementOn(it) }
                 "A settlement cannot be built on a hexTile that is of type Desert" using
                         itAndNeighboringCorners.none {
-                            inputBoard.hexTiles.get(it.tileIndex).resourceType == HexTileType.Desert
+                            inputBoard.get(it.tileIndex).resourceType == HexTileType.Desert
                         }
 
                 verifyPaymentIsEnough(getBuildableCosts(Buildable.Settlement), outputResources, "settlement")
@@ -197,17 +194,16 @@ class BuildPhaseContract : Contract {
                  *  Check that the counter party is proposing a move that is allowed by the rules of the game.
                  */
                 val newRoad = outputRoads.single()
-                val onSide = newRoad.getAbsoluteSide()
 
                 verifyPaymentIsEnough(getBuildableCosts(Buildable.Road), outputResources, "road")
 
                 "A road must not have previously been built in this location." using
-                        inputBoard.hexTiles.getItAndOppositeSides(onSide).none {
-                            inputBoard.hexTiles.hasRoadIdOn(it)
+                        inputBoard.getItAndOppositeSides(newRoad.absoluteSide).none {
+                            inputBoard.hasRoadOn(it)
                         }
-                outputBoard.hexTiles.getItAndOppositeSides(onSide).also { sides ->
+                outputBoard.getItAndOppositeSides(newRoad.absoluteSide).also { sides ->
                     "The new road must have been built in this location." using sides.all {
-                        outputBoard.hexTiles.hasRoadIdOn(it)
+                        outputBoard.hasRoadOn(it)
                     }
 //                    TODO "The new road should be adjacent to a settlement" using sides.all { side ->
 //                        side.getAdjacentCorners().any { it == onCorner }
@@ -241,7 +237,7 @@ class BuildPhaseContract : Contract {
                 val newCity = outputSettlements.single()
 
                 "A city cannot be built on a hexTile that is of type Desert" using
-                        (inputBoard.hexTiles.get(newCity.absoluteCorner.tileIndex).resourceType == HexTileType.Desert)
+                        (inputBoard.get(newCity.absoluteCorner.tileIndex).resourceType == HexTileType.Desert)
 
                 verifyPaymentIsEnough(getBuildableCosts(Buildable.City), outputResources, "city")
 
@@ -260,12 +256,12 @@ class BuildPhaseContract : Contract {
         }
     }
 
-    fun PlacedHexTiles.getItAndNeighboringCorners(onCorner: AbsoluteCorner) =
+    fun GameBoardState.getItAndNeighboringCorners(onCorner: AbsoluteCorner) =
             listOf(onCorner.previous(), onCorner, onCorner.next())
                     .flatMap { getOverlappedCorners(it).plus(it) }
                     .filterNotNull()
 
-    fun PlacedHexTiles.getItAndOppositeSides(onSide: AbsoluteSide) =
+    fun GameBoardState.getItAndOppositeSides(onSide: AbsoluteSide) =
             listOfNotNull(onSide, getOpposite(onSide))
 
     fun verifyPaymentIsEnough(buildableCosts: Map<TokenType, Long>, outputResources: List<FungibleToken>, what: String) =

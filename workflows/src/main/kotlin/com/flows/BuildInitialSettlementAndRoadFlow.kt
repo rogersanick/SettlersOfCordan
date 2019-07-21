@@ -15,7 +15,6 @@ import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
 import net.corda.core.internal.toMultiMap
 import net.corda.core.node.services.queryBy
-import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
@@ -32,26 +31,22 @@ import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
-class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
-                                        hexTileIndex: Int,
-                                        hexTileCoordinate: Int,
-                                        hexTileRoadSide: Int
+class BuildInitialSettlementAndRoadFlow(
+        val gameBoardLinearId: UniqueIdentifier,
+        tileIndex: Int,
+        cornerIndex: Int,
+        sideIndex: Int
 ) : FlowLogic<SignedTransaction>() {
 
-    val tileIndex: HexTileIndex
-    val cornerIndex: TileCornerIndex
     val absoluteCorner: AbsoluteCorner
-    val sideIndex: TileSideIndex
     val absoluteSide: AbsoluteSide
 
     init {
-        tileIndex = HexTileIndex(hexTileIndex)
-        cornerIndex = TileCornerIndex(hexTileCoordinate)
-        absoluteCorner = AbsoluteCorner(tileIndex, cornerIndex)
-        sideIndex = TileSideIndex(hexTileRoadSide)
-        absoluteSide = AbsoluteSide(tileIndex, sideIndex)
+        val hexTileIndex = HexTileIndex(tileIndex)
+        absoluteCorner = AbsoluteCorner(hexTileIndex, TileCornerIndex(cornerIndex))
+        absoluteSide = AbsoluteSide(hexTileIndex, TileSideIndex(sideIndex))
 
-        require(cornerIndex.getAdjacentSides().contains(sideIndex)) {
+        require(absoluteCorner.cornerIndex.getAdjacentSides().contains(absoluteSide.sideIndex)) {
             "You must build a road next to a settlement"
         }
     }
@@ -87,14 +82,14 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         tb.addCommand(placeInitialSettlement)
 
         // Step 6. Create an initial settlement state
-        val settlementState = SettlementState(tileIndex, cornerIndex, gameBoardState.players, ourIdentity)
+        val settlementState = SettlementState(absoluteCorner, gameBoardState.players, ourIdentity)
 
         // Step 7. Prepare a new Game Board State which will contain an updated mapping of where settlements
         // have been placed.
         val boardBuilder = gameBoardState.toBuilder()
 
         // Step 8. Use the build to place the settlement on overlapping corners.
-        boardBuilder.placeSettlementOn(absoluteCorner)
+        boardBuilder.setSettlementOn(absoluteCorner, settlementState.linearId)
 
         // Step 9. Add self-issued resources if we are in the second round of initial placement
         if (turnTrackerState.setUpRound1Complete) {
@@ -117,10 +112,10 @@ class BuildInitialSettlementAndRoadFlow(val gameBoardLinearId: UniqueIdentifier,
         }
 
         // Step 10. Create the road state at the appropriate location specified by the user.
-        val roadState = RoadState(tileIndex, sideIndex, gameBoardState.players, ourIdentity)
+        val roadState = RoadState(absoluteSide, gameBoardState.players, ourIdentity)
 
         // Step 11. Update the gameBoardState hexTiles with the roads being built.
-        boardBuilder.buildRoadOn(absoluteSide, roadState.linearId)
+        boardBuilder.setRoadOn(absoluteSide, roadState.linearId)
 
         // Step 12. Update the gameBoardState with new hexTiles and built settlements.
         val updatedOutputGameBoardState = boardBuilder.build()
