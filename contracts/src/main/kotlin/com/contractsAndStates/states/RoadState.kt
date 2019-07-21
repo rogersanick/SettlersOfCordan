@@ -20,8 +20,7 @@ import net.corda.core.serialization.CordaSerializable
 @CordaSerializable
 @BelongsToContract(BuildPhaseContract::class)
 data class RoadState(
-        val hexTileIndex: HexTileIndex,
-        val hexTileSide: TileSideIndex,
+        val absoluteSide: AbsoluteSide,
         val players: List<Party>,
         val owner: Party,
         val roadAttachedA: UniqueIdentifier? = null,
@@ -29,8 +28,6 @@ data class RoadState(
         override val linearId: UniqueIdentifier = UniqueIdentifier()
 ) : LinearState {
     override val participants: List<AbstractParty> = players
-
-    fun getAbsoluteSide() = AbsoluteSide(hexTileIndex, hexTileSide)
 
     /**
      * In Settlers of Catan, players earn additional victory points for maintaining the longest

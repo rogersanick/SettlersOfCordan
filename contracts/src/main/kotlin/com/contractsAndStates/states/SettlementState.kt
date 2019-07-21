@@ -3,6 +3,8 @@ package com.contractsAndStates.states
 import com.contractsAndStates.contracts.BuildPhaseContract
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.ContractState
+import net.corda.core.contracts.LinearState
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
 import net.corda.core.serialization.ConstructorForDeserialization
@@ -17,24 +19,13 @@ import net.corda.core.serialization.CordaSerializable
 
 @CordaSerializable
 @BelongsToContract(BuildPhaseContract::class)
-data class SettlementState @ConstructorForDeserialization constructor(
+data class SettlementState(
         val absoluteCorner: AbsoluteCorner,
         val players: List<Party>,
         val owner: Party,
-        val resourceAmountClaim: Int = settlementAmountClaim
-) : ContractState {
-
-    constructor(
-            hexTileIndex: HexTileIndex,
-            hexTileCoordinate: TileCornerIndex,
-            players: List<Party>,
-            owner: Party,
-            resourceAmountClaim: Int = settlementAmountClaim
-    ) : this(
-            absoluteCorner = AbsoluteCorner(hexTileIndex, hexTileCoordinate),
-            players = players,
-            owner = owner,
-            resourceAmountClaim = resourceAmountClaim)
+        val resourceAmountClaim: Int = settlementAmountClaim,
+        override val linearId: UniqueIdentifier = UniqueIdentifier()
+) : LinearState {
 
     val upgradedToCity = resourceAmountClaim == cityAmountClaim
 

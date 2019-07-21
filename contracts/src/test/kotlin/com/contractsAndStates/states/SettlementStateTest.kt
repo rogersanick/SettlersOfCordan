@@ -11,8 +11,7 @@ import kotlin.test.assertTrue
 class SettlementStateTest {
 
     private fun makeBasicSettlement() = SettlementState(
-            hexTileIndex = HexTileIndex(1),
-            hexTileCoordinate = TileCornerIndex(0),
+            absoluteCorner= AbsoluteCorner(HexTileIndex(1), TileCornerIndex(0)),
             players = listOf(mock(Party::class.java), mock(Party::class.java), mock(Party::class.java)),
             owner = mock(Party::class.java))
 
@@ -20,16 +19,14 @@ class SettlementStateTest {
     fun `Constructor rejects unwanted resourceAmountClaim`() {
         assertFailsWith<IllegalArgumentException> {
             SettlementState(
-                    hexTileIndex = HexTileIndex(1),
-                    hexTileCoordinate = TileCornerIndex(0),
+                    absoluteCorner= AbsoluteCorner(HexTileIndex(1), TileCornerIndex(0)),
                     players = listOf(mock(Party::class.java), mock(Party::class.java), mock(Party::class.java)),
                     owner = mock(Party::class.java),
                     resourceAmountClaim = 0)
         }
         assertFailsWith<IllegalArgumentException> {
             SettlementState(
-                    hexTileIndex = HexTileIndex(1),
-                    hexTileCoordinate = TileCornerIndex(0),
+                    absoluteCorner= AbsoluteCorner(HexTileIndex(1), TileCornerIndex(0)),
                     players = listOf(mock(Party::class.java), mock(Party::class.java), mock(Party::class.java)),
                     owner = mock(Party::class.java),
                     resourceAmountClaim = 3)
