@@ -16,24 +16,6 @@ class SettlementStateTest {
             owner = mock(Party::class.java))
 
     @Test
-    fun `Constructor rejects unwanted resourceAmountClaim`() {
-        assertFailsWith<IllegalArgumentException> {
-            SettlementState(
-                    absoluteCorner= AbsoluteCorner(HexTileIndex(1), TileCornerIndex(0)),
-                    players = listOf(mock(Party::class.java), mock(Party::class.java), mock(Party::class.java)),
-                    owner = mock(Party::class.java),
-                    resourceAmountClaim = 0)
-        }
-        assertFailsWith<IllegalArgumentException> {
-            SettlementState(
-                    absoluteCorner= AbsoluteCorner(HexTileIndex(1), TileCornerIndex(0)),
-                    players = listOf(mock(Party::class.java), mock(Party::class.java), mock(Party::class.java)),
-                    owner = mock(Party::class.java),
-                    resourceAmountClaim = 3)
-        }
-    }
-
-    @Test
     fun `upgradedToCity is correct`() {
         makeBasicSettlement().also {
             assertFalse(it.upgradedToCity)

@@ -2,12 +2,10 @@ package com.contractsAndStates.states
 
 import com.contractsAndStates.contracts.BuildPhaseContract
 import net.corda.core.contracts.BelongsToContract
-import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
-import net.corda.core.serialization.ConstructorForDeserialization
 import net.corda.core.serialization.CordaSerializable
 
 /**
@@ -23,11 +21,12 @@ data class SettlementState(
         val absoluteCorner: AbsoluteCorner,
         val players: List<Party>,
         val owner: Party,
-        val resourceAmountClaim: Int = settlementAmountClaim,
+        val upgradedToCity: Boolean = false,
         override val linearId: UniqueIdentifier = UniqueIdentifier()
 ) : LinearState {
 
-    val upgradedToCity = resourceAmountClaim == cityAmountClaim
+    val resourceAmountClaim = if (upgradedToCity) cityAmountClaim
+    else settlementAmountClaim
 
     init {
         require(resourceAmountClaim in listOf(settlementAmountClaim, cityAmountClaim)) {
@@ -40,6 +39,6 @@ data class SettlementState(
         const val cityAmountClaim = 2
     }
 
-    fun upgradeToCity() = copy(resourceAmountClaim = cityAmountClaim)
+    fun upgradeToCity() = copy(upgradedToCity = true)
     override val participants: List<AbstractParty> get() = players
 }
