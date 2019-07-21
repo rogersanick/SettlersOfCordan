@@ -5,7 +5,6 @@ import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
-import net.corda.core.serialization.ConstructorForDeserialization
 import net.corda.core.serialization.CordaSerializable
 
 /**
@@ -26,13 +25,12 @@ data class GameBoardState(
         val players: List<Party>,
         val turnTrackerLinearId: UniqueIdentifier,
         val robberLinearId: UniqueIdentifier,
-        val settlementsPlaced: PlacedSettlements = PlacedSettlements(),
         val setUpComplete: Boolean = false,
         val initialPiecesPlaced: Int = 0,
         val winner: Party? = null,
         val beginner: Boolean = false
 ) : LinearState, TileLocator<HexTile> by hexTiles, AbsoluteSideLocator by hexTiles, AbsoluteCornerLocator by hexTiles,
-        AbsoluteRoadLocator by hexTiles {
+        AbsoluteRoadLocator by hexTiles, AbsoluteSettlementLocator by hexTiles {
 
     override val participants: List<Party> get() = players
 
@@ -43,20 +41,17 @@ data class GameBoardState(
     fun weWin(ourIdentity: Party) = copy(winner = ourIdentity)
 
     /**
-     * Returns the count of settlements built. It takes care not to include duplicates.
-     */
-    fun getSettlementsCount() = settlementsPlaced
-            .allBuiltCorners()
-            .distinctBy { hexTiles.getCornerHash(it) }
-            .size
-
-    /**
      * Also checks the overlapping corners.
      */
-    fun hasSettlementOn(corner: AbsoluteCorner) = hexTiles.getOverlappedCorners(corner)
+    override fun getSettlementOn(corner: AbsoluteCorner) = getOverlappedCorners(corner)
             .plus(corner)
-            .filterNotNull()
-            .any { settlementsPlaced.hasOn(it) }
+            .map { it ->
+                if (it != null) get(corner.tileIndex).getSettlementOn(corner.cornerIndex)
+                else null
+            }
+            .toSet()
+            .also { require(it.size == 1) { "There should be a single id on overlapped corners" } }
+            .single()
 
     fun toBuilder() = Builder(
             linearId = linearId,
@@ -65,7 +60,6 @@ data class GameBoardState(
             players = players.toMutableList(),
             turnTrackerLinearId = turnTrackerLinearId,
             robberLinearId = robberLinearId,
-            settlementsPlaced = settlementsPlaced.toBuilder(),
             setUpComplete = setUpComplete,
             initialPiecesPlaced = initialPiecesPlaced,
             winner = winner,
@@ -78,26 +72,13 @@ data class GameBoardState(
             private val players: MutableList<Party> = mutableListOf(),
             private var turnTrackerLinearId: UniqueIdentifier? = null,
             private var robberLinearId: UniqueIdentifier? = null,
-            val settlementsPlaced: PlacedSettlements.Builder,
             private var setUpComplete: Boolean = false,
             private var initialPiecesPlaced: Int = 0,
             private var winner: Party? = null,
             private var beginner: Boolean = false
     ) : TileLocator<HexTile.Builder> by hexTiles, AbsoluteSideLocator by hexTiles, AbsoluteCornerLocator by hexTiles,
-            AbsoluteRoadLocator by hexTiles, AbsoluteRoadBuilder by hexTiles {
-
-        /**
-         * Also checks the overlapping corners.
-         */
-        fun hasSettlementOn(corner: AbsoluteCorner) = hexTiles.getOverlappedCorners(corner)
-                .plus(corner)
-                .filterNotNull()
-                .any { settlementsPlaced.hasOn(it) }
-
-        fun placeSettlementOn(corner: AbsoluteCorner) = settlementsPlaced
-                .placeOn(
-                        corner,
-                        hexTiles.get(corner.tileIndex).sidesBuilder)
+            AbsoluteRoadLocator by hexTiles, AbsoluteRoadBuilder by hexTiles, AbsoluteSettlementLocator by hexTiles,
+            AbsoluteSettlementBuilder by hexTiles {
 
         fun addPlayers(newPlayers: List<Party>) = apply { players.addAll(newPlayers) }
         fun withTurnTracker(id: UniqueIdentifier) = apply {
@@ -130,7 +111,6 @@ data class GameBoardState(
                 players = ImmutableList(players),
                 turnTrackerLinearId = turnTrackerLinearId!!,
                 robberLinearId = robberLinearId!!,
-                settlementsPlaced = settlementsPlaced.build(),
                 setUpComplete = setUpComplete,
                 initialPiecesPlaced = initialPiecesPlaced,
                 winner = winner,

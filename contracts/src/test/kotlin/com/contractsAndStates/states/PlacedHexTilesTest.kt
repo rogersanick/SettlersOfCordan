@@ -351,14 +351,14 @@ class PlacedHexTilesTest {
     @Test
     fun `Builder-buildRoadOn is correct`() {
         val placed = PlacedHexTiles.Builder(getAllTileBuilders().toMutableList())
-                .buildRoadOn((4 to 4).toAbsoluteSide(), UniqueIdentifier())
-                .buildRoadOn((2 to 0).toAbsoluteSide(), UniqueIdentifier())
+                .setRoadOn((4 to 4).toAbsoluteSide(), UniqueIdentifier())
+                .setRoadOn((2 to 0).toAbsoluteSide(), UniqueIdentifier())
                 .build()
 
-        assertFalse(placed.hasRoadIdOn((0 to 0).toAbsoluteSide()))
-        assertTrue(placed.hasRoadIdOn((2 to 0).toAbsoluteSide()))
-        assertTrue(placed.hasRoadIdOn((4 to 4).toAbsoluteSide()))
-        assertTrue(placed.hasRoadIdOn((3 to 1).toAbsoluteSide()))
+        assertFalse(placed.hasRoadOn((0 to 0).toAbsoluteSide()))
+        assertTrue(placed.hasRoadOn((2 to 0).toAbsoluteSide()))
+        assertTrue(placed.hasRoadOn((4 to 4).toAbsoluteSide()))
+        assertTrue(placed.hasRoadOn((3 to 1).toAbsoluteSide()))
     }
 
     @Test

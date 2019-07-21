@@ -24,45 +24,31 @@ class GameBoardStateTest {
     }
 
     private fun buildWithBuilder() = PlacedHexTiles.Builder(getAllTileBuilders().toMutableList()).build()
+    private fun boardBuilder() = GameBoardState.Builder(
+            hexTiles = PlacedHexTiles.Builder(getAllTileBuilders().toMutableList()),
+            ports = PlacedPorts.Builder())
+
     private fun Pair<Int, Int>.toAbsoluteCorner() = AbsoluteCorner(HexTileIndex(first), TileCornerIndex(second))
 
     @Test
     fun `getSettlementsCount is correct`() {
-
-        val placedTiles = buildWithBuilder()
-        val settlementBuilder = PlacedSettlements.Builder()
-        val settlementsPlaced = settlementBuilder
-                .placeOn((1 to 2).toAbsoluteCorner(), placedTiles.get(HexTileIndex(1)).sides)
-                .placeOn((1 to 1).toAbsoluteCorner(), placedTiles.get(HexTileIndex(1)).sides)
-                .placeOn((7 to 4).toAbsoluteCorner(), placedTiles.get(HexTileIndex(7)).sides)
-                .build()
-        val boardState = GameBoardState(
-                hexTiles = placedTiles,
-                ports = PlacedPorts.Builder.createAllPorts().build(),
-                players = listOf(mock(Party::class.java), mock(Party::class.java), mock(Party::class.java)),
-                turnTrackerLinearId = UniqueIdentifier(),
-                robberLinearId = UniqueIdentifier(),
-                settlementsPlaced = settlementsPlaced)
+        val boardBuilder = boardBuilder()
+        boardBuilder.setSettlementOn((1 to 2).toAbsoluteCorner(), UniqueIdentifier())
+                .setSettlementOn((2 to 1).toAbsoluteCorner(), UniqueIdentifier())
+                .setSettlementOn((5 to 4).toAbsoluteCorner(), UniqueIdentifier())
+        val boardState = boardBuilder.build()
 
         assertEquals(3, boardState.getSettlementsCount())
     }
 
     @Test
     fun `hasSettlementOn is correct`() {
-        val placedTiles = buildWithBuilder()
-        val settlementBuilder = PlacedSettlements.Builder()
-        val settlementsPlaced = settlementBuilder
-                .placeOn((1 to 2).toAbsoluteCorner(), placedTiles.get(HexTileIndex(1)).sides)
-                .placeOn((1 to 1).toAbsoluteCorner(), placedTiles.get(HexTileIndex(1)).sides)
-                .placeOn((7 to 4).toAbsoluteCorner(), placedTiles.get(HexTileIndex(7)).sides)
-                .build()
-        val boardState = GameBoardState(
-                hexTiles = placedTiles,
-                ports = PlacedPorts.Builder.createAllPorts().build(),
-                players = listOf(mock(Party::class.java), mock(Party::class.java), mock(Party::class.java)),
-                turnTrackerLinearId = UniqueIdentifier(),
-                robberLinearId = UniqueIdentifier(),
-                settlementsPlaced = settlementsPlaced)
+        val boardBuilder = boardBuilder()
+        boardBuilder
+                .setSettlementOn((1 to 2).toAbsoluteCorner(), UniqueIdentifier())
+                .setSettlementOn((1 to 1).toAbsoluteCorner(), UniqueIdentifier())
+                .setSettlementOn((7 to 4).toAbsoluteCorner(), UniqueIdentifier())
+        val boardState = boardBuilder.build()
 
         assertFalse(boardState.hasSettlementOn((1 to 0).toAbsoluteCorner()))
         assertTrue(boardState.hasSettlementOn((1 to 2).toAbsoluteCorner()))

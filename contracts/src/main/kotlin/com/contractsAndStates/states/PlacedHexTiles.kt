@@ -9,7 +9,7 @@ import net.corda.core.serialization.CordaSerializable
 @CordaSerializable
 data class PlacedHexTiles @ConstructorForDeserialization constructor(
         val value: List<HexTile>
-) : TileLocator<HexTile>, AbsoluteSideLocator, AbsoluteCornerLocator, AbsoluteRoadLocator {
+) : TileLocator<HexTile>, AbsoluteSideLocator, AbsoluteCornerLocator, AbsoluteRoadLocator, AbsoluteSettlementLocator {
 
     init {
         require(value.size == GameBoardState.TILE_COUNT) {
@@ -57,6 +57,10 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
                 HexTileType.Mountain to 3,
                 HexTileType.Pasture to 4
         )
+
+        fun getAllAbsoluteCorners() = (0 until GameBoardState.TILE_COUNT).flatMap { tile ->
+            (0 until HexTile.SIDE_COUNT).map { AbsoluteCorner(HexTileIndex(tile), TileCornerIndex(it)) }
+        }
     }
 
     override fun get(index: HexTileIndex) = value[index.value]
@@ -74,7 +78,23 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
             .zip(absoluteCorner.cornerIndex.getOverlappedCorners())
             .map { AbsoluteCorner.create(it.first, it.second) }
 
-    override fun hasRoadIdOn(side: AbsoluteSide) = get(side.tileIndex).sides.hasRoadIdOn(side.sideIndex)
+    override fun getRoadOn(side: AbsoluteSide) = get(side.tileIndex).getRoadOn(side.sideIndex)
+    override fun getSettlementOn(corner: AbsoluteCorner) = getOverlappedCorners(corner)
+            .plus(corner)
+            .map { it ->
+                if (it != null) get(corner.tileIndex).getSettlementOn(corner.cornerIndex)
+                else null
+            }
+            .toSet()
+            .also { require(it.size == 1) { "There should be a single id on overlapped corners" } }
+            .single()
+
+    /**
+     * This is a heavy function.
+     */
+    override fun getAllSettlements() = getAllAbsoluteCorners()
+            .mapNotNull { getSettlementOn(it) }
+            .distinct()
 
     fun cloneList() = value.map { it }.toMutableList()
     fun toBuilder() = Builder(this)
@@ -82,7 +102,7 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
     class Builder(
             private val value: MutableList<HexTile.Builder>
     ) : TileLocator<HexTile.Builder>, AbsoluteSideLocator, AbsoluteCornerLocator, AbsoluteRoadLocator,
-            AbsoluteRoadBuilder {
+            AbsoluteRoadBuilder, AbsoluteSettlementLocator, AbsoluteSettlementBuilder {
         constructor(placedHexTiles: PlacedHexTiles) :
                 this(placedHexTiles.value.map { it.toBuilder() }.toMutableList())
 
@@ -133,7 +153,8 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
                 .zip(absoluteCorner.cornerIndex.getOverlappedCorners())
                 .map { AbsoluteCorner.create(it.first, it.second) }
 
-        override fun hasRoadIdOn(side: AbsoluteSide) = get(side.tileIndex).hasRoadIdOn(side.sideIndex)
+        override fun getRoadOn(side: AbsoluteSide) = get(side.tileIndex).getRoadOn(side.sideIndex)
+
         /**
          * This method is used in flows to product a new version of the gameboard with a record of the location of roads, identified by
          * their specific linearID
@@ -141,20 +162,26 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
          * TODO: Add functionality to connect roadStates when new roads and proposed extending existing roads.
          */
         @Suspendable
-        override fun buildRoadOn(side: AbsoluteSide, roadStateLinearId: UniqueIdentifier) =
-                buildRoadOn(side.tileIndex, side.sideIndex, roadStateLinearId)
-
-        @Suspendable
-        override fun buildRoadOn(
-                tileIndex: HexTileIndex,
-                sideIndex: TileSideIndex,
-                roadStateLinearId: UniqueIdentifier) = apply {
-            value[tileIndex.value].sidesBuilder
-                    .setRoadIdOn(sideIndex, roadStateLinearId)
-                    .getNeighborOn(sideIndex)?.also { neighborIndex ->
+        override fun setRoadOn(side: AbsoluteSide, roadStateLinearId: UniqueIdentifier) = apply {
+            get(side.tileIndex).sidesBuilder
+                    .setRoadOn(side.sideIndex, roadStateLinearId)
+                    .getNeighborOn(side.sideIndex)?.also { neighborIndex ->
                         value[neighborIndex.value]
-                                .setRoadIdOn(sideIndex.opposite(), roadStateLinearId)
+                                .setRoadOn(side.sideIndex.opposite(), roadStateLinearId)
                     }
+        }
+
+        override fun getSettlementOn(corner: AbsoluteCorner) =
+                get(corner.tileIndex).getSettlementOn(corner.cornerIndex)
+
+        override fun getAllSettlements() = getAllAbsoluteCorners()
+                .mapNotNull { getSettlementOn(it) }
+                .distinct()
+
+        override fun setSettlementOn(corner: AbsoluteCorner, settlementLinearId: UniqueIdentifier) = apply {
+            getOverlappedCorners(corner).plus(corner)
+                    .filterNotNull()
+                    .forEach { get(it.tileIndex).setSettlementOn(it.cornerIndex, settlementLinearId) }
         }
 
         fun build() = PlacedHexTiles(ImmutableList(value.map { it.build() }).toMutableList())
@@ -237,13 +264,21 @@ interface AbsoluteCornerLocator {
 }
 
 interface AbsoluteRoadLocator {
-    fun hasRoadIdOn(side: AbsoluteSide): Boolean
+    fun getRoadOn(side: AbsoluteSide): UniqueIdentifier?
+    fun hasRoadOn(side: AbsoluteSide): Boolean = getRoadOn(side) != null
 }
 
 interface AbsoluteRoadBuilder {
-    fun buildRoadOn(side: AbsoluteSide, roadStateLinearId: UniqueIdentifier): AbsoluteRoadBuilder
-    fun buildRoadOn(
-            tileIndex: HexTileIndex,
-            sideIndex: TileSideIndex,
-            roadStateLinearId: UniqueIdentifier): AbsoluteRoadBuilder
+    fun setRoadOn(side: AbsoluteSide, roadStateLinearId: UniqueIdentifier): AbsoluteRoadBuilder
+}
+
+interface AbsoluteSettlementLocator {
+    fun getSettlementOn(corner: AbsoluteCorner): UniqueIdentifier?
+    fun hasSettlementOn(corner: AbsoluteCorner): Boolean = getSettlementOn(corner) != null
+    fun getAllSettlements(): List<UniqueIdentifier>
+    fun getSettlementsCount(): Int = getAllSettlements().size
+}
+
+interface AbsoluteSettlementBuilder {
+    fun setSettlementOn(corner: AbsoluteCorner, settlementLinearId: UniqueIdentifier): AbsoluteSettlementBuilder
 }
