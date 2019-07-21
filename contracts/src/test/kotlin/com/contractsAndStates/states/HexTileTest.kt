@@ -11,7 +11,6 @@ class HexTileTest {
 
     private fun makeBasicBuilder(tileIndex: HexTileIndex) = HexTile.Builder(tileIndex)
             .with(HexTileType.Desert)
-            .with(RollTrigger(3))
             .with(true)
 
     @Test
@@ -46,6 +45,7 @@ class HexTileTest {
     @Test
     fun `Builder rejects replacing roleTrigger`() {
         val builder = makeBasicBuilder(HexTileIndex(1))
+                .with(RollTrigger(3))
         assertFailsWith<IllegalArgumentException> {
             builder.with(RollTrigger(2))
         }
@@ -54,6 +54,7 @@ class HexTileTest {
     @Test
     fun `Builder rejects putting roleTrigger back to null`() {
         val builder = makeBasicBuilder(HexTileIndex(1))
+                .with(RollTrigger(2))
         assertFailsWith<IllegalArgumentException> {
             builder.with(null)
         }
@@ -93,10 +94,14 @@ class HexTileTest {
 
     @Test
     fun `Builder-build is correct`() {
-        val built = makeBasicBuilder(HexTileIndex(4)).build()
-        assertEquals(HexTileType.Desert, built.resourceType)
+        val built = HexTile.Builder(HexTileIndex(4))
+                .with(HexTileType.Forest)
+                .with(false)
+                .with(RollTrigger(3))
+                .build()
+        assertEquals(HexTileType.Forest, built.resourceType)
         assertEquals(RollTrigger(3), built.rollTrigger)
-        assertTrue(built.robberPresent)
+        assertFalse(built.robberPresent)
         assertEquals(HexTileIndex(4), built.hexTileIndex)
         // TODO test roads?
     }

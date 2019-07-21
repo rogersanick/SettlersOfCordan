@@ -16,6 +16,12 @@ data class HexTile(
         SettlementLocator by settlements,
         NeighborLocator by sides {
 
+    init {
+        require((rollTrigger == null) == (resourceType == HexTileType.Desert)) {
+            "Only a desert tile can have a null rollTrigger"
+        }
+    }
+
     companion object {
         const val SIDE_COUNT = 6
 
