@@ -59,8 +59,7 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
                 HexTileType.Forest to 4,
                 HexTileType.Hill to 3,
                 HexTileType.Mountain to 3,
-                HexTileType.Pasture to 4
-        )
+                HexTileType.Pasture to 4)
 
         fun getAllAbsoluteCorners() = (0 until GameBoardState.TILE_COUNT).flatMap { tile ->
             (0 until HexTile.SIDE_COUNT).map { AbsoluteCorner(HexTileIndex(tile), TileCornerIndex(it)) }
@@ -102,7 +101,8 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
     fun toBuilder() = Builder(this)
 
     class Builder(
-            private val value: MutableList<HexTile.Builder>
+            private val value: MutableList<HexTile.Builder> =
+                    (0 until GameBoardState.TILE_COUNT).map { HexTile.Builder(HexTileIndex(it)) }.toMutableList()
     ) : TileLocator<HexTile.Builder>,
             AbsoluteSideLocator,
             AbsoluteCornerLocator,
@@ -148,6 +148,16 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
                     }
                 }
             }
+        }
+
+        fun assignShuffledTypes() = apply {
+            tileCountPerType
+                    .flatMap { entry -> (0 until entry.value).map { entry.key } }
+                    .shuffled()
+                    .zip(value)
+                    .forEach {
+                        it.second.with(it.first).with(it.first == HexTileType.Desert)
+                    }
         }
 
         override fun get(index: HexTileIndex) = value[index.value]

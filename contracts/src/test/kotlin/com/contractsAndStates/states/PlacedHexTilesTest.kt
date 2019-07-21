@@ -2,6 +2,7 @@ package com.contractsAndStates.states
 
 import com.oracleClientStatesAndContracts.states.RollTrigger
 import net.corda.core.contracts.UniqueIdentifier
+import net.corda.core.internal.toMultiMap
 import org.junit.Test
 import kotlin.test.*
 
@@ -30,6 +31,14 @@ class PlacedHexTilesTest {
     fun `Builder rejects too short list`() {
         assertFailsWith<IllegalArgumentException> {
             PlacedHexTiles.Builder(getAllTileBuilders().dropLast(1).toMutableList())
+        }
+    }
+
+    @Test
+    fun `Builder default value is correct`() {
+        val builder = PlacedHexTiles.Builder()
+        (0 until GameBoardState.TILE_COUNT).forEach {
+            assertEquals(HexTileIndex(it), builder.get(HexTileIndex(it)).hexTileIndex)
         }
     }
 
@@ -346,6 +355,20 @@ class PlacedHexTilesTest {
         assertEquals(
                 HexTileIndex(14),
                 placed.value[18].sides.getNeighborOn(TileSideIndex(5)))
+    }
+
+    @Test
+    fun `Builder-assignShuffledTypes is correct`() {
+        PlacedHexTiles.Builder()
+                .assignShuffledTypes()
+                .build()
+                .value
+                .map { it.resourceType to 1 }
+                .toMultiMap()
+                .mapValues { it.value.sum() }
+                .forEach { (type, count) ->
+                    assertEquals(PlacedHexTiles.tileCountPerType[type], count)
+                }
     }
 
     @Test
