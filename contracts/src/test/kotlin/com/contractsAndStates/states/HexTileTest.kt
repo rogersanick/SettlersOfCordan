@@ -15,6 +15,20 @@ class HexTileTest {
             .with(true)
 
     @Test
+    fun `getAllSides is correct`() {
+        assertEquals(listOf(TileSideIndex(0), TileSideIndex(1), TileSideIndex(2),
+                TileSideIndex(3), TileSideIndex(4), TileSideIndex(5)),
+                HexTile.getAllSides())
+    }
+
+    @Test
+    fun `getAllCorners is correct`() {
+        assertEquals(listOf(TileCornerIndex(0), TileCornerIndex(1), TileCornerIndex(2),
+                TileCornerIndex(3), TileCornerIndex(4), TileCornerIndex(5)),
+                HexTile.getAllCorners())
+    }
+
+    @Test
     fun `Builder rejects replacing resourceType`() {
         val builder = makeBasicBuilder(HexTileIndex(1))
         assertFailsWith<IllegalArgumentException> {

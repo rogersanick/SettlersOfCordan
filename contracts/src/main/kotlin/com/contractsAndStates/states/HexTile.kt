@@ -18,6 +18,9 @@ data class HexTile(
 
     companion object {
         const val SIDE_COUNT = 6
+
+        fun getAllSides() = (0 until SIDE_COUNT).map { TileSideIndex(it) }
+        fun getAllCorners() = (0 until SIDE_COUNT).map { TileCornerIndex(it) }
     }
 
     fun toBuilder() = Builder(this)
