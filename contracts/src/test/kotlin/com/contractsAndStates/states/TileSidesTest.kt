@@ -22,7 +22,7 @@ class TileSidesTest {
 
     private fun TileSides.Builder.addRoads(roads: List<UniqueIdentifier?>) = apply {
         roads.forEachIndexed { index, it ->
-            if (it != null) setRoadIdOn(TileSideIndex(index), it)
+            if (it != null) setRoadOn(TileSideIndex(index), it)
         }
     }
 
@@ -99,12 +99,12 @@ class TileSidesTest {
         val ids = listOf(UniqueIdentifier(), null, null,
                 UniqueIdentifier(), UniqueIdentifier(), UniqueIdentifier())
         val builder = TileSides.Builder().addRoads(ids)
-        assertEquals(ids[0], builder.getRoadIdOn(TileSideIndex(0)))
-        assertEquals(null, builder.getRoadIdOn(TileSideIndex(1)))
-        assertEquals(null, builder.getRoadIdOn(TileSideIndex(2)))
-        assertEquals(ids[3], builder.getRoadIdOn(TileSideIndex(3)))
-        assertEquals(ids[4], builder.getRoadIdOn(TileSideIndex(4)))
-        assertEquals(ids[5], builder.getRoadIdOn(TileSideIndex(5)))
+        assertEquals(ids[0], builder.getRoadOn(TileSideIndex(0)))
+        assertEquals(null, builder.getRoadOn(TileSideIndex(1)))
+        assertEquals(null, builder.getRoadOn(TileSideIndex(2)))
+        assertEquals(ids[3], builder.getRoadOn(TileSideIndex(3)))
+        assertEquals(ids[4], builder.getRoadOn(TileSideIndex(4)))
+        assertEquals(ids[5], builder.getRoadOn(TileSideIndex(5)))
     }
 
     @Test
@@ -117,7 +117,7 @@ class TileSidesTest {
                 .addRoads(ids)
 
         assertFailsWith<java.lang.IllegalArgumentException> {
-            builder.setRoadIdOn(TileSideIndex(0), UniqueIdentifier())
+            builder.setRoadOn(TileSideIndex(0), UniqueIdentifier())
         }
     }
 
@@ -129,9 +129,9 @@ class TileSidesTest {
         val builder = TileSides.Builder()
                 .addNeighbors(indices)
                 .addRoads(ids)
-                .setRoadIdOn(TileSideIndex(0), ids[0]!!)
+                .setRoadOn(TileSideIndex(0), ids[0]!!)
 
-        assertEquals(ids[0], builder.getRoadIdOn(TileSideIndex(0)))
+        assertEquals(ids[0], builder.getRoadOn(TileSideIndex(0)))
     }
 
     @Test
@@ -143,9 +143,9 @@ class TileSidesTest {
                 .addNeighbors(indices)
                 .addRoads(ids)
         ids[0] = UniqueIdentifier()
-        builder.setRoadIdOn(TileSideIndex(0), ids[0]!!)
+        builder.setRoadOn(TileSideIndex(0), ids[0]!!)
 
-        assertEquals(ids[0], builder.getRoadIdOn(TileSideIndex(0)))
+        assertEquals(ids[0], builder.getRoadOn(TileSideIndex(0)))
     }
 
     @Test
@@ -362,12 +362,12 @@ class TileSidesTest {
         val ids = listOf(UniqueIdentifier(), null, null,
                 UniqueIdentifier(), UniqueIdentifier(), UniqueIdentifier())
         val neighbors = TileSides.Builder().addRoads(ids).build()
-        assertEquals(ids[0], neighbors.getRoadIdOn(TileSideIndex(0)))
-        assertEquals(null, neighbors.getRoadIdOn(TileSideIndex(1)))
-        assertEquals(null, neighbors.getRoadIdOn(TileSideIndex(2)))
-        assertEquals(ids[3], neighbors.getRoadIdOn(TileSideIndex(3)))
-        assertEquals(ids[4], neighbors.getRoadIdOn(TileSideIndex(4)))
-        assertEquals(ids[5], neighbors.getRoadIdOn(TileSideIndex(5)))
+        assertEquals(ids[0], neighbors.getRoadOn(TileSideIndex(0)))
+        assertEquals(null, neighbors.getRoadOn(TileSideIndex(1)))
+        assertEquals(null, neighbors.getRoadOn(TileSideIndex(2)))
+        assertEquals(ids[3], neighbors.getRoadOn(TileSideIndex(3)))
+        assertEquals(ids[4], neighbors.getRoadOn(TileSideIndex(4)))
+        assertEquals(ids[5], neighbors.getRoadOn(TileSideIndex(5)))
     }
 
     @Test
@@ -375,12 +375,12 @@ class TileSidesTest {
         val ids = listOf(UniqueIdentifier(), null, null,
                 UniqueIdentifier(), UniqueIdentifier(), UniqueIdentifier())
         val neighbors = TileSides.Builder().addRoads(ids).build()
-        assertTrue(neighbors.hasRoadIdOn(TileSideIndex(0)))
-        assertFalse(neighbors.hasRoadIdOn(TileSideIndex(1)))
-        assertFalse(neighbors.hasRoadIdOn(TileSideIndex(2)))
-        assertTrue(neighbors.hasRoadIdOn(TileSideIndex(3)))
-        assertTrue(neighbors.hasRoadIdOn(TileSideIndex(4)))
-        assertTrue(neighbors.hasRoadIdOn(TileSideIndex(5)))
+        assertTrue(neighbors.hasRoadOn(TileSideIndex(0)))
+        assertFalse(neighbors.hasRoadOn(TileSideIndex(1)))
+        assertFalse(neighbors.hasRoadOn(TileSideIndex(2)))
+        assertTrue(neighbors.hasRoadOn(TileSideIndex(3)))
+        assertTrue(neighbors.hasRoadOn(TileSideIndex(4)))
+        assertTrue(neighbors.hasRoadOn(TileSideIndex(5)))
     }
 
     @Test

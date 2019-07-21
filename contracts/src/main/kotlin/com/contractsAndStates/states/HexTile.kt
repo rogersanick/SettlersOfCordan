@@ -9,8 +9,9 @@ data class HexTile(
         val rollTrigger: RollTrigger?,
         val robberPresent: Boolean,
         val hexTileIndex: HexTileIndex,
-        val sides: TileSides = TileSides()
-) : TileSideLocator by sides, RoadLocator by sides, NeighborLocator by sides {
+        val sides: TileSides = TileSides(),
+        val settlements: PlacedSettlements = PlacedSettlements()
+) : TileSideLocator by sides, RoadLocator by sides, SettlementLocator by settlements, NeighborLocator by sides {
 
     companion object {
         const val SIDE_COUNT = 6
@@ -23,16 +24,19 @@ data class HexTile(
             resourceType: HexTileType? = null,
             rollTrigger: RollTrigger? = null,
             robberPresent: Boolean? = null,
-            val sidesBuilder: TileSides.Builder = TileSides.Builder()
-    ): TileSideLocator by sidesBuilder, TileSideBuilder by sidesBuilder, RoadLocator by sidesBuilder,
-            RoadBuilder by sidesBuilder, NeighborLocator by sidesBuilder, NeighborBuilder by sidesBuilder {
+            val sidesBuilder: TileSides.Builder = TileSides.Builder(),
+            val settlementsBuilder: PlacedSettlements.Builder = PlacedSettlements.Builder()
+    ) : TileSideLocator by sidesBuilder, TileSideBuilder by sidesBuilder, RoadLocator by sidesBuilder,
+            RoadBuilder by sidesBuilder, SettlementLocator by settlementsBuilder,
+            SettlementBuilder by settlementsBuilder, NeighborLocator by sidesBuilder, NeighborBuilder by sidesBuilder {
 
         constructor(tile: HexTile) : this(
                 tile.hexTileIndex,
                 tile.resourceType,
                 tile.rollTrigger,
                 tile.robberPresent,
-                TileSides.Builder(tile.sides))
+                TileSides.Builder(tile.sides),
+                tile.settlements.toBuilder())
 
         var resourceType: HexTileType?
             private set
@@ -84,7 +88,8 @@ data class HexTile(
                 rollTrigger,
                 robberPresent!!,
                 hexTileIndex,
-                sidesBuilder.build()
+                sidesBuilder.build(),
+                settlementsBuilder.build()
         )
     }
 }

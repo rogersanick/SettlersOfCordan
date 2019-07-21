@@ -33,8 +33,8 @@ data class TileSides @ConstructorForDeserialization constructor(
         else TileSideIndex(it)
     }
 
-    override fun getRoadIdOn(sideIndex: TileSideIndex) = getSideOn(sideIndex).roadId
-    override fun getRoadIds() = value.map { it.roadId }
+    override fun getRoadOn(sideIndex: TileSideIndex) = getSideOn(sideIndex).roadId
+    override fun getRoads() = value.map { it.roadId }
 
     /**
      * The neighbor corners returned are ordered clockwise.
@@ -64,7 +64,7 @@ data class TileSides @ConstructorForDeserialization constructor(
             require(getNeighborOn(sideIndex).let { it == null || it == tileSide.neighbor }) {
                 "You cannot replace an existing neighbor"
             }
-            require(getRoadIdOn(sideIndex).let { it == null || it == tileSide.roadId }) {
+            require(getRoadOn(sideIndex).let { it == null || it == tileSide.roadId }) {
                 "You cannot build a new road on top of a current one"
             }
             value[sideIndex.value] = tileSide
@@ -90,10 +90,10 @@ data class TileSides @ConstructorForDeserialization constructor(
             setSideOn(sideIndex, getSideOn(sideIndex).copy(neighbor = neighbor))
         }
 
-        override fun getRoadIdOn(sideIndex: TileSideIndex) = getSideOn(sideIndex).roadId
-        override fun getRoadIds() = value.map { it.roadId }
-        override fun setRoadIdOn(sideIndex: TileSideIndex, roadId: UniqueIdentifier) = apply {
-            require(getRoadIdOn(sideIndex).let { it == null || it == roadId }) {
+        override fun getRoadOn(sideIndex: TileSideIndex) = getSideOn(sideIndex).roadId
+        override fun getRoads() = value.map { it.roadId }
+        override fun setRoadOn(sideIndex: TileSideIndex, roadId: UniqueIdentifier) = apply {
+            require(getRoadOn(sideIndex).let { it == null || it == roadId }) {
                 "You cannot build a new road on top of a current one"
             }
             setSideOn(sideIndex, getSideOn(sideIndex).copy(roadId = roadId))
@@ -120,17 +120,17 @@ interface CornerLocator {
 }
 
 interface RoadLocator {
-    fun getRoadIdOn(sideIndex: TileSideIndex): UniqueIdentifier?
-    fun hasRoadIdOn(sideIndex: TileSideIndex) = getRoadIdOn(sideIndex) != null
-    fun getRoadIds(): List<UniqueIdentifier?>
-    fun indexOf(roadId: UniqueIdentifier) = getRoadIds().indexOf(roadId).let {
+    fun getRoadOn(sideIndex: TileSideIndex): UniqueIdentifier?
+    fun hasRoadOn(sideIndex: TileSideIndex) = getRoadOn(sideIndex) != null
+    fun getRoads(): List<UniqueIdentifier?>
+    fun indexOf(roadId: UniqueIdentifier) = getRoads().indexOf(roadId).let {
         if (it < 0) null
         else TileSideIndex(it)
     }
 }
 
 interface RoadBuilder {
-    fun setRoadIdOn(sideIndex: TileSideIndex, roadId: UniqueIdentifier): RoadBuilder
+    fun setRoadOn(sideIndex: TileSideIndex, roadId: UniqueIdentifier): RoadBuilder
 }
 
 interface NeighborLocator {
