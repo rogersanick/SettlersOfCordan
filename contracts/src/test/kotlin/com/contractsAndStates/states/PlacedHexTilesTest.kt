@@ -9,7 +9,7 @@ class PlacedHexTilesTest {
 
     private fun getAllTileBuilders(): List<HexTile.Builder> {
         var tileIndex = 0
-        return PlacedHexTiles.TILE_COUNT_PER_RESOURCE.flatMap { entry ->
+        return PlacedHexTiles.tileCountPerType.flatMap { entry ->
             (0 until entry.value).map {
                 HexTile.Builder(HexTileIndex(tileIndex).also { tileIndex++ })
                         .with(entry.key)

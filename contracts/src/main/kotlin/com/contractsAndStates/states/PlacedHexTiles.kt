@@ -36,11 +36,11 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
                 .toMultiMap()
                 .map { it.key to it.value.size }
                 .toMap()
-        require(sortedResources.keys == TILE_COUNT_PER_RESOURCE.keys) {
+        require(sortedResources.keys == tileCountPerType.keys) {
             "There is a mismatch between the resource types and the expected ones"
         }
         sortedResources.forEach { resource, count ->
-            require(TILE_COUNT_PER_RESOURCE[resource] == count) {
+            require(tileCountPerType[resource] == count) {
                 "There is a mismatch in the count of $resource tiles"
             }
         }
@@ -53,7 +53,7 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
                 7..11,
                 12..15,
                 16..18)
-        val TILE_COUNT_PER_RESOURCE = mapOf(
+        val tileCountPerType = mapOf(
                 HexTileType.Desert to 1,
                 HexTileType.Field to 4,
                 HexTileType.Forest to 4,

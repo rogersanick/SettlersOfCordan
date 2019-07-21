@@ -127,11 +127,11 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
                 0, 11, 10, 1, 12, 17, 9, 2, 13, 18, 16, 8, 3, 14, 15, 7, 4, 5, 6)
 
         // Array with counters for specific types of HexTiles added to the game board.
-        val countedHexTypes = PlacedHexTiles.TILE_COUNT_PER_RESOURCE.map {
+        val countedHexTypes = PlacedHexTiles.tileCountPerType.map {
             it.key to 0
         }.toMap().toMutableMap()
 
-        val shuffledHexTypes = PlacedHexTiles.TILE_COUNT_PER_RESOURCE
+        val shuffledHexTypes = PlacedHexTiles.tileCountPerType
                 .flatMap { entry -> List(entry.value) { entry.key } }
                 .shuffled()
 
