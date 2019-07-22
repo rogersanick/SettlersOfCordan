@@ -6,7 +6,7 @@ import net.corda.core.serialization.CordaSerializable
 
 @CordaSerializable
 data class PlacedSettlements @ConstructorForDeserialization constructor(
-        val value: List<UniqueIdentifier?> = List(HexTile.SIDE_COUNT) { null }
+        val value: MutableList<UniqueIdentifier?> = MutableList(HexTile.SIDE_COUNT) { null }
 ) : SettlementLocator {
 
     init {
@@ -42,7 +42,7 @@ data class PlacedSettlements @ConstructorForDeserialization constructor(
         }
 
         fun getAllSettlements(): List<UniqueIdentifier?> = ImmutableList(value)
-        fun build() = PlacedSettlements(getAllSettlements())
+        fun build() = PlacedSettlements(getAllSettlements().toMutableList())
     }
 }
 

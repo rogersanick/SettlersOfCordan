@@ -26,11 +26,11 @@ data class PlacedPorts @ConstructorForDeserialization constructor(val value: Lis
 
     fun toBuilder() = Builder(
             value.map { it.portTile }.toMutableList(),
-            value.map { it.accessPoints }.toMutableList())
+            value.map { it.accessPoints.toMutableList() }.toMutableList())
 
     class Builder(
             val portTiles: MutableList<PortTile> = mutableListOf(),
-            val accessPointsList: MutableList<List<AccessPoint>> = mutableListOf()) {
+            val accessPointsList: MutableList<MutableList<AccessPoint>> = mutableListOf()) {
 
         companion object {
             fun createAllPorts() = Builder()
@@ -57,7 +57,7 @@ data class PlacedPorts @ConstructorForDeserialization constructor(val value: Lis
         fun add(portTile: PortTile) = apply { portTiles.add(portTile) }
         fun add(accessPoints: List<AccessPoint>) = apply {
             require(accessPoints.isNotEmpty()) { "accessPoints must not be empty" }
-            accessPointsList.add(ImmutableList(accessPoints))
+            accessPointsList.add(accessPoints.toMutableList())
         }
 
         fun build(): PlacedPorts {

@@ -5,6 +5,7 @@ import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
+import net.corda.core.serialization.ConstructorForDeserialization
 import net.corda.core.serialization.CordaSerializable
 
 /**
@@ -18,11 +19,11 @@ import net.corda.core.serialization.CordaSerializable
 
 @CordaSerializable
 @BelongsToContract(GameStateContract::class)
-data class GameBoardState(
+data class GameBoardState @ConstructorForDeserialization constructor(
         override val linearId: UniqueIdentifier = UniqueIdentifier(),
         val hexTiles: PlacedHexTiles,
         val ports: PlacedPorts,
-        val players: List<Party>,
+        val players: MutableList<Party>,
         val turnTrackerLinearId: UniqueIdentifier,
         val robberLinearId: UniqueIdentifier,
         val setUpComplete: Boolean = false,
@@ -110,7 +111,7 @@ data class GameBoardState(
                 linearId = linearId,
                 hexTiles = hexTiles.build(),
                 ports = ports.build(),
-                players = ImmutableList(players),
+                players = players,
                 turnTrackerLinearId = turnTrackerLinearId!!,
                 robberLinearId = robberLinearId!!,
                 setUpComplete = setUpComplete,
