@@ -15,12 +15,12 @@ enum class HexTileType(val resourceYielded: TokenType?) {
     Desert(null)
 }
 
+val allResourceTypes = listOf("BRICK", "ORE", "SHEEP", "WHEAT", "WOOD")
 val Brick = Resource.getInstance("BRICK")
 val Ore = Resource.getInstance("ORE")
 val Sheep = Resource.getInstance("SHEEP")
 val Wheat = Resource.getInstance("WHEAT")
 val Wood = Resource.getInstance("WOOD")
-val allResourceTypes = listOf("BRICK", "ORE", "SHEEP", "WHEAT", "WOOD")
 val allResources = allResourceTypes.map { Resource.getInstance(it) }
 
 fun Iterable<TokenType>.mapOf(amount: Int) = map { amount of it }

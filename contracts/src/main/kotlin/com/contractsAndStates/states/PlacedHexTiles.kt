@@ -185,8 +185,6 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(val value: 
         /**
          * This method is used in flows to product a new version of the gameboard with a record of the location of roads, identified by
          * their specific linearID
-         *
-         * TODO: Add functionality to connect roadStates when new roads and proposed extending existing roads.
          */
         @Suspendable
         fun buildRoad(
