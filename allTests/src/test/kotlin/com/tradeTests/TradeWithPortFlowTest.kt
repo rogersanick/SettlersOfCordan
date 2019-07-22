@@ -66,7 +66,6 @@ class TradeWithPortFlowTest {
     @Test
     fun player1IsAbleToMakeMultipleTradesWithAPortOnTheirTurn() {
 
-        assert(false);
         // Get an identity for each of the players of the game.
         val p1 = a.info.chooseIdentity()
         val p2 = b.info.chooseIdentity()
