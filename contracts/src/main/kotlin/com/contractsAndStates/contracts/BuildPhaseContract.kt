@@ -68,6 +68,10 @@ class BuildPhaseContract : Contract {
                  */
                 val newSettlement = outputSettlements.single()
                 val onCorner = newSettlement.absoluteCorner
+                val equivalentCorners = inputBoard
+                        .getOverlappedCorners(onCorner)
+                        .filterNotNull()
+                        .plus(onCorner)
                 val newRoad = outputRoads.single()
                 val turnTracker = turnTrackers.single()
                 val currentPlayer = inputBoard.players[turnTracker.currTurnIndex]
@@ -90,10 +94,7 @@ class BuildPhaseContract : Contract {
                  */
                 if (turnTracker.setUpRound1Complete) {
                     // The list of resources that should be issued in this transaction.
-                    val consolidatedResources = inputBoard
-                            .getOverlappedCorners(onCorner)
-                            .filterNotNull()
-                            .plus(onCorner)
+                    val consolidatedResources = equivalentCorners
                             .mapNotNull { corner ->
                                 inputBoard.get(corner.tileIndex).resourceType.let { tileType ->
                                     if (tileType != HexTileType.Desert) {
@@ -129,7 +130,7 @@ class BuildPhaseContract : Contract {
                         outputBoard.hasRoadOn(it)
                     }
                     "The new road should be adjacent to the proposed settlement" using sides.all { side ->
-                        side.getAdjacentCorners().any { it == onCorner }
+                        side.getAdjacentCorners().any { equivalentCorners.contains(it) }
                     }
                 }
 

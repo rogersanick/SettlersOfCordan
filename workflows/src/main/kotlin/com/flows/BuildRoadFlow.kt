@@ -28,11 +28,7 @@ class BuildRoadFlow(
         hexTileSide: Int
 ) : FlowLogic<SignedTransaction>() {
 
-    val absoluteSide: AbsoluteSide
-
-    init {
-        absoluteSide = AbsoluteSide(HexTileIndex(hexTileIndex), TileSideIndex(hexTileSide))
-    }
+    val absoluteSide = AbsoluteSide(HexTileIndex(hexTileIndex), TileSideIndex(hexTileSide))
 
     @Suspendable
     override fun call(): SignedTransaction {

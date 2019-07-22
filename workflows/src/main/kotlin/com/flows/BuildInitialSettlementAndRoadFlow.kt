@@ -38,14 +38,10 @@ class BuildInitialSettlementAndRoadFlow(
         sideIndex: Int
 ) : FlowLogic<SignedTransaction>() {
 
-    val absoluteCorner: AbsoluteCorner
-    val absoluteSide: AbsoluteSide
+    val absoluteCorner = AbsoluteCorner(HexTileIndex(tileIndex), TileCornerIndex(cornerIndex))
+    val absoluteSide = AbsoluteSide(HexTileIndex(tileIndex), TileSideIndex(sideIndex))
 
     init {
-        val hexTileIndex = HexTileIndex(tileIndex)
-        absoluteCorner = AbsoluteCorner(hexTileIndex, TileCornerIndex(cornerIndex))
-        absoluteSide = AbsoluteSide(hexTileIndex, TileSideIndex(sideIndex))
-
         require(absoluteCorner.cornerIndex.getAdjacentSides().contains(absoluteSide.sideIndex)) {
             "You must build a road next to a settlement"
         }

@@ -30,11 +30,7 @@ class BuildSettlementFlow(
         cornerIndex: Int
 ) : FlowLogic<SignedTransaction>() {
 
-    val absoluteCorner : AbsoluteCorner
-
-    init {
-        absoluteCorner = AbsoluteCorner(HexTileIndex(tileIndex), TileCornerIndex(cornerIndex))
-    }
+    val absoluteCorner = AbsoluteCorner(HexTileIndex(tileIndex), TileCornerIndex(cornerIndex))
 
     @Suspendable
     override fun call(): SignedTransaction {
