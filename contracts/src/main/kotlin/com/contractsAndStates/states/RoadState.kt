@@ -45,6 +45,11 @@ data class RoadState(
     }
 }
 
+/**
+ * Returns the player who should received the Longest Road Card given the current state
+ * of the board, roads, settlements, players and the current holder of the card. Either the
+ * current holder and the return value can be null meaning no player had or will have the card.
+ */
 fun longestRoad(board: PlacedHexTiles,
                 roads: List<RoadState>,
                 settlements: List<SettlementState>,
@@ -56,6 +61,11 @@ fun longestRoad(board: PlacedHexTiles,
 
 data class LongestRoadCandidate(val player: Party, val longestRoadLength: Int)
 
+/**
+ * Given a list of pairs of parties and count of the longest road and the current player with
+ * the longest road card (null means no one has the card), return the new card holder. It can
+ * be a new player, the same player or null if no one meets the criteria.
+ */
 fun assignLongestRoad(holder: Party?, candidates: List<LongestRoadCandidate>): Party? {
 
     val orderedCandidates = candidates.sortedByDescending { it.longestRoadLength }
@@ -78,7 +88,9 @@ fun assignLongestRoad(holder: Party?, candidates: List<LongestRoadCandidate>): P
     return null
 }
 
-
+/**
+ * Returns a list with the count of the longest road for each player.
+ */
 fun longestRoadsForAllPlayers(board: PlacedHexTiles,
                               roads: List<RoadState>,
                               settlements: List<SettlementState>,
@@ -86,6 +98,9 @@ fun longestRoadsForAllPlayers(board: PlacedHexTiles,
     return players.map { LongestRoadCandidate(it, longestRoadForPlayer(board, roads, settlements, it).count()) }
 }
 
+/**
+ * Returns a set of road ids with the longest road for a particular player.
+ */
 fun longestRoadForPlayer(board: PlacedHexTiles,
                          roads: List<RoadState>,
                          settlements: List<SettlementState>,
