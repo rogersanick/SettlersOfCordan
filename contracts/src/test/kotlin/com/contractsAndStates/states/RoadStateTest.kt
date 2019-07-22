@@ -61,49 +61,49 @@ class RoadStateTest {
     fun `Longest road of 1`() {
         buildRoads(p1.party, listOf(0 to 1))
         buildBoard()
-        assertEquals(1, calculateLongestRoad(board, roads, mutableSetOf()).count())
+        assertEquals(1, longestRoadForPlayer(board, roads.toList(), listOf(), p1.party).count())
     }
 
     @Test
     fun `longest road of 2 same hex`() {
         buildRoads(p1.party, listOf(0 to 1, 0 to 2))
         buildBoard()
-        assertEquals(2, calculateLongestRoad(board, roads, mutableSetOf()).count())
+        assertEquals(2, longestRoadForPlayer(board, roads.toList(), listOf(), p1.party).count())
     }
 
     @Test
     fun `longest road of 3 same hex`() {
         buildRoads(p1.party, listOf(0 to 1, 0 to 2, 0 to 0))
         buildBoard()
-        assertEquals(3, calculateLongestRoad(board, roads, mutableSetOf()).count())
+        assertEquals(3, longestRoadForPlayer(board, roads.toList(), listOf(), p1.party).count())
     }
 
     @Test
     fun `longest road of 6 same hex`() {
         buildRoads(p1.party, listOf(0 to 0, 0 to 1, 0 to 2, 0 to 3, 0 to 4, 0 to 5))
         buildBoard()
-        assertEquals(6, calculateLongestRoad(board, roads, mutableSetOf()).count())
+        assertEquals(6, longestRoadForPlayer(board, roads.toList(), listOf(), p1.party).count())
     }
 
     @Test
     fun `longest road of 2 different hex`() {
         buildRoads(p1.party, listOf(0 to 2, 1 to 3))
         buildBoard()
-        assertEquals(2, calculateLongestRoad(board, roads, mutableSetOf()).count())
+        assertEquals(2, longestRoadForPlayer(board, roads.toList(), listOf(), p1.party).count())
     }
 
     @Test
     fun `longest road of 3 with split path`() {
         buildRoads(p1.party, listOf(0 to 2, 1 to 3, 1 to 4, 4 to 1))
         buildBoard()
-        assertEquals(3, calculateLongestRoad(board, roads, mutableSetOf()).count())
+        assertEquals(3, longestRoadForPlayer(board, roads.toList(), listOf(), p1.party).count())
     }
 
     @Test
     fun `longest road of 8 with loop`() {
         buildRoads(p1.party, listOf(0 to 0, 0 to 1, 0 to 2, 0 to 3, 0 to 4, 0 to 5, 1 to 3, 1 to 2))
         buildBoard()
-        assertEquals(8, calculateLongestRoad(board, roads, mutableSetOf()).count())
+        assertEquals(8, longestRoadForPlayer(board, roads.toList(), listOf(), p1.party).count())
     }
 
     @Test
@@ -111,7 +111,7 @@ class RoadStateTest {
         buildRoads(p1.party, listOf(0 to 0, 0 to 1, 0 to 2, 0 to 3, 0 to 4, 0 to 5, 1 to 3, 1 to 2,
                                     5 to 0, 5 to 1, 5 to 2, 5 to 3, 5 to 4))
         buildBoard()
-        assertEquals(13, calculateLongestRoad(board, roads, mutableSetOf()).count())
+        assertEquals(13, longestRoadForPlayer(board, roads.toList(), listOf(), p1.party).count())
     }
 
     @Test
@@ -119,7 +119,7 @@ class RoadStateTest {
         buildRoads(p1.party, listOf(5 to 0, 5 to 1))
         buildSettlements(p2.party, listOf(5 to 1))
         buildBoard()
-        assertEquals(1, calculateLongestRoad(board, roads, settlements).count())
+        assertEquals(1, longestRoadForPlayer(board, roads.toList(), settlements.toList(), p1.party).count())
     }
 
     @Test
@@ -127,7 +127,7 @@ class RoadStateTest {
         buildRoads(p1.party, listOf(5 to 0, 5 to 1))
         buildSettlements(p1.party, listOf(6 to 5))
         buildBoard()
-        assertEquals(2, calculateLongestRoad(board, roads, settlements).count())
+        assertEquals(2, longestRoadForPlayer(board, roads.toList(), settlements.toList(), p1.party).count())
     }
 }
 
