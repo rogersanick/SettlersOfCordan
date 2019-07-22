@@ -1,15 +1,10 @@
 package com.contractsAndStates.states
 
-import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.GameStateContract
-import com.oracleClientStatesAndContracts.states.RollTrigger
-import com.r3.corda.lib.tokens.contracts.types.TokenType
-import net.corda.core.contracts.Amount
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
-import net.corda.core.internal.toMultiMap
 import net.corda.core.serialization.ConstructorForDeserialization
 import net.corda.core.serialization.CordaSerializable
 
@@ -24,17 +19,23 @@ import net.corda.core.serialization.CordaSerializable
 
 @CordaSerializable
 @BelongsToContract(GameStateContract::class)
-data class GameBoardState(val hexTiles: PlacedHexTiles,
-                          val ports: PlacedPorts,
-                          val players: List<Party>,
-                          val turnTrackerLinearId: UniqueIdentifier,
-                          val robberLinearId: UniqueIdentifier,
-                          val settlementsPlaced: PlacedSettlements = PlacedSettlements(),
-                          val setUpComplete: Boolean = false,
-                          val initialPiecesPlaced: Int = 0,
-                          val winner: Party? = null,
-                          val beginner: Boolean = false,
-                          override val linearId: UniqueIdentifier = UniqueIdentifier()) : LinearState {
+data class GameBoardState @ConstructorForDeserialization constructor(
+        override val linearId: UniqueIdentifier = UniqueIdentifier(),
+        val hexTiles: PlacedHexTiles,
+        val ports: PlacedPorts,
+        val players: MutableList<Party>,
+        val turnTrackerLinearId: UniqueIdentifier,
+        val robberLinearId: UniqueIdentifier,
+        val setUpComplete: Boolean = false,
+        val initialPiecesPlaced: Int = 0,
+        val winner: Party? = null,
+        val beginner: Boolean = false
+) : LinearState,
+        TileLocator<HexTile> by hexTiles,
+        AbsoluteSideLocator by hexTiles,
+        AbsoluteCornerLocator by hexTiles,
+        AbsoluteRoadLocator by hexTiles,
+        AbsoluteSettlementLocator by hexTiles {
 
     override val participants: List<Party> get() = players
 
@@ -42,54 +43,82 @@ data class GameBoardState(val hexTiles: PlacedHexTiles,
         const val TILE_COUNT = 19
     }
 
-    fun weWin(ourIdentity: Party): GameBoardState {
-        return this.copy(winner = ourIdentity)
-    }
-}
+    fun weWin(ourIdentity: Party) = copy(winner = ourIdentity)
 
-@CordaSerializable
-data class PlacedSettlements @ConstructorForDeserialization constructor(
-        val value: List<List<Boolean>> = List(GameBoardState.TILE_COUNT) {
-            List(HexTile.SIDE_COUNT) { false }
-        }) {
+    fun toBuilder() = Builder(
+            linearId = linearId,
+            hexTiles = hexTiles.toBuilder(),
+            ports = ports.toBuilder(),
+            players = players.toMutableList(),
+            turnTrackerLinearId = turnTrackerLinearId,
+            robberLinearId = robberLinearId,
+            setUpComplete = setUpComplete,
+            initialPiecesPlaced = initialPiecesPlaced,
+            winner = winner,
+            beginner = beginner)
 
-    init {
-        require(value.size == GameBoardState.TILE_COUNT) {
-            "value.size cannot be ${value.size}"
+    class Builder(
+            val linearId: UniqueIdentifier = UniqueIdentifier(),
+            val hexTiles: PlacedHexTiles.Builder,
+            val ports: PlacedPorts.Builder,
+            private val players: MutableList<Party> = mutableListOf(),
+            private var turnTrackerLinearId: UniqueIdentifier? = null,
+            private var robberLinearId: UniqueIdentifier? = null,
+            private var setUpComplete: Boolean = false,
+            private var initialPiecesPlaced: Int = 0,
+            private var winner: Party? = null,
+            private var beginner: Boolean = false
+    ) : TileLocator<HexTile.Builder> by hexTiles,
+            AbsoluteSideLocator by hexTiles,
+            AbsoluteCornerLocator by hexTiles,
+            AbsoluteRoadLocator by hexTiles,
+            AbsoluteRoadBuilder by hexTiles,
+            AbsoluteSettlementLocator by hexTiles,
+            AbsoluteSettlementBuilder by hexTiles {
+
+        companion object {
+            fun createFull() = Builder(
+                    hexTiles = PlacedHexTiles.Builder.createFull(),
+                    ports = PlacedPorts.Builder.createAllPorts()
+            )
         }
-        require(value.all { it.size == HexTile.SIDE_COUNT }) {
-            "Each value list must be of ${HexTile.SIDE_COUNT} size"
-        }
-    }
 
-    fun hasOn(corner: AbsoluteCorner) = hasOn(corner.tileIndex, corner.cornerIndex)
-    fun hasOn(tileIndex: HexTileIndex, corner: TileCornerIndex) = value[tileIndex.value][corner.value]
-
-    class Builder(private val value: List<MutableList<Boolean>> = List(GameBoardState.TILE_COUNT) {
-        MutableList(HexTile.SIDE_COUNT) { false }
-    }) {
-
-        init {
-            require(value.size == GameBoardState.TILE_COUNT) {
-                "value.size cannot be ${value.size}"
+        fun addPlayers(newPlayers: List<Party>) = apply { players.addAll(newPlayers) }
+        fun withTurnTracker(id: UniqueIdentifier) = apply {
+            require(turnTrackerLinearId == null || turnTrackerLinearId == id) {
+                "You cannot overwrite the turnTrackerLinearId"
             }
-            require(value.all { it.size == HexTile.SIDE_COUNT }) {
-                "Each value list must be of ${HexTile.SIDE_COUNT} size"
+            turnTrackerLinearId = id
+        }
+
+        fun withRobber(id: UniqueIdentifier) = apply {
+            require(robberLinearId == null || robberLinearId == id) {
+                "You cannot overwrite the robberLinearId"
             }
+            robberLinearId = id
         }
 
-        fun hasOn(corner: AbsoluteCorner) = hasOn(corner.tileIndex, corner.cornerIndex)
-        fun hasOn(tileIndex: HexTileIndex, corner: TileCornerIndex) = value[tileIndex.value][corner.value]
-        fun placeOn(corner: AbsoluteCorner, sides: TileSides = TileSides()) =
-                placeOn(corner.tileIndex, corner.cornerIndex, sides)
-
-        fun placeOn(tileIndex: HexTileIndex, corner: TileCornerIndex, sides: TileSides = TileSides()): Builder = apply {
-            require(!value[tileIndex.value][corner.value]) { "You cannot set a settlement twice" }
-            value[tileIndex.value][corner.value] = true
-            sides.getOverlappedCorners(corner).filterNotNull().forEach { if (!hasOn(it)) placeOn(it) }
+        fun setSetupComplete() = apply { setUpComplete = true }
+        fun addInitialPiecesPlaced(extra: Int) = apply { initialPiecesPlaced += extra }
+        fun withWinner(newWinner: Party) = apply {
+            require(winner == null || winner == newWinner) { "You cannot overwrite the winner" }
+            winner = newWinner
         }
 
-        fun build() = PlacedSettlements(value.map { ImmutableList(it) })
+        fun setBeginner() = apply { beginner = true }
+
+        fun build() = GameBoardState(
+                linearId = linearId,
+                hexTiles = hexTiles.build(),
+                ports = ports.build(),
+                players = players,
+                turnTrackerLinearId = turnTrackerLinearId!!,
+                robberLinearId = robberLinearId!!,
+                setUpComplete = setUpComplete,
+                initialPiecesPlaced = initialPiecesPlaced,
+                winner = winner,
+                beginner = beginner
+        )
     }
 }
 

@@ -2,7 +2,8 @@ package com.contractsAndStates.states
 
 import com.contractsAndStates.contracts.BuildPhaseContract
 import net.corda.core.contracts.BelongsToContract
-import net.corda.core.contracts.ContractState
+import net.corda.core.contracts.LinearState
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
 import net.corda.core.serialization.CordaSerializable
@@ -17,13 +18,27 @@ import net.corda.core.serialization.CordaSerializable
 @CordaSerializable
 @BelongsToContract(BuildPhaseContract::class)
 data class SettlementState(
-        val hexTileIndex: HexTileIndex,
-        val hexTileCoordinate: TileCornerIndex,
+        val absoluteCorner: AbsoluteCorner,
         val players: List<Party>,
         val owner: Party,
-        val resourceAmountClaim: Int = 1,
-        val upgradedToCity: Boolean = false
-): ContractState {
-    fun upgradeToCity() = copy(resourceAmountClaim = 2, upgradedToCity = true)
+        val upgradedToCity: Boolean = false,
+        override val linearId: UniqueIdentifier = UniqueIdentifier()
+) : LinearState {
+
+    val resourceAmountClaim = if (upgradedToCity) cityAmountClaim
+    else settlementAmountClaim
+
+    init {
+        require(resourceAmountClaim in listOf(settlementAmountClaim, cityAmountClaim)) {
+            "resourceAmountClaim of $resourceAmountClaim is not an allowed value"
+        }
+    }
+
+    companion object {
+        const val settlementAmountClaim = 1
+        const val cityAmountClaim = 2
+    }
+
+    fun upgradeToCity() = copy(upgradedToCity = true)
     override val participants: List<AbstractParty> get() = players
 }

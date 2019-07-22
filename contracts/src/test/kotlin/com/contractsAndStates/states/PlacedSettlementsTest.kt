@@ -1,154 +1,100 @@
 package com.contractsAndStates.states
 
+import net.corda.core.contracts.UniqueIdentifier
 import org.junit.Test
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class PlacedSettlementsTest {
 
     @Test
     fun `Constructor accepts proper input`() {
-        PlacedSettlements(List(GameBoardState.TILE_COUNT) { List(HexTile.SIDE_COUNT) { false } })
+        PlacedSettlements(MutableList(HexTile.SIDE_COUNT) { null })
     }
 
     @Test
     fun `Constructor rejects too short list`() {
         assertFailsWith<IllegalArgumentException> {
-            PlacedSettlements(List(GameBoardState.TILE_COUNT - 1) { List(HexTile.SIDE_COUNT) { false } })
-        }
-    }
-
-    @Test
-    fun `Constructor rejects too short inner list`() {
-        assertFailsWith<IllegalArgumentException> {
-            PlacedSettlements(List(GameBoardState.TILE_COUNT) { List(HexTile.SIDE_COUNT - 1) { false } })
+            PlacedSettlements(MutableList(HexTile.SIDE_COUNT - 1) { null })
         }
     }
 
     @Test
     fun `Constructor rejects too long list`() {
         assertFailsWith<IllegalArgumentException> {
-            PlacedSettlements(List(GameBoardState.TILE_COUNT + 1) { List(HexTile.SIDE_COUNT) { false } })
+            PlacedSettlements(MutableList(HexTile.SIDE_COUNT + 1) { null })
         }
     }
 
     @Test
-    fun `Constructor rejects too long inner list`() {
-        assertFailsWith<IllegalArgumentException> {
-            PlacedSettlements(List(GameBoardState.TILE_COUNT) { List(HexTile.SIDE_COUNT + 1) { false } })
-        }
-    }
-
-    @Test
-    fun `hasOn after placeOn without sides is correct`() {
-        val placed = PlacedSettlements.Builder(List(GameBoardState.TILE_COUNT) {
-            MutableList(HexTile.SIDE_COUNT) { false }
-        })
-                .placeOn(HexTileIndex(3), TileCornerIndex(2))
-                .placeOn(HexTileIndex(3), TileCornerIndex(1))
-                .placeOn(HexTileIndex(7), TileCornerIndex(4))
+    fun `getSettlementOn and hasSettlementOn after placeOn is correct`() {
+        val settlementIds = (1..3).map { UniqueIdentifier() }
+        val placed = PlacedSettlements.Builder()
+                .setSettlementOn(TileCornerIndex(2), settlementIds[0])
+                .setSettlementOn(TileCornerIndex(1), settlementIds[1])
+                .setSettlementOn(TileCornerIndex(4), settlementIds[2])
                 .build()
-        assertTrue(placed.hasOn(HexTileIndex(3), TileCornerIndex(2)))
-        assertTrue(placed.hasOn(HexTileIndex(3), TileCornerIndex(1)))
-        assertTrue(placed.hasOn(HexTileIndex(7), TileCornerIndex(4)))
-        assertFalse(placed.hasOn(HexTileIndex(7), TileCornerIndex(5)))
-    }
-
-    @Test
-    fun `hasOn after placeOn with sides is correct`() {
-        val builder = PlacedSettlements.Builder(List(GameBoardState.TILE_COUNT) {
-            MutableList(HexTile.SIDE_COUNT) { false }
-        })
-        val sides = TileSides.Builder()
-                .setNeighborOn(TileSideIndex(1), HexTileIndex(2))
-                .build()
-        val placed = builder
-                .placeOn(HexTileIndex(3), TileCornerIndex(2), sides)
-                .placeOn(HexTileIndex(3), TileCornerIndex(1), sides)
-                .placeOn(HexTileIndex(7), TileCornerIndex(4))
-                .build()
-        assertTrue(placed.hasOn(HexTileIndex(3), TileCornerIndex(2)))
-        assertTrue(placed.hasOn(HexTileIndex(2), TileCornerIndex(4)))
-        assertTrue(placed.hasOn(HexTileIndex(3), TileCornerIndex(1)))
-        assertTrue(placed.hasOn(HexTileIndex(7), TileCornerIndex(4)))
-        assertFalse(placed.hasOn(HexTileIndex(7), TileCornerIndex(5)))
+        assertEquals(settlementIds[0], placed.getSettlementOn(TileCornerIndex(2)))
+        assertTrue(placed.hasSettlementOn(TileCornerIndex(2)))
+        assertEquals(settlementIds[1], placed.getSettlementOn(TileCornerIndex(1)))
+        assertTrue(placed.hasSettlementOn(TileCornerIndex(1)))
+        assertEquals(settlementIds[2], placed.getSettlementOn(TileCornerIndex(4)))
+        assertTrue(placed.hasSettlementOn(TileCornerIndex(4)))
+        assertNull(placed.getSettlementOn(TileCornerIndex(5)))
+        assertFalse(placed.hasSettlementOn(TileCornerIndex(5)))
     }
 
     @Test
     fun `Builder-constructor accepts proper input`() {
-        PlacedSettlements.Builder(List(GameBoardState.TILE_COUNT) { MutableList(HexTile.SIDE_COUNT) { false } })
+        PlacedSettlements.Builder(MutableList(HexTile.SIDE_COUNT) { null })
     }
 
     @Test
     fun `Builder-constructor rejects too short list`() {
         assertFailsWith<IllegalArgumentException> {
-            PlacedSettlements.Builder(List(GameBoardState.TILE_COUNT - 1) { MutableList(HexTile.SIDE_COUNT) { false } })
-        }
-    }
-
-    @Test
-    fun `Builder-constructor rejects too short inner list`() {
-        assertFailsWith<IllegalArgumentException> {
-            PlacedSettlements.Builder(List(GameBoardState.TILE_COUNT) { MutableList(HexTile.SIDE_COUNT - 1) { false } })
+            PlacedSettlements.Builder(MutableList(HexTile.SIDE_COUNT - 1) { null })
         }
     }
 
     @Test
     fun `Builder-constructor rejects too long list`() {
         assertFailsWith<IllegalArgumentException> {
-            PlacedSettlements.Builder(List(GameBoardState.TILE_COUNT + 1) { MutableList(HexTile.SIDE_COUNT) { false } })
+            PlacedSettlements.Builder(MutableList(HexTile.SIDE_COUNT + 1) { null })
         }
     }
 
     @Test
-    fun `Builder-constructor rejects too long inner list`() {
+    fun `Builder-constructor rejects non-null duplicates`() {
+        val duplicate = UniqueIdentifier()
+        val settlementIds = listOf(duplicate, duplicate, UniqueIdentifier())
+        val placed = PlacedSettlements.Builder()
+                .setSettlementOn(TileCornerIndex(2), settlementIds[0])
+                .setSettlementOn(TileCornerIndex(1), settlementIds[1])
+                .setSettlementOn(TileCornerIndex(4), settlementIds[2])
+
         assertFailsWith<IllegalArgumentException> {
-            PlacedSettlements.Builder(List(GameBoardState.TILE_COUNT) { MutableList(HexTile.SIDE_COUNT + 1) { false } })
+            placed.build()
         }
     }
 
     @Test
-    fun `Builder-placeOn without sides is correct`() {
-        val builder = PlacedSettlements.Builder(List(GameBoardState.TILE_COUNT) {
-            MutableList(HexTile.SIDE_COUNT) { false }
-        })
-        assertFalse(builder.hasOn(HexTileIndex(3), TileCornerIndex(2)))
-        assertFalse(builder.hasOn(HexTileIndex(3), TileCornerIndex(1)))
-        assertFalse(builder.hasOn(HexTileIndex(7), TileCornerIndex(4)))
-        assertFalse(builder.hasOn(HexTileIndex(7), TileCornerIndex(5)))
+    fun `Builder-setSettlementOn, getSettlementOn and hasSettlementOn after is correct`() {
+        val settlementIds = (1..3).map { UniqueIdentifier() }
+        val builder = PlacedSettlements.Builder()
+        assertFalse(builder.hasSettlementOn(TileCornerIndex(2)))
+        assertFalse(builder.hasSettlementOn(TileCornerIndex(1)))
+        assertFalse(builder.hasSettlementOn(TileCornerIndex(4)))
+        assertFalse(builder.hasSettlementOn(TileCornerIndex(5)))
         builder
-                .placeOn(HexTileIndex(3), TileCornerIndex(2))
-                .placeOn(HexTileIndex(3), TileCornerIndex(1))
-                .placeOn(HexTileIndex(7), TileCornerIndex(4))
-        assertTrue(builder.hasOn(HexTileIndex(3), TileCornerIndex(2)))
-        assertTrue(builder.hasOn(HexTileIndex(3), TileCornerIndex(1)))
-        assertTrue(builder.hasOn(HexTileIndex(7), TileCornerIndex(4)))
-        assertFalse(builder.hasOn(HexTileIndex(7), TileCornerIndex(5)))
+                .setSettlementOn(TileCornerIndex(2), settlementIds[0])
+                .setSettlementOn(TileCornerIndex(1), settlementIds[1])
+                .setSettlementOn(TileCornerIndex(4), settlementIds[2])
+        assertEquals(settlementIds[0], builder.getSettlementOn(TileCornerIndex(2)))
+        assertTrue(builder.hasSettlementOn(TileCornerIndex(2)))
+        assertEquals(settlementIds[1], builder.getSettlementOn(TileCornerIndex(1)))
+        assertTrue(builder.hasSettlementOn(TileCornerIndex(1)))
+        assertEquals(settlementIds[2], builder.getSettlementOn(TileCornerIndex(4)))
+        assertTrue(builder.hasSettlementOn(TileCornerIndex(4)))
+        assertNull(builder.getSettlementOn(TileCornerIndex(5)))
+        assertFalse(builder.hasSettlementOn(TileCornerIndex(5)))
     }
-
-    @Test
-    fun `Builder-placeOn with sides is correct`() {
-        val builder = PlacedSettlements.Builder(List(GameBoardState.TILE_COUNT) {
-            MutableList(HexTile.SIDE_COUNT) { false }
-        })
-        val sides = TileSides.Builder()
-                .setNeighborOn(TileSideIndex(1), HexTileIndex(2))
-                .build()
-        assertFalse(builder.hasOn(HexTileIndex(3), TileCornerIndex(2)))
-        assertFalse(builder.hasOn(HexTileIndex(2), TileCornerIndex(4)))
-        assertFalse(builder.hasOn(HexTileIndex(3), TileCornerIndex(1)))
-        assertFalse(builder.hasOn(HexTileIndex(7), TileCornerIndex(4)))
-        assertFalse(builder.hasOn(HexTileIndex(7), TileCornerIndex(5)))
-        builder
-                .placeOn(HexTileIndex(3), TileCornerIndex(2), sides)
-                .placeOn(HexTileIndex(3), TileCornerIndex(1), sides)
-                .placeOn(HexTileIndex(7), TileCornerIndex(4))
-        assertTrue(builder.hasOn(HexTileIndex(3), TileCornerIndex(2)))
-        assertTrue(builder.hasOn(HexTileIndex(2), TileCornerIndex(4)))
-        assertTrue(builder.hasOn(HexTileIndex(3), TileCornerIndex(1)))
-        assertTrue(builder.hasOn(HexTileIndex(7), TileCornerIndex(4)))
-        assertFalse(builder.hasOn(HexTileIndex(7), TileCornerIndex(5)))
-    }
-
 }

@@ -11,8 +11,21 @@ class HexTileTest {
 
     private fun makeBasicBuilder(tileIndex: HexTileIndex) = HexTile.Builder(tileIndex)
             .with(HexTileType.Desert)
-            .with(RollTrigger(3))
             .with(true)
+
+    @Test
+    fun `getAllSides is correct`() {
+        assertEquals(listOf(TileSideIndex(0), TileSideIndex(1), TileSideIndex(2),
+                TileSideIndex(3), TileSideIndex(4), TileSideIndex(5)),
+                HexTile.getAllSides())
+    }
+
+    @Test
+    fun `getAllCorners is correct`() {
+        assertEquals(listOf(TileCornerIndex(0), TileCornerIndex(1), TileCornerIndex(2),
+                TileCornerIndex(3), TileCornerIndex(4), TileCornerIndex(5)),
+                HexTile.getAllCorners())
+    }
 
     @Test
     fun `Builder rejects replacing resourceType`() {
@@ -32,6 +45,7 @@ class HexTileTest {
     @Test
     fun `Builder rejects replacing roleTrigger`() {
         val builder = makeBasicBuilder(HexTileIndex(1))
+                .with(RollTrigger(3))
         assertFailsWith<IllegalArgumentException> {
             builder.with(RollTrigger(2))
         }
@@ -40,6 +54,7 @@ class HexTileTest {
     @Test
     fun `Builder rejects putting roleTrigger back to null`() {
         val builder = makeBasicBuilder(HexTileIndex(1))
+                .with(RollTrigger(2))
         assertFailsWith<IllegalArgumentException> {
             builder.with(null)
         }
@@ -79,10 +94,14 @@ class HexTileTest {
 
     @Test
     fun `Builder-build is correct`() {
-        val built = makeBasicBuilder(HexTileIndex(4)).build()
-        assertEquals(HexTileType.Desert, built.resourceType)
+        val built = HexTile.Builder(HexTileIndex(4))
+                .with(HexTileType.Forest)
+                .with(false)
+                .with(RollTrigger(3))
+                .build()
+        assertEquals(HexTileType.Forest, built.resourceType)
         assertEquals(RollTrigger(3), built.rollTrigger)
-        assertTrue(built.robberPresent)
+        assertFalse(built.robberPresent)
         assertEquals(HexTileIndex(4), built.hexTileIndex)
         // TODO test roads?
     }
@@ -91,12 +110,12 @@ class HexTileTest {
     fun `connect is correct 1-5`() {
         val builder1 = makeBasicBuilder(HexTileIndex(1))
         val builder5 = makeBasicBuilder(HexTileIndex(5))
-        assertFalse(builder1.isConnectedWith(TileSideIndex(3), builder5.hexTileIndex))
-        assertFalse(builder5.isConnectedWith(TileSideIndex(0), builder1.hexTileIndex))
+        assertFalse(builder1.isNeighborOn(TileSideIndex(3), builder5.hexTileIndex))
+        assertFalse(builder5.isNeighborOn(TileSideIndex(0), builder1.hexTileIndex))
 
         builder5.connect(TileSideIndex(0), builder1)
-        assertTrue(builder1.isConnectedWith(TileSideIndex(3), builder5.hexTileIndex))
-        assertTrue(builder5.isConnectedWith(TileSideIndex(0), builder1.hexTileIndex))
+        assertTrue(builder1.isNeighborOn(TileSideIndex(3), builder5.hexTileIndex))
+        assertTrue(builder5.isNeighborOn(TileSideIndex(0), builder1.hexTileIndex))
     }
 
     @Test

@@ -1,12 +1,13 @@
 package com.flows
 
 import com.contractsAndStates.contracts.RobberContract
+import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.HexTileIndex
-import com.oracleClientStatesAndContracts.states.DiceRollState
+import com.contractsAndStates.states.RobberState
+import com.contractsAndStates.states.TurnTrackerState
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
-import net.corda.core.node.services.queryBy
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
@@ -16,23 +17,27 @@ class TriggerRobberFlow(val gameBoardLinearId: UniqueIdentifier,
                         val updatedRobberLocation: Int) : FlowLogic<SignedTransaction>() {
     override fun call(): SignedTransaction {
 
-        // Step 1. Get a reference to the notary service on the network
-        val notary = serviceHub.networkMapCache.notaryIdentities.first()
-
-        // Step 2. Retrieve the Game Board State from the vault.
-        val gameBoardStateAndRef = getGameBoardStateFromLinearID(gameBoardLinearId, serviceHub)
+        // Step 1. Retrieve the Game Board State from the vault.
+        val gameBoardStateAndRef = serviceHub.vaultService
+                .querySingleState<GameBoardState>(gameBoardLinearId)
         val gameBoardState = gameBoardStateAndRef.state.data
         val gameBoardReferenceStateAndRef = ReferencedStateAndRef(gameBoardStateAndRef)
 
+        // Step 2. Get a reference to the notary service on the network
+        val notary = gameBoardStateAndRef.state.notary
+
         // Step 3. Retrieve the Turn Tracker State from the vault
-        val turnTrackerStateAndRef = getTurnTrackerStateFromLinearID(gameBoardState.linearId, serviceHub)
+        val turnTrackerStateAndRef = serviceHub.vaultService
+                .querySingleState<TurnTrackerState>(gameBoardState.linearId)
         val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(turnTrackerStateAndRef)
 
         // Step 4. Retrieve the Dice Roll State from the vault
-        val diceRollStateAndRef = serviceHub.vaultService.queryBy<DiceRollState>().states.filter { it.state.data.gameBoardStateUniqueIdentifier == gameBoardLinearId }.single()
+        val diceRollStateAndRef = serviceHub.vaultService
+                .queryDiceRoll(gameBoardLinearId)
 
         // Step 5. Add the existing robber state as an input state
-        val robberStateAndRef = getRobberStateFromLinearID(gameBoardState.linearId, serviceHub)
+        val robberStateAndRef = serviceHub.vaultService
+                .querySingleState<RobberState>(gameBoardState.linearId)
 
         // Step 6. Create a new robber state
         val movedRobberState = robberStateAndRef.state.data.move(HexTileIndex(updatedRobberLocation))

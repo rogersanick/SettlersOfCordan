@@ -26,11 +26,11 @@ data class PlacedPorts @ConstructorForDeserialization constructor(val value: Lis
 
     fun toBuilder() = Builder(
             value.map { it.portTile }.toMutableList(),
-            value.map { it.accessPoints }.toMutableList())
+            value.map { it.accessPoints.toMutableList() }.toMutableList())
 
     class Builder(
             val portTiles: MutableList<PortTile> = mutableListOf(),
-            val accessPointsList: MutableList<List<AccessPoint>> = mutableListOf()) {
+            val accessPointsList: MutableList<MutableList<AccessPoint>> = mutableListOf()) {
 
         companion object {
             fun createAllPorts() = Builder()
@@ -57,7 +57,7 @@ data class PlacedPorts @ConstructorForDeserialization constructor(val value: Lis
         fun add(portTile: PortTile) = apply { portTiles.add(portTile) }
         fun add(accessPoints: List<AccessPoint>) = apply {
             require(accessPoints.isNotEmpty()) { "accessPoints must not be empty" }
-            accessPointsList.add(ImmutableList(accessPoints))
+            accessPointsList.add(accessPoints.toMutableList())
         }
 
         fun build(): PlacedPorts {
@@ -79,6 +79,12 @@ data class Port @ConstructorForDeserialization constructor(val portTile: PortTil
     }
 }
 
+/**
+ * Ports in Settlers of Cordan enable users to exchange resources at more favourable rates than those available to
+ * players generally.
+ * To access a port, a player must have previously built a settlement on a hex tile with an adjacent port.
+ * The settlement must also be built on one of the designated access point specified below.
+ */
 @CordaSerializable
 data class PortTile(val inputRequired: List<Amount<TokenType>>, val outputRequired: List<Amount<TokenType>>) {
 

@@ -22,5 +22,4 @@ class TradePhaseContract : Contract {
         class CancelTrade: Commands
         class ExecuteTrade: Commands
     }
-
 }
