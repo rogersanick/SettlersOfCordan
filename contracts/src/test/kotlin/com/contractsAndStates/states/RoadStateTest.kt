@@ -22,13 +22,13 @@ class RoadStateTest {
     private var p2 = TestIdentity((CordaX500Name("player2", "New York", "GB")))
 
     private fun buildRoads(owner: Party, pairs: List<Pair<Int, Int>>) = pairs.forEach {
-        roads.add(RoadState(HexTileIndex(it.first), TileSideIndex(it.second), listOf(), owner, null, null))
-        builder.buildRoad(roads.last().hexTileIndex, roads.last().hexTileSide, roads.last().linearId)
+        roads.add(RoadState(AbsoluteSide(HexTileIndex(it.first), TileSideIndex(it.second)), listOf(), owner, null, null))
+        builder.setRoadOn(roads.last().absoluteSide, roads.last().linearId)
     }
 
     private fun buildSettlements(owner: Party, pairs: List<Pair<Int, Int>>) = pairs.forEach {
-        settlements.add(SettlementState(HexTileIndex(it.first), TileCornerIndex(it.second), listOf(), owner))
-        settlementsBuilder.placeOn(settlements.last().hexTileIndex, settlements.last().hexTileCoordinate)
+        settlements.add(SettlementState(AbsoluteCorner(HexTileIndex(it.first), TileCornerIndex(it.second)), listOf(), owner))
+        settlementsBuilder.setSettlementOn(settlements.last().absoluteCorner.cornerIndex, settlements.last().linearId)
     }
 
     private fun buildBoard() {
@@ -46,11 +46,11 @@ class RoadStateTest {
 
     private fun getAllTileBuilders(): List<HexTile.Builder> {
         var tileIndex = 0
-        return PlacedHexTiles.TILE_COUNT_PER_RESOURCE.flatMap { entry ->
+        return PlacedHexTiles.tileCountPerType.flatMap { entry ->
             (0 until entry.value).map {
                 HexTile.Builder(HexTileIndex(tileIndex).also { tileIndex++ })
                         .with(entry.key)
-                        .with(RollTrigger(3))
+                        .with(if (entry.key == HexTileType.Desert) null else RollTrigger(3))
                         .with(entry.key == HexTileType.Desert)
             }
         }

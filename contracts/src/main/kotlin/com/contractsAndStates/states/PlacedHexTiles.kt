@@ -183,9 +183,9 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
         fun assignShuffledRollTriggers() = apply {
             val shuffled = rollTriggers.shuffled()
             value.foldIndexed(false) { index, hadDessert, tile ->
-                val rollTrigger = shuffled[index - if (hadDessert) 1 else 0]
                 if (tile.resourceType == HexTileType.Desert) true
                 else {
+                    val rollTrigger = shuffled[index - if (hadDessert) 1 else 0]
                     tile.with(rollTrigger)
                     hadDessert
                 }

@@ -8,20 +8,20 @@ class PlacedSettlementsTest {
 
     @Test
     fun `Constructor accepts proper input`() {
-        PlacedSettlements(List(HexTile.SIDE_COUNT) { null })
+        PlacedSettlements(MutableList(HexTile.SIDE_COUNT) { null })
     }
 
     @Test
     fun `Constructor rejects too short list`() {
         assertFailsWith<IllegalArgumentException> {
-            PlacedSettlements(List(HexTile.SIDE_COUNT - 1) { null })
+            PlacedSettlements(MutableList(HexTile.SIDE_COUNT - 1) { null })
         }
     }
 
     @Test
     fun `Constructor rejects too long list`() {
         assertFailsWith<IllegalArgumentException> {
-            PlacedSettlements(List(HexTile.SIDE_COUNT + 1) { null })
+            PlacedSettlements(MutableList(HexTile.SIDE_COUNT + 1) { null })
         }
     }
 

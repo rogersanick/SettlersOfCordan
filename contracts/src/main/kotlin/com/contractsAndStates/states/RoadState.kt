@@ -118,7 +118,7 @@ private fun calculateLongestRoad(board: PlacedHexTiles,
                                  roads: Set<RoadState>,
                                  settlements: Set<SettlementState>): Set<UniqueIdentifier> {
     val roadIds = roads.map { it.linearId }.toSet()
-    val settlementsCorners = settlements.map { AbsoluteCorner(it.hexTileIndex, it.hexTileCoordinate) }.toSet()
+    val settlementsCorners = settlements.map { it.absoluteCorner }.toSet()
 
     var longestRoad = setOf<UniqueIdentifier>()
     val neverVisitedRoads = roads.map { it.linearId }.toMutableSet()
@@ -126,8 +126,7 @@ private fun calculateLongestRoad(board: PlacedHexTiles,
     while (neverVisitedRoads.isNotEmpty()) {
         val firstNeverVisitedRoad = roads.first { it.linearId == neverVisitedRoads.first() }
         val candidate = calculateLongestRoad(
-                board, AbsoluteSide(firstNeverVisitedRoad.hexTileIndex, firstNeverVisitedRoad.hexTileSide),
-                firstNeverVisitedRoad.linearId, roadIds, settlementsCorners)
+                board, firstNeverVisitedRoad, roadIds, settlementsCorners)
 
         if (candidate.count() > longestRoad.count())
             longestRoad = candidate
@@ -139,12 +138,14 @@ private fun calculateLongestRoad(board: PlacedHexTiles,
 }
 
 private fun calculateLongestRoad(board: PlacedHexTiles,
-                                 startFromSide: AbsoluteSide,
-                                 startFromId: UniqueIdentifier,
+                                 roadState: RoadState,
                                  playerRoads: Set<UniqueIdentifier>,
                                  otherPlayersSettlements: Set<AbsoluteCorner>): Set<UniqueIdentifier> {
-
-    val absCorners = startFromSide.sideIndex.getAdjacentCorners().map { AbsoluteCorner(startFromSide.tileIndex, it) }
+    val startFromSide = roadState.absoluteSide
+    val startFromId = roadState.linearId
+    val absCorners = startFromSide.sideIndex
+            .getAdjacentCorners()
+            .map { AbsoluteCorner(startFromSide.tileIndex, it) }
 
     val visited = calculateLongestRoad(board, startFromSide, absCorners.first(), setOf(), playerRoads, otherPlayersSettlements)
 
@@ -158,7 +159,7 @@ private fun calculateLongestRoad(board: PlacedHexTiles,
                                  visited: Set<UniqueIdentifier>,
                                  available: Set<UniqueIdentifier>,
                                  otherPlayersSettlements: Set<AbsoluteCorner>): Set<UniqueIdentifier> {
-    val roadId = board.get(candidate.tileIndex).sides.getRoadIdOn(candidate.sideIndex)
+    val roadId = board.get(candidate.tileIndex).sides.getRoadOn(candidate.sideIndex)
 
     // No road built
     if (roadId == null) return visited
@@ -170,7 +171,7 @@ private fun calculateLongestRoad(board: PlacedHexTiles,
     if (visited.contains(roadId)) return visited
 
     // New visited list
-    var longestRoadVisited = visited + roadId
+    val longestRoadVisited = visited + roadId
 
     // Calculate next corner to expand
     val nextCornerIndex = candidate.sideIndex.getAdjacentCorners() - lastVisitedCorner.cornerIndex

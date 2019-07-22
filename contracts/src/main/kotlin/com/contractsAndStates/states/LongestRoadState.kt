@@ -10,6 +10,7 @@ import net.corda.core.serialization.CordaSerializable
 
 @CordaSerializable
 @BelongsToContract(LongestRoadContract::class)
-data class LongestRoadState(val holder: Party?,
-                            override val participants: List<AbstractParty>,
-                            override val linearId: UniqueIdentifier = UniqueIdentifier()) : LinearState
+data class LongestRoadState(
+        val holder: Party?,
+        override val participants: List<AbstractParty>,
+        override val linearId: UniqueIdentifier = UniqueIdentifier()) : LinearState
