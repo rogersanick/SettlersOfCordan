@@ -47,7 +47,8 @@ class BuildRoadFlow(
 
         // Step 3. Retrieve roads, settlements and current longest road state
         val roadStates = serviceHub.vaultService
-                .queryBy<RoadState>().states.map { it.state.data }
+                .queryBelongsToGameBoard<RoadState>(gameBoardLinearId)
+                .map { it.state.data }
         val settlementStates = serviceHub.vaultService
                 .queryBy<SettlementState>().states.map { it.state.data }
         val longestRoadStateStateAndRef = serviceHub.vaultService
@@ -68,7 +69,11 @@ class BuildRoadFlow(
         tb.addCommand(buildRoadCommand)
 
         // Step 7. Create initial road state
-        val roadState = RoadState(absoluteSide, gameBoardState.players, ourIdentity)
+        val roadState = RoadState(
+                gameBoardLinearId = gameBoardLinearId,
+                absoluteSide = absoluteSide,
+                players = gameBoardState.players,
+                owner = ourIdentity)
 
         // Step 8. Determine if the road state is extending an existing road
         val newBoardStateBuilder = gameBoardState.toBuilder()

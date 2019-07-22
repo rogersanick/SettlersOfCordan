@@ -76,6 +76,8 @@ class BuildPhaseContract : Contract {
                 val turnTracker = turnTrackers.single()
                 val currentPlayer = inputBoard.players[turnTracker.currTurnIndex]
 
+                "The road must belong to the board" using(inputBoard.linearId == newRoad.gameBoardLinearId)
+
                 /**
                  * Check Settlements - no previous settlement should be on the place, on the neighboring corners,
                  * and for the overlapping ones.
@@ -198,6 +200,7 @@ class BuildPhaseContract : Contract {
 
                 verifyPaymentIsEnough(getBuildableCosts(Buildable.Road), outputResources, "road")
 
+                "The road must belong to the board" using(inputBoard.linearId == newRoad.gameBoardLinearId)
                 "A road must not have previously been built in this location." using
                         inputBoard.getItAndOppositeSides(newRoad.absoluteSide).none {
                             inputBoard.hasRoadOn(it)

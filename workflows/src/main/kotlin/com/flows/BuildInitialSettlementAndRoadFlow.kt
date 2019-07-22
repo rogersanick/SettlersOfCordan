@@ -108,7 +108,11 @@ class BuildInitialSettlementAndRoadFlow(
         }
 
         // Step 10. Create the road state at the appropriate location specified by the user.
-        val roadState = RoadState(absoluteSide, gameBoardState.players, ourIdentity)
+        val roadState = RoadState(
+                gameBoardLinearId = gameBoardLinearId,
+                absoluteSide = absoluteSide,
+                players = gameBoardState.players,
+                owner = ourIdentity)
 
         // Step 11. Update the gameBoardState hexTiles with the roads being built.
         boardBuilder.setRoadOn(absoluteSide, roadState.linearId)

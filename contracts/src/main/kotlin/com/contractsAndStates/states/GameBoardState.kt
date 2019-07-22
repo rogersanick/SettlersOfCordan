@@ -5,8 +5,11 @@ import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
+import net.corda.core.schemas.PersistentState
+import net.corda.core.schemas.StatePersistable
 import net.corda.core.serialization.ConstructorForDeserialization
 import net.corda.core.serialization.CordaSerializable
+import javax.persistence.Column
 
 /**
  * This state represents the same shared data that the symbolic representation of the Settlers board game
@@ -123,3 +126,13 @@ data class GameBoardState @ConstructorForDeserialization constructor(
 }
 
 internal class ImmutableList<T>(private val inner: List<T>) : List<T> by inner
+
+open class BelongsToGameBoard(
+        @Column(name = columnName, nullable = false)
+        var gameBoardLinearId: UniqueIdentifier
+) : PersistentState(), StatePersistable {
+
+    companion object {
+        const val columnName = "game_board_linear_id"
+    }
+}

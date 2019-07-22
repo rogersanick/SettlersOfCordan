@@ -1,6 +1,7 @@
 package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import com.contractsAndStates.states.BelongsToGameBoard
 import com.oracleClientStatesAndContracts.states.DiceRollState
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.of
@@ -16,6 +17,7 @@ import net.corda.core.node.ServiceHub
 import net.corda.core.node.services.VaultService
 import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
+import net.corda.core.node.services.vault.builder
 import net.corda.core.transactions.TransactionBuilder
 
 /**
@@ -72,11 +74,20 @@ inline fun <reified T : ContractState> VaultService.querySingleState(stateRefs: 
                     queryBy<T>(criteria).states
                 }
                 .also { stateAndRefs ->
-                    if(stateAndRefs.size != 1) {
+                    if (stateAndRefs.size != 1) {
                         throw FlowException("There should be a single ${T::class.simpleName} for this ref")
                     }
                 }
                 .single()
+
+inline fun <reified T : ContractState> VaultService.queryBelongsToGameBoard(gameBoardLinearId: UniqueIdentifier) =
+        builder {
+            BelongsToGameBoard::gameBoardLinearId.equal(gameBoardLinearId)
+        }.let { predicate ->
+            QueryCriteria.VaultCustomQueryCriteria(predicate)
+        }.let { criteria ->
+            queryBy<T>(criteria).states
+        }
 
 fun VaultService.queryDiceRoll(gameBoardLinearId: UniqueIdentifier) =
         queryBy<DiceRollState>()
@@ -85,7 +96,7 @@ fun VaultService.queryDiceRoll(gameBoardLinearId: UniqueIdentifier) =
                     it.state.data.gameBoardStateUniqueIdentifier == gameBoardLinearId
                 }
                 .also { stateAndRefs ->
-                    if(stateAndRefs.size != 1) {
+                    if (stateAndRefs.size != 1) {
                         throw FlowException("There should be a single DiceRollState for id $gameBoardLinearId")
                     }
                 }
