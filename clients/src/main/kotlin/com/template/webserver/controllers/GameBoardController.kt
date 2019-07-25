@@ -2,6 +2,7 @@ package com.template.webserver.controllers
 
 import com.contractsAndStates.states.GameBoardState
 import com.flows.SetupGameBoardFlow
+import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.template.webserver.NodeRPCConnection
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.CordaX500Name
@@ -49,6 +50,13 @@ class GameBoardController(rpc: NodeRPCConnection) {
         val listOfReturnedGameBoardStates = proxy.vaultQueryByCriteria(QueryCriteria.LinearStateQueryCriteria(), GameBoardState::class.java)
         val gameBoardStates = listOfReturnedGameBoardStates.states.map { it.state.data }
         return JSONSerializer.serializeObject(gameBoardStates)
+    }
+
+    @GetMapping(value = "/", produces = arrayOf("text/plain"))
+    private fun getTokens(): String {
+        val listOfTokens = proxy.vaultQueryByCriteria(QueryCriteria.LinearStateQueryCriteria(), FungibleToken::class.java)
+        val fungibleTokens = listOfTokens.states.map { it.state.data }
+        return JSONSerializer.serializeObject(fungibleTokens)
     }
 }
 
