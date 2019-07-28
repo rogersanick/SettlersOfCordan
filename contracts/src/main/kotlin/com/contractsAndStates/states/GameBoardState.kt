@@ -47,7 +47,11 @@ data class GameBoardState @ConstructorForDeserialization constructor(
         const val TILE_COUNT = 19
     }
 
+    fun ownPointer() = LinearPointer(linearId, GameBoardState::class.java)
     fun weWin(ourIdentity: Party) = copy(winner = ourIdentity)
+
+    fun isValid(turnTrackerState: TurnTrackerState) = turnTrackerState.linearId == turnTrackerLinearId &&
+            turnTrackerState.gameBoardPointer.pointer == linearId
 
     fun toBuilder() = Builder(
             linearId = linearId,
@@ -87,6 +91,7 @@ data class GameBoardState @ConstructorForDeserialization constructor(
             )
         }
 
+        fun ownPointer() = LinearPointer(linearId, GameBoardState::class.java)
         fun addPlayers(newPlayers: List<Party>) = apply { players.addAll(newPlayers) }
         fun withTurnTracker(id: UniqueIdentifier) = apply {
             require(turnTrackerLinearId == null || turnTrackerLinearId == id) {
