@@ -56,6 +56,8 @@ data class GameBoardState @ConstructorForDeserialization constructor(
     fun isValid(robberState: RobberState) = robberState.linearId == robberLinearId &&
             robberState.gameBoardPointer.pointer == linearId
 
+    fun isValid(tradeState: TradeState) = tradeState.gameBoardPointer.pointer == linearId
+
     fun toBuilder() = Builder(
             linearId = linearId,
             hexTiles = hexTiles.toBuilder(),

@@ -123,4 +123,22 @@ class GameBoardStateTest {
 
         assertFalse(state.isValid(robber))
     }
+
+    @Test
+    fun `isValid Trade is correct`() {
+        val state = boardBuilder().build()
+        val trade = mock(TradeState::class.java)
+        whenever(trade.gameBoardPointer).then { state.ownPointer() }
+
+        assertTrue(state.isValid(trade))
+    }
+
+    @Test
+    fun `isValid Trade rejects if pointer is wrong`() {
+        val state = boardBuilder().build()
+        val trade = mock(TradeState::class.java)
+        whenever(trade.gameBoardPointer).then { LinearPointer(UniqueIdentifier(), GameBoardState::class.java) }
+
+        assertFalse(state.isValid(trade))
+    }
 }
