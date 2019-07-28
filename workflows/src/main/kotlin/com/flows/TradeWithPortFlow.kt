@@ -93,7 +93,7 @@ open class TradeWithPortFlowResponder(val counterpartySession: FlowSession) : Fl
                 val turnTrackerState = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
                         .state.data
-                if (gameBoardState.isValid(turnTrackerState)) {
+                if (!gameBoardState.isValid(turnTrackerState)) {
                     throw FlowException("The turn tracker state does not point back to the GameBoardState")
                 }
 

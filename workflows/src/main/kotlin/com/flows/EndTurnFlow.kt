@@ -38,7 +38,7 @@ class EndTurnFlow(val gameBoardStateLinearId: UniqueIdentifier) : FlowLogic<Sign
         val turnTrackerStateAndRef = serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
         val turnTrackerState = turnTrackerStateAndRef.state.data
-        if (gameBoardState.isValid(turnTrackerState)) {
+        if (!gameBoardState.isValid(turnTrackerState)) {
             throw FlowException("The turn tracker state does not point back to the GameBoardState")
         }
 
@@ -94,7 +94,7 @@ class EndTurnFlowResponder(val counterpartySession: FlowSession) : FlowLogic<Sig
                 if (lastTurnTrackerWeHaveOnRecord.linearId != turnTrackerReferencedInTransaction.linearId) {
                     throw IllegalArgumentException("The TurnTracker included in the transaction is not correct for this game or turn.")
                 }
-                if (gameBoard.isValid(lastTurnTrackerWeHaveOnRecord)) {
+                if (!gameBoard.isValid(lastTurnTrackerWeHaveOnRecord)) {
                     throw FlowException("The turn tracker state does not point back to the GameBoardState")
                 }
                 if (lastTurnTrackerWeHaveOnRecord.currTurnIndex != turnTrackerReferencedInTransaction.currTurnIndex) {

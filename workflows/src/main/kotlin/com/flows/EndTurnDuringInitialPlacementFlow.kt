@@ -40,7 +40,7 @@ class EndTurnDuringInitialPlacementFlow(val gameBoardStateLinearId: UniqueIdenti
         val turnTrackerStateAndRef = serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
         val turnTrackerState = turnTrackerStateAndRef.state.data
-        if (gameBoardState.isValid(turnTrackerState)) {
+        if (!gameBoardState.isValid(turnTrackerState)) {
             throw FlowException("The turn tracker state does not point back to the GameBoardState")
         }
 
@@ -98,7 +98,7 @@ class EndTurnDuringInitialPlacementFlowResponder(val counterpartySession: FlowSe
                 if (lastTurnTrackerWeHaveOnRecord.linearId != turnTrackerReferencedInTransaction.linearId) {
                     throw FlowException("The TurnTracker included in the transaction is not correct for this game or turn.")
                 }
-                if (gameBoard.isValid(lastTurnTrackerWeHaveOnRecord)) {
+                if (!gameBoard.isValid(lastTurnTrackerWeHaveOnRecord)) {
                     throw FlowException("The turn tracker state does not point back to the GameBoardState")
                 }
 

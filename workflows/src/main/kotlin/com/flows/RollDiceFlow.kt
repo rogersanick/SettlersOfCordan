@@ -38,7 +38,7 @@ class RollDiceFlow(val gameBoardStateLinearId: UniqueIdentifier) : FlowLogic<Sig
         val turnTrackerState = serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
                 .state.data
-        if (gameBoardState.isValid(turnTrackerState)) {
+        if (!gameBoardState.isValid(turnTrackerState)) {
             throw FlowException("The turn tracker state does not point back to the GameBoardState")
         }
         val turnTrackerStateLinearId = turnTrackerState.linearId
@@ -79,7 +79,7 @@ open class RollDiceFlowResponder(internal val counterpartySession: FlowSession) 
                 val turnTrackerState = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
                         .state.data
-                if (gameBoardState.isValid(turnTrackerState)) {
+                if (!gameBoardState.isValid(turnTrackerState)) {
                     throw FlowException("The turn tracker state does not point back to the GameBoardState")
                 }
 

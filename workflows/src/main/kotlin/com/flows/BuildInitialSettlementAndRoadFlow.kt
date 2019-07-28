@@ -67,7 +67,7 @@ class BuildInitialSettlementAndRoadFlow(
         val turnTrackerStateAndRef = serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
         val turnTrackerState = turnTrackerStateAndRef.state.data
-        if (gameBoardState.isValid(turnTrackerState)) {
+        if (!gameBoardState.isValid(turnTrackerState)) {
             throw FlowException("The turn tracker state does not point back to the GameBoardState")
         }
 
@@ -169,7 +169,7 @@ class BuildInitialSettlementFlowResponder(val counterpartySession: FlowSession) 
                 if (lastTurnTrackerOnRecordStateAndRef.linearId != turnTrackerState.linearId) {
                     throw FlowException("The TurnTracker included in the transaction is not correct for this game or turn.")
                 }
-                if (gameBoardState.isValid(lastTurnTrackerOnRecordStateAndRef)) {
+                if (!gameBoardState.isValid(lastTurnTrackerOnRecordStateAndRef)) {
                     throw FlowException("The turn tracker state does not point back to the GameBoardState")
                 }
 

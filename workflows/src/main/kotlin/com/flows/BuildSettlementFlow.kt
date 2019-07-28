@@ -46,7 +46,7 @@ class BuildSettlementFlow(
         // Step 3. Retrieve the Turn Tracker State from the vault
         val turnTrackerStateAndRef = serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
-        if (gameBoardState.isValid(turnTrackerStateAndRef.state.data)) {
+        if (!gameBoardState.isValid(turnTrackerStateAndRef.state.data)) {
             throw FlowException("The turn tracker state does not point back to the GameBoardState")
         }
         val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(turnTrackerStateAndRef)
@@ -113,7 +113,7 @@ class BuildSettlementFlowResponder(val counterpartySession: FlowSession) : FlowL
                 if (lastTurnTrackerOnRecordStateAndRef.linearId != turnTrackerState.linearId) {
                     throw FlowException("The TurnTracker included in the transaction is not correct for this game or turn.")
                 }
-                if (gameBoardState.isValid(lastTurnTrackerOnRecordStateAndRef)) {
+                if (!gameBoardState.isValid(lastTurnTrackerOnRecordStateAndRef)) {
                     throw FlowException("The turn tracker state does not point back to the GameBoardState")
                 }
 

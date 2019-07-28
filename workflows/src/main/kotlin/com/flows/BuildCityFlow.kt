@@ -99,7 +99,7 @@ class BuildCityFlowResponder(val counterpartySession: FlowSession) : FlowLogic<S
                 if (gameBoardState.turnTrackerLinearId != turnTrackerState.linearId) {
                     throw FlowException("The TurnTracker included in the transaction is not correct for this game or turn.")
                 }
-                if (gameBoardState.isValid(turnTrackerState)) {
+                if (!gameBoardState.isValid(turnTrackerState)) {
                     throw FlowException("The turn tracker state does not point back to the GameBoardState")
                 }
 

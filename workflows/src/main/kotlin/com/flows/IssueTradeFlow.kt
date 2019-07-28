@@ -86,7 +86,7 @@ open class IssueTradeFlowResponder(val counterpartySession: FlowSession) : FlowL
                 val lastTurnTrackerOnRecord = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
                         .state.data
-                if (gameBoardState.isValid(lastTurnTrackerOnRecord)) {
+                if (!gameBoardState.isValid(lastTurnTrackerOnRecord)) {
                     throw FlowException("The turn tracker state does not point back to the GameBoardState")
                 }
 
