@@ -1,8 +1,10 @@
 package com.contractsAndStates.states
 
+import com.nhaarman.mockito_kotlin.whenever
 import net.corda.core.contracts.LinearPointer
 import net.corda.core.contracts.UniqueIdentifier
 import org.junit.Test
+import org.mockito.Mockito.mock
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -64,10 +66,9 @@ class GameBoardStateTest {
     @Test
     fun `isValid TurnTracker is correct`() {
         val state = boardBuilder().build()
-        val turnTracker = TurnTrackerState(
-                gameBoardPointer = state.ownPointer(),
-                participants = listOf(),
-                linearId = state.turnTrackerLinearId)
+        val turnTracker = mock(TurnTrackerState::class.java)
+        whenever(turnTracker.linearId).then { state.turnTrackerLinearId }
+        whenever(turnTracker.gameBoardPointer).then { state.ownPointer() }
 
         assertTrue(state.isValid(turnTracker))
     }
@@ -75,10 +76,9 @@ class GameBoardStateTest {
     @Test
     fun `isValid TurnTracker rejects if pointer is wrong`() {
         val state = boardBuilder().build()
-        val turnTracker = TurnTrackerState(
-                gameBoardPointer = LinearPointer(UniqueIdentifier(), GameBoardState::class.java),
-                participants = listOf(),
-                linearId = state.turnTrackerLinearId)
+        val turnTracker = mock(TurnTrackerState::class.java)
+        whenever(turnTracker.linearId).then { state.turnTrackerLinearId }
+        whenever(turnTracker.gameBoardPointer).then { LinearPointer(UniqueIdentifier(), GameBoardState::class.java) }
 
         assertFalse(state.isValid(turnTracker))
     }
@@ -86,9 +86,9 @@ class GameBoardStateTest {
     @Test
     fun `isValid TurnTracker rejects if turn tracker id is wrong`() {
         val state = boardBuilder().build()
-        val turnTracker = TurnTrackerState(
-                gameBoardPointer = state.ownPointer(),
-                participants = listOf())
+        val turnTracker = mock(TurnTrackerState::class.java)
+        whenever(turnTracker.linearId).then { UniqueIdentifier() }
+        whenever(turnTracker.gameBoardPointer).then { state.ownPointer() }
 
         assertFalse(state.isValid(turnTracker))
     }
@@ -96,23 +96,19 @@ class GameBoardStateTest {
     @Test
     fun `isValid Robber is correct`() {
         val state = boardBuilder().build()
-        val robberState = RobberState(
-                gameBoardPointer = state.ownPointer(),
-                hexTileIndex = HexTileIndex(0),
-                players = listOf(),
-                linearId = state.robberLinearId)
+        val robber = mock(RobberState::class.java)
+        whenever(robber.linearId).then { state.robberLinearId }
+        whenever(robber.gameBoardPointer).then { state.ownPointer() }
 
-        assertTrue(state.isValid(robberState))
+        assertTrue(state.isValid(robber))
     }
 
     @Test
     fun `isValid Robber rejects if pointer is wrong`() {
         val state = boardBuilder().build()
-        val robber = RobberState(
-                gameBoardPointer = LinearPointer(UniqueIdentifier(), GameBoardState::class.java),
-                hexTileIndex = HexTileIndex(0),
-                players = listOf(),
-                linearId = state.robberLinearId)
+        val robber = mock(RobberState::class.java)
+        whenever(robber.linearId).then { state.robberLinearId }
+        whenever(robber.gameBoardPointer).then { LinearPointer(UniqueIdentifier(), GameBoardState::class.java) }
 
         assertFalse(state.isValid(robber))
     }
@@ -120,10 +116,10 @@ class GameBoardStateTest {
     @Test
     fun `isValid Robber rejects if turn tracker id is wrong`() {
         val state = boardBuilder().build()
-        val robber = RobberState(
-                gameBoardPointer = state.ownPointer(),
-                hexTileIndex = HexTileIndex(0),
-                players = listOf())
+        val robber = mock(RobberState::class.java)
+        whenever(robber.linearId).then { UniqueIdentifier() }
+        whenever(robber.gameBoardPointer).then { state.ownPointer() }
+
 
         assertFalse(state.isValid(robber))
     }
