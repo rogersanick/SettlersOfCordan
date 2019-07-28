@@ -73,7 +73,7 @@ class GameBoardStateTest {
     }
 
     @Test
-    fun `isValid rejects if pointer is wrong`() {
+    fun `isValid TurnTracker rejects if pointer is wrong`() {
         val state = boardBuilder().build()
         val turnTracker = TurnTrackerState(
                 gameBoardPointer = LinearPointer(UniqueIdentifier(), GameBoardState::class.java),
@@ -84,12 +84,47 @@ class GameBoardStateTest {
     }
 
     @Test
-    fun `isValid rejects if turn tracker id is wrong`() {
+    fun `isValid TurnTracker rejects if turn tracker id is wrong`() {
         val state = boardBuilder().build()
         val turnTracker = TurnTrackerState(
                 gameBoardPointer = state.ownPointer(),
                 participants = listOf())
 
         assertFalse(state.isValid(turnTracker))
+    }
+
+    @Test
+    fun `isValid Robber is correct`() {
+        val state = boardBuilder().build()
+        val robberState = RobberState(
+                gameBoardPointer = state.ownPointer(),
+                hexTileIndex = HexTileIndex(0),
+                players = listOf(),
+                linearId = state.robberLinearId)
+
+        assertTrue(state.isValid(robberState))
+    }
+
+    @Test
+    fun `isValid Robber rejects if pointer is wrong`() {
+        val state = boardBuilder().build()
+        val robber = RobberState(
+                gameBoardPointer = LinearPointer(UniqueIdentifier(), GameBoardState::class.java),
+                hexTileIndex = HexTileIndex(0),
+                players = listOf(),
+                linearId = state.robberLinearId)
+
+        assertFalse(state.isValid(robber))
+    }
+
+    @Test
+    fun `isValid Robber rejects if turn tracker id is wrong`() {
+        val state = boardBuilder().build()
+        val robber = RobberState(
+                gameBoardPointer = state.ownPointer(),
+                hexTileIndex = HexTileIndex(0),
+                players = listOf())
+
+        assertFalse(state.isValid(robber))
     }
 }
