@@ -40,7 +40,10 @@ class TriggerRobberFlow(val gameBoardLinearId: UniqueIdentifier,
 
         // Step 5. Add the existing robber state as an input state
         val robberStateAndRef = serviceHub.vaultService
-                .querySingleState<RobberState>(gameBoardState.linearId)
+                .querySingleState<RobberState>(gameBoardState.robberLinearId)
+        if (gameBoardState.isValid(robberStateAndRef.state.data)) {
+            throw FlowException("The robber state does not point back to the GameBoardState")
+        }
 
         // Step 6. Create a new robber state
         val movedRobberState = robberStateAndRef.state.data.move(HexTileIndex(updatedRobberLocation))
