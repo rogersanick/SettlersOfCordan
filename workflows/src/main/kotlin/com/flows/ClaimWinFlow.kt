@@ -8,7 +8,6 @@ import com.contractsAndStates.states.TurnTrackerState
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
-import net.corda.core.node.services.queryBy
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
@@ -44,7 +43,9 @@ class ClaimWinFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<SignedTr
 
         // Step 4. Retrieve all of our settlement states from the vault.
         val settlementStatesWeOwn = serviceHub.vaultService
-                .queryBy<SettlementState>().states.map { ReferencedStateAndRef(it) }
+                .queryBelongsToGameBoard<SettlementState>(gameBoardLinearId)
+                .filter { it -> it.state.data.owner == ourIdentity }
+                .map { ReferencedStateAndRef(it) }
 
         // Step 5. Create a new transaction builder
         val tb = TransactionBuilder(notary)

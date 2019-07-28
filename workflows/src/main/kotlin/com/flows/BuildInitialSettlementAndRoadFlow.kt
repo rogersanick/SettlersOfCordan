@@ -10,7 +10,6 @@ import com.r3.corda.lib.tokens.contracts.utilities.of
 import com.r3.corda.lib.tokens.workflows.flows.issue.addIssueTokens
 import com.r3.corda.lib.tokens.workflows.utilities.addTokenTypeJar
 import net.corda.core.contracts.Command
-import net.corda.core.contracts.LinearPointer
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
@@ -82,7 +81,11 @@ class BuildInitialSettlementAndRoadFlow(
         tb.addCommand(placeInitialSettlement)
 
         // Step 6. Create an initial settlement state
-        val settlementState = SettlementState(absoluteCorner, gameBoardState.players, ourIdentity)
+        val settlementState = SettlementState(
+                gameBoardPointer = gameBoardState.ownPointer(),
+                absoluteCorner = absoluteCorner,
+                players = gameBoardState.players,
+                owner = ourIdentity)
 
         // Step 7. Prepare a new Game Board State which will contain an updated mapping of where settlements
         // have been placed.

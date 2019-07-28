@@ -59,7 +59,11 @@ class BuildSettlementFlow(
         tb.addCommand(buildSettlement)
 
         // Step 6. Create initial settlement
-        val settlementState = SettlementState(absoluteCorner, gameBoardState.players, ourIdentity)
+        val settlementState = SettlementState(
+                gameBoardPointer = gameBoardState.ownPointer(),
+                absoluteCorner = absoluteCorner,
+                players = gameBoardState.players,
+                owner = ourIdentity)
 
         // Step 7. Prepare a new Game Board State
         val newBoardBuilder = gameBoardState.toBuilder()

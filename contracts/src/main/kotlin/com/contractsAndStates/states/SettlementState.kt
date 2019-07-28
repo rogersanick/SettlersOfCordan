@@ -2,11 +2,20 @@ package com.contractsAndStates.states
 
 import com.contractsAndStates.contracts.BuildPhaseContract
 import net.corda.core.contracts.BelongsToContract
+import net.corda.core.contracts.LinearPointer
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
+import net.corda.core.schemas.MappedSchema
+import net.corda.core.schemas.PersistentState
+import net.corda.core.schemas.QueryableState
+import net.corda.core.schemas.StatePersistable
 import net.corda.core.serialization.CordaSerializable
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.Index
+import javax.persistence.Table
 
 /**
  * Settlements are the fundamental structure one may build in Settlers of Cordan. They
@@ -18,12 +27,13 @@ import net.corda.core.serialization.CordaSerializable
 @CordaSerializable
 @BelongsToContract(BuildPhaseContract::class)
 data class SettlementState(
+        override val gameBoardPointer: LinearPointer<GameBoardState>,
         val absoluteCorner: AbsoluteCorner,
         val players: List<Party>,
         val owner: Party,
         val upgradedToCity: Boolean = false,
         override val linearId: UniqueIdentifier = UniqueIdentifier()
-) : LinearState {
+) : LinearState, QueryableState, StatePersistable, PointsToGameBoard {
 
     val resourceAmountClaim = if (upgradedToCity) cityAmountClaim
     else settlementAmountClaim
@@ -41,4 +51,35 @@ data class SettlementState(
 
     fun upgradeToCity() = copy(upgradedToCity = true)
     override val participants: List<AbstractParty> get() = players
+
+    override fun generateMappedObject(schema: MappedSchema): PersistentState {
+        return when (schema) {
+            is SettlementSchemaV1 -> SettlementSchemaV1.PersistentSettlementState(
+                    gameBoardPointer.pointer)
+            else -> throw IllegalArgumentException("Unrecognised schema $schema")
+        }
+    }
+
+    override fun supportedSchemas(): Iterable<MappedSchema> {
+        return listOf(SettlementSchemaV1)
+    }
+}
+
+object SettlementSchema
+
+@CordaSerializable
+object SettlementSchemaV1 : MappedSchema(
+        schemaFamily = SettlementSchema.javaClass,
+        version = 1,
+        mappedTypes = listOf(SettlementState::class.java)
+) {
+    @Entity
+    @Table(
+            name = "contract_settlement_states",
+            indexes = [
+                Index(name = "${BelongsToGameBoard.columnName}_idx", columnList = BelongsToGameBoard.columnName)
+            ])
+    class PersistentSettlementState(
+            gameBoardLinearId: UniqueIdentifier
+    ) : BelongsToGameBoard(gameBoardLinearId)
 }

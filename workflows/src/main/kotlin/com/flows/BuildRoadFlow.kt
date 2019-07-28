@@ -51,7 +51,7 @@ class BuildRoadFlow(
                 .queryBelongsToGameBoard<RoadState>(gameBoardLinearId)
                 .map { it.state.data }
         val settlementStates = serviceHub.vaultService
-                .queryBy<SettlementState>().states.map { it.state.data }
+                .queryBelongsToGameBoard<SettlementState>(gameBoardLinearId).map { it.state.data }
         val longestRoadStateStateAndRef = serviceHub.vaultService
                 .queryBy<LongestRoadState>().states.first()
         val longestRoadState = longestRoadStateStateAndRef.state.data
