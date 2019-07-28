@@ -29,6 +29,9 @@ class TriggerRobberFlow(val gameBoardLinearId: UniqueIdentifier,
         // Step 3. Retrieve the Turn Tracker State from the vault
         val turnTrackerStateAndRef = serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.linearId)
+        if (gameBoardState.isValid(turnTrackerStateAndRef.state.data)) {
+            throw FlowException("The turn tracker state does not point back to the GameBoardState")
+        }
         val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(turnTrackerStateAndRef)
 
         // Step 4. Retrieve the Dice Roll State from the vault

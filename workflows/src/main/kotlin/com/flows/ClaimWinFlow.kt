@@ -38,6 +38,9 @@ class ClaimWinFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<SignedTr
         // Step 3. Retrieve the Turn Tracker State from the vault
         val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId))
+        if (gameBoardState.isValid(turnTrackerReferenceStateAndRef.stateAndRef.state.data)) {
+            throw FlowException("The turn tracker state does not point back to the GameBoardState")
+        }
 
         // Step 4. Retrieve all of our settlement states from the vault.
         val settlementStatesWeOwn = serviceHub.vaultService
@@ -80,6 +83,12 @@ class ClaimWinFlowResponder(val counterpartySession: FlowSession) : FlowLogic<Si
                 val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(turnTrackerState.linearId)
                         .state.data
+                if (lastTurnTrackerOnRecordStateAndRef.linearId != turnTrackerState.linearId) {
+                    throw FlowException("The TurnTracker included in the transaction is not correct for this game or turn.")
+                }
+                if (gameBoardState.isValid(lastTurnTrackerOnRecordStateAndRef)) {
+                    throw FlowException("The turn tracker state does not point back to the GameBoardState")
+                }
 
                 if (counterpartySession.counterparty.owningKey !=
                         gameBoardState.players[lastTurnTrackerOnRecordStateAndRef.currTurnIndex].owningKey) {

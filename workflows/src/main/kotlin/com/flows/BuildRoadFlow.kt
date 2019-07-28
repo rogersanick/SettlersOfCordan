@@ -59,6 +59,9 @@ class BuildRoadFlow(
         // Step 4. Retrieve the Turn Tracker State from the vault
         val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(
                 serviceHub.vaultService.querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId))
+        if (gameBoardState.isValid(turnTrackerReferenceStateAndRef.stateAndRef.state.data)) {
+            throw FlowException("The turn tracker state does not point back to the GameBoardState")
+        }
 
         // Step 5. Create a new transaction builder
         val tb = TransactionBuilder(notary)
@@ -71,7 +74,7 @@ class BuildRoadFlow(
 
         // Step 7. Create initial road state
         val roadState = RoadState(
-                gameBoardPointer = LinearPointer(gameBoardLinearId, GameBoardState::class.java),
+                gameBoardPointer = gameBoardState.ownPointer(),
                 absoluteSide = absoluteSide,
                 players = gameBoardState.players,
                 owner = ourIdentity)
@@ -126,6 +129,12 @@ class BuildRoadFlowResponder(val counterpartySession: FlowSession) : FlowLogic<S
 
                 val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(turnTrackerState.linearId).state.data
+                if (lastTurnTrackerOnRecordStateAndRef.linearId != turnTrackerState.linearId) {
+                    throw FlowException("The TurnTracker included in the transaction is not correct for this game or turn.")
+                }
+                if (gameBoardState.isValid(lastTurnTrackerOnRecordStateAndRef)) {
+                    throw FlowException("The turn tracker state does not point back to the GameBoardState")
+                }
 
                 if (counterpartySession.counterparty.owningKey != gameBoardState.players[lastTurnTrackerOnRecordStateAndRef.currTurnIndex].owningKey) {
                     throw IllegalArgumentException("Only the current player may build a road.")

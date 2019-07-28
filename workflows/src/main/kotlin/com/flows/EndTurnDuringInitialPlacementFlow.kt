@@ -37,10 +37,12 @@ class EndTurnDuringInitialPlacementFlow(val gameBoardStateLinearId: UniqueIdenti
         val notary = gameBoardStateAndRef.state.notary
 
         // Step 3. Retrieve the TurnTracker State from the vault.
-        val turnTrackerQueryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoardState.turnTrackerLinearId))
         val turnTrackerStateAndRef = serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
         val turnTrackerState = turnTrackerStateAndRef.state.data
+        if (gameBoardState.isValid(turnTrackerState)) {
+            throw FlowException("The turn tracker state does not point back to the GameBoardState")
+        }
 
         // Step 4. Create a new transaction builder using the notary
         val tb = TransactionBuilder(notary)
@@ -89,13 +91,15 @@ class EndTurnDuringInitialPlacementFlowResponder(val counterpartySession: FlowSe
                 val gameBoard = serviceHub.vaultService
                         .querySingleState<GameBoardState>(gameBoardStateRef)
                         .state.data
-                val queryCriteriaForLastTurnTrackerWeHaveOnRecord = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(gameBoard.turnTrackerLinearId))
                 val lastTurnTrackerWeHaveOnRecord = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(gameBoard.turnTrackerLinearId)
                         .state.data
 
                 if (lastTurnTrackerWeHaveOnRecord.linearId != turnTrackerReferencedInTransaction.linearId) {
                     throw FlowException("The TurnTracker included in the transaction is not correct for this game or turn.")
+                }
+                if (gameBoard.isValid(lastTurnTrackerWeHaveOnRecord)) {
+                    throw FlowException("The turn tracker state does not point back to the GameBoardState")
                 }
 
                 if (lastTurnTrackerWeHaveOnRecord.currTurnIndex != turnTrackerReferencedInTransaction.currTurnIndex) {

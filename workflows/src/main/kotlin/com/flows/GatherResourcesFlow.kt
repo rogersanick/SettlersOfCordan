@@ -47,7 +47,9 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         // TODO how do we prevent players issuing themselves resources twice by calling this flow once more?
         val turnTrackerStateAndRef = serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
-
+        if (gameBoardState.isValid(turnTrackerStateAndRef.state.data)) {
+            throw FlowException("The turn tracker state does not point back to the GameBoardState")
+        }
         // Step 4. Retrieve the Dice Roll State from the vault
         val diceRollStateAndRef = serviceHub.vaultService
                 .querySingleState<DiceRollState>(gameBoardLinearId)
@@ -102,6 +104,9 @@ open class GatherResourcesFlowResponder(val counterpartySession: FlowSession) : 
                 val turnTrackerState = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
                         .state.data
+                if (gameBoardState.isValid(turnTrackerState)) {
+                    throw FlowException("The turn tracker state does not point back to the GameBoardState")
+                }
                 val diceRollState = serviceHub.vaultService
                         .querySingleState<DiceRollState>(stx.inputs)
                         .state.data

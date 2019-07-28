@@ -77,6 +77,7 @@ class BuildPhaseContract : Contract {
                 val currentPlayer = inputBoard.players[turnTracker.currTurnIndex]
 
                 "The road must belong to the board" using(inputBoard.linearId == newRoad.gameBoardPointer.pointer)
+                "The turn tracker is incorrect" using (inputBoard.isValid(turnTracker))
 
                 /**
                  * Check Settlements - no previous settlement should be on the place, on the neighboring corners,
