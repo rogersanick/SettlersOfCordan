@@ -2,6 +2,7 @@ package com.contractsAndStates.states
 
 import com.contractsAndStates.contracts.BuildPhaseContract
 import net.corda.core.contracts.BelongsToContract
+import net.corda.core.contracts.LinearPointer
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
@@ -28,14 +29,14 @@ import javax.persistence.Table
 @CordaSerializable
 @BelongsToContract(BuildPhaseContract::class)
 data class RoadState(
-        val gameBoardLinearId: UniqueIdentifier,
+        override val gameBoardPointer: LinearPointer<GameBoardState>,
         val absoluteSide: AbsoluteSide,
         val players: List<Party>,
         val owner: Party,
         val roadAttachedA: UniqueIdentifier? = null,
         val roadAttachedB: UniqueIdentifier? = null,
         override val linearId: UniqueIdentifier = UniqueIdentifier()
-) : LinearState, QueryableState, StatePersistable {
+) : LinearState, QueryableState, StatePersistable, PointsToGameBoard {
     override val participants: List<AbstractParty> = players
 
     /**
@@ -55,7 +56,7 @@ data class RoadState(
     override fun generateMappedObject(schema: MappedSchema): PersistentState {
         return when (schema) {
             is RoadSchemaV1 -> RoadSchemaV1.PersistentRoadState(
-                    gameBoardLinearId,
+                    gameBoardPointer.pointer,
                     absoluteSide.tileIndex.value,
                     absoluteSide.sideIndex.value,
                     owner,

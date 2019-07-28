@@ -1,6 +1,7 @@
 package com.contractsAndStates.states
 
 import com.oracleClientStatesAndContracts.states.RollTrigger
+import net.corda.core.contracts.LinearPointer
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
@@ -24,7 +25,7 @@ class RoadStateTest {
 
     private fun buildRoads(owner: Party, pairs: List<Pair<Int, Int>>) = pairs.forEach {
         roads.add(RoadState(
-                gameBoardLinearId = UniqueIdentifier(),
+                gameBoardPointer = LinearPointer(UniqueIdentifier(), GameBoardState::class.java),
                 absoluteSide = AbsoluteSide(HexTileIndex(it.first), TileSideIndex(it.second)),
                 players = listOf(),
                 owner = owner,
