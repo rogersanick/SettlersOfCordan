@@ -3,11 +3,13 @@ package com.flows
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.BuildPhaseContract
 import com.contractsAndStates.contracts.GameStateContract
+import com.contractsAndStates.contracts.LongestRoadContract
 import com.contractsAndStates.states.*
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
+import net.corda.core.node.services.queryBy
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
@@ -43,36 +45,58 @@ class BuildSettlementFlow(
         // Step 2. Get a reference to the notary service on the network
         val notary = gameBoardStateAndRef.state.notary
 
-        // Step 3. Retrieve the Turn Tracker State from the vault
+        // Step 3. Retrieve roads, settlements and current longest road state
+        val roadStates = serviceHub.vaultService
+                .queryBy<RoadState>().states.map { it.state.data }
+        val settlementStates = serviceHub.vaultService
+                .queryBy<SettlementState>().states.map { it.state.data }
+        val longestRoadStateStateAndRef = serviceHub.vaultService
+                .queryBy<LongestRoadState>().states.first()
+        val longestRoadState = longestRoadStateStateAndRef.state.data
+
+        // Step 4. Retrieve the Turn Tracker State from the vault
         val turnTrackerStateAndRef = serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.linearId)
         val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(turnTrackerStateAndRef)
 
-        // Step 4. Create a new transaction builder
+        // Step 5. Create a new transaction builder
         val tb = TransactionBuilder(notary)
 
-        // Step 5. Create new commands for placing a settlement and ending a turn. Add both to the transaction.
+        // Step 6. Create new commands for placing a settlement and ending a turn. Add both to the transaction.
         val buildSettlement = Command(BuildPhaseContract.Commands.BuildSettlement(), gameBoardState.players.map { it.owningKey })
         tb.addCommand(buildSettlement)
 
-        // Step 6. Create initial settlement
+        // Step 7. Create initial settlement
         val settlementState = SettlementState(absoluteCorner, gameBoardState.players, ourIdentity)
 
-        // Step 7. Prepare a new Game Board State
+        // Step 8. Prepare a new Game Board State
         val newBoardBuilder = gameBoardState.toBuilder()
 
-        // Step 8. Safely put the settlement on all overlapping corners.
+        // Step 9. Safely put the settlement on all overlapping corners.
         newBoardBuilder.setSettlementOn(absoluteCorner, settlementState.linearId)
 
-        // Step 9. Add the appropriate resources to the transaction to pay for the Settlement.
+        // Step 10. Add the appropriate resources to the transaction to pay for the Settlement.
         generateInGameSpend(serviceHub, tb, getBuildableCosts(Buildable.Settlement), ourIdentity)
 
-        // Step 10. Add all states and commands to the transaction.
+        // Step 11. Determine new longest road holder
+        val longestRoadHolder = longestRoad(
+                board = gameBoardState.hexTiles,
+                roads = roadStates,
+                settlements = settlementStates,
+                players = gameBoardState.players,
+                currentHolder = longestRoadState.holder)
+        val outputLongestRoadState = longestRoadState.copy(holder = longestRoadHolder)
+
+        // Step 12. Add all states and commands to the transaction.
         tb.addInputState(gameBoardStateAndRef)
         tb.addReferenceState(turnTrackerReferenceStateAndRef)
         tb.addOutputState(settlementState, BuildPhaseContract.ID)
         tb.addOutputState(newBoardBuilder.build())
         tb.addCommand(GameStateContract.Commands.UpdateWithSettlement(), gameBoardState.players.map { it.owningKey })
+        if (outputLongestRoadState.holder != longestRoadState.holder) {
+            tb.addInputState(longestRoadStateStateAndRef)
+            tb.addOutputState(outputLongestRoadState, LongestRoadContract.ID)
+        }
 
         serviceHub.networkMapCache.notaryIdentities.first()
         serviceHub.networkMapCache.notaryIdentities.first()

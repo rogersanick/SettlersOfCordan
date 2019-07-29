@@ -2,12 +2,10 @@ package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.GameStateContract
+import com.contractsAndStates.contracts.LongestRoadContract
 import com.contractsAndStates.contracts.RobberContract
 import com.contractsAndStates.contracts.TurnTrackerContract
-import com.contractsAndStates.states.GameBoardState
-import com.contractsAndStates.states.HexTileType
-import com.contractsAndStates.states.RobberState
-import com.contractsAndStates.states.TurnTrackerState
+import com.contractsAndStates.states.*
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
@@ -115,26 +113,32 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
                 .withRobber(robberState.linearId)
                 .build()
 
-        // Step 7. Add the states to the transaction
+        // Step 7. Initialise longest road state
+        val longestRoadState = LongestRoadState(null, playersList)
+        val createLongestRoadCommand = Command(LongestRoadContract.Commands.Init(), playerKeys)
+        tb.addOutputState(longestRoadState, LongestRoadContract.ID)
+        tb.addCommand(createLongestRoadCommand)
+
+        // Step 8. Add the states to the transaction
         progressTracker.currentStep = ADDING_ALL_GAME_STATES_TO_THE_TRANSACTION
         tb.addOutputState(newGameState, GameStateContract.ID)
         tb.addOutputState(turnTrackerState, TurnTrackerContract.ID)
 
-        // Step 8. Verify and sign the transaction
+        // Step 9. Verify and sign the transaction
         progressTracker.currentStep = VERIFYING
         tb.verify(serviceHub)
         val ptx = serviceHub.signInitialTransaction(tb)
 
-        // Step 8. Create a list of flows with the relevant participants
+        // Step 10. Create a list of flows with the relevant participants
         progressTracker.currentStep = COLLECTING_SIGNATURES
         val sessions = (newGameState.participants - ourIdentity)
                 .map { initiateFlow(it) }
                 .toSet()
 
-        // Step 9. Collect other signatures
+        // Step 11. Collect other signatures
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
 
-        // Step 10. Run the FinalityFlow
+        // Step 12. Run the FinalityFlow
         progressTracker.currentStep = FINALIZING_TRANSACTION
         val playerNames = newGameState.players.map { it.name.toString() }
         val currPlayer = newGameState.players[0]

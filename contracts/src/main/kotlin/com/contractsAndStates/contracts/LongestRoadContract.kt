@@ -16,16 +16,33 @@ class LongestRoadContract : Contract {
 
     override fun verify(tx: LedgerTransaction) {
         val command = tx.commands.requireSingleCommand<Commands>()
-
-        val longestRoadInputStates = tx.inputsOfType<LongestRoadState>().first()
-        val roadsInputStates = tx.inputsOfType<RoadState>()
-        val settlementsInputStates = tx.inputsOfType<SettlementState>()
-        val inputGameBoardState = tx.inputsOfType<GameBoardState>().single()
-
         val outputLongestRoadState = tx.outputsOfType<LongestRoadState>().first()
 
         when (command.value) {
+            is Commands.Init -> requireThat {
+                /**
+                 *  ******** BUSINESS LOGIC ********
+                 */
+
+                "Longest Road cannot be assigned to any player at the beggining of the game" using (
+                        outputLongestRoadState.holder == null)
+
+                /**
+                 *  ******** SIGNATURES ********
+                 */
+
+                val signingParties = tx.commandsOfType<Commands.Init>().single().signers.toSet()
+                val participants = outputLongestRoadState.participants.map{ it.owningKey }
+
+                "All players must verify and sign the transaction to build a settlement." using(
+                        signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
+            }
+
             is Commands.Claim -> requireThat {
+                val longestRoadInputStates = tx.inputsOfType<LongestRoadState>().first()
+                val roadsInputStates = tx.inputsOfType<RoadState>()
+                val settlementsInputStates = tx.inputsOfType<SettlementState>()
+                val inputGameBoardState = tx.inputsOfType<GameBoardState>().single()
 
                 /**
                  *  ******** BUSINESS LOGIC ********
@@ -52,6 +69,7 @@ class LongestRoadContract : Contract {
     }
 
     interface Commands : CommandData {
+        class Init: Commands
         class Claim: Commands
     }
 }
