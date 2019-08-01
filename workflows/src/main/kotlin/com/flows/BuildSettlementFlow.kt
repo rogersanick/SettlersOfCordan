@@ -60,7 +60,7 @@ class BuildSettlementFlow(
 
         // Step 6. Create initial settlement
         val settlementState = SettlementState(
-                gameBoardPointer = gameBoardState.ownPointer(),
+                gameBoardLinearId = gameBoardState.linearId,
                 absoluteCorner = absoluteCorner,
                 players = gameBoardState.players,
                 owner = ourIdentity)

@@ -3,7 +3,6 @@ package com.flows
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.states.BelongsToGameBoard
 import com.contractsAndStates.states.HasGameBoardId
-import com.contractsAndStates.states.PointsToGameBoard
 import com.oracleClientStatesAndContracts.states.DiceRollState
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.of
@@ -83,7 +82,7 @@ inline fun <reified T : ContractState> VaultService.querySingleState(stateRefs: 
                 .single()
 
 inline fun <reified T> VaultService.queryBelongsToGameBoard(gameBoardLinearId: UniqueIdentifier)
-        where T : ContractState, T : PointsToGameBoard =
+        where T : ContractState, T : HasGameBoardId =
         builder {
             BelongsToGameBoard::gameBoardLinearId.equal(gameBoardLinearId)
         }.let { predicate ->

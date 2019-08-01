@@ -1,7 +1,6 @@
 package com.contractsAndStates.states
 
 import com.oracleClientStatesAndContracts.states.RollTrigger
-import net.corda.core.contracts.LinearPointer
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
@@ -25,7 +24,7 @@ class RoadStateTest {
 
     private fun buildRoads(owner: Party, pairs: List<Pair<Int, Int>>) = pairs.forEach {
         roads.add(RoadState(
-                gameBoardPointer = LinearPointer(UniqueIdentifier(), GameBoardState::class.java),
+                gameBoardLinearId = UniqueIdentifier(),
                 absoluteSide = AbsoluteSide(HexTileIndex(it.first), TileSideIndex(it.second)),
                 players = listOf(),
                 owner = owner,
@@ -36,7 +35,7 @@ class RoadStateTest {
 
     private fun buildSettlements(owner: Party, pairs: List<Pair<Int, Int>>) = pairs.forEach {
         settlements.add(SettlementState(
-                LinearPointer(UniqueIdentifier(), GameBoardState::class.java),
+                UniqueIdentifier(),
                 AbsoluteCorner(HexTileIndex(it.first), TileCornerIndex(it.second)), listOf(), owner))
         settlementsBuilder.setSettlementOn(settlements.last().absoluteCorner.cornerIndex, settlements.last().linearId)
     }

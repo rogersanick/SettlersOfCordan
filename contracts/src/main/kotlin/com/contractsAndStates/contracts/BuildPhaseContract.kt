@@ -76,9 +76,9 @@ class BuildPhaseContract : Contract {
                 val turnTracker = turnTrackers.single()
                 val currentPlayer = inputBoard.players[turnTracker.currTurnIndex]
 
-                "The road must belong to the board" using (inputBoard.linearId == newRoad.gameBoardPointer.pointer)
+                "The road must belong to the board" using (inputBoard.linearId == newRoad.gameBoardLinearId)
                 "The new settlement must belong to the board" using
-                        (inputBoard.linearId == newSettlement.gameBoardPointer.pointer)
+                        (inputBoard.linearId == newSettlement.gameBoardLinearId)
                 "The turn tracker is incorrect" using (inputBoard.isValid(turnTracker))
 
                 /**
@@ -168,7 +168,7 @@ class BuildPhaseContract : Contract {
                 val onCorner = newSettlement.absoluteCorner
 
                 "The new settlement must belong to the board" using
-                        (inputBoard.linearId == newSettlement.gameBoardPointer.pointer)
+                        (inputBoard.linearId == newSettlement.gameBoardLinearId)
 
                 val itAndNeighboringCorners = inputBoard.getItAndNeighboringCorners(onCorner)
                 "A settlement must not have previously been built in this vicinity." using
@@ -206,7 +206,7 @@ class BuildPhaseContract : Contract {
 
                 verifyPaymentIsEnough(getBuildableCosts(Buildable.Road), outputResources, "road")
 
-                "The road must belong to the board" using (inputBoard.linearId == newRoad.gameBoardPointer.pointer)
+                "The road must belong to the board" using (inputBoard.linearId == newRoad.gameBoardLinearId)
                 "A road must not have previously been built in this location." using
                         inputBoard.getItAndOppositeSides(newRoad.absoluteSide).none {
                             inputBoard.hasRoadOn(it)
@@ -247,9 +247,9 @@ class BuildPhaseContract : Contract {
                 val newCity = outputSettlements.single()
 
                 "The input settlement must belong to the board" using
-                        (inputBoard.linearId == inputSettlement.gameBoardPointer.pointer)
+                        (inputBoard.linearId == inputSettlement.gameBoardLinearId)
                 "The output city must belong to the board" using
-                        (inputBoard.linearId == newCity.gameBoardPointer.pointer)
+                        (inputBoard.linearId == newCity.gameBoardLinearId)
                 "A city cannot be built on a hexTile that is of type Desert" using
                         (inputBoard.get(newCity.absoluteCorner.tileIndex).resourceType == HexTileType.Desert)
 

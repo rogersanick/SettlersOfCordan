@@ -6,7 +6,6 @@ import com.contractsAndStates.contracts.GameStateContract
 import com.contractsAndStates.contracts.LongestRoadContract
 import com.contractsAndStates.states.*
 import net.corda.core.contracts.Command
-import net.corda.core.contracts.LinearPointer
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
@@ -74,7 +73,7 @@ class BuildRoadFlow(
 
         // Step 7. Create initial road state
         val roadState = RoadState(
-                gameBoardPointer = gameBoardState.ownPointer(),
+                gameBoardLinearId = gameBoardState.linearId,
                 absoluteSide = absoluteSide,
                 players = gameBoardState.players,
                 owner = ourIdentity)

@@ -40,7 +40,7 @@ class BuildCityFlow(
         // Step 3. Retrieve the Turn Tracker State from the vault
         val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(
                 serviceHub.vaultService.querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId))
-        if (gameBoardState.linearId != turnTrackerReferenceStateAndRef.stateAndRef.state.data.gameBoardPointer.pointer) {
+        if (gameBoardState.linearId != turnTrackerReferenceStateAndRef.stateAndRef.state.data.gameBoardLinearId) {
             throw FlowException("The turn tracker state does not point back to the GameBoardState")
         }
 

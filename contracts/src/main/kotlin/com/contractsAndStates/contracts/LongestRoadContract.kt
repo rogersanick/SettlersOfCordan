@@ -30,9 +30,9 @@ class LongestRoadContract : Contract {
                  *  ******** BUSINESS LOGIC ********
                  */
                 "All roads must belong to the board" using
-                        inputRoads.all { inputBoard.linearId == it.gameBoardPointer.pointer }
+                        inputRoads.all { inputBoard.linearId == it.gameBoardLinearId }
                 "All settlements must belong to the board" using
-                        inputSettlements.all { inputBoard.linearId == it.gameBoardPointer.pointer }
+                        inputSettlements.all { inputBoard.linearId == it.gameBoardLinearId }
 
                 val candidate = longestRoad(
                         inputBoard.hexTiles, inputRoads, inputSettlements,

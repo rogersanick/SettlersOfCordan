@@ -2,7 +2,6 @@ package com.contractsAndStates.states
 
 import com.contractsAndStates.contracts.BuildPhaseContract
 import net.corda.core.contracts.BelongsToContract
-import net.corda.core.contracts.LinearPointer
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
@@ -12,7 +11,6 @@ import net.corda.core.schemas.PersistentState
 import net.corda.core.schemas.QueryableState
 import net.corda.core.schemas.StatePersistable
 import net.corda.core.serialization.CordaSerializable
-import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Index
 import javax.persistence.Table
@@ -27,13 +25,13 @@ import javax.persistence.Table
 @CordaSerializable
 @BelongsToContract(BuildPhaseContract::class)
 data class SettlementState(
-        override val gameBoardPointer: LinearPointer<GameBoardState>,
+        override val gameBoardLinearId: UniqueIdentifier,
         val absoluteCorner: AbsoluteCorner,
         val players: List<Party>,
         val owner: Party,
         val upgradedToCity: Boolean = false,
         override val linearId: UniqueIdentifier = UniqueIdentifier()
-) : LinearState, QueryableState, StatePersistable, PointsToGameBoard {
+) : LinearState, QueryableState, StatePersistable, HasGameBoardId {
 
     val resourceAmountClaim = if (upgradedToCity) cityAmountClaim
     else settlementAmountClaim
@@ -54,8 +52,7 @@ data class SettlementState(
 
     override fun generateMappedObject(schema: MappedSchema): PersistentState {
         return when (schema) {
-            is SettlementSchemaV1 -> SettlementSchemaV1.PersistentSettlementState(
-                    gameBoardPointer.pointer)
+            is SettlementSchemaV1 -> SettlementSchemaV1.PersistentSettlementState(gameBoardLinearId)
             else -> throw IllegalArgumentException("Unrecognised schema $schema")
         }
     }

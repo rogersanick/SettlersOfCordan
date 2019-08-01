@@ -2,7 +2,6 @@ package com.contractsAndStates.states
 
 import com.contractsAndStates.contracts.GameStateContract
 import net.corda.core.contracts.BelongsToContract
-import net.corda.core.contracts.LinearPointer
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
@@ -47,16 +46,15 @@ data class GameBoardState @ConstructorForDeserialization constructor(
         const val TILE_COUNT = 19
     }
 
-    fun ownPointer() = LinearPointer(linearId, GameBoardState::class.java)
     fun weWin(ourIdentity: Party) = copy(winner = ourIdentity)
 
     fun isValid(turnTrackerState: TurnTrackerState) = turnTrackerState.linearId == turnTrackerLinearId &&
-            turnTrackerState.gameBoardPointer.pointer == linearId
+            turnTrackerState.gameBoardLinearId == linearId
 
     fun isValid(robberState: RobberState) = robberState.linearId == robberLinearId &&
-            robberState.gameBoardPointer.pointer == linearId
+            robberState.gameBoardLinearId == linearId
 
-    fun isValid(tradeState: TradeState) = tradeState.gameBoardPointer.pointer == linearId
+    fun isValid(tradeState: TradeState) = tradeState.gameBoardLinearId == linearId
 
     fun toBuilder() = Builder(
             linearId = linearId,
@@ -96,7 +94,6 @@ data class GameBoardState @ConstructorForDeserialization constructor(
             )
         }
 
-        fun ownPointer() = LinearPointer(linearId, GameBoardState::class.java)
         fun addPlayers(newPlayers: List<Party>) = apply { players.addAll(newPlayers) }
         fun withTurnTracker(id: UniqueIdentifier) = apply {
             require(turnTrackerLinearId == null || turnTrackerLinearId == id) {
@@ -137,10 +134,6 @@ data class GameBoardState @ConstructorForDeserialization constructor(
 }
 
 internal class ImmutableList<T>(private val inner: List<T>) : List<T> by inner
-
-interface PointsToGameBoard {
-    val gameBoardPointer: LinearPointer<GameBoardState>
-}
 
 interface HasGameBoardId {
     val gameBoardLinearId: UniqueIdentifier

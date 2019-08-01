@@ -82,7 +82,7 @@ class BuildInitialSettlementAndRoadFlow(
 
         // Step 6. Create an initial settlement state
         val settlementState = SettlementState(
-                gameBoardPointer = gameBoardState.ownPointer(),
+                gameBoardLinearId = gameBoardState.linearId,
                 absoluteCorner = absoluteCorner,
                 players = gameBoardState.players,
                 owner = ourIdentity)
@@ -116,7 +116,7 @@ class BuildInitialSettlementAndRoadFlow(
 
         // Step 10. Create the road state at the appropriate location specified by the user.
         val roadState = RoadState(
-                gameBoardPointer = gameBoardState.ownPointer(),
+                gameBoardLinearId = gameBoardState.linearId,
                 absoluteSide = absoluteSide,
                 players = gameBoardState.players,
                 owner = ourIdentity)

@@ -1,7 +1,6 @@
 package com.contractsAndStates.states
 
 import com.nhaarman.mockito_kotlin.whenever
-import net.corda.core.contracts.LinearPointer
 import net.corda.core.contracts.UniqueIdentifier
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -52,23 +51,11 @@ class GameBoardStateTest {
     }
 
     @Test
-    fun `ownPointer is correct`() {
-        val linearId = UniqueIdentifier()
-        val boardBuilder = boardBuilder(linearId)
-        assertEquals(boardBuilder.ownPointer().pointer, linearId)
-        assertEquals(boardBuilder.ownPointer().type, GameBoardState::class.java)
-
-        val state = boardBuilder.build()
-        assertEquals(state.ownPointer().pointer, linearId)
-        assertEquals(state.ownPointer().type, GameBoardState::class.java)
-    }
-
-    @Test
     fun `isValid TurnTracker is correct`() {
         val state = boardBuilder().build()
         val turnTracker = mock(TurnTrackerState::class.java)
         whenever(turnTracker.linearId).then { state.turnTrackerLinearId }
-        whenever(turnTracker.gameBoardPointer).then { state.ownPointer() }
+        whenever(turnTracker.gameBoardLinearId).then { state.linearId }
 
         assertTrue(state.isValid(turnTracker))
     }
@@ -78,7 +65,7 @@ class GameBoardStateTest {
         val state = boardBuilder().build()
         val turnTracker = mock(TurnTrackerState::class.java)
         whenever(turnTracker.linearId).then { state.turnTrackerLinearId }
-        whenever(turnTracker.gameBoardPointer).then { LinearPointer(UniqueIdentifier(), GameBoardState::class.java) }
+        whenever(turnTracker.gameBoardLinearId).then { UniqueIdentifier() }
 
         assertFalse(state.isValid(turnTracker))
     }
@@ -88,7 +75,7 @@ class GameBoardStateTest {
         val state = boardBuilder().build()
         val turnTracker = mock(TurnTrackerState::class.java)
         whenever(turnTracker.linearId).then { UniqueIdentifier() }
-        whenever(turnTracker.gameBoardPointer).then { state.ownPointer() }
+        whenever(turnTracker.gameBoardLinearId).then { state.linearId }
 
         assertFalse(state.isValid(turnTracker))
     }
@@ -98,7 +85,7 @@ class GameBoardStateTest {
         val state = boardBuilder().build()
         val robber = mock(RobberState::class.java)
         whenever(robber.linearId).then { state.robberLinearId }
-        whenever(robber.gameBoardPointer).then { state.ownPointer() }
+        whenever(robber.gameBoardLinearId).then { state.linearId }
 
         assertTrue(state.isValid(robber))
     }
@@ -108,7 +95,7 @@ class GameBoardStateTest {
         val state = boardBuilder().build()
         val robber = mock(RobberState::class.java)
         whenever(robber.linearId).then { state.robberLinearId }
-        whenever(robber.gameBoardPointer).then { LinearPointer(UniqueIdentifier(), GameBoardState::class.java) }
+        whenever(robber.gameBoardLinearId).then { UniqueIdentifier() }
 
         assertFalse(state.isValid(robber))
     }
@@ -118,7 +105,7 @@ class GameBoardStateTest {
         val state = boardBuilder().build()
         val robber = mock(RobberState::class.java)
         whenever(robber.linearId).then { UniqueIdentifier() }
-        whenever(robber.gameBoardPointer).then { state.ownPointer() }
+        whenever(robber.gameBoardLinearId).then { state.linearId }
 
 
         assertFalse(state.isValid(robber))
@@ -128,16 +115,16 @@ class GameBoardStateTest {
     fun `isValid Trade is correct`() {
         val state = boardBuilder().build()
         val trade = mock(TradeState::class.java)
-        whenever(trade.gameBoardPointer).then { state.ownPointer() }
+        whenever(trade.gameBoardLinearId).then { state.linearId }
 
         assertTrue(state.isValid(trade))
     }
 
     @Test
-    fun `isValid Trade rejects if pointer is wrong`() {
+    fun `isValid Trade rejects if game board linearId is wrong`() {
         val state = boardBuilder().build()
         val trade = mock(TradeState::class.java)
-        whenever(trade.gameBoardPointer).then { LinearPointer(UniqueIdentifier(), GameBoardState::class.java) }
+        whenever(trade.gameBoardLinearId).then { UniqueIdentifier() }
 
         assertFalse(state.isValid(trade))
     }

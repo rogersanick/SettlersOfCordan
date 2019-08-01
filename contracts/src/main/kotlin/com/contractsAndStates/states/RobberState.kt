@@ -2,7 +2,6 @@ package com.contractsAndStates.states
 
 import com.contractsAndStates.contracts.RobberContract
 import net.corda.core.contracts.BelongsToContract
-import net.corda.core.contracts.LinearPointer
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
@@ -19,11 +18,11 @@ import javax.persistence.Table
 @CordaSerializable
 @BelongsToContract(RobberContract::class)
 data class RobberState(
-        override val gameBoardPointer: LinearPointer<GameBoardState>,
+        override val gameBoardLinearId: UniqueIdentifier,
         val hexTileIndex: HexTileIndex,
         val players: List<Party>,
         override val linearId: UniqueIdentifier = UniqueIdentifier()
-) : LinearState, QueryableState, StatePersistable, PointsToGameBoard {
+) : LinearState, QueryableState, StatePersistable, HasGameBoardId {
     override val participants: List<AbstractParty> = players
 
     fun move(hexTileIndex: HexTileIndex) = copy(hexTileIndex = hexTileIndex)
@@ -31,7 +30,7 @@ data class RobberState(
     override fun generateMappedObject(schema: MappedSchema): PersistentState {
         return when (schema) {
             is RobberSchemaV1 -> RobberSchemaV1.PersistentRobberState(
-                    gameBoardPointer.pointer)
+                    gameBoardLinearId)
             else -> throw IllegalArgumentException("Unrecognised schema $schema")
         }
     }

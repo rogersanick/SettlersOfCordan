@@ -54,7 +54,7 @@ class IssueTradeFlow(
                 targetPlayer,
                 gameBoardState.players,
                 false,
-                gameBoardState.ownPointer()
+                gameBoardState.linearId
         )
 
         // Step 5. Add the new trade state to the transaction.
@@ -81,7 +81,7 @@ open class IssueTradeFlowResponder(val counterpartySession: FlowSession) : FlowL
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
                 val tradeState = stx.coreTransaction.outputsOfType<TradeState>().single()
                 val gameBoardState = serviceHub.vaultService
-                        .querySingleState<GameBoardState>(tradeState.gameBoardPointer.pointer)
+                        .querySingleState<GameBoardState>(tradeState.gameBoardLinearId)
                         .state.data
                 if (!gameBoardState.isValid(tradeState)) {
                     throw FlowException("The trade state does not point back to the GameBoardState")

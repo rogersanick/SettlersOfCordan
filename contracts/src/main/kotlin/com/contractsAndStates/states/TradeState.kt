@@ -18,49 +18,51 @@ import javax.persistence.Table
 
 @CordaSerializable
 @BelongsToContract(TradePhaseContract::class)
-data class TradeState (
+data class TradeState(
         override val offering: Amount<TokenType>,
         override val wanted: Amount<TokenType>,
         override val owner: Party,
         val targetPlayer: Party,
         val players: List<Party>,
         val executed: Boolean,
-        override val gameBoardPointer: LinearPointer<GameBoardState>,
+        override val gameBoardLinearId: UniqueIdentifier,
         override val informationForAcceptor: InformationForAcceptor? = null,
         override val linearId: UniqueIdentifier = UniqueIdentifier()
-): LinearState, ExtendedDealState {
+) : LinearState, ExtendedDealState {
 
     override fun generateAgreement(transactionBuilder: TransactionBuilder): TransactionBuilder {
-        val state = TradeState(offering, wanted, owner, targetPlayer, players, executed, gameBoardPointer, linearId = linearId)
+        val state = TradeState(offering, wanted, owner, targetPlayer, players, executed, gameBoardLinearId, linearId = linearId)
         return transactionBuilder.withItems(
                 StateAndContract(state, TradePhaseContract.ID),
                 Command(TradePhaseContract.Commands.ExecuteTrade(), participants.map { it.owningKey })
         )
     }
 
-    override fun generateAgreement(notary: Party): TransactionBuilder { return TransactionBuilder() }
+    override fun generateAgreement(notary: Party): TransactionBuilder {
+        return TransactionBuilder()
+    }
 
     override val participants: List<AbstractParty> get() = listOf(owner, targetPlayer)
 
     override fun generateMappedObject(schema: MappedSchema): PersistentState {
         return when (schema) {
-            is TradeSchemaV1 -> TradeSchemaV1.PersistentTradeState(
-                    gameBoardPointer.pointer)
+            is TradeSchemaV1 -> TradeSchemaV1.PersistentTradeState(gameBoardLinearId)
             else -> throw IllegalArgumentException("Unrecognised schema $schema")
         }
     }
 
     override fun supportedSchemas(): Iterable<MappedSchema> {
         return listOf(TradeSchemaV1)
-    }}
+    }
+}
 
-interface ExtendedDealState: DealState, QueryableState, StatePersistable, PointsToGameBoard {
+interface ExtendedDealState : DealState, QueryableState, StatePersistable, HasGameBoardId {
     fun generateAgreement(transactionBuilder: TransactionBuilder): TransactionBuilder
     val informationForAcceptor: InformationForAcceptor?
     val offering: Amount<TokenType>
     val wanted: Amount<TokenType>
     val owner: Party
-    override val gameBoardPointer: LinearPointer<GameBoardState>
+    override val gameBoardLinearId: UniqueIdentifier
 }
 
 @CordaSerializable
