@@ -50,7 +50,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
 
         // Step 4. Retrieve the Dice Roll State from the vault
         val diceRollStateAndRef = serviceHub.vaultService
-                .querySingleState<DiceRollState>(gameBoardLinearId)
+                .queryDiceRoll(gameBoardLinearId)
         val diceRollState = diceRollStateAndRef.state.data
 
         // Step 5. Create a transaction builder
@@ -103,12 +103,12 @@ open class GatherResourcesFlowResponder(val counterpartySession: FlowSession) : 
                         .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
                         .state.data
                 val diceRollState = serviceHub.vaultService
-                        .querySingleState<DiceRollState>(stx.inputs)
+                        .queryDiceRoll(gameBoardState.linearId)
                         .state.data
                 val listOfTokensThatShouldHaveBeenIssued = serviceHub.vaultService
                         .getTokensToIssue(gameBoardState, diceRollState.getRollTrigger())
 
-                if ((listOfTokensThatShouldHaveBeenIssued.all {
+                if ((listOfTokensThatShouldHaveBeenIssued.none {
                             listOfTokensIssued.indexOf(it) != -1
                         } || listOfTokensIssued.size != listOfTokensThatShouldHaveBeenIssued.size)) {
                     throw FlowException("The correct number of resources must be produced for each respective party")

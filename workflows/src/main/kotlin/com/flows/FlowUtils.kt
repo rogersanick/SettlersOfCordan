@@ -64,7 +64,7 @@ inline fun <reified T : ContractState> VaultService.querySingleState(linearId: U
                 .single()
 
 inline fun <reified T : ContractState> VaultService.querySingleState(stateRef: StateRef): StateAndRef<T> =
-        querySingleState<T>(listOf(stateRef))
+        querySingleState(listOf(stateRef))
 
 inline fun <reified T : ContractState> VaultService.querySingleState(stateRefs: List<StateRef>) =
         QueryCriteria.VaultQueryCriteria(stateRefs = stateRefs)
@@ -73,7 +73,6 @@ inline fun <reified T : ContractState> VaultService.querySingleState(stateRefs: 
                 }
                 .also { stateAndRefs ->
                     if(stateAndRefs.size != 1) {
-                        System.out.println("test")
                         throw FlowException("There should be a single ${T::class.simpleName} for this ref")
                     }
                 }
@@ -87,7 +86,6 @@ fun VaultService.queryDiceRoll(gameBoardLinearId: UniqueIdentifier) =
                 }
                 .also { stateAndRefs ->
                     if(stateAndRefs.size != 1) {
-                        System.out.println("test")
                         throw FlowException("There should be a single DiceRollState for id $gameBoardLinearId")
                     }
                 }
