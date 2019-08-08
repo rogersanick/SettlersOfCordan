@@ -26,12 +26,12 @@ import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
 @StartableByRPC
-class RollDiceFlow(val gameBoardStateLinearId: UniqueIdentifier) : FlowLogic<SignedTransaction>() {
+class RollDiceFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
 
         val gameBoardStateAndRef = serviceHub.vaultService
-                .querySingleState<GameBoardState>(gameBoardStateLinearId)
+                .querySingleState<GameBoardState>(gameBoardLinearId)
         val gameBoardReferenceStateAndRef = ReferencedStateAndRef(gameBoardStateAndRef)
         val gameBoardState = gameBoardStateAndRef.state.data
 
@@ -89,7 +89,7 @@ open class RollDiceFlowResponder(internal val counterpartySession: FlowSession) 
                     throw FlowException("Only the current player may roll the dice.")
                 }
 
-                if (diceRollState.gameBoardStateUniqueIdentifier != gameBoardState.linearId) {
+                if (diceRollState.gameBoardLinearId != gameBoardState.linearId) {
                     throw FlowException("The dice roll must have been generated for this game.")
                 }
 

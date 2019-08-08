@@ -52,7 +52,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         }
         // Step 4. Retrieve the Dice Roll State from the vault
         val diceRollStateAndRef = serviceHub.vaultService
-                .querySingleState<DiceRollState>(gameBoardLinearId)
+                .queryDiceRoll(gameBoardLinearId)
         val diceRollState = diceRollStateAndRef.state.data
 
         // Step 5. Create a transaction builder

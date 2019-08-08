@@ -61,7 +61,7 @@ inline fun <reified T : ContractState> VaultService.querySingleState(linearId: U
                 }
                 .also { stateAndRefs ->
                     if (stateAndRefs.size != 1) {
-                        throw FlowException("There should be a single ${T::class.simpleName} of id $linearId")
+                        throw FlowException("There should be a single ${T::class.simpleName} of id $linearId, but found ${stateAndRefs.size}")
                     }
                 }
                 .single()
@@ -76,7 +76,7 @@ inline fun <reified T : ContractState> VaultService.querySingleState(stateRefs: 
                 }
                 .also { stateAndRefs ->
                     if (stateAndRefs.size != 1) {
-                        throw FlowException("There should be a single ${T::class.simpleName} for this ref")
+                        throw FlowException("There should be a single ${T::class.simpleName} for this ref, but found ${stateAndRefs.size}")
                     }
                 }
                 .single()
@@ -95,11 +95,11 @@ fun VaultService.queryDiceRoll(gameBoardLinearId: UniqueIdentifier) =
         queryBy<DiceRollState>()
                 .states
                 .filter {
-                    it.state.data.gameBoardStateUniqueIdentifier == gameBoardLinearId
+                    it.state.data.gameBoardLinearId == gameBoardLinearId
                 }
                 .also { stateAndRefs ->
                     if (stateAndRefs.size != 1) {
-                        throw FlowException("There should be a single DiceRollState for id $gameBoardLinearId")
+                        throw FlowException("There should be a single DiceRollState for id $gameBoardLinearId, but found ${stateAndRefs.size}")
                     }
                 }
                 .single()
