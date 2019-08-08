@@ -5,8 +5,11 @@ import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
+import net.corda.core.schemas.PersistentState
+import net.corda.core.schemas.StatePersistable
 import net.corda.core.serialization.ConstructorForDeserialization
 import net.corda.core.serialization.CordaSerializable
+import javax.persistence.Column
 
 /**
  * This state represents the same shared data that the symbolic representation of the Settlers board game
@@ -44,6 +47,14 @@ data class GameBoardState @ConstructorForDeserialization constructor(
     }
 
     fun weWin(ourIdentity: Party) = copy(winner = ourIdentity)
+
+    fun isValid(turnTrackerState: TurnTrackerState) = turnTrackerState.linearId == turnTrackerLinearId &&
+            turnTrackerState.gameBoardLinearId == linearId
+
+    fun isValid(robberState: RobberState) = robberState.linearId == robberLinearId &&
+            robberState.gameBoardLinearId == linearId
+
+    fun isValid(tradeState: TradeState) = tradeState.gameBoardLinearId == linearId
 
     fun toBuilder() = Builder(
             linearId = linearId,
@@ -123,3 +134,20 @@ data class GameBoardState @ConstructorForDeserialization constructor(
 }
 
 internal class ImmutableList<T>(private val inner: List<T>) : List<T> by inner
+
+interface HasGameBoardId {
+    val gameBoardLinearId: UniqueIdentifier
+}
+
+/**
+ * Other persistence classes cannot inherit this class. Otherwise the system cannot detect the column name.
+ */
+sealed class BelongsToGameBoard(
+        @Column(name = columnName, nullable = false)
+        var gameBoardLinearId: String
+) : PersistentState(), StatePersistable {
+
+    companion object {
+        const val columnName = "game_board_linear_id"
+    }
+}

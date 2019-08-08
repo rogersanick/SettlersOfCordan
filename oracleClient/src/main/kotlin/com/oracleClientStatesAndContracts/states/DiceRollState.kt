@@ -15,7 +15,7 @@ data class DiceRollState(
         val randomRoll1: Int,
         val randomRoll2: Int,
         val turnTrackerUniqueIdentifier: UniqueIdentifier,
-        val gameBoardStateUniqueIdentifier: UniqueIdentifier,
+        val gameBoardLinearId: UniqueIdentifier,
         override val participants: List<Party>,
         val signedDataWithOracleCert: SignedDataWithCert<Party>
 ) : ContractState, PersistentState() {
@@ -24,7 +24,7 @@ data class DiceRollState(
             diceRollState.randomRoll1,
             diceRollState.randomRoll2,
             diceRollState.turnTrackerUniqueIdentifier,
-            diceRollState.gameBoardStateUniqueIdentifier,
+            diceRollState.gameBoardLinearId,
             diceRollState.participants,
             diceRollState.signedDataWithOracleCert
     )

@@ -40,6 +40,9 @@ class BuildCityFlow(
         // Step 3. Retrieve the Turn Tracker State from the vault
         val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(
                 serviceHub.vaultService.querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId))
+        if (gameBoardState.linearId != turnTrackerReferenceStateAndRef.stateAndRef.state.data.gameBoardLinearId) {
+            throw FlowException("The turn tracker state does not point back to the GameBoardState")
+        }
 
         // Step 4. Create a new transaction builder
         val tb = TransactionBuilder(notary)
@@ -93,6 +96,12 @@ class BuildCityFlowResponder(val counterpartySession: FlowSession) : FlowLogic<S
                 val turnTrackerState = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(turnTrackerStateRef)
                         .state.data
+                if (gameBoardState.turnTrackerLinearId != turnTrackerState.linearId) {
+                    throw FlowException("The TurnTracker included in the transaction is not correct for this game or turn.")
+                }
+                if (!gameBoardState.isValid(turnTrackerState)) {
+                    throw FlowException("The turn tracker state does not point back to the GameBoardState")
+                }
 
                 require(counterpartySession.counterparty.owningKey == gameBoardState
                         .players[turnTrackerState.currTurnIndex]

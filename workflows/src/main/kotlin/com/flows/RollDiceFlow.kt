@@ -26,18 +26,21 @@ import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
 @StartableByRPC
-class RollDiceFlow(val gameBoardStateLinearId: UniqueIdentifier) : FlowLogic<SignedTransaction>() {
+class RollDiceFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
 
         val gameBoardStateAndRef = serviceHub.vaultService
-                .querySingleState<GameBoardState>(gameBoardStateLinearId)
+                .querySingleState<GameBoardState>(gameBoardLinearId)
         val gameBoardReferenceStateAndRef = ReferencedStateAndRef(gameBoardStateAndRef)
         val gameBoardState = gameBoardStateAndRef.state.data
 
         val turnTrackerState = serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
                 .state.data
+        if (!gameBoardState.isValid(turnTrackerState)) {
+            throw FlowException("The turn tracker state does not point back to the GameBoardState")
+        }
         val turnTrackerStateLinearId = turnTrackerState.linearId
 
         val oracleLegalName = CordaX500Name("Oracle", "New York", "US")
@@ -68,6 +71,7 @@ open class RollDiceFlowResponder(internal val counterpartySession: FlowSession) 
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) {
 
+                // TODO not assume that there is a single game in flight
                 val gameBoardState = serviceHub.vaultService
                         .querySingleState<GameBoardState>(stx.coreTransaction.references.single())
                         .state.data
@@ -75,6 +79,9 @@ open class RollDiceFlowResponder(internal val counterpartySession: FlowSession) 
                 val turnTrackerState = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
                         .state.data
+                if (!gameBoardState.isValid(turnTrackerState)) {
+                    throw FlowException("The turn tracker state does not point back to the GameBoardState")
+                }
 
                 val diceRollState = stx.coreTransaction.outputsOfType<DiceRollState>().single()
 
@@ -82,7 +89,7 @@ open class RollDiceFlowResponder(internal val counterpartySession: FlowSession) 
                     throw FlowException("Only the current player may roll the dice.")
                 }
 
-                if (diceRollState.gameBoardStateUniqueIdentifier != gameBoardState.linearId) {
+                if (diceRollState.gameBoardLinearId != gameBoardState.linearId) {
                     throw FlowException("The dice roll must have been generated for this game.")
                 }
 

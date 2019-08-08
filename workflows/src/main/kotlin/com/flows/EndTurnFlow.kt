@@ -38,6 +38,9 @@ class EndTurnFlow(val gameBoardStateLinearId: UniqueIdentifier) : FlowLogic<Sign
         val turnTrackerStateAndRef = serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
         val turnTrackerState = turnTrackerStateAndRef.state.data
+        if (!gameBoardState.isValid(turnTrackerState)) {
+            throw FlowException("The turn tracker state does not point back to the GameBoardState")
+        }
 
         // Step 4. Create a new transaction builder using the notary
         val tb = TransactionBuilder(notary)
@@ -90,6 +93,9 @@ class EndTurnFlowResponder(val counterpartySession: FlowSession) : FlowLogic<Sig
                         .state.data
                 if (lastTurnTrackerWeHaveOnRecord.linearId != turnTrackerReferencedInTransaction.linearId) {
                     throw IllegalArgumentException("The TurnTracker included in the transaction is not correct for this game or turn.")
+                }
+                if (!gameBoard.isValid(lastTurnTrackerWeHaveOnRecord)) {
+                    throw FlowException("The turn tracker state does not point back to the GameBoardState")
                 }
                 if (lastTurnTrackerWeHaveOnRecord.currTurnIndex != turnTrackerReferencedInTransaction.currTurnIndex) {
                     throw IllegalArgumentException("The player is proposing an incorrect turn advancement.")

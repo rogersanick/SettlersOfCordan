@@ -6,7 +6,15 @@ import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
+import net.corda.core.schemas.MappedSchema
+import net.corda.core.schemas.PersistentState
+import net.corda.core.schemas.QueryableState
+import net.corda.core.schemas.StatePersistable
 import net.corda.core.serialization.CordaSerializable
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.Index
+import javax.persistence.Table
 
 /**
  * Roads are pieces of infrastructure that connect your settlements and cities.
@@ -20,13 +28,14 @@ import net.corda.core.serialization.CordaSerializable
 @CordaSerializable
 @BelongsToContract(BuildPhaseContract::class)
 data class RoadState(
+        override val gameBoardLinearId: UniqueIdentifier,
         val absoluteSide: AbsoluteSide,
         val players: List<Party>,
         val owner: Party,
         val roadAttachedA: UniqueIdentifier? = null,
         val roadAttachedB: UniqueIdentifier? = null,
         override val linearId: UniqueIdentifier = UniqueIdentifier()
-) : LinearState {
+) : LinearState, QueryableState, StatePersistable, HasGameBoardId {
     override val participants: List<AbstractParty> = players
 
     /**
@@ -42,6 +51,57 @@ data class RoadState(
     fun attachRoadB(linearIdentifier: UniqueIdentifier): RoadState {
         return this.copy(roadAttachedB = linearIdentifier)
     }
+
+    override fun generateMappedObject(schema: MappedSchema): PersistentState {
+        return when (schema) {
+            is RoadSchemaV1 -> RoadSchemaV1.PersistentRoadState(
+                    gameBoardLinearId.toString(),
+                    absoluteSide.tileIndex.value,
+                    absoluteSide.sideIndex.value,
+                    owner,
+                    linearId.toString())
+            else -> throw IllegalArgumentException("Unrecognised schema $schema")
+        }
+    }
+
+    override fun supportedSchemas(): Iterable<MappedSchema> {
+        return listOf(RoadSchemaV1)
+    }
+}
+
+object RoadSchema
+
+@CordaSerializable
+object RoadSchemaV1 : MappedSchema(
+        schemaFamily = RoadSchema.javaClass,
+        version = 1,
+        mappedTypes = listOf(PersistentRoadState::class.java)
+) {
+    @Entity
+    @Table(
+            name = "contract_road_states",
+            indexes = [
+                Index(name = "${BelongsToGameBoard.columnName}_idx", columnList = BelongsToGameBoard.columnName),
+                Index(name = "tile_index_idx", columnList = "tile_index"),
+                Index(name = "side_index_idx", columnList = "side_index"),
+                Index(name = "owner_idx", columnList = "owner")
+            ])
+    class PersistentRoadState(
+            @Column(name = BelongsToGameBoard.columnName, nullable = false)
+            var gameBoardLinearId: String,
+
+            @Column(name = "tile_index", nullable = false)
+            var tileIndex: Int,
+
+            @Column(name = "side_index", nullable = false)
+            var sideIndex: Int,
+
+            @Column(name = "owner", nullable = false)
+            var owner: Party,
+
+            @Column(name = "linear_id", nullable = false)
+            var linearId: String
+    ) : PersistentState(), StatePersistable
 }
 
 /**

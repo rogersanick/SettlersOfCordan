@@ -39,6 +39,7 @@ class RobberContract : Contract {
                 /**
                  *  ******** SHAPE ********
                  */
+                "There should be no input Robber State" using robberInputStates.isEmpty()
                 val outputGameBoards = tx.outputsOfType<GameBoardState>()
                 "There should be a single output GameBoardState" using (outputGameBoards.size == 1)
                 val outputGameBoard = tx.outputsOfType<GameBoardState>().single()
@@ -46,8 +47,8 @@ class RobberContract : Contract {
                 /**
                  *  ******** BUSINESS LOGIC ********
                  */
-                "The robber state must have the same gameBoardStateLinearID as the output game board" using
-                        (outputGameBoard.robberLinearId == outputRobberState.linearId)
+                "The robber state must must belong to the output game board" using
+                        outputGameBoard.isValid(outputRobberState)
 
                 /**
                  *  ******** SIGNATURES ********
@@ -73,8 +74,8 @@ class RobberContract : Contract {
                  */
                 "The input and output RobberStates should have the same id" using
                         (robberInputStates.single().linearId == outputRobberState.linearId)
-                "The robber state must have the same gameBoardStateLinearID as the output game board" using
-                        (referencedGameBoardState.robberLinearId == outputRobberState.linearId)
+                "The robber state must belong to the output game board" using
+                        referencedGameBoardState.isValid(outputRobberState)
 
                 /**
                  *  ******** SIGNATURES ********

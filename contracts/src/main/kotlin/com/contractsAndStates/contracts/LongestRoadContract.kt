@@ -6,7 +6,6 @@ import net.corda.core.contracts.Contract
 import net.corda.core.contracts.requireSingleCommand
 import net.corda.core.contracts.requireThat
 import net.corda.core.transactions.LedgerTransaction
-import java.security.PublicKey
 
 class LongestRoadContract : Contract {
 
@@ -17,10 +16,10 @@ class LongestRoadContract : Contract {
     override fun verify(tx: LedgerTransaction) {
         val command = tx.commands.requireSingleCommand<Commands>()
 
-        val longestRoadInputStates = tx.inputsOfType<LongestRoadState>().first()
-        val roadsInputStates = tx.inputsOfType<RoadState>()
-        val settlementsInputStates = tx.inputsOfType<SettlementState>()
-        val inputGameBoardState = tx.inputsOfType<GameBoardState>().single()
+        val inputLongestRoads = tx.inputsOfType<LongestRoadState>().first()
+        val inputRoads = tx.inputsOfType<RoadState>()
+        val inputSettlements = tx.inputsOfType<SettlementState>()
+        val inputBoard = tx.inputsOfType<GameBoardState>().single()
 
         val outputLongestRoadState = tx.outputsOfType<LongestRoadState>().first()
 
@@ -30,28 +29,31 @@ class LongestRoadContract : Contract {
                 /**
                  *  ******** BUSINESS LOGIC ********
                  */
+                "All roads must belong to the board" using
+                        inputRoads.all { inputBoard.linearId == it.gameBoardLinearId }
+                "All settlements must belong to the board" using
+                        inputSettlements.all { inputBoard.linearId == it.gameBoardLinearId }
 
                 val candidate = longestRoad(
-                        inputGameBoardState.hexTiles, roadsInputStates, settlementsInputStates,
-                        inputGameBoardState.players, longestRoadInputStates.holder)
+                        inputBoard.hexTiles, inputRoads, inputSettlements,
+                        inputBoard.players, inputLongestRoads.holder)
 
                 "Incorrect longest road holder." using (candidate == outputLongestRoadState.holder)
-
 
                 /**
                  *  ******** SIGNATURES ********
                  */
 
                 val signingParties = tx.commandsOfType<Commands.Claim>().single().signers.toSet()
-                val participants = outputLongestRoadState.participants.map{ it.owningKey }
+                val participants = outputLongestRoadState.participants.map { it.owningKey }
 
-                "All players must verify and sign the transaction to build a settlement." using(
-                        signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
+                "All players must verify and sign the transaction to build a settlement." using (
+                        signingParties.containsAll(participants) && signingParties.size == 4)
             }
         }
     }
 
     interface Commands : CommandData {
-        class Claim: Commands
+        class Claim : Commands
     }
 }

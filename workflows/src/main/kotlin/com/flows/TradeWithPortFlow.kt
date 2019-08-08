@@ -90,12 +90,15 @@ open class TradeWithPortFlowResponder(val counterpartySession: FlowSession) : Fl
                         .querySingleState<GameBoardState>(gameBoardStateRef)
                         .state.data
 
-                val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService
+                val turnTrackerState = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
                         .state.data
+                if (!gameBoardState.isValid(turnTrackerState)) {
+                    throw FlowException("The turn tracker state does not point back to the GameBoardState")
+                }
 
                 if (counterpartySession.counterparty.owningKey != gameBoardState
-                                .players[lastTurnTrackerOnRecordStateAndRef.currTurnIndex].owningKey) {
+                                .players[turnTrackerState.currTurnIndex].owningKey) {
                     throw IllegalArgumentException("Only the current player may propose the next move.")
                 }
             }
