@@ -88,10 +88,6 @@ class BuildPhaseContract : Contract {
                 val itAndNeighboringCorners = inputBoard.getItAndNeighboringCorners(onCorner)
                 "A settlement must not have previously been built in this vicinity." using
                         itAndNeighboringCorners.none { inputBoard.hasSettlementOn(it) }
-                "A settlement cannot be built on a hexTile that is of type Desert" using
-                        itAndNeighboringCorners.none {
-                            inputBoard.get(it.tileIndex).resourceType == HexTileType.Desert
-                        }
 
                 /**
                  * Check Issued Resources - If we are in the first round of setup, the player should not be issuing themselves any resources.
@@ -173,10 +169,6 @@ class BuildPhaseContract : Contract {
                 val itAndNeighboringCorners = inputBoard.getItAndNeighboringCorners(onCorner)
                 "A settlement must not have previously been built in this vicinity." using
                         itAndNeighboringCorners.none { inputBoard.hasSettlementOn(it) }
-                "A settlement cannot be built on a hexTile that is of type Desert" using
-                        itAndNeighboringCorners.none {
-                            inputBoard.get(it.tileIndex).resourceType == HexTileType.Desert
-                        }
 
                 verifyPaymentIsEnough(getBuildableCosts(Buildable.Settlement), outputResources, "settlement")
 
