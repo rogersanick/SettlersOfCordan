@@ -44,7 +44,6 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         val notary = gameBoardStateAndRef.state.notary
 
         // Step 3. Retrieve the Turn Tracker State from the vault
-        // TODO how do we prevent players issuing themselves resources twice by calling this flow once more?
         val turnTrackerStateAndRef = serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
 
