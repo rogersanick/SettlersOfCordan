@@ -10,6 +10,7 @@ import net.corda.core.schemas.PersistentState
 import net.corda.core.schemas.QueryableState
 import net.corda.core.schemas.StatePersistable
 import net.corda.core.serialization.CordaSerializable
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Index
 import javax.persistence.Table
@@ -39,7 +40,7 @@ data class TurnTrackerState(
     override fun generateMappedObject(schema: MappedSchema): PersistentState {
         return when (schema) {
             is TurnTrackerSchemaV1 -> TurnTrackerSchemaV1.PersistentTurnTrackerState(
-                    gameBoardLinearId)
+                    gameBoardLinearId.toString())
             else -> throw IllegalArgumentException("Unrecognised schema $schema")
         }
     }
@@ -55,7 +56,7 @@ object TurnTrackerSchema
 object TurnTrackerSchemaV1 : MappedSchema(
         schemaFamily = TurnTrackerSchema.javaClass,
         version = 1,
-        mappedTypes = listOf(TurnTrackerState::class.java)
+        mappedTypes = listOf(PersistentTurnTrackerState::class.java)
 ) {
     @Entity
     @Table(
@@ -64,6 +65,7 @@ object TurnTrackerSchemaV1 : MappedSchema(
                 Index(name = "${BelongsToGameBoard.columnName}_idx", columnList = BelongsToGameBoard.columnName)
             ])
     class PersistentTurnTrackerState(
-            gameBoardLinearId: UniqueIdentifier
-    ) : BelongsToGameBoard(gameBoardLinearId)
+            @Column(name = BelongsToGameBoard.columnName, nullable = false)
+            var gameBoardLinearId: String
+    ) : PersistentState(), StatePersistable
 }

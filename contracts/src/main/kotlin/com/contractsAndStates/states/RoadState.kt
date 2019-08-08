@@ -55,11 +55,11 @@ data class RoadState(
     override fun generateMappedObject(schema: MappedSchema): PersistentState {
         return when (schema) {
             is RoadSchemaV1 -> RoadSchemaV1.PersistentRoadState(
-                    gameBoardLinearId,
+                    gameBoardLinearId.toString(),
                     absoluteSide.tileIndex.value,
                     absoluteSide.sideIndex.value,
                     owner,
-                    linearId)
+                    linearId.toString())
             else -> throw IllegalArgumentException("Unrecognised schema $schema")
         }
     }
@@ -75,7 +75,7 @@ object RoadSchema
 object RoadSchemaV1 : MappedSchema(
         schemaFamily = RoadSchema.javaClass,
         version = 1,
-        mappedTypes = listOf(RoadState::class.java)
+        mappedTypes = listOf(PersistentRoadState::class.java)
 ) {
     @Entity
     @Table(
@@ -87,7 +87,8 @@ object RoadSchemaV1 : MappedSchema(
                 Index(name = "owner_idx", columnList = "owner")
             ])
     class PersistentRoadState(
-            gameBoardLinearId: UniqueIdentifier,
+            @Column(name = BelongsToGameBoard.columnName, nullable = false)
+            var gameBoardLinearId: String,
 
             @Column(name = "tile_index", nullable = false)
             var tileIndex: Int,
@@ -99,8 +100,8 @@ object RoadSchemaV1 : MappedSchema(
             var owner: Party,
 
             @Column(name = "linear_id", nullable = false)
-            var linearId: UniqueIdentifier
-    ) : BelongsToGameBoard(gameBoardLinearId)
+            var linearId: String
+    ) : PersistentState(), StatePersistable
 }
 
 /**

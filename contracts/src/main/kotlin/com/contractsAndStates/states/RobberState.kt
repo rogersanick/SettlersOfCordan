@@ -11,6 +11,7 @@ import net.corda.core.schemas.PersistentState
 import net.corda.core.schemas.QueryableState
 import net.corda.core.schemas.StatePersistable
 import net.corda.core.serialization.CordaSerializable
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Index
 import javax.persistence.Table
@@ -30,7 +31,7 @@ data class RobberState(
     override fun generateMappedObject(schema: MappedSchema): PersistentState {
         return when (schema) {
             is RobberSchemaV1 -> RobberSchemaV1.PersistentRobberState(
-                    gameBoardLinearId)
+                    gameBoardLinearId.toString())
             else -> throw IllegalArgumentException("Unrecognised schema $schema")
         }
     }
@@ -46,7 +47,7 @@ object RobberSchema
 object RobberSchemaV1 : MappedSchema(
         schemaFamily = RobberSchema.javaClass,
         version = 1,
-        mappedTypes = listOf(RobberState::class.java)
+        mappedTypes = listOf(PersistentRobberState::class.java)
 ) {
     @Entity
     @Table(
@@ -55,6 +56,7 @@ object RobberSchemaV1 : MappedSchema(
                 Index(name = "${BelongsToGameBoard.columnName}_idx", columnList = BelongsToGameBoard.columnName)
             ])
     class PersistentRobberState(
-            gameBoardLinearId: UniqueIdentifier
-    ) : BelongsToGameBoard(gameBoardLinearId)
+            @Column(name = BelongsToGameBoard.columnName, nullable = false)
+            var gameBoardLinearId: String
+    ) : PersistentState(), StatePersistable
 }

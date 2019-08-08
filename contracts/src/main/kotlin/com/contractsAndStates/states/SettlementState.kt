@@ -11,6 +11,7 @@ import net.corda.core.schemas.PersistentState
 import net.corda.core.schemas.QueryableState
 import net.corda.core.schemas.StatePersistable
 import net.corda.core.serialization.CordaSerializable
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Index
 import javax.persistence.Table
@@ -52,7 +53,7 @@ data class SettlementState(
 
     override fun generateMappedObject(schema: MappedSchema): PersistentState {
         return when (schema) {
-            is SettlementSchemaV1 -> SettlementSchemaV1.PersistentSettlementState(gameBoardLinearId)
+            is SettlementSchemaV1 -> SettlementSchemaV1.PersistentSettlementState(gameBoardLinearId.toString())
             else -> throw IllegalArgumentException("Unrecognised schema $schema")
         }
     }
@@ -68,7 +69,7 @@ object SettlementSchema
 object SettlementSchemaV1 : MappedSchema(
         schemaFamily = SettlementSchema.javaClass,
         version = 1,
-        mappedTypes = listOf(SettlementState::class.java)
+        mappedTypes = listOf(PersistentSettlementState::class.java)
 ) {
     @Entity
     @Table(
@@ -77,6 +78,7 @@ object SettlementSchemaV1 : MappedSchema(
                 Index(name = "${BelongsToGameBoard.columnName}_idx", columnList = BelongsToGameBoard.columnName)
             ])
     class PersistentSettlementState(
-            gameBoardLinearId: UniqueIdentifier
-    ) : BelongsToGameBoard(gameBoardLinearId)
+            @Column(name = BelongsToGameBoard.columnName, nullable = false)
+            var gameBoardLinearId: String
+    ) : PersistentState(), StatePersistable
 }

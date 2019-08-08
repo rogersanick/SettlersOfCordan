@@ -139,10 +139,13 @@ interface HasGameBoardId {
     val gameBoardLinearId: UniqueIdentifier
 }
 
-open class BelongsToGameBoard(
+/**
+ * Other persistence classes cannot inherit this class. Otherwise the system cannot detect the column name.
+ */
+sealed class BelongsToGameBoard(
         @Column(name = columnName, nullable = false)
-        override var gameBoardLinearId: UniqueIdentifier
-) : PersistentState(), StatePersistable, HasGameBoardId {
+        var gameBoardLinearId: String
+) : PersistentState(), StatePersistable {
 
     companion object {
         const val columnName = "game_board_linear_id"

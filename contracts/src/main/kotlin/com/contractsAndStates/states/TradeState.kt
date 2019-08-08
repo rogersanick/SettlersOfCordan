@@ -12,6 +12,7 @@ import net.corda.core.schemas.StatePersistable
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.finance.contracts.DealState
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Index
 import javax.persistence.Table
@@ -46,7 +47,7 @@ data class TradeState(
 
     override fun generateMappedObject(schema: MappedSchema): PersistentState {
         return when (schema) {
-            is TradeSchemaV1 -> TradeSchemaV1.PersistentTradeState(gameBoardLinearId)
+            is TradeSchemaV1 -> TradeSchemaV1.PersistentTradeState(gameBoardLinearId.toString())
             else -> throw IllegalArgumentException("Unrecognised schema $schema")
         }
     }
@@ -78,7 +79,7 @@ object TradeSchema
 object TradeSchemaV1 : MappedSchema(
         schemaFamily = TradeSchema.javaClass,
         version = 1,
-        mappedTypes = listOf(TradeState::class.java)
+        mappedTypes = listOf(PersistentTradeState::class.java)
 ) {
     @Entity
     @Table(
@@ -87,6 +88,7 @@ object TradeSchemaV1 : MappedSchema(
                 Index(name = "${BelongsToGameBoard.columnName}_idx", columnList = BelongsToGameBoard.columnName)
             ])
     class PersistentTradeState(
-            gameBoardLinearId: UniqueIdentifier
-    ) : BelongsToGameBoard(gameBoardLinearId)
+            @Column(name = BelongsToGameBoard.columnName, nullable = false)
+            var gameBoardLinearId: String
+    ) : PersistentState(), StatePersistable
 }
