@@ -1,6 +1,7 @@
 package com.contractsAndStates.states
 
 import com.oracleClientStatesAndContracts.states.RollTrigger
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.testing.core.TestIdentity
@@ -22,12 +23,20 @@ class RoadStateTest {
     private var p2 = TestIdentity((CordaX500Name("player2", "New York", "GB")))
 
     private fun buildRoads(owner: Party, pairs: List<Pair<Int, Int>>) = pairs.forEach {
-        roads.add(RoadState(AbsoluteSide(HexTileIndex(it.first), TileSideIndex(it.second)), listOf(), owner, null, null))
+        roads.add(RoadState(
+                gameBoardLinearId = UniqueIdentifier(),
+                absoluteSide = AbsoluteSide(HexTileIndex(it.first), TileSideIndex(it.second)),
+                players = listOf(),
+                owner = owner,
+                roadAttachedA = null,
+                roadAttachedB = null))
         builder.setRoadOn(roads.last().absoluteSide, roads.last().linearId)
     }
 
     private fun buildSettlements(owner: Party, pairs: List<Pair<Int, Int>>) = pairs.forEach {
-        settlements.add(SettlementState(AbsoluteCorner(HexTileIndex(it.first), TileCornerIndex(it.second)), listOf(), owner))
+        settlements.add(SettlementState(
+                UniqueIdentifier(),
+                AbsoluteCorner(HexTileIndex(it.first), TileCornerIndex(it.second)), listOf(), owner))
         settlementsBuilder.setSettlementOn(settlements.last().absoluteCorner.cornerIndex, settlements.last().linearId)
     }
 
@@ -109,7 +118,7 @@ class RoadStateTest {
     @Test
     fun `longest road of 13 with 2 loops`() {
         buildRoads(p1.party, listOf(0 to 0, 0 to 1, 0 to 2, 0 to 3, 0 to 4, 0 to 5, 1 to 3, 1 to 2,
-                                    5 to 0, 5 to 1, 5 to 2, 5 to 3, 5 to 4))
+                5 to 0, 5 to 1, 5 to 2, 5 to 3, 5 to 4))
         buildBoard()
         assertEquals(13, longestRoadForPlayer(board, roads.toList(), listOf(), p1.party).count())
     }
@@ -138,8 +147,10 @@ class AssignLongestRoadTests {
     private var p3 = TestIdentity((CordaX500Name("player3", "New York", "GB")))
     private var p4 = TestIdentity((CordaX500Name("player4", "New York", "GB")))
 
-    private fun createCandidates(vararg lengths: Int) = listOf(p1, p2, p3, p4).mapIndexed {
-        index, testIdentity -> LongestRoadCandidate(testIdentity.party, lengths[index]) }
+    private fun createCandidates(vararg lengths: Int) = listOf(p1, p2, p3, p4)
+            .mapIndexed { index, testIdentity ->
+                LongestRoadCandidate(testIdentity.party, lengths[index])
+            }
 
     @Test
     fun `No candidate has at least 5 roads and no previous holder`() {

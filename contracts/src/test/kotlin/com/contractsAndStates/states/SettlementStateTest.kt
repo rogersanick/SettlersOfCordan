@@ -1,17 +1,18 @@
 package com.contractsAndStates.states
 
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
 import org.junit.Test
 import org.mockito.Mockito.mock
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class SettlementStateTest {
 
     private fun makeBasicSettlement() = SettlementState(
-            absoluteCorner= AbsoluteCorner(HexTileIndex(1), TileCornerIndex(0)),
+            gameBoardLinearId = UniqueIdentifier(),
+            absoluteCorner = AbsoluteCorner(HexTileIndex(1), TileCornerIndex(0)),
             players = listOf(mock(Party::class.java), mock(Party::class.java), mock(Party::class.java)),
             owner = mock(Party::class.java))
 

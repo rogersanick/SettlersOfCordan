@@ -90,18 +90,20 @@ class SetupGameBoardFlow(val p1: Party, val p2: Party, val p3: Party, val p4: Pa
         tb.addCommand(issueCommand)
         tb.addCommand(createTurnTracker)
 
-        // Step 4. Create a new turn tracker state
-        progressTracker.currentStep = CREATING_A_TURN_TRACKER
-        val turnTrackerState = TurnTrackerState(participants = playersList)
-
-        // Step 5. Generate data for new game state
+        // Step 4. Generate data for new game state
         progressTracker.currentStep = SETTING_UP_YOUR_GAMEBOARD
         val boardBuilder = GameBoardState.Builder.createFull()
+
+        // Step 5. Create a new turn tracker state
+        progressTracker.currentStep = CREATING_A_TURN_TRACKER
+        val turnTrackerState = TurnTrackerState(
+                gameBoardLinearId = boardBuilder.linearId,
+                participants = playersList)
 
         // Step 6. Create a robber state and issueRobber commands - add both to the transaction
         progressTracker.currentStep = FINDING_A_VILLAIN_TO_PLAY_THE_ROBBER
         val desertTile = boardBuilder.getTilesBy(HexTileType.Desert).single()
-        val robberState = RobberState(desertTile.hexTileIndex, playersList)
+        val robberState = RobberState(boardBuilder.linearId, desertTile.hexTileIndex, playersList)
         val createRobberCommand = Command(
                 RobberContract.Commands.CreateRobber(),
                 playerKeys)

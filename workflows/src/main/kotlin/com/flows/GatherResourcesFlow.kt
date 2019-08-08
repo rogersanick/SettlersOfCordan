@@ -46,7 +46,9 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         // Step 3. Retrieve the Turn Tracker State from the vault
         val turnTrackerStateAndRef = serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
-
+        if (!gameBoardState.isValid(turnTrackerStateAndRef.state.data)) {
+            throw FlowException("The turn tracker state does not point back to the GameBoardState")
+        }
         // Step 4. Retrieve the Dice Roll State from the vault
         val diceRollStateAndRef = serviceHub.vaultService
                 .queryDiceRoll(gameBoardLinearId)
@@ -101,6 +103,9 @@ open class GatherResourcesFlowResponder(val counterpartySession: FlowSession) : 
                 val turnTrackerState = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
                         .state.data
+                if (!gameBoardState.isValid(turnTrackerState)) {
+                    throw FlowException("The turn tracker state does not point back to the GameBoardState")
+                }
                 val diceRollState = serviceHub.vaultService
                         .queryDiceRoll(gameBoardState.linearId)
                         .state.data

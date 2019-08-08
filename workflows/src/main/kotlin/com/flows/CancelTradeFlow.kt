@@ -35,7 +35,7 @@ class CancelTradeFlow(val tradeStateLinearId: UniqueIdentifier) : FlowLogic<Sign
 
         // Step 3. Get the GameBoard state from the vault.
         val gameBoardState = serviceHub.vaultService
-                .querySingleState<GameBoardState>(tradeStateAndRef.state.data.gameBoardStateLinearId)
+                .querySingleState<GameBoardState>(tradeStateAndRef.state.data.gameBoardLinearId)
                 .state.data
 
         // Step 3. Create a transaction builder
