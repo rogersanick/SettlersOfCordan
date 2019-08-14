@@ -112,9 +112,8 @@ open class GatherResourcesFlowResponder(val counterpartySession: FlowSession) : 
                 val listOfTokensThatShouldHaveBeenIssued = serviceHub.vaultService
                         .getTokensToIssue(gameBoardState, diceRollState.getRollTrigger())
 
-                if ((listOfTokensThatShouldHaveBeenIssued.none {
-                            listOfTokensIssued.indexOf(it) != -1
-                        } || listOfTokensIssued.size != listOfTokensThatShouldHaveBeenIssued.size)) {
+                if (!listOfTokensThatShouldHaveBeenIssued.containsAll(listOfTokensIssued)
+                                || listOfTokensIssued.size != listOfTokensThatShouldHaveBeenIssued.size) {
                     throw FlowException("The correct number of resources must be produced for each respective party")
                 }
             }

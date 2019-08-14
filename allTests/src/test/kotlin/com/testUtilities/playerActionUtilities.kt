@@ -5,6 +5,7 @@ import com.flows.*
 import com.oracleClientStatesAndContracts.states.DiceRollState
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.r3.corda.lib.tokens.contracts.types.TokenType
+import net.corda.core.concurrent.CordaFuture
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.internal.DigitalSignatureWithCert
@@ -15,10 +16,19 @@ import net.corda.core.utilities.getOrThrow
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.StartedMockNode
 
-fun rollDiceThenGatherThenMaybeEndTurn(gameBoardLinearId: UniqueIdentifier, node: StartedMockNode, network: MockNetwork, endTurn: Boolean = true): ResourceCollectionSignedTransactions {
+fun rollDiceThenGatherThenMaybeEndTurn(
+        gameBoardLinearId: UniqueIdentifier,
+        node: StartedMockNode,
+        network: MockNetwork,
+        endTurn: Boolean = true,
+        diceRollState: DiceRollState? = null): ResourceCollectionSignedTransactions {
 
     // Roll the dice
-    val futureWithDiceRoll = node.startFlow(RollDiceFlow(gameBoardLinearId))
+    val futureWithDiceRoll: CordaFuture<SignedTransaction> = when (diceRollState) {
+        null -> node.startFlow(RollDiceFlow(gameBoardLinearId))
+        else -> node.startFlow(RollDiceFlow(gameBoardLinearId, diceRollState))
+    }
+
     network.runNetwork()
     val stxWithDiceRoll = futureWithDiceRoll.getOrThrow()
 

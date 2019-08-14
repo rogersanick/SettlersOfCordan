@@ -6,6 +6,7 @@ import com.contractsAndStates.states.*
 import com.r3.corda.lib.tokens.contracts.commands.IssueTokenCommand
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
+import com.r3.corda.lib.tokens.workflows.flows.issue.addIssueTokens
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.contracts.requireThat
@@ -14,10 +15,8 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
 /**
- * This flow will allow users to exchange their existing assets at a port at the specified exchange rate. It is
- * currently unimplemented and is a copy / paste of the IssueTokenFlow. The issue here surrounds the burning of
- * the tokens - which is currently impossible. A potential interim solution might be issuing a new identity on the
- * network and having them act as an inactive 'burnt-token-collector'.
+ * This flow will allow users to exchange their existing resources at a port for other resources. It is
+ * facillitated using the redeem and issue token utilities to exchange assets at a verifiable rate.
  */
 
 @InitiatingFlow(version = 1)
@@ -60,7 +59,7 @@ class TradeWithPortFlow(
         // Step 5. Generate all tokens and commands for issuance from the port
         val playerKeys = gameBoardState.players.map { it.owningKey }
         val purchased = portToBeTradedWith.getOutputOf(purchasedResource)
-        tb.addOutputState(purchased issuedBy ourIdentity heldBy ourIdentity)
+        addIssueTokens(tb, purchased issuedBy ourIdentity heldBy ourIdentity)
         tb.addCommand(TradePhaseContract.Commands.TradeWithPort(), playerKeys)
         tb.addCommand(IssueTokenCommand(purchased.token issuedBy ourIdentity), playerKeys)
 
