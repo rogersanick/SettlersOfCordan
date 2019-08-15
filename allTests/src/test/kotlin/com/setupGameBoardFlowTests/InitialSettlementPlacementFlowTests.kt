@@ -175,12 +175,12 @@ class InitialSettlementPlacementFlowTests {
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
 
         val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
-        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
+        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
         setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
 
-        assertFailsWith<FlowException>("You should be using the end turn function") { placeAPieceFromASpecificNodeAndEndTurn(0, arrayListOf(Pair(0, 5)), gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false) }
+        assertFailsWith<FlowException>("You should be using the end turn function") { placeAPieceFromASpecificNodeAndEndTurn(0, arrayListOf(Pair(0, 0)), gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false) }
 
     }
 

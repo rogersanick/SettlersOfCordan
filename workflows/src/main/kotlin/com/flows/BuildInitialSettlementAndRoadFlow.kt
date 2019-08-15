@@ -67,6 +67,9 @@ class BuildInitialSettlementAndRoadFlow(
         val turnTrackerStateAndRef = serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
         val turnTrackerState = turnTrackerStateAndRef.state.data
+        if (!gameBoardState.isValid(turnTrackerState)) {
+            throw FlowException("The turn tracker state does not point back to the GameBoardState")
+        }
 
         // Step 4. Create a new transaction builder
         val tb = TransactionBuilder(notary)
@@ -78,7 +81,11 @@ class BuildInitialSettlementAndRoadFlow(
         tb.addCommand(placeInitialSettlement)
 
         // Step 6. Create an initial settlement state
-        val settlementState = SettlementState(absoluteCorner, gameBoardState.players, ourIdentity)
+        val settlementState = SettlementState(
+                gameBoardLinearId = gameBoardState.linearId,
+                absoluteCorner = absoluteCorner,
+                players = gameBoardState.players,
+                owner = ourIdentity)
 
         // Step 7. Prepare a new Game Board State which will contain an updated mapping of where settlements
         // have been placed.
@@ -108,7 +115,11 @@ class BuildInitialSettlementAndRoadFlow(
         }
 
         // Step 10. Create the road state at the appropriate location specified by the user.
-        val roadState = RoadState(absoluteSide, gameBoardState.players, ourIdentity)
+        val roadState = RoadState(
+                gameBoardLinearId = gameBoardState.linearId,
+                absoluteSide = absoluteSide,
+                players = gameBoardState.players,
+                owner = ourIdentity)
 
         // Step 11. Update the gameBoardState hexTiles with the roads being built.
         boardBuilder.setRoadOn(absoluteSide, roadState.linearId)
@@ -155,6 +166,12 @@ class BuildInitialSettlementFlowResponder(val counterpartySession: FlowSession) 
                 val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
                         .state.data
+                if (lastTurnTrackerOnRecordStateAndRef.linearId != turnTrackerState.linearId) {
+                    throw FlowException("The TurnTracker included in the transaction is not correct for this game or turn.")
+                }
+                if (!gameBoardState.isValid(lastTurnTrackerOnRecordStateAndRef)) {
+                    throw FlowException("The turn tracker state does not point back to the GameBoardState")
+                }
 
                 // Get all of the settlements currently allocated to this player
                 val currentSettlementsBelongingToPlayer = serviceHub.vaultService

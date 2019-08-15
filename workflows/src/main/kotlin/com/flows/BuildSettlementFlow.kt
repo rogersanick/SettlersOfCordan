@@ -56,7 +56,10 @@ class BuildSettlementFlow(
 
         // Step 4. Retrieve the Turn Tracker State from the vault
         val turnTrackerStateAndRef = serviceHub.vaultService
-                .querySingleState<TurnTrackerState>(gameBoardState.linearId)
+                .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
+        if (!gameBoardState.isValid(turnTrackerStateAndRef.state.data)) {
+            throw FlowException("The turn tracker state does not point back to the GameBoardState")
+        }
         val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(turnTrackerStateAndRef)
 
         // Step 5. Create a new transaction builder
@@ -67,7 +70,11 @@ class BuildSettlementFlow(
         tb.addCommand(buildSettlement)
 
         // Step 7. Create initial settlement
-        val settlementState = SettlementState(absoluteCorner, gameBoardState.players, ourIdentity)
+        val settlementState = SettlementState(
+                gameBoardLinearId = gameBoardState.linearId,
+                absoluteCorner = absoluteCorner,
+                players = gameBoardState.players,
+                owner = ourIdentity)
 
         // Step 8. Prepare a new Game Board State
         val newBoardBuilder = gameBoardState.toBuilder()
@@ -127,6 +134,12 @@ class BuildSettlementFlowResponder(val counterpartySession: FlowSession) : FlowL
                 val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(turnTrackerState.linearId)
                         .state.data
+                if (lastTurnTrackerOnRecordStateAndRef.linearId != turnTrackerState.linearId) {
+                    throw FlowException("The TurnTracker included in the transaction is not correct for this game or turn.")
+                }
+                if (!gameBoardState.isValid(lastTurnTrackerOnRecordStateAndRef)) {
+                    throw FlowException("The turn tracker state does not point back to the GameBoardState")
+                }
 
                 if (counterpartySession.counterparty.owningKey !=
                         gameBoardState.players[lastTurnTrackerOnRecordStateAndRef.currTurnIndex].owningKey) {

@@ -6,7 +6,9 @@ import com.contractsAndStates.states.HexTileType
 import com.contractsAndStates.states.Resource
 import com.flows.SetupGameBoardFlow
 import com.flows.TradeWithPortFlow
+import com.oracleClientStatesAndContracts.states.DiceRollState
 import com.testUtilities.countAllResourcesForASpecificNode
+import com.testUtilities.getDiceRollWithSpecifiedRollValue
 import com.testUtilities.rollDiceThenGatherThenMaybeEndTurn
 import com.testUtilities.setupGameBoardForTesting
 import net.corda.core.contracts.Amount
@@ -98,15 +100,22 @@ class TradeWithPortFlowTest {
         setupGameBoardForTesting(gameBoardState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
 
         var currPlayer = 0
+        val rollTrigger = gameBoardState.hexTiles.value[0].rollTrigger!!.total
         while (!(countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0]).mutableMap.any { it.value > 1 }) || currPlayer != 0) {
-            rollDiceThenGatherThenMaybeEndTurn(gameBoardState.linearId, arrayOfAllPlayerNodesInOrder[currPlayer], network, true)
+            rollDiceThenGatherThenMaybeEndTurn(
+                    gameBoardState.linearId,
+                    arrayOfAllPlayerNodesInOrder[currPlayer],
+                    network,
+                    true,
+                    getDiceRollWithSpecifiedRollValue(rollTrigger/2, rollTrigger/2+rollTrigger%2, gameBoardState, oracle)
+            )
             currPlayer = if (currPlayer == 3) 0 else currPlayer + 1
         }
 
         val portToTradeWith = gameBoardState.ports.value[0]
         val inputResource = portToTradeWith.portTile.getInputOf(
                 gameBoardState.hexTiles.get(HexTileIndex(0)).resourceType.resourceYielded!!).token as Resource
-        val outputResource = portToTradeWith.portTile.getOutputOf(inputResource).token as Resource
+        val outputResource = portToTradeWith.portTile.outputRequired.first().token as Resource
         val playerWithPortPreTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
 
         val futureWithIssuedTrade = arrayOfAllPlayerNodesInOrder[0].startFlow(

@@ -47,9 +47,10 @@ class BuildRoadFlow(
 
         // Step 3. Retrieve roads, settlements and current longest road state
         val roadStates = serviceHub.vaultService
-                .queryBy<RoadState>().states.map { it.state.data }
+                .queryBelongsToGameBoard<RoadState>(gameBoardLinearId)
+                .map { it.state.data }
         val settlementStates = serviceHub.vaultService
-                .queryBy<SettlementState>().states.map { it.state.data }
+                .queryBelongsToGameBoard<SettlementState>(gameBoardLinearId).map { it.state.data }
         val longestRoadStateStateAndRef = serviceHub.vaultService
                 .queryBy<LongestRoadState>().states.first()
         val longestRoadState = longestRoadStateStateAndRef.state.data
@@ -57,6 +58,9 @@ class BuildRoadFlow(
         // Step 4. Retrieve the Turn Tracker State from the vault
         val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(
                 serviceHub.vaultService.querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId))
+        if (!gameBoardState.isValid(turnTrackerReferenceStateAndRef.stateAndRef.state.data)) {
+            throw FlowException("The turn tracker state does not point back to the GameBoardState")
+        }
 
         // Step 5. Create a new transaction builder
         val tb = TransactionBuilder(notary)
@@ -68,7 +72,11 @@ class BuildRoadFlow(
         tb.addCommand(buildRoadCommand)
 
         // Step 7. Create initial road state
-        val roadState = RoadState(absoluteSide, gameBoardState.players, ourIdentity)
+        val roadState = RoadState(
+                gameBoardLinearId = gameBoardState.linearId,
+                absoluteSide = absoluteSide,
+                players = gameBoardState.players,
+                owner = ourIdentity)
 
         // Step 8. Determine if the road state is extending an existing road
         val newBoardStateBuilder = gameBoardState.toBuilder()
@@ -120,6 +128,12 @@ class BuildRoadFlowResponder(val counterpartySession: FlowSession) : FlowLogic<S
 
                 val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(turnTrackerState.linearId).state.data
+                if (lastTurnTrackerOnRecordStateAndRef.linearId != turnTrackerState.linearId) {
+                    throw FlowException("The TurnTracker included in the transaction is not correct for this game or turn.")
+                }
+                if (!gameBoardState.isValid(lastTurnTrackerOnRecordStateAndRef)) {
+                    throw FlowException("The turn tracker state does not point back to the GameBoardState")
+                }
 
                 if (counterpartySession.counterparty.owningKey != gameBoardState.players[lastTurnTrackerOnRecordStateAndRef.currTurnIndex].owningKey) {
                     throw IllegalArgumentException("Only the current player may build a road.")

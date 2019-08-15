@@ -16,6 +16,10 @@ class LongestRoadContract : Contract {
 
     override fun verify(tx: LedgerTransaction) {
         val command = tx.commands.requireSingleCommand<Commands>()
+
+        // Get all states required for verification
+        val inputRoads = tx.inputsOfType<RoadState>()
+        val inputSettlements = tx.inputsOfType<SettlementState>()
         val outputLongestRoadState = tx.outputsOfType<LongestRoadState>().first()
 
         when (command.value) {
@@ -24,7 +28,7 @@ class LongestRoadContract : Contract {
                  *  ******** BUSINESS LOGIC ********
                  */
 
-                "Longest Road cannot be assigned to any player at the beggining of the game" using (
+                "Longest Road cannot be assigned to any player at the beginning of the game" using (
                         outputLongestRoadState.holder == null)
 
                 /**
@@ -39,31 +43,35 @@ class LongestRoadContract : Contract {
             }
 
             is Commands.Claim -> requireThat {
-                val longestRoadInputStates = tx.inputsOfType<LongestRoadState>().first()
-                val roadsInputStates = tx.inputsOfType<RoadState>()
-                val settlementsInputStates = tx.inputsOfType<SettlementState>()
-                val inputGameBoardState = tx.inputsOfType<GameBoardState>().single()
+
+                // Get the referenced gameboard
+                val inputBoard = tx.referenceInputsOfType<GameBoardState>().single()
+
+                val inputLongestRoads = tx.inputsOfType<LongestRoadState>().first()
 
                 /**
                  *  ******** BUSINESS LOGIC ********
                  */
+                "All roads must belong to the board" using
+                        inputRoads.all { inputBoard.linearId == it.gameBoardLinearId }
+                "All settlements must belong to the board" using
+                        inputSettlements.all { inputBoard.linearId == it.gameBoardLinearId }
 
                 val candidate = longestRoad(
-                        inputGameBoardState.hexTiles, roadsInputStates, settlementsInputStates,
-                        inputGameBoardState.players, longestRoadInputStates.holder)
+                        inputBoard.hexTiles, inputRoads, inputSettlements,
+                        inputBoard.players, inputLongestRoads.holder)
 
                 "Incorrect longest road holder." using (candidate == outputLongestRoadState.holder)
-
 
                 /**
                  *  ******** SIGNATURES ********
                  */
 
                 val signingParties = tx.commandsOfType<Commands.Claim>().single().signers.toSet()
-                val participants = outputLongestRoadState.participants.map{ it.owningKey }
+                val participants = outputLongestRoadState.participants.map { it.owningKey }
 
-                "All players must verify and sign the transaction to build a settlement." using(
-                        signingParties.containsAll<PublicKey>(participants) && signingParties.size == 4)
+                "All players must verify and sign the transaction to build a settlement." using (
+                        signingParties.containsAll(participants) && signingParties.size == 4)
             }
         }
     }

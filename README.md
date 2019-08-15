@@ -76,5 +76,31 @@ For example, to initialize between all of the nodes running locally, use the fol
 
 ##### Via IntelliJ
 
-Run the `All Tests` run configuration in Intellij by selecting the configuration from the drop down in the 
-top right of the application and then clicking the green play button.
+Use the following scripts to run the tests inside of this project:
+
+    // Run all tests
+    ./gradlew test
+
+    // Run all tests related to the oracle
+    ./gradlew test --tests com.oracleFlowTests.*
+
+    // Run all of the tests related to the issuance and use of resources
+    ./gradlew test --tests com.resourceFlowTests.*
+
+    // Run all of the tests related to setting up a game board
+    ./gradlew test --tests com.setupGameBoardFlowTests.*
+
+    // Run all of the tests related to trading amongst players
+    ./gradlew test --tests com.tradeTests.*
+
+If you would like to use intellij to debug the tests add the following flag to any of the scripts listed above:
+
+    --debug-jvm
+
+The test execution will pause after providing the message: 
+
+    Listening for transport dt_socket at address: 5005
+
+Select the `All tests remote debugging` config from the intellij test config dropdown in the top right of Intellij 
+and then click the debug button. This will attach the intellij debugger to the running gradle process and enable you
+to set breakpoints in the code.
