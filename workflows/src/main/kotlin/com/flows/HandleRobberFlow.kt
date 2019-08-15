@@ -5,6 +5,7 @@ import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.HexTileIndex
 import com.contractsAndStates.states.RobberState
 import com.contractsAndStates.states.TurnTrackerState
+import com.oracleClientStatesAndContracts.contracts.DiceRollContract
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
@@ -13,8 +14,8 @@ import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
-class TriggerRobberFlow(val gameBoardLinearId: UniqueIdentifier,
-                        val updatedRobberLocation: Int) : FlowLogic<SignedTransaction>() {
+class HandleRobberFlow(val gameBoardLinearId: UniqueIdentifier,
+                       val updatedRobberLocation: Int) : FlowLogic<SignedTransaction>() {
     override fun call(): SignedTransaction {
 
         // Step 1. Retrieve the Game Board State from the vault.
@@ -49,7 +50,8 @@ class TriggerRobberFlow(val gameBoardLinearId: UniqueIdentifier,
         val movedRobberState = robberStateAndRef.state.data.move(HexTileIndex(updatedRobberLocation))
 
         // Step 7. Create the appropriate command
-        val command = RobberContract.Commands.MoveRobber()
+        val robberCommand = RobberContract.Commands.MoveRobber()
+        val diceRollCommand = DiceRollContract.Commands.ConsumeDiceRoll()
 
         // Step 8. Create a transaction builder and add all input/output states
         val tb = TransactionBuilder(notary)
@@ -58,7 +60,8 @@ class TriggerRobberFlow(val gameBoardLinearId: UniqueIdentifier,
         tb.addOutputState(movedRobberState)
         tb.addReferenceState(gameBoardReferenceStateAndRef)
         tb.addReferenceState(turnTrackerReferenceStateAndRef)
-        tb.addCommand(command, gameBoardState.players.map { it.owningKey })
+        tb.addCommand(robberCommand, gameBoardState.players.map { it.owningKey })
+        tb.addCommand(diceRollCommand, gameBoardState.players.map { it.owningKey })
 
         // Step 9. Verify and sign the transaction
         tb.verify(serviceHub)

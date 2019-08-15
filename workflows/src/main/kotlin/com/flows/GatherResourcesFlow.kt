@@ -35,10 +35,19 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
     @Suspendable
     override fun call(): SignedTransaction {
 
+
         // Step 1. Retrieve the Game Board State from the vault.
         val gameBoardStateAndRef = serviceHub.vaultService
                 .querySingleState<GameBoardState>(gameBoardLinearId)
         val gameBoardState = gameBoardStateAndRef.state.data
+
+        // Step 1.5 Check if there is an active robber state.
+        val robberStateAndRef = serviceHub.vaultService.querySingleState<RobberState>(gameBoardState.robberLinearId)
+        val robberState = robberStateAndRef.state.data
+
+        if (robberState.active) {
+            throw FlowException("There is an active robber state. You must move the robber and invoke its consequences using ApplyRobberFlow before proceeding to the Gather Phase.")
+        }
 
         // Step 2. Get reference to the notary and oracle
         val notary = gameBoardStateAndRef.state.notary
@@ -53,6 +62,10 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         val diceRollStateAndRef = serviceHub.vaultService
                 .queryDiceRoll(gameBoardLinearId)
         val diceRollState = diceRollStateAndRef.state.data
+
+        if (diceRollState.isRobberTotal()) {
+            throw FlowException("The last active dice roll has a value of 7. You must move the robber and apply its consequences using HandleRobberFlow before continuing.")
+        }
 
         // Step 5. Create a transaction builder
         val tb = TransactionBuilder(notary = notary)

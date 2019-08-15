@@ -22,11 +22,14 @@ data class RobberState(
         override val gameBoardLinearId: UniqueIdentifier,
         val hexTileIndex: HexTileIndex,
         val players: List<Party>,
-        override val linearId: UniqueIdentifier = UniqueIdentifier()
+        override val linearId: UniqueIdentifier = UniqueIdentifier(),
+        val active: Boolean = false
 ) : LinearState, QueryableState, StatePersistable, HasGameBoardId {
     override val participants: List<AbstractParty> = players
 
-    fun move(hexTileIndex: HexTileIndex) = copy(hexTileIndex = hexTileIndex)
+    fun move(hexTileIndex: HexTileIndex) = copy(hexTileIndex = hexTileIndex, active = true)
+
+    fun deactivate() = copy(active = false)
 
     override fun generateMappedObject(schema: MappedSchema): PersistentState {
         return when (schema) {
