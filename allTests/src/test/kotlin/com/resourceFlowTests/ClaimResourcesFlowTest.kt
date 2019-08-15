@@ -2,8 +2,11 @@ package com.resourceFlowTests
 
 import com.contractsAndStates.states.GameBoardState
 import com.flows.*
+import com.oracleClientStatesAndContracts.states.DiceRollState
 import com.r3.corda.lib.tokens.contracts.AbstractTokenContract
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
+import com.testUtilities.getDiceRollWithRandomRollValue
+import com.testUtilities.getDiceRollWithSpecifiedRollValue
 import com.testUtilities.setupGameBoardForTesting
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.FlowException
@@ -73,14 +76,15 @@ class ClaimResourcesFlowTest {
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
 
         val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
-        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
+        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
         setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
 
         val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
 
-        val rollDiceFlow = RollDiceFlow(gameBoardState.linearId)
+        val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(1, 4, gameBoardState, oracle)
+        val rollDiceFlow = RollDiceFlow(gameBoardState.linearId, deterministicDiceRoll)
         val futureWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
         network.runNetwork()
         futureWithDiceRoll.getOrThrow()
@@ -122,7 +126,8 @@ class ClaimResourcesFlowTest {
 
         val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
 
-        val rollDiceFlow = RollDiceFlow(gameBoardState.linearId)
+        val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(1, 4, gameBoardState, oracle)
+        val rollDiceFlow = RollDiceFlow(gameBoardState.linearId, deterministicDiceRoll)
         val futureWithDiceRollPlayer1 = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
         network.runNetwork()
         futureWithDiceRollPlayer1.getOrThrow()
@@ -143,7 +148,7 @@ class ClaimResourcesFlowTest {
     }
 
     @Test
-    fun player1and2AreAbleToClaimTheAppropriateResourcesAfterSetup() {
+    fun players123and4AreAbleToClaimTheAppropriateResourcesAfterSetup() {
 
         // Get an identity for each of the players of the game.
         val p1 = a.info.chooseIdentity()
@@ -162,15 +167,16 @@ class ClaimResourcesFlowTest {
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
 
         val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
-        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
+        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
         setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
 
         val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
 
-        val rollDiceFlow = RollDiceFlow(gameBoardState.linearId)
-        val futureWithDiceRollPlayer1 = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
+        val randomDiceRoll1 = getDiceRollWithRandomRollValue(gameBoardState, oracle)
+        val rollDiceFlow1 = RollDiceFlow(gameBoardState.linearId, randomDiceRoll1)
+        val futureWithDiceRollPlayer1 = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow1)
         network.runNetwork()
         futureWithDiceRollPlayer1.getOrThrow()
 
@@ -187,7 +193,9 @@ class ClaimResourcesFlowTest {
         network.runNetwork()
         futureWithPlayer2Turn.getOrThrow()
 
-        val futureWithPlayer2DiceRoll = arrayOfAllPlayerNodesInOrder[1].startFlow(RollDiceFlow(gameBoardState.linearId))
+        val randomDiceRoll2 = getDiceRollWithRandomRollValue(gameBoardState, oracle)
+        val rollDiceFlow2 = RollDiceFlow(gameBoardState.linearId, randomDiceRoll2)
+        val futureWithPlayer2DiceRoll = arrayOfAllPlayerNodesInOrder[1].startFlow(rollDiceFlow2)
         network.runNetwork()
         futureWithPlayer2DiceRoll.getOrThrow()
 
@@ -204,7 +212,8 @@ class ClaimResourcesFlowTest {
         network.runNetwork()
         futureWithPlayer3Turn.getOrThrow()
 
-        val futureWithPlayer3DiceRoll = arrayOfAllPlayerNodesInOrder[2].startFlow(RollDiceFlow(gameBoardState.linearId))
+        val randomDiceRoll3 = getDiceRollWithRandomRollValue(gameBoardState, oracle)
+        val futureWithPlayer3DiceRoll = arrayOfAllPlayerNodesInOrder[2].startFlow(RollDiceFlow(gameBoardState.linearId, randomDiceRoll3))
         network.runNetwork()
         futureWithPlayer3DiceRoll.getOrThrow()
 
@@ -221,7 +230,8 @@ class ClaimResourcesFlowTest {
         network.runNetwork()
         futureWithPlayer4Turn.getOrThrow()
 
-        val futureWithPlayer4DiceRoll = arrayOfAllPlayerNodesInOrder[3].startFlow(RollDiceFlow(gameBoardState.linearId))
+        val randomDiceRoll4 = getDiceRollWithRandomRollValue(gameBoardState, oracle)
+        val futureWithPlayer4DiceRoll = arrayOfAllPlayerNodesInOrder[3].startFlow(RollDiceFlow(gameBoardState.linearId, randomDiceRoll4))
         network.runNetwork()
         futureWithPlayer4DiceRoll.getOrThrow()
 

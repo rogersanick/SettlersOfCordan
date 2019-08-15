@@ -26,7 +26,7 @@ import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
 @StartableByRPC
-class RollDiceFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<SignedTransaction>() {
+class RollDiceFlow(val gameBoardLinearId: UniqueIdentifier, val diceRollState: DiceRollState? = null) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
 
@@ -46,7 +46,8 @@ class RollDiceFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<SignedTr
         val oracleLegalName = CordaX500Name("Oracle", "New York", "US")
         val oracle = serviceHub.networkMapCache.getNodeByLegalName(oracleLegalName)!!.legalIdentities.single()
 
-        val diceRoll = subFlow(GetRandomDiceRollValues(turnTrackerStateLinearId, gameBoardState.linearId, gameBoardState.players, oracle))
+        val diceRoll = diceRollState ?: subFlow(GetRandomDiceRollValues(turnTrackerStateLinearId, gameBoardState.linearId, gameBoardState.players, oracle))
+
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
         val tb = TransactionBuilder(notary)
 

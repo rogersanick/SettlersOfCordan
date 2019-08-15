@@ -5,6 +5,7 @@ import com.contractsAndStates.states.TradeState
 import com.flows.*
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.testUtilities.countAllResourcesForASpecificNode
+import com.testUtilities.getDiceRollWithRandomRollValue
 import com.testUtilities.setupGameBoardForTesting
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.requireThat
@@ -81,7 +82,7 @@ class TradeFlowTests {
 
         val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
 
-        val rollDiceFlow = RollDiceFlow(gameBoardState.linearId)
+        val rollDiceFlow = RollDiceFlow(gameBoardState.linearId, getDiceRollWithRandomRollValue(gameBoardState, oracle))
         val futureWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
         network.runNetwork()
         futureWithDiceRoll.getOrThrow()
@@ -143,7 +144,7 @@ class TradeFlowTests {
 
         val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
 
-        val rollDiceFlow = RollDiceFlow(gameBoardState.linearId)
+        val rollDiceFlow = RollDiceFlow(gameBoardState.linearId, getDiceRollWithRandomRollValue(gameBoardState, oracle))
         val futureWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
         network.runNetwork()
         futureWithDiceRoll.getOrThrow()

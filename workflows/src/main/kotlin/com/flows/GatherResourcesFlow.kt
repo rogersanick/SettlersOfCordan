@@ -44,7 +44,6 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         val notary = gameBoardStateAndRef.state.notary
 
         // Step 3. Retrieve the Turn Tracker State from the vault
-        // TODO how do we prevent players issuing themselves resources twice by calling this flow once more?
         val turnTrackerStateAndRef = serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
         if (!gameBoardState.isValid(turnTrackerStateAndRef.state.data)) {
@@ -113,9 +112,8 @@ open class GatherResourcesFlowResponder(val counterpartySession: FlowSession) : 
                 val listOfTokensThatShouldHaveBeenIssued = serviceHub.vaultService
                         .getTokensToIssue(gameBoardState, diceRollState.getRollTrigger())
 
-                if ((listOfTokensThatShouldHaveBeenIssued.any {
-                            listOfTokensIssued.indexOf(it) < 0
-                        } || listOfTokensIssued.size != listOfTokensThatShouldHaveBeenIssued.size)) {
+                if (!listOfTokensThatShouldHaveBeenIssued.containsAll(listOfTokensIssued)
+                                || listOfTokensIssued.size != listOfTokensThatShouldHaveBeenIssued.size) {
                     throw FlowException("The correct number of resources must be produced for each respective party")
                 }
             }
