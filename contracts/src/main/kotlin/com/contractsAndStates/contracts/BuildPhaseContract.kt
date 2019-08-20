@@ -1,7 +1,6 @@
 package com.contractsAndStates.contracts
 
 import com.contractsAndStates.states.*
-import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
@@ -31,8 +30,8 @@ class BuildPhaseContract : Contract {
         val inputSettlements = tx.inputsOfType<SettlementState>()
         val outputSettlements = tx.outputsOfType<SettlementState>()
         val outputRoads = tx.outputsOfType<RoadState>()
-        val inputResources = tx.inputsOfType<FungibleToken>()
-        val outputResources = tx.outputsOfType<FungibleToken>()
+        val inputResources = tx.inputsOfType<GameCurrencyState>()
+        val outputResources = tx.outputsOfType<GameCurrencyState>()
 
         /**
          *  ******** SHAPE ********
@@ -109,7 +108,7 @@ class BuildPhaseContract : Contract {
                             .mapValues { it.value.sum() }
 
                     val tokenAmountsToBeIssued = consolidatedResources.map {
-                        it.value of it.key issuedBy currentPlayer heldBy currentPlayer
+                        it.value of it.key issuedBy currentPlayer heldBy currentPlayer forGameBoard inputBoard.linearId
                     }
 
                     "The player should be issuing itself resources of the appropriate amount and type" using
@@ -270,7 +269,7 @@ class BuildPhaseContract : Contract {
     fun GameBoardState.getItAndOppositeSides(onSide: AbsoluteSide) =
             listOfNotNull(onSide, getOpposite(onSide))
 
-    fun verifyPaymentIsEnough(buildableCosts: Map<TokenType, Long>, outputResources: List<FungibleToken>, what: String) =
+    fun verifyPaymentIsEnough(buildableCosts: Map<TokenType, Long>, outputResources: List<GameCurrencyState>, what: String) =
             verifyPaymentIsEnough(
                     buildableCosts,
                     outputResources.extractTokenAmounts(buildableCosts.keys),
@@ -286,7 +285,7 @@ class BuildPhaseContract : Contract {
                 }
             }
 
-    fun List<FungibleToken>.extractTokenAmounts(types: Iterable<TokenType>) = types
+    fun List<GameCurrencyState>.extractTokenAmounts(types: Iterable<TokenType>) = types
             .map { type ->
                 type to filter { it.amount.token.tokenType == type }
                         .sumByLong { it.amount.quantity }

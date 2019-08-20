@@ -1,9 +1,20 @@
 package com.contractsAndStates.states
 
+import com.contractsAndStates.contracts.GameCurrencyContract
+import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.of
+import net.corda.core.contracts.BelongsToContract
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.serialization.CordaSerializable
 import java.math.BigDecimal
+
+@CordaSerializable
+@BelongsToContract(GameCurrencyContract::class)
+data class GameCurrencyState(val fungibleToken: FungibleToken,
+                             val gameBoardId: UniqueIdentifier): FungibleToken(fungibleToken.amount, fungibleToken.holder)
+
+infix fun FungibleToken.forGameBoard(gameBoardId: UniqueIdentifier): GameCurrencyState = GameCurrencyState(this, gameBoardId)
 
 val Brick = Resource.getInstance("BRICK")
 val Ore = Resource.getInstance("ORE")

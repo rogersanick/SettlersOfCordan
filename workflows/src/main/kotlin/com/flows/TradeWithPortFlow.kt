@@ -7,6 +7,8 @@ import com.r3.corda.lib.tokens.contracts.commands.IssueTokenCommand
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
 import com.r3.corda.lib.tokens.workflows.flows.issue.addIssueTokens
+import com.r3.corda.lib.tokens.workflows.utilities.heldBy
+import net.corda.core.contracts.FungibleState
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.contracts.requireThat
@@ -59,7 +61,7 @@ class TradeWithPortFlow(
         // Step 5. Generate all tokens and commands for issuance from the port
         val playerKeys = gameBoardState.players.map { it.owningKey }
         val purchased = portToBeTradedWith.getOutputOf(purchasedResource)
-        addIssueTokens(tb, purchased issuedBy ourIdentity heldBy ourIdentity)
+        addIssueTokens(tb, purchased issuedBy ourIdentity heldBy ourIdentity forGameBoard gameBoardLinearId)
         tb.addCommand(TradePhaseContract.Commands.TradeWithPort(), playerKeys)
         tb.addCommand(IssueTokenCommand(purchased.token issuedBy ourIdentity), playerKeys)
 

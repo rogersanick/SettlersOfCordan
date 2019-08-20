@@ -109,10 +109,13 @@ open class GatherResourcesFlowResponder(val counterpartySession: FlowSession) : 
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
-                val listOfTokensIssued = stx.coreTransaction.outputsOfType<FungibleState<*>>().toMutableList()
+                c
                 val gameBoardState = serviceHub.vaultService
                         .querySingleState<GameBoardState>(stx.references)
                         .state.data
+                if (listOfTokensIssued.any { (it as GameCurrencyState).gameBoardId != gameBoardState.linearId }) {
+                    throw FlowException("Game currency is being generated for a game board that is not referenced. No Cheating pls.")
+                }
                 val turnTrackerState = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
                         .state.data
@@ -158,10 +161,5 @@ internal fun VaultService.getTokensToIssue(gameBoardState: GameBoardState, rollT
         .toMultiMap()
         .mapValues { it.value.sum() }
         .map { entry ->
-            entry.value of entry.key.second issuedBy entry.key.first heldBy entry.key.first
+            entry.value of entry.key.second issuedBy entry.key.first heldBy entry.key.first forGameBoard gameBoardState.linearId
         }
-
-data class GameCurrencyToClaim(
-        val resourceType: HexTileType,
-        val ownerIndex: Int
-)

@@ -1,8 +1,8 @@
 package com.contractsAndStates.contracts
 
 import com.contractsAndStates.states.GameBoardState
+import com.contractsAndStates.states.GameCurrencyState
 import com.oracleClientStatesAndContracts.states.DiceRollState
-import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
 import net.corda.core.contracts.requireSingleCommand
@@ -41,8 +41,8 @@ class GatherPhaseContract : Contract {
                  *  ******** SHAPE ********
                  */
                 "There are no inputs to this transaction" using (tx.inputs.isEmpty())
-                "All of the outputs of this transaction are of the FungibleTokenType" using
-                        (tx.outputs.all { it.data is FungibleToken })
+                "All of the outputs of this transaction are of type GameCurrencyState" using
+                        (tx.outputs.all { it.data is GameCurrencyState })
 
                 /**
                  *  ******** BUSINESS LOGIC ********

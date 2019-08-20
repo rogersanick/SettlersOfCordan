@@ -108,7 +108,7 @@ class BuildInitialSettlementAndRoadFlow(
                     .map { it.resourceType.resourceYielded!! to settlementState.resourceAmountClaim.toLong() }
                     .toMultiMap()
                     .mapValues { it.value.sum() }
-                    .map { it.value of it.key issuedBy ourIdentity heldBy ourIdentity }
+                    .map { it.value of it.key issuedBy ourIdentity heldBy ourIdentity forGameBoard gameBoardLinearId }
 
             addIssueTokens(tb, issuedTokens)
             addTokenTypeJar(issuedTokens, tb)
