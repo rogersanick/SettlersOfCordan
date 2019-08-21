@@ -68,7 +68,7 @@ class BuildRoadFlow(
         // Step 6. Create new commands for placing a settlement and ending a turn. Add both to the transaction.
         val buildRoadCommand = Command(
                 BuildPhaseContract.Commands.BuildRoad(),
-                gameBoardState.players.map { it.owningKey })
+                gameBoardState.playerKeys())
         tb.addCommand(buildRoadCommand)
 
         // Step 7. Create initial road state

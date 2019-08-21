@@ -48,7 +48,7 @@ class EndTurnFlow(val gameBoardStateLinearId: UniqueIdentifier) : FlowLogic<Sign
         // Step 5. Create a new command for ending our turns
         val endTurnCommand = Command(
                 TurnTrackerContract.Commands.EndTurn(),
-                gameBoardState.players.map { it.owningKey })
+                gameBoardState.playerKeys())
         tb.addCommand(endTurnCommand)
 
         // Step 6. Add the old turn tracker state as an input.

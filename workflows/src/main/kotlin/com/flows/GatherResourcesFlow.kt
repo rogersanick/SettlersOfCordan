@@ -4,12 +4,10 @@ import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.GatherPhaseContract
 import com.contractsAndStates.states.*
 import com.oracleClientStatesAndContracts.contracts.DiceRollContract
-import com.oracleClientStatesAndContracts.states.DiceRollState
 import com.oracleClientStatesAndContracts.states.RollTrigger
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
 import com.r3.corda.lib.tokens.contracts.utilities.of
-import com.r3.corda.lib.tokens.workflows.flows.issue.addIssueTokens
 import com.r3.corda.lib.tokens.workflows.utilities.addTokenTypeJar
 import net.corda.core.contracts.FungibleState
 import net.corda.core.contracts.ReferencedStateAndRef
@@ -80,7 +78,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
 
         // Step 7. Add commands to issue the appropriate types of resources. Convert the gameCurrencyToClaim to a set
         // to prevent duplicate commands.
-        addIssueTokens(tb, tokensToIssue)
+        addIssueTokens(tb, tokensToIssue, gameBoardState.playerKeys())
         addTokenTypeJar(tokensToIssue, tb)
 
         // Step 8. Add reference states for turn tracker and game board. Add the dice roll as an input
@@ -90,7 +88,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         tb.addReferenceState(ReferencedStateAndRef(turnTrackerStateAndRef))
 
         // Step 9. Add the gather resources command and verify the transaction
-        val commandSigners = gameBoardState.players.map { it.owningKey }
+        val commandSigners = gameBoardState.playerKeys()
         tb.addCommand(GatherPhaseContract.Commands.IssueResourcesToAllPlayers(), commandSigners)
         tb.addCommand(DiceRollContract.Commands.ConsumeDiceRoll(), commandSigners)
         tb.verify(serviceHub)
@@ -109,7 +107,7 @@ open class GatherResourcesFlowResponder(val counterpartySession: FlowSession) : 
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
-                c
+                val listOfTokensIssued = stx.coreTransaction.outputsOfType<FungibleState<*>>().toMutableList()
                 val gameBoardState = serviceHub.vaultService
                         .querySingleState<GameBoardState>(stx.references)
                         .state.data

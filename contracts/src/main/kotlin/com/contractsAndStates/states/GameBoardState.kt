@@ -68,6 +68,8 @@ data class GameBoardState @ConstructorForDeserialization constructor(
             winner = winner,
             beginner = beginner)
 
+    fun playerKeys() = players.map { it.owningKey }
+
     class Builder(
             val linearId: UniqueIdentifier = UniqueIdentifier(),
             val hexTiles: PlacedHexTiles.Builder,

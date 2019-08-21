@@ -50,7 +50,7 @@ class EndTurnDuringInitialPlacementFlow(val gameBoardStateLinearId: UniqueIdenti
         // Step 5. Create a new command for ending our turns
         val endTurnCommand = Command(
                 TurnTrackerContract.Commands.EndTurnDuringInitialPlacementPhase(),
-                gameBoardState.players.map { it.owningKey })
+                gameBoardState.playerKeys())
         tb.addCommand(endTurnCommand)
 
         // Step 6. Add the old turn tracker state as an input.

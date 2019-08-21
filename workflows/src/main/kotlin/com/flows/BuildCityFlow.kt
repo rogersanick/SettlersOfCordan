@@ -50,7 +50,7 @@ class BuildCityFlow(
         // Step 5. Create new commands for placing a settlement and ending a turn. Add both to the transaction.
         val buildCity = Command(
                 BuildPhaseContract.Commands.BuildCity(),
-                gameBoardState.players.map { it.owningKey })
+                gameBoardState.playerKeys())
         tb.addCommand(buildCity)
 
         // Step 6. Create city settlement

@@ -4,6 +4,9 @@ import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.states.BelongsToGameBoard
 import com.contractsAndStates.states.HasGameBoardId
 import com.oracleClientStatesAndContracts.states.DiceRollState
+import com.r3.corda.lib.tokens.contracts.commands.IssueTokenCommand
+import com.r3.corda.lib.tokens.contracts.states.AbstractToken
+import com.r3.corda.lib.tokens.contracts.types.IssuedTokenType
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.of
 import com.r3.corda.lib.tokens.workflows.flows.redeem.addFungibleTokensToRedeem
@@ -20,6 +23,7 @@ import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.node.services.vault.builder
 import net.corda.core.transactions.TransactionBuilder
+import java.security.PublicKey
 
 /**
  * When a player spends resources in-game, those resources are consumed as inputs to a transaction. The generateInGameSpend
@@ -52,6 +56,24 @@ fun generateInGameSpend(
 
     // Return the mutated transaction builder
     return tb
+}
+
+@Suspendable
+fun addIssueTokens(transactionBuilder: TransactionBuilder, outputs: List<AbstractToken>, additionalSigners: Collection<PublicKey>): TransactionBuilder {
+    val outputGroups: Map<IssuedTokenType, List<AbstractToken>> = outputs.groupBy { it.issuedTokenType }
+    return transactionBuilder.apply {
+        outputGroups.forEach { (issuedTokenType: IssuedTokenType, states: List<AbstractToken>) ->
+            val issuers = states.map { it.issuer }.toSet()
+            require(issuers.size == 1) { "All tokensToIssue must have the same issuer." }
+            val issuer = issuers.single()
+            var startingIndex = outputStates().size
+            val indexesAdded = states.map { state ->
+                addOutputState(state)
+                startingIndex++
+            }
+            addCommand(IssueTokenCommand(issuedTokenType, indexesAdded), additionalSigners + issuer.owningKey)
+        }
+    }
 }
 
 inline fun <reified T : ContractState> VaultService.querySingleState(linearId: UniqueIdentifier) =

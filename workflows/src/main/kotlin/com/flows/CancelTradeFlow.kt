@@ -45,7 +45,7 @@ class CancelTradeFlow(val tradeStateLinearId: UniqueIdentifier) : FlowLogic<Sign
         tb.addInputState(tradeStateAndRef)
 
         // Step 5. Add the gather resources command and verify the transaction
-        val commandSigners = gameBoardState.players.map { it.owningKey }
+        val commandSigners = gameBoardState.playerKeys()
         tb.addCommand(TradePhaseContract.Commands.CancelTrade(), commandSigners)
         tb.verify(serviceHub)
 

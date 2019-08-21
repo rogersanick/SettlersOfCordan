@@ -7,7 +7,6 @@ import com.contractsAndStates.states.*
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
 import com.r3.corda.lib.tokens.contracts.utilities.of
-import com.r3.corda.lib.tokens.workflows.flows.issue.addIssueTokens
 import com.r3.corda.lib.tokens.workflows.utilities.addTokenTypeJar
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef
@@ -77,7 +76,7 @@ class BuildInitialSettlementAndRoadFlow(
         // Step 5. Create new commands for placing a settlement. Add both to the transaction.
         val placeInitialSettlement = Command(
                 BuildPhaseContract.Commands.BuildInitialSettlementAndRoad(),
-                gameBoardState.players.map { it.owningKey })
+                gameBoardState.playerKeys())
         tb.addCommand(placeInitialSettlement)
 
         // Step 6. Create an initial settlement state
@@ -110,7 +109,7 @@ class BuildInitialSettlementAndRoadFlow(
                     .mapValues { it.value.sum() }
                     .map { it.value of it.key issuedBy ourIdentity heldBy ourIdentity forGameBoard gameBoardLinearId }
 
-            addIssueTokens(tb, issuedTokens)
+            addIssueTokens(tb, issuedTokens, gameBoardState.playerKeys() - ourIdentity.owningKey)
             addTokenTypeJar(issuedTokens, tb)
         }
 
@@ -133,7 +132,7 @@ class BuildInitialSettlementAndRoadFlow(
         tb.addOutputState(settlementState, BuildPhaseContract.ID)
         tb.addOutputState(roadState, BuildPhaseContract.ID)
         tb.addOutputState(updatedOutputGameBoardState)
-        tb.addCommand(GameStateContract.Commands.UpdateWithSettlement(), gameBoardState.players.map { it.owningKey })
+        tb.addCommand(GameStateContract.Commands.UpdateWithSettlement(), gameBoardState.playerKeys())
 
         // Step 14. Sign initial transaction
         tb.verify(serviceHub)

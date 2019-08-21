@@ -53,7 +53,7 @@ class RollDiceFlow(val gameBoardLinearId: UniqueIdentifier, val diceRollState: D
 
         tb.addOutputState(DiceRollState(diceRoll))
         tb.addReferenceState(gameBoardReferenceStateAndRef)
-        tb.addCommand(DiceRollContract.Commands.RollDice(), gameBoardState.players.map { it.owningKey })
+        tb.addCommand(DiceRollContract.Commands.RollDice(), gameBoardState.playerKeys())
 
         tb.verify(serviceHub)
         val ptx = serviceHub.signInitialTransaction(tb)

@@ -61,7 +61,7 @@ class IssueTradeFlow(
         tb.addOutputState(tradeState)
 
         // Step 6. Add the gather resources command and verify the transaction
-        val commandSigners = gameBoardState.players.map { it.owningKey }
+        val commandSigners = gameBoardState.playerKeys()
         tb.addCommand(TradePhaseContract.Commands.IssueTrade(), commandSigners)
         tb.verify(serviceHub)
 

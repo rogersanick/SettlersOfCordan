@@ -60,8 +60,8 @@ class HandleRobberFlow(val gameBoardLinearId: UniqueIdentifier,
         tb.addOutputState(movedRobberState)
         tb.addReferenceState(gameBoardReferenceStateAndRef)
         tb.addReferenceState(turnTrackerReferenceStateAndRef)
-        tb.addCommand(robberCommand, gameBoardState.players.map { it.owningKey })
-        tb.addCommand(diceRollCommand, gameBoardState.players.map { it.owningKey })
+        tb.addCommand(robberCommand, gameBoardState.playerKeys())
+        tb.addCommand(diceRollCommand, gameBoardState.playerKeys())
 
         // Step 9. Verify and sign the transaction
         tb.verify(serviceHub)

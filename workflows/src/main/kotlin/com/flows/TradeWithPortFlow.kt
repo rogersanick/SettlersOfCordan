@@ -6,8 +6,6 @@ import com.contractsAndStates.states.*
 import com.r3.corda.lib.tokens.contracts.commands.IssueTokenCommand
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
-import com.r3.corda.lib.tokens.workflows.flows.issue.addIssueTokens
-import com.r3.corda.lib.tokens.workflows.utilities.heldBy
 import net.corda.core.contracts.FungibleState
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -18,7 +16,7 @@ import net.corda.core.transactions.TransactionBuilder
 
 /**
  * This flow will allow users to exchange their existing resources at a port for other resources. It is
- * facillitated using the redeem and issue token utilities to exchange assets at a verifiable rate.
+ * facilitated using the redeem and issue token utilities to exchange assets at a verifiable rate.
  */
 
 @InitiatingFlow(version = 1)
@@ -59,9 +57,9 @@ class TradeWithPortFlow(
         generateInGameSpend(serviceHub, tb, mapOf(sold.token to sold.quantity), ourIdentity)
 
         // Step 5. Generate all tokens and commands for issuance from the port
-        val playerKeys = gameBoardState.players.map { it.owningKey }
+        val playerKeys = gameBoardState.playerKeys()
         val purchased = portToBeTradedWith.getOutputOf(purchasedResource)
-        addIssueTokens(tb, purchased issuedBy ourIdentity heldBy ourIdentity forGameBoard gameBoardLinearId)
+        addIssueTokens(tb, arrayListOf(purchased issuedBy ourIdentity heldBy ourIdentity forGameBoard gameBoardLinearId), gameBoardState.playerKeys() - ourIdentity.owningKey )
         tb.addCommand(TradePhaseContract.Commands.TradeWithPort(), playerKeys)
         tb.addCommand(IssueTokenCommand(purchased.token issuedBy ourIdentity), playerKeys)
 
@@ -86,11 +84,14 @@ open class TradeWithPortFlowResponder(val counterpartySession: FlowSession) : Fl
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
+                val listOfTokensIssued = stx.coreTransaction.outputsOfType<FungibleState<*>>().toMutableList()
                 val gameBoardStateRef = stx.coreTransaction.references.single()
                 val gameBoardState = serviceHub.vaultService
                         .querySingleState<GameBoardState>(gameBoardStateRef)
                         .state.data
-
+                if (listOfTokensIssued.any { (it as GameCurrencyState).gameBoardId != gameBoardState.linearId }) {
+                    throw FlowException("Game currency is being generated for a game board that is not referenced. No Cheating pls.")
+                }
                 val turnTrackerState = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
                         .state.data

@@ -66,7 +66,7 @@ class BuildSettlementFlow(
         val tb = TransactionBuilder(notary)
 
         // Step 6. Create new commands for placing a settlement and ending a turn. Add both to the transaction.
-        val buildSettlement = Command(BuildPhaseContract.Commands.BuildSettlement(), gameBoardState.players.map { it.owningKey })
+        val buildSettlement = Command(BuildPhaseContract.Commands.BuildSettlement(), gameBoardState.playerKeys())
         tb.addCommand(buildSettlement)
 
         // Step 7. Create initial settlement
@@ -99,7 +99,7 @@ class BuildSettlementFlow(
         tb.addReferenceState(turnTrackerReferenceStateAndRef)
         tb.addOutputState(settlementState, BuildPhaseContract.ID)
         tb.addOutputState(newBoardBuilder.build())
-        tb.addCommand(GameStateContract.Commands.UpdateWithSettlement(), gameBoardState.players.map { it.owningKey })
+        tb.addCommand(GameStateContract.Commands.UpdateWithSettlement(), gameBoardState.playerKeys())
         if (outputLongestRoadState.holder != longestRoadState.holder) {
             tb.addInputState(longestRoadStateStateAndRef)
             tb.addOutputState(outputLongestRoadState, LongestRoadContract.ID)
