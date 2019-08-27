@@ -22,7 +22,6 @@ class GameCurrencyContract: AbstractTokenContract<GameCurrencyState>(), Contract
     }
 
     override fun verifyIssue(issueCommand: CommandWithParties<TokenCommand>, inputs: List<IndexedState<GameCurrencyState>>, outputs: List<IndexedState<GameCurrencyState>>, attachments: List<Attachment>) {
-
         // This code is a replication of the FungibleTokenContract verifyIssue function with one small change. In this case, currency must be issued
         val issuedToken: IssuedTokenType = issueCommand.value.token
         require(inputs.isEmpty()) { "When issuing tokens, there cannot be any input states." }
@@ -35,10 +34,6 @@ class GameCurrencyContract: AbstractTokenContract<GameCurrencyState>(), Contract
             }
             val hasZeroAmounts = any { it.state.data.amount == Amount.zero(issuedToken) }
             require(hasZeroAmounts.not()) { "You cannot issue tokens with a zero amount." }
-            // There can only be one issuer per group as the issuer is part of the token which is used to group states.
-            // If there are multiple issuers for the same tokens then there will be a group for each issued token. So,
-            // the line below should never fail on single().
-            val issuer: Party = this.map { it.state.data }.map(AbstractToken::issuer).toSet().single()
         }
 
         requireThat {

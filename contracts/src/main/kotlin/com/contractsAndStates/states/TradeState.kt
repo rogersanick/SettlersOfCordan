@@ -73,7 +73,8 @@ class InformationForAcceptor(
         val outputStates: List<TransactionState<*>>,
         val commands: List<Command<*>>,
         val attachments: List<SecureHash>,
-        val gameBoardLinearId: UniqueIdentifier
+        val gameBoardLinearId: UniqueIdentifier,
+        val tradeStateLinearId: UniqueIdentifier
 )
 
 object TradeSchema

@@ -2,10 +2,8 @@ package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.GameCurrencyContract
-import com.contractsAndStates.states.ExtendedDealState
-import com.contractsAndStates.states.GameCurrencyState
-import com.contractsAndStates.states.InformationForAcceptor
-import com.contractsAndStates.states.TradeState
+import com.contractsAndStates.contracts.TradePhaseContract
+import com.contractsAndStates.states.*
 import com.r3.corda.lib.tokens.contracts.commands.MoveTokenCommand
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.r3.corda.lib.tokens.workflows.flows.issue.IssueTokensFlow
@@ -103,7 +101,8 @@ class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier) : FlowL
                                 tb.outputStates(),
                                 tb.commands(),
                                 tb.attachments(),
-                                tradeState.gameBoardLinearId
+                                tradeState.gameBoardLinearId,
+                                tradeStateLinearId
                         ))),
                 progressTracker.getChildProgressTracker(DEALING)!!
         )
@@ -121,11 +120,17 @@ class ExecuteTradeFlowResponder(otherSideSession: FlowSession) : TwoPartyDealFlo
         val handShakeToAssembleSharedTX = handshake.payload.dealBeingOffered as ExtendedDealState
         val gameBoardLinearId = handShakeToAssembleSharedTX.gameBoardLinearId
 
-        // Retrieve the counterParty input and outputs states
+        // Retrieve the counterParty input states, outputs states and other relevant data
         val counterPartyGameCurrencyInputs = handShakeToAssembleSharedTX.informationForAcceptor!!.inputStates.stream().collect(Collectors.toList())
         val counterPartyGameCurrencyOutputs = handShakeToAssembleSharedTX.informationForAcceptor!!.outputStates.stream().collect(Collectors.toList()).map { it.data as GameCurrencyState }
         val counterPartyAttachments = handShakeToAssembleSharedTX.informationForAcceptor!!.attachments.stream().collect(Collectors.toList())
         val counterPartyCommands = handShakeToAssembleSharedTX.informationForAcceptor!!.commands.stream().collect(Collectors.toList())
+        val counterPartyGameBoardLinearId = handShakeToAssembleSharedTX.informationForAcceptor!!.gameBoardLinearId
+        val counterPartyTradeStateLinearId = handShakeToAssembleSharedTX.informationForAcceptor!!.tradeStateLinearId
+
+        // query our vault to get the appropriate states to reference
+        val tradeState = serviceHub.vaultService.querySingleState<TradeState>(counterPartyTradeStateLinearId)
+        val gameBoardState = serviceHub.vaultService.querySingleState<GameBoardState>(counterPartyGameBoardLinearId)
 
         // Use the counter-party input states and commands when initialising a new transaction builder
         val tb = TransactionBuilder(
@@ -145,6 +150,10 @@ class ExecuteTradeFlowResponder(otherSideSession: FlowSession) : TwoPartyDealFlo
                 gameBoardLinearId)
         addMoveTokens(tb, inputGameCurrency, outputGameCurrency)
         addTokenTypeJar(tb.outputStates().filterIsInstance<TransactionState<GameCurrencyState>>().map { it.data }, tb)
+
+//        // Add the trade state to the transaction.
+//        tb.addInputState(tradeState)
+//        tb.addCommand(TradePhaseContract.Commands.ExecuteTrade(), gameBoardState.state.data.playerKeys())
 
         // Use the generateAgreement method on the ExtendedDealState class to add the appropriate commands to the transaction.
         val ptx = handShakeToAssembleSharedTX.generateAgreement(tb)
