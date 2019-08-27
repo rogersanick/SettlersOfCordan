@@ -3,6 +3,7 @@ package com.contractsAndStates.states
 import com.contractsAndStates.contracts.TradePhaseContract
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.*
+import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
 import net.corda.core.schemas.MappedSchema
@@ -68,9 +69,11 @@ interface ExtendedDealState : DealState, QueryableState, StatePersistable, HasGa
 
 @CordaSerializable
 class InformationForAcceptor(
-        val inputStates: List<StateRef>,
+        val inputStates: List<StateAndRef<*>>,
         val outputStates: List<TransactionState<*>>,
-        val commands: List<Command<*>>
+        val commands: List<Command<*>>,
+        val attachments: List<SecureHash>,
+        val gameBoardLinearId: UniqueIdentifier
 )
 
 object TradeSchema

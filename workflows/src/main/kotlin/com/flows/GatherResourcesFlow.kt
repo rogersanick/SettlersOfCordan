@@ -8,6 +8,8 @@ import com.oracleClientStatesAndContracts.states.RollTrigger
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
 import com.r3.corda.lib.tokens.contracts.utilities.of
+import com.r3.corda.lib.tokens.workflows.internal.flows.distribution.UpdateDistributionListFlow
+import com.r3.corda.lib.tokens.workflows.internal.flows.distribution.updateDistributionList
 import com.r3.corda.lib.tokens.workflows.utilities.addTokenTypeJar
 import net.corda.core.contracts.FungibleState
 import net.corda.core.contracts.ReferencedStateAndRef
@@ -97,6 +99,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         val ptx = serviceHub.signInitialTransaction(tb)
         val sessions = (gameBoardState.players - ourIdentity).toSet().map { initiateFlow(it) }
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
+
         return subFlow(FinalityFlow(stx, sessions))
     }
 }

@@ -11,6 +11,7 @@ import com.r3.corda.lib.tokens.contracts.utilities.sumTokenStatesOrZero
 import net.corda.core.contracts.*
 import net.corda.core.identity.Party
 import net.corda.core.internal.uncheckedCast
+import net.corda.core.transactions.LedgerTransaction
 
 class GameCurrencyContract: AbstractTokenContract<GameCurrencyState>(), Contract {
 

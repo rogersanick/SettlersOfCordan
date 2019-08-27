@@ -1,21 +1,23 @@
 package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import com.contractsAndStates.contracts.GameCurrencyContract
 import com.contractsAndStates.states.BelongsToGameBoard
+import com.contractsAndStates.states.GameCurrencyState
 import com.contractsAndStates.states.HasGameBoardId
 import com.oracleClientStatesAndContracts.states.DiceRollState
 import com.r3.corda.lib.tokens.contracts.commands.IssueTokenCommand
 import com.r3.corda.lib.tokens.contracts.states.AbstractToken
+import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.r3.corda.lib.tokens.contracts.types.IssuedTokenType
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.of
 import com.r3.corda.lib.tokens.workflows.flows.redeem.addFungibleTokensToRedeem
 import com.r3.corda.lib.tokens.workflows.internal.selection.TokenSelection
-import net.corda.core.contracts.ContractState
-import net.corda.core.contracts.StateAndRef
-import net.corda.core.contracts.StateRef
-import net.corda.core.contracts.UniqueIdentifier
+import com.r3.corda.lib.tokens.workflows.types.PartyAndAmount
+import net.corda.core.contracts.*
 import net.corda.core.flows.FlowException
+import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
 import net.corda.core.node.ServiceHub
 import net.corda.core.node.services.VaultService
@@ -24,6 +26,7 @@ import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.node.services.vault.builder
 import net.corda.core.transactions.TransactionBuilder
 import java.security.PublicKey
+import java.util.*
 
 /**
  * When a player spends resources in-game, those resources are consumed as inputs to a transaction. The generateInGameSpend
@@ -125,3 +128,19 @@ fun VaultService.queryDiceRoll(gameBoardLinearId: UniqueIdentifier) =
                     }
                 }
                 .single()
+
+@Suspendable
+@JvmOverloads
+inline fun <reified T: FungibleToken> TokenSelection.generateMoveGameCurrency(
+        lockId: UUID,
+        partyAndAmounts: List<PartyAndAmount<TokenType>>,
+        changeHolder: AbstractParty,
+        gameBoardLinearId: UniqueIdentifier,
+        queryCriteria: QueryCriteria? = null): Pair<List<StateAndRef<T>>, List<T>> {
+    val fungibleTokens = this.generateMove(lockId, partyAndAmounts, changeHolder, queryCriteria)
+    val listStateAndRefGameCurrency = fungibleTokens.first.map {
+        it as StateAndRef<T>
+    }
+    val listOfGameCurrency = fungibleTokens.second.map { GameCurrencyState(it, gameBoardLinearId) as T }
+    return Pair(listStateAndRefGameCurrency, listOfGameCurrency)
+}

@@ -1,11 +1,22 @@
 package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import com.contractsAndStates.contracts.GameCurrencyContract
 import com.contractsAndStates.states.ExtendedDealState
+import com.contractsAndStates.states.GameCurrencyState
 import com.contractsAndStates.states.InformationForAcceptor
 import com.contractsAndStates.states.TradeState
+import com.r3.corda.lib.tokens.contracts.commands.MoveTokenCommand
+import com.r3.corda.lib.tokens.contracts.states.FungibleToken
+import com.r3.corda.lib.tokens.workflows.flows.issue.IssueTokensFlow
 import com.r3.corda.lib.tokens.workflows.flows.move.addMoveFungibleTokens
+import com.r3.corda.lib.tokens.workflows.flows.move.addMoveTokens
+import com.r3.corda.lib.tokens.workflows.internal.selection.TokenSelection
 import com.r3.corda.lib.tokens.workflows.types.PartyAndAmount
+import com.r3.corda.lib.tokens.workflows.utilities.addPartyToDistributionList
+import com.r3.corda.lib.tokens.workflows.utilities.addTokenTypeJar
+import net.corda.core.contracts.StateAndRef
+import net.corda.core.contracts.TransactionState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.TransactionSignature
 import net.corda.core.flows.*
@@ -63,7 +74,14 @@ class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier) : FlowL
 
         // 2. Use the tokenSDK to generate the movement of resources required to execute the trade.
         val tb = TransactionBuilder()
-        addMoveFungibleTokens(tb, serviceHub, listOf(PartyAndAmount(tradeState.owner, tradeState.wanted)), ourIdentity)
+        val tokenSelection = TokenSelection(serviceHub)
+        val (inputGameCurrency, outputGameCurrency) = tokenSelection.generateMoveGameCurrency<GameCurrencyState>(
+                tb.lockId,
+                listOf(PartyAndAmount(tradeState.owner, tradeState.wanted)),
+                ourIdentity,
+                tradeState.gameBoardLinearId
+        )
+        addMoveTokens(tb, inputGameCurrency, outputGameCurrency)
 
         // 3. Get a reference to the notary and assign it to the transaction.
         require(serviceHub.networkMapCache.notaryIdentities.isNotEmpty()) { "No notary nodes registered" }
@@ -81,9 +99,11 @@ class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier) : FlowL
                 TwoPartyDealFlow.AutoOffer(
                         notary,
                         tradeState.copy(informationForAcceptor = InformationForAcceptor(
-                                tb.inputStates(),
+                                tb.inputStates().map { serviceHub.vaultService.querySingleState<GameCurrencyState>(it) },
                                 tb.outputStates(),
-                                tb.commands()
+                                tb.commands(),
+                                tb.attachments(),
+                                tradeState.gameBoardLinearId
                         ))),
                 progressTracker.getChildProgressTracker(DEALING)!!
         )
@@ -99,20 +119,32 @@ class ExecuteTradeFlowResponder(otherSideSession: FlowSession) : TwoPartyDealFlo
 
         // Retrieve the payload from the handshake
         val handShakeToAssembleSharedTX = handshake.payload.dealBeingOffered as ExtendedDealState
+        val gameBoardLinearId = handShakeToAssembleSharedTX.gameBoardLinearId
 
         // Retrieve the counterParty input and outputs states
-        val counterPartyInputStates = handShakeToAssembleSharedTX.informationForAcceptor!!.inputStates.stream().collect(Collectors.toList())
-        val counterPartyOutputStates = handShakeToAssembleSharedTX.informationForAcceptor!!.outputStates.stream().collect(Collectors.toList())
+        val counterPartyGameCurrencyInputs = handShakeToAssembleSharedTX.informationForAcceptor!!.inputStates.stream().collect(Collectors.toList())
+        val counterPartyGameCurrencyOutputs = handShakeToAssembleSharedTX.informationForAcceptor!!.outputStates.stream().collect(Collectors.toList()).map { it.data as GameCurrencyState }
+        val counterPartyAttachments = handShakeToAssembleSharedTX.informationForAcceptor!!.attachments.stream().collect(Collectors.toList())
         val counterPartyCommands = handShakeToAssembleSharedTX.informationForAcceptor!!.commands.stream().collect(Collectors.toList())
 
-        // Use the counter-party input and output states to create a new transaction builder
+        // Use the counter-party input states and commands when initialising a new transaction builder
         val tb = TransactionBuilder(
-                inputs = counterPartyInputStates,
-                outputs = counterPartyOutputStates,
-                commands = counterPartyCommands
+                notary = handshake.payload.notary,
+                commands = counterPartyCommands,
+                attachments = counterPartyAttachments
         )
 
-        addMoveFungibleTokens(tb, serviceHub, listOf(PartyAndAmount(otherSideSession.counterparty, handShakeToAssembleSharedTX.offering)), ourIdentity)
+        counterPartyGameCurrencyInputs.forEach { tb.addInputState(it) }
+        counterPartyGameCurrencyOutputs.forEach { tb.addOutputState(it, GameCurrencyContract.contractId) }
+
+        val tokenSelection = TokenSelection(serviceHub)
+        val (inputGameCurrency, outputGameCurrency) = tokenSelection.generateMoveGameCurrency<GameCurrencyState>(
+                tb.lockId,
+                listOf(PartyAndAmount(otherSideSession.counterparty, handShakeToAssembleSharedTX.offering)),
+                ourIdentity,
+                gameBoardLinearId)
+        addMoveTokens(tb, inputGameCurrency, outputGameCurrency)
+        addTokenTypeJar(tb.outputStates().filterIsInstance<TransactionState<GameCurrencyState>>().map { it.data }, tb)
 
         // Use the generateAgreement method on the ExtendedDealState class to add the appropriate commands to the transaction.
         val ptx = handShakeToAssembleSharedTX.generateAgreement(tb)
