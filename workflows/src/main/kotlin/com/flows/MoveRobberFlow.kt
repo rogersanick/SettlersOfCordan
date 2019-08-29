@@ -1,5 +1,6 @@
 package com.flows
 
+import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.RobberContract
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.HexTileIndex
@@ -9,13 +10,14 @@ import com.oracleClientStatesAndContracts.contracts.DiceRollContract
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
+import net.corda.core.node.StatesToRecord
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
-class HandleRobberFlow(val gameBoardLinearId: UniqueIdentifier,
-                       val updatedRobberLocation: Int) : FlowLogic<SignedTransaction>() {
+class MoveRobberFlow(val gameBoardLinearId: UniqueIdentifier,
+                     val updatedRobberLocation: Int) : FlowLogic<SignedTransaction>() {
     override fun call(): SignedTransaction {
 
         // Step 1. Retrieve the Game Board State from the vault.
@@ -47,7 +49,7 @@ class HandleRobberFlow(val gameBoardLinearId: UniqueIdentifier,
         }
 
         // Step 6. Create a new robber state
-        val movedRobberState = robberStateAndRef.state.data.move(HexTileIndex(updatedRobberLocation))
+        val movedRobberState = robberStateAndRef.state.data.moveAndActivate(HexTileIndex(updatedRobberLocation))
 
         // Step 7. Create the appropriate command
         val robberCommand = RobberContract.Commands.MoveRobber()
@@ -73,5 +75,43 @@ class HandleRobberFlow(val gameBoardLinearId: UniqueIdentifier,
 
         // Step 11. Finalize the transaction
         return subFlow(FinalityFlow(stx, sessions))
+    }
+}
+
+@InitiatedBy(MoveRobberFlow::class)
+class MoveRobberFlowResponder(val counterpartySession: FlowSession) : FlowLogic<SignedTransaction>() {
+    @Suspendable
+    override fun call(): SignedTransaction {
+        val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
+            override fun checkTransaction(stx: SignedTransaction) {
+                val gameBoardState = stx.coreTransaction.outputsOfType<GameBoardState>().first()
+                val turnTrackerStateRef = stx.coreTransaction.references.single()
+                val turnTrackerState = serviceHub.vaultService
+                        .querySingleState<TurnTrackerState>(turnTrackerStateRef)
+                        .state.data
+
+                val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService
+                        .querySingleState<TurnTrackerState>(turnTrackerState.linearId)
+                        .state.data
+                if (lastTurnTrackerOnRecordStateAndRef.linearId != turnTrackerState.linearId) {
+                    throw FlowException("The TurnTracker included in the transaction is not correct for this game or turn.")
+                }
+                if (!gameBoardState.isValid(lastTurnTrackerOnRecordStateAndRef)) {
+                    throw FlowException("The turn tracker state does not point back to the GameBoardState")
+                }
+
+                if (counterpartySession.counterparty.owningKey !=
+                        gameBoardState.players[lastTurnTrackerOnRecordStateAndRef.currTurnIndex].owningKey) {
+                    throw IllegalArgumentException("Only the current player may propose the next move.")
+                }
+            }
+        }
+
+        val txWeJustSignedId = subFlow(signedTransactionFlow)
+
+        return subFlow(ReceiveFinalityFlow(
+                otherSideSession = counterpartySession,
+                expectedTxId = txWeJustSignedId.id,
+                statesToRecord = StatesToRecord.ALL_VISIBLE))
     }
 }

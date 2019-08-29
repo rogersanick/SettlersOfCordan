@@ -64,7 +64,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         val diceRollState = diceRollStateAndRef.state.data
 
         if (diceRollState.isRobberTotal()) {
-            throw FlowException("The last active dice roll has a value of 7. You must move the robber and apply its consequences using HandleRobberFlow before continuing.")
+            throw FlowException("The last active dice roll has a value of 7. You must move the robber and apply its consequences using MoveRobberFlow before continuing.")
         }
 
         // Step 5. Create a transaction builder

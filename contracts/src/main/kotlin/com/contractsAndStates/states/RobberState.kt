@@ -27,7 +27,7 @@ data class RobberState(
 ) : LinearState, QueryableState, StatePersistable, HasGameBoardId {
     override val participants: List<AbstractParty> = players
 
-    fun move(hexTileIndex: HexTileIndex) = copy(hexTileIndex = hexTileIndex, active = true)
+    fun moveAndActivate(hexTileIndex: HexTileIndex) = copy(hexTileIndex = hexTileIndex, active = true)
 
     fun deactivate() = copy(active = false)
 

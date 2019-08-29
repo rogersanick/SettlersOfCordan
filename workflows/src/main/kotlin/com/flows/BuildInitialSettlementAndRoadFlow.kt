@@ -13,6 +13,7 @@ import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
 import net.corda.core.internal.toMultiMap
+import net.corda.core.node.StatesToRecord
 import net.corda.core.node.services.queryBy
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
@@ -200,6 +201,9 @@ class BuildInitialSettlementFlowResponder(val counterpartySession: FlowSession) 
         val txWeJustSignedId = subFlow(signedTransactionFlow)
 
         // Run the ReceiveFinalityFlow flow to finalize the transaction.
-        return subFlow(ReceiveFinalityFlow(otherSideSession = counterpartySession, expectedTxId = txWeJustSignedId.id))
+        return subFlow(ReceiveFinalityFlow(
+                otherSideSession = counterpartySession,
+                expectedTxId = txWeJustSignedId.id,
+                statesToRecord = StatesToRecord.ALL_VISIBLE))
     }
 }

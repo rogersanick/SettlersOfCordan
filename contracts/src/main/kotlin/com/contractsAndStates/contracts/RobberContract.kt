@@ -76,6 +76,7 @@ class RobberContract : Contract {
                         (robberInputStates.single().linearId == outputRobberState.linearId)
                 "The robber state must belong to the output game board" using
                         referencedGameBoardState.isValid(outputRobberState)
+                "The output robber state must be activated" using outputRobberState.active
 
                 /**
                  *  ******** SIGNATURES ********
@@ -91,5 +92,6 @@ class RobberContract : Contract {
     interface Commands : CommandData {
         class CreateRobber : Commands
         class MoveRobber : Commands
+        class ApplyRobber: Commands
     }
 }
