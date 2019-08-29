@@ -1,5 +1,6 @@
 package com.contractsAndStates.states
 
+import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.Amount
 import net.corda.core.serialization.ConstructorForDeserialization
@@ -18,6 +19,12 @@ data class PlacedPorts @ConstructorForDeserialization constructor(val value: Lis
         const val PORT_COUNT = 9
     }
 
+    @Suspendable
+    fun checkPortAt(hexTileIndex: HexTileIndex, tileCorner: TileCornerIndex): Boolean = value.any { port ->
+        port.accessPoints.any { it.hexTileIndex == hexTileIndex && it.hexTileCoordinate.contains(tileCorner) }
+    }
+
+    @Suspendable
     fun getPortAt(hexTile: HexTileIndex, tileCorner: TileCornerIndex) = value.single {
         it.accessPoints.any { accessPoint ->
             accessPoint.hexTileIndex == hexTile && accessPoint.hexTileCoordinate.contains(tileCorner)

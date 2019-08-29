@@ -60,7 +60,7 @@ class TradeWithPortFlow(
         val playerKeys = gameBoardState.playerKeys()
         val purchased = portToBeTradedWith.getOutputOf(purchasedResource)
         addIssueTokens(tb, arrayListOf(purchased issuedBy ourIdentity heldBy ourIdentity forGameBoard gameBoardLinearId), gameBoardState.playerKeys() - ourIdentity.owningKey )
-        tb.addCommand(TradePhaseContract.Commands.TradeWithPort(), playerKeys)
+        tb.addCommand(TradePhaseContract.Commands.TradeWithPort(hexTileOfPort, tileCorner), playerKeys)
         tb.addCommand(IssueTokenCommand(purchased.token issuedBy ourIdentity), playerKeys)
 
         // Step 6. Add all necessary states to the transaction

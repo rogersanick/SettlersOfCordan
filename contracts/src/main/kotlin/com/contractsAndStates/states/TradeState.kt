@@ -1,5 +1,6 @@
 package com.contractsAndStates.states
 
+import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.TradePhaseContract
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.*
@@ -32,14 +33,16 @@ data class TradeState(
         override val linearId: UniqueIdentifier = UniqueIdentifier()
 ) : LinearState, ExtendedDealState {
 
+    @Suspendable
     override fun generateAgreement(transactionBuilder: TransactionBuilder): TransactionBuilder {
         val state = TradeState(offering, wanted, owner, targetPlayer, players, executed, gameBoardLinearId, linearId = linearId)
         return transactionBuilder.withItems(
                 StateAndContract(state, TradePhaseContract.ID),
-                Command(TradePhaseContract.Commands.ExecuteTrade(), participants.map { it.owningKey })
+                Command(TradePhaseContract.Commands.ExecuteTrade(), players.map { it.owningKey })
         )
     }
 
+    @Suspendable
     override fun generateAgreement(notary: Party): TransactionBuilder {
         return TransactionBuilder()
     }
