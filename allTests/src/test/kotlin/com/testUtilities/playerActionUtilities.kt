@@ -3,13 +3,9 @@ package com.testUtilities
 import com.contractsAndStates.states.*
 import com.flows.*
 import com.oracleClientStatesAndContracts.states.DiceRollState
-import com.r3.corda.lib.tokens.contracts.states.FungibleToken
-import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.concurrent.CordaFuture
-import net.corda.core.contracts.Amount
 import net.corda.core.contracts.UniqueIdentifier
-import net.corda.core.internal.DigitalSignatureWithCert
-import net.corda.core.internal.signWithCert
+import net.corda.core.internal.sumByLong
 import net.corda.core.node.services.queryBy
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
@@ -83,4 +79,31 @@ fun placeAPieceFromASpecificNodeAndEndTurn(i: Int, testCoordinates: ArrayList<Pa
         network.runNetwork()
     }
 
+}
+
+fun gatherResourcesUntilAPlayerHasMoreThan7(gameBoardState: GameBoardState,
+                                            listOfNodes: List<StartedMockNode>,
+                                            oracle: StartedMockNode,
+                                            network: MockNetwork): StartedMockNode {
+    var allNodesHaveLessThan7Resources = true
+    var nodeWithMoreThan7Resources: StartedMockNode? = null
+    while(allNodesHaveLessThan7Resources) {
+        for (nodeIndex in 0..3) {
+            val diceRoll = getDiceRollWithRandomRollValue(gameBoardState, oracle)
+            rollDiceThenGatherThenMaybeEndTurn(gameBoardState.linearId, listOfNodes[nodeIndex], network, diceRollState = diceRoll)
+        }
+
+        val nodeResources = listOfNodes
+                .map { it to it.services.vaultService.queryBy<GameCurrencyState>().states
+                        .filter { token -> token.state.data.fungibleToken.holder.owningKey == it.info.legalIdentities.first().owningKey }}
+
+        nodeResources.forEach { node ->
+            if (node.second.sumByLong { it.state.data.fungibleToken.amount.quantity } > 7) {
+                allNodesHaveLessThan7Resources = false
+                nodeWithMoreThan7Resources = node.first
+            }
+        }
+    }
+
+    return nodeWithMoreThan7Resources!!
 }

@@ -81,8 +81,8 @@ class EndTurnDuringInitialPlacementFlowResponder(val counterpartySession: FlowSe
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) {
+
                 val inputTurnTrackerInTransaction = stx.coreTransaction.inputs.single()
-                val queryCriteria = QueryCriteria.VaultQueryCriteria(stateRefs = listOf(inputTurnTrackerInTransaction))
                 val turnTrackerReferencedInTransaction = serviceHub.vaultService
                         .querySingleState<TurnTrackerState>(inputTurnTrackerInTransaction)
                         .state.data

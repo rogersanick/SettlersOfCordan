@@ -16,7 +16,9 @@ import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
+import net.corda.core.identity.Party
 import net.corda.core.internal.toMultiMap
+import net.corda.core.node.StatesToRecord
 import net.corda.core.node.services.VaultService
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
@@ -76,7 +78,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         // amount. This is required right now as multiple issuances of the same token type cause an error with
         // transaction state grouping.
         val tokensToIssue = serviceHub.vaultService
-                .getTokensToIssue(gameBoardState, diceRollState.getRollTrigger())
+                .getTokensToIssue(gameBoardState, diceRollState.getRollTrigger(), ourIdentity)
 
         // Step 7. Add commands to issue the appropriate types of resources. Convert the gameCurrencyToClaim to a set
         // to prevent duplicate commands.
@@ -100,7 +102,10 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         val sessions = (gameBoardState.players - ourIdentity).toSet().map { initiateFlow(it) }
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
 
-        return subFlow(FinalityFlow(stx, sessions))
+        // TODO: Understand why this TX must be manually recorded in order to persist self issued tokens to the vault.
+        val fstx = subFlow(FinalityFlow(stx, sessions))
+        serviceHub.recordTransactions(StatesToRecord.ALL_VISIBLE, listOf(stx))
+        return fstx
     }
 }
 
@@ -127,7 +132,7 @@ open class GatherResourcesFlowResponder(val counterpartySession: FlowSession) : 
                         .queryDiceRoll(gameBoardState.linearId)
                         .state.data
                 val listOfTokensThatShouldHaveBeenIssued = serviceHub.vaultService
-                        .getTokensToIssue(gameBoardState, diceRollState.getRollTrigger())
+                        .getTokensToIssue(gameBoardState, diceRollState.getRollTrigger(), counterpartySession.counterparty)
 
                 if (!listOfTokensThatShouldHaveBeenIssued.containsAll(listOfTokensIssued)
                                 || listOfTokensIssued.size != listOfTokensThatShouldHaveBeenIssued.size) {
@@ -138,11 +143,14 @@ open class GatherResourcesFlowResponder(val counterpartySession: FlowSession) : 
 
         val txWeJustSignedId = subFlow(signedTransactionFlow)
 
-        return subFlow(ReceiveFinalityFlow(otherSideSession = counterpartySession, expectedTxId = txWeJustSignedId.id))
+        return subFlow(ReceiveFinalityFlow(
+                otherSideSession = counterpartySession,
+                expectedTxId = txWeJustSignedId.id,
+                statesToRecord = StatesToRecord.ALL_VISIBLE))
     }
 }
 
-internal fun VaultService.getTokensToIssue(gameBoardState: GameBoardState, rollTrigger: RollTrigger) = gameBoardState
+internal fun VaultService.getTokensToIssue(gameBoardState: GameBoardState, rollTrigger: RollTrigger, issuer: Party) = gameBoardState
         .getTilesBy(rollTrigger, false)
         .flatMap { tile ->
             if (tile.resourceType.resourceYielded == null) {
@@ -162,5 +170,5 @@ internal fun VaultService.getTokensToIssue(gameBoardState: GameBoardState, rollT
         .toMultiMap()
         .mapValues { it.value.sum() }
         .map { entry ->
-            entry.value of entry.key.second issuedBy entry.key.first heldBy entry.key.first forGameBoard gameBoardState.linearId
+            entry.value of entry.key.second issuedBy issuer heldBy entry.key.first forGameBoard gameBoardState.linearId
         }

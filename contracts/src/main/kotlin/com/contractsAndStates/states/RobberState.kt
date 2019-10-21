@@ -1,5 +1,6 @@
 package com.contractsAndStates.states
 
+import co.paralleluniverse.fibers.Suspendable
 import com.contractsAndStates.contracts.RobberContract
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
@@ -23,13 +24,14 @@ data class RobberState(
         val hexTileIndex: HexTileIndex,
         val players: List<Party>,
         override val linearId: UniqueIdentifier = UniqueIdentifier(),
-        val active: Boolean = false
+        val active: Boolean = false,
+        val targetPlayer: Party? = null
 ) : LinearState, QueryableState, StatePersistable, HasGameBoardId {
     override val participants: List<AbstractParty> = players
 
-    fun moveAndActivate(hexTileIndex: HexTileIndex) = copy(hexTileIndex = hexTileIndex, active = true)
+    fun moveAndActivate(hexTileIndex: HexTileIndex, targetPlayer: Party?) = copy(hexTileIndex = hexTileIndex, active = true, targetPlayer = targetPlayer)
 
-    fun deactivate() = copy(active = false)
+    fun deactivate() = copy(active = false, targetPlayer = null)
 
     override fun generateMappedObject(schema: MappedSchema): PersistentState {
         return when (schema) {

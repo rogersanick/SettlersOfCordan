@@ -110,7 +110,7 @@ class BuildInitialSettlementAndRoadFlow(
                     .mapValues { it.value.sum() }
                     .map { it.value of it.key issuedBy ourIdentity heldBy ourIdentity forGameBoard gameBoardLinearId }
 
-            addIssueTokens(tb, issuedTokens, gameBoardState.playerKeys() - ourIdentity.owningKey)
+            addIssueTokens(tb, issuedTokens, gameBoardState.playerKeys())
             addTokenTypeJar(issuedTokens, tb)
         }
 

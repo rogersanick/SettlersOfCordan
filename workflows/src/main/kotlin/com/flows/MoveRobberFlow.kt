@@ -10,6 +10,7 @@ import com.oracleClientStatesAndContracts.contracts.DiceRollContract
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
+import net.corda.core.identity.Party
 import net.corda.core.node.StatesToRecord
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
@@ -17,7 +18,9 @@ import net.corda.core.transactions.TransactionBuilder
 @InitiatingFlow(version = 1)
 @StartableByRPC
 class MoveRobberFlow(val gameBoardLinearId: UniqueIdentifier,
-                     val updatedRobberLocation: Int) : FlowLogic<SignedTransaction>() {
+                     val updatedRobberLocation: Int,
+                     val targetPlayer: Party? = null) : FlowLogic<SignedTransaction>() {
+    @Suspendable
     override fun call(): SignedTransaction {
 
         // Step 1. Retrieve the Game Board State from the vault.
@@ -31,7 +34,7 @@ class MoveRobberFlow(val gameBoardLinearId: UniqueIdentifier,
 
         // Step 3. Retrieve the Turn Tracker State from the vault
         val turnTrackerStateAndRef = serviceHub.vaultService
-                .querySingleState<TurnTrackerState>(gameBoardState.linearId)
+                .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
         if (!gameBoardState.isValid(turnTrackerStateAndRef.state.data)) {
             throw FlowException("The turn tracker state does not point back to the GameBoardState")
         }
@@ -49,7 +52,7 @@ class MoveRobberFlow(val gameBoardLinearId: UniqueIdentifier,
         }
 
         // Step 6. Create a new robber state
-        val movedRobberState = robberStateAndRef.state.data.moveAndActivate(HexTileIndex(updatedRobberLocation))
+        val movedRobberState = robberStateAndRef.state.data.moveAndActivate(HexTileIndex(updatedRobberLocation), targetPlayer)
 
         // Step 7. Create the appropriate command
         val robberCommand = RobberContract.Commands.MoveRobber()
@@ -84,10 +87,11 @@ class MoveRobberFlowResponder(val counterpartySession: FlowSession) : FlowLogic<
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) {
-                val gameBoardState = stx.coreTransaction.outputsOfType<GameBoardState>().first()
-                val turnTrackerStateRef = stx.coreTransaction.references.single()
+                val gameBoardState = serviceHub.vaultService
+                        .querySingleState<GameBoardState>(stx.coreTransaction.references)
+                        .state.data
                 val turnTrackerState = serviceHub.vaultService
-                        .querySingleState<TurnTrackerState>(turnTrackerStateRef)
+                        .querySingleState<TurnTrackerState>(stx.coreTransaction.references)
                         .state.data
 
                 val lastTurnTrackerOnRecordStateAndRef = serviceHub.vaultService

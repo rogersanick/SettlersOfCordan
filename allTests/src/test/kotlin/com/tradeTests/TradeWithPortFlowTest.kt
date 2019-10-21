@@ -1,9 +1,6 @@
 package com.tradeTests
 
-import com.contractsAndStates.states.GameBoardState
-import com.contractsAndStates.states.HexTileIndex
-import com.contractsAndStates.states.HexTileType
-import com.contractsAndStates.states.Resource
+import com.contractsAndStates.states.*
 import com.flows.SetupGameBoardFlow
 import com.flows.TradeWithPortFlow
 import com.oracleClientStatesAndContracts.states.DiceRollState
@@ -99,25 +96,21 @@ class TradeWithPortFlowTest {
 
         setupGameBoardForTesting(gameBoardState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
 
-        var currPlayer = 0
-        val rollTrigger = gameBoardState.hexTiles.value[0].rollTrigger!!.total
-        while (!(countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0]).mutableMap.any { it.value > 1 }) || currPlayer != 0) {
-            rollDiceThenGatherThenMaybeEndTurn(
-                    gameBoardState.linearId,
-                    arrayOfAllPlayerNodesInOrder[currPlayer],
-                    network,
-                    true,
-                    getDiceRollWithSpecifiedRollValue(rollTrigger/2, rollTrigger/2+rollTrigger%2, gameBoardState, oracle)
-            )
-            currPlayer = if (currPlayer == 3) 0 else currPlayer + 1
-        }
-
         val portToTradeWith = gameBoardState.ports.value[0]
+        val outputResource = portToTradeWith.portTile.outputRequired.first().token as Resource
         val inputResource = portToTradeWith.portTile.getInputOf(
                 gameBoardState.hexTiles.get(HexTileIndex(0)).resourceType.resourceYielded!!).token as Resource
-        val outputResource = portToTradeWith.portTile.outputRequired.first().token as Resource
-        val playerWithPortPreTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
 
+        val rollTrigger = gameBoardState.hexTiles.get(HexTileIndex(0)).rollTrigger!!.total
+        val diceRollPips1 = rollTrigger / 2
+        val diceRollPips2 = (rollTrigger / 2) + (rollTrigger % 2)
+
+        for (i in 0..3) {
+            val diceRoll = getDiceRollWithSpecifiedRollValue(diceRollPips1, diceRollPips2, gameBoardState, oracle)
+            rollDiceThenGatherThenMaybeEndTurn(gameBoardState.linearId, arrayOfAllPlayerNodesInOrder[i], network, true, diceRoll)
+        }
+
+        val playerWithPortPreTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
         val futureWithIssuedTrade = arrayOfAllPlayerNodesInOrder[0].startFlow(
                 TradeWithPortFlow(
                         gameBoardState.linearId,
@@ -128,7 +121,7 @@ class TradeWithPortFlowTest {
                 )
         )
         network.runNetwork()
-        val txWithExecutedPortTrade = futureWithIssuedTrade.getOrThrow()
+        futureWithIssuedTrade.getOrThrow()
 
         val playerWithPortPostTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
 

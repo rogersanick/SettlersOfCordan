@@ -212,7 +212,10 @@ class ExecuteTradeFlowResponderNonParticipant(val counterpartySession: FlowSessi
         }
 
         val txWeJustSignedId = subFlow(signedTransactionFlow)
-        return subFlow(ReceiveFinalityFlow(otherSideSession = counterpartySession, expectedTxId = txWeJustSignedId.id, statesToRecord = StatesToRecord.ALL_VISIBLE))
+        return subFlow(ReceiveFinalityFlow(
+                otherSideSession = counterpartySession,
+                expectedTxId = txWeJustSignedId.id,
+                statesToRecord = StatesToRecord.ALL_VISIBLE))
     }
 }
 

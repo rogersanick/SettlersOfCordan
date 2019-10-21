@@ -2,6 +2,7 @@ package com.contractsAndStates.contracts
 
 import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.RobberState
+import com.oracleClientStatesAndContracts.states.DiceRollState
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
 import net.corda.core.contracts.requireSingleCommand
@@ -72,11 +73,14 @@ class RobberContract : Contract {
                 /**
                  *  ******** BUSINESS LOGIC ********
                  */
-                "The input and output RobberStates should have the same id" using
+                "The input and output RobberStates should have the same id." using
                         (robberInputStates.single().linearId == outputRobberState.linearId)
-                "The robber state must belong to the output game board" using
+                "The robber state must belong to the output game board." using
                         referencedGameBoardState.isValid(outputRobberState)
-                "The output robber state must be activated" using outputRobberState.active
+                "The output robber state must be activated." using outputRobberState.active
+
+                val inputDiceRollState = tx.inputsOfType<DiceRollState>().single()
+                "The associated dice roll must have a value of 7." using inputDiceRollState.isRobberTotal()
 
                 /**
                  *  ******** SIGNATURES ********

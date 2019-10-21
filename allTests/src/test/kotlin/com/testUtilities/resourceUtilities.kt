@@ -1,7 +1,6 @@
 package com.testUtilities
 
 import com.contractsAndStates.states.*
-import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.Amount
 import net.corda.core.node.services.queryBy
@@ -17,7 +16,29 @@ fun countAllResourcesForASpecificNode(node: StartedMockNode): MapOfResources {
             Pair(Sheep, 0)
     )
 
-    node.services.vaultService.queryBy<FungibleToken>().states.filter { it.state.data.holder.owningKey == node.info.legalIdentities.first().owningKey }.forEach {
+    node.services.vaultService.queryBy<GameCurrencyState>().states.filter { it.state.data.holder.owningKey == node.info.legalIdentities.first().owningKey }.forEach {
+        val tokenAmount = it.state.data.amount
+        if (mapOfResources.containsKey<TokenType>(tokenAmount.token.tokenType)) mapOfResources[tokenAmount.token.tokenType] = mapOfResources[tokenAmount.token.tokenType]!!.plus(tokenAmount.quantity)
+        else mapOfResources[tokenAmount.token.tokenType] = tokenAmount.quantity
+    }
+
+    return MapOfResources(mapOfResources)
+}
+
+fun countAllKnownResourcesForASpecificNodeFromAllNodes(dataNodes: Collection<StartedMockNode>, targetNode: StartedMockNode): Collection<MutableMap<TokenType, Long>> {
+    return dataNodes.map { countAllKnownResourcesForASpecificNode(it, targetNode).mutableMap }
+}
+
+fun countAllKnownResourcesForASpecificNode(dataNode: StartedMockNode, targetNode: StartedMockNode): MapOfResources {
+    val mapOfResources = mutableMapOf<TokenType, Long>(
+            Pair(Wheat, 0),
+            Pair(Ore, 0),
+            Pair(Wood, 0),
+            Pair(Brick, 0),
+            Pair(Sheep, 0)
+    )
+
+    dataNode.services.vaultService.queryBy<GameCurrencyState>().states.filter { it.state.data.holder.owningKey == targetNode.info.legalIdentities.first().owningKey }.forEach {
         val tokenAmount = it.state.data.amount
         if (mapOfResources.containsKey<TokenType>(tokenAmount.token.tokenType)) mapOfResources[tokenAmount.token.tokenType] = mapOfResources[tokenAmount.token.tokenType]!!.plus(tokenAmount.quantity)
         else mapOfResources[tokenAmount.token.tokenType] = tokenAmount.quantity
@@ -43,3 +64,4 @@ class MapOfResources(val mutableMap: MutableMap<TokenType, Long>) {
         return MapOfResources(mapToReturn)
     }
 }
+

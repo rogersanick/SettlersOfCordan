@@ -48,7 +48,7 @@ fun generateInGameSpend(
     val tokenSelection = TokenSelection(serviceHub)
 
     // Generate exits for tokens of the appropriate type
-    costs.forEach { (type, amount) ->
+    costs.filter { it.value > 0 }.forEach { (type, amount) ->
         tokenSelection
                 .attemptSpend(amount of type, tb.lockId)
                 .groupBy { it.state.data.issuer }
