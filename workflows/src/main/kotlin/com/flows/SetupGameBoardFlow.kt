@@ -165,7 +165,6 @@ class SetupGameBoardFlowResponder(val counterpartySession: FlowSession) : FlowLo
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
-                stx.verify(serviceHub)
                 println("\nSomeone has invited you to play Settlers of Cordan (Catan on Corda)\n")
                 val gameBoardState = stx.coreTransaction.outputsOfType<GameBoardState>().single()
                 val linearIDToBePrinted = gameBoardState.linearId

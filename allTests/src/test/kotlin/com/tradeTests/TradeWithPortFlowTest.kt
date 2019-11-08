@@ -125,9 +125,13 @@ class TradeWithPortFlowTest {
 
         val playerWithPortPostTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
 
-        assert(playerWithPortPreTrade.addTokenState(Amount(1, outputResource)).subtractTokenState(Amount(2, inputResource)).mutableMap.all {
-            playerWithPortPostTrade.mutableMap[it.key] == it.value
-        })
+        assert(playerWithPortPreTrade
+                .addTokenState(Amount(1, outputResource))
+                .subtractTokenState(Amount(2, inputResource))
+                .mutableMap
+                .all {
+                    playerWithPortPostTrade.mutableMap[it.key] == it.value
+                })
 
     }
 

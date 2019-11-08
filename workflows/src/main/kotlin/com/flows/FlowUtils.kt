@@ -1,10 +1,7 @@
 package com.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.contractsAndStates.contracts.GameCurrencyContract
-import com.contractsAndStates.states.BelongsToGameBoard
-import com.contractsAndStates.states.GameCurrencyState
-import com.contractsAndStates.states.HasGameBoardId
+import com.contractsAndStates.states.*
 import com.oracleClientStatesAndContracts.states.DiceRollState
 import com.r3.corda.lib.tokens.contracts.commands.IssueTokenCommand
 import com.r3.corda.lib.tokens.contracts.states.AbstractToken
@@ -12,9 +9,12 @@ import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.r3.corda.lib.tokens.contracts.types.IssuedTokenType
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.of
-import com.r3.corda.lib.tokens.workflows.flows.redeem.addFungibleTokensToRedeem
+import com.r3.corda.lib.tokens.contracts.utilities.sumTokenStateAndRefs
+import com.r3.corda.lib.tokens.contracts.utilities.withoutIssuer
+import com.r3.corda.lib.tokens.workflows.flows.redeem.addTokensToRedeem
 import com.r3.corda.lib.tokens.workflows.internal.selection.TokenSelection
 import com.r3.corda.lib.tokens.workflows.types.PartyAndAmount
+import com.r3.corda.lib.tokens.workflows.utilities.heldTokenAmountCriteria
 import net.corda.core.contracts.*
 import net.corda.core.flows.FlowException
 import net.corda.core.identity.AbstractParty
@@ -41,7 +41,9 @@ fun generateInGameSpend(
         serviceHub: ServiceHub,
         tb: TransactionBuilder,
         costs: Map<TokenType, Long>,
-        changeOwner: Party
+        holder: Party,
+        changeOwner: Party,
+        additionalQueryCriteria: QueryCriteria? = null
 ): TransactionBuilder {
 
     // Create a tokenSelector
@@ -49,11 +51,32 @@ fun generateInGameSpend(
 
     // Generate exits for tokens of the appropriate type
     costs.filter { it.value > 0 }.forEach { (type, amount) ->
-        tokenSelection
-                .attemptSpend(amount of type, tb.lockId)
+
+        val baseCriteria = heldTokenAmountCriteria(type, holder)
+        val queryCriteria = additionalQueryCriteria?.let { baseCriteria.and(it) } ?: baseCriteria
+
+        // Get a list of tokens satisfying the costs
+        val tokensToSpend = tokenSelection
+                .attemptSpend(amount of type, tb.lockId, queryCriteria)
+
+        // Run checks on the tokens to ensure the proposed transaction is valid
+        val notaryToCheck = tokensToSpend.first().state.notary
+        check(tokensToSpend.all { it.state.notary == notaryToCheck }) { "You are trying to spend assets with different notaries." }
+        check(tokensToSpend.isNotEmpty()) { "Received empty list of states to spend." }
+
+        // Begin to spend tokens to satisfy costs
+        var spentAmount = Amount(0, type)
+
+        tokensToSpend
                 .groupBy { it.state.data.issuer }
                 .forEach {
-                    addFungibleTokensToRedeem(tb, serviceHub, amount of type, it.key, changeOwner)
+                    val amountOfTokens = it.value.sumTokenStateAndRefs().withoutIssuer()
+                    spentAmount = spentAmount.plus(amountOfTokens)
+                    val (exitStates, change) = tokenSelection.generateExit(
+                    it.value,
+                    if (spentAmount.quantity > costs[type]!!) Amount(amount, type) else amountOfTokens,
+                    changeOwner)
+                    addTokensToRedeem(tb, exitStates, change)
                 }
     }
 

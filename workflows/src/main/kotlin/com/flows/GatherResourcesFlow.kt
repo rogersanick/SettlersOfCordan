@@ -102,10 +102,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         val sessions = (gameBoardState.players - ourIdentity).toSet().map { initiateFlow(it) }
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
 
-        // TODO: Understand why this TX must be manually recorded in order to persist self issued tokens to the vault.
-        val fstx = subFlow(FinalityFlow(stx, sessions))
-        serviceHub.recordTransactions(StatesToRecord.ALL_VISIBLE, listOf(stx))
-        return fstx
+        return subFlow(FinalityFlow(stx, sessions, StatesToRecord.ALL_VISIBLE))
     }
 }
 

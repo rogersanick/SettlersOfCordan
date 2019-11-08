@@ -144,7 +144,7 @@ class BuildInitialSettlementAndRoadFlow(
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
 
         // Step 16. Run the FinalityFlow to persist the transaction to the ledgers of all appropriate parties.
-        return subFlow(FinalityFlow(stx, sessions))
+        return subFlow(FinalityFlow(stx, sessions, StatesToRecord.ALL_VISIBLE))
     }
 }
 

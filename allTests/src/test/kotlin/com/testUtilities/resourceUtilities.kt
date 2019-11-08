@@ -38,10 +38,9 @@ fun countAllKnownResourcesForASpecificNode(dataNode: StartedMockNode, targetNode
             Pair(Sheep, 0)
     )
 
-    dataNode.services.vaultService.queryBy<GameCurrencyState>().states.filter { it.state.data.holder.owningKey == targetNode.info.legalIdentities.first().owningKey }.forEach {
+    dataNode.services.vaultService.queryBy<GameCurrencyState>().states.filter { it.state.data.holder == targetNode.info.legalIdentities.first() }.forEach {
         val tokenAmount = it.state.data.amount
-        if (mapOfResources.containsKey<TokenType>(tokenAmount.token.tokenType)) mapOfResources[tokenAmount.token.tokenType] = mapOfResources[tokenAmount.token.tokenType]!!.plus(tokenAmount.quantity)
-        else mapOfResources[tokenAmount.token.tokenType] = tokenAmount.quantity
+        mapOfResources[tokenAmount.token.tokenType] = mapOfResources[tokenAmount.token.tokenType]!!.plus(tokenAmount.quantity)
     }
 
     return MapOfResources(mapOfResources)

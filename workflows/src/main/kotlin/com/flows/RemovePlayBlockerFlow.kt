@@ -35,7 +35,7 @@ class RemovePlayBlockerFlow(val playBlockerLinearId: UniqueIdentifier, val resou
         val tb = TransactionBuilder(notary)
 
         // Step 5. Add resources to pay off the play blocker state
-        generateInGameSpend(serviceHub, tb, resourcesToDiscard, ourIdentity)
+        generateInGameSpend(serviceHub, tb, resourcesToDiscard, ourIdentity, ourIdentity)
 
         // Step 6. Create the appropriate command
         val removePlayBlockerCommand = PlayBlockerContract.Commands.RemovePlayBlocker()

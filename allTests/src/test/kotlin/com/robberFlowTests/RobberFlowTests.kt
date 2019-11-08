@@ -236,7 +236,7 @@ class RobberFlowTests {
         val resourcesToSpend = mutableMapOf<TokenType, Long>()
         val playerResources = countAllResourcesForASpecificNode(nodeWithMoreThan7).mutableMap
         playerResources.forEach {
-            if (resourceTotal <= playBlockerState.price) {
+            if (resourceTotal < playBlockerState.price) {
                 if (resourceTotal + it.value > playBlockerState.price) {
                     val amount = it.value + resourceTotal.toLong() - playBlockerState.price
                     resourcesToSpend[it.key] = amount
@@ -246,7 +246,7 @@ class RobberFlowTests {
                     resourcesToSpend[it.key] = it.value
                     resourceTotal += it.value.toInt()
                 }
-            } else return
+            }
         }
 
         val futureWithRemovedPlayBlockerState = nodeWithMoreThan7.startFlow(RemovePlayBlockerFlow(playBlockerState.linearId, resourcesToSpend))
