@@ -84,7 +84,8 @@ class BuildSettlementFlow(
         newBoardBuilder.setSettlementOn(absoluteCorner, settlementState.linearId)
 
         // Step 10. Add the appropriate resources to the transaction to pay for the Settlement.
-        generateInGameSpend(serviceHub, tb, getBuildableCosts(Buildable.Settlement), ourIdentity, ourIdentity)
+        serviceHub.cordaService(GenerateSpendService::class.java)
+                .generateInGameSpend(serviceHub, tb, getBuildableCosts(Buildable.Settlement), ourIdentity, ourIdentity)
 
         // Step 11. Determine new longest road holder
         val longestRoadHolder = longestRoad(

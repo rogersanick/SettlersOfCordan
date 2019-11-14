@@ -77,7 +77,6 @@ class RobberFlowTests {
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
         setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
-
         val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
 
         val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(3, 2, gameBoardState, oracle)

@@ -2,8 +2,6 @@ package com.resourceFlowTests
 
 import com.contractsAndStates.states.GameBoardState
 import com.flows.*
-import com.oracleClientStatesAndContracts.states.DiceRollState
-import com.r3.corda.lib.tokens.contracts.AbstractTokenContract
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.testUtilities.getDiceRollWithRandomRollValue
 import com.testUtilities.getDiceRollWithSpecifiedRollValue
