@@ -1,6 +1,5 @@
 package com.flows
 
-import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.of
 import com.r3.corda.lib.tokens.contracts.utilities.sumTokenStateAndRefs
@@ -11,25 +10,32 @@ import com.r3.corda.lib.tokens.workflows.utilities.heldTokenAmountCriteria
 import net.corda.core.contracts.Amount
 import net.corda.core.identity.Party
 import net.corda.core.node.AppServiceHub
-import net.corda.core.node.ServiceHub
 import net.corda.core.node.services.CordaService
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.serialization.SingletonSerializeAsToken
 import net.corda.core.transactions.TransactionBuilder
-import org.slf4j.Logger
 
 @CordaService
-class GenerateSpendService(serviceHub: AppServiceHub): SingletonSerializeAsToken() {
+class GenerateSpendService(val serviceHub: AppServiceHub): SingletonSerializeAsToken() {
     /**
-     * When a player spends resources in-game, those resources are consumed as inputs to a transaction. The generateInGameSpend
-     * method leverages the token-SDK to facilitate the building of transaction proposing the consumption of tokens when they are
-     * spent (burned) and not transferred to a counter-party.
+     * When a player spends tokens in-game, those tokens are consumed as inputs to a transaction. The generateInGameSpend
+     * method leverages the token-SDK to build a transaction proposing the consumption of tokens when they are
+     * spent (burned) and not transferred to a counter-party. This is useful for simulating in game spend events where
+     * resources (tokens) would be removed from play.
      *
-     * This method uses the generateExit functionality from the tokenSelection and mutates an input transaction builder in place.
+     * This method uses the [TokenSelection.attemptSpend], [TokenSelection.generateExit], and [addTokensToRedeem] functions
+     * sequentially to mutates an inputted transaction builder in place.
+     *
+     * @param tb The transaction builder in which we wish to consumer tokens and issue change to the spender
+     * @param costs A map representing the [Amount] of each [TokenType] we should spend to satisfy the cost of our action
+     * @param holder The holder of all the tokens that should be selected and spent
+     * @param changeOwner The recipient of any change resulting from the spend
+     * @param additionalQueryCriteria Additional [QueryCriteria] that will be appended to the selection process for tokens
+     * that will be spent.
+     * @return A transaction builder with inputs, outputs and commands adjusted to reflect the in game spend.
      */
 
     fun generateInGameSpend(
-            serviceHub: ServiceHub,
             tb: TransactionBuilder,
             costs: Map<TokenType, Long>,
             holder: Party,

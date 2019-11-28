@@ -61,7 +61,7 @@ class BuildCityFlow(
 
         // Step 7. Add the appropriate resources to the transaction to pay for the City.
         serviceHub.cordaService(GenerateSpendService::class.java)
-                .generateInGameSpend(serviceHub, tb, getBuildableCosts(Buildable.City), ourIdentity, ourIdentity)
+                .generateInGameSpend(tb, getBuildableCosts(Buildable.City), ourIdentity, ourIdentity)
 
         // Step 8. Add all states and commands to the transaction.
         tb.addInputState(inputSettlementStateAndRef)

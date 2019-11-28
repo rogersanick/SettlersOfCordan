@@ -1,4 +1,4 @@
-package com.testUtilities
+package com.gameUtilities
 
 import com.contractsAndStates.states.*
 import com.r3.corda.lib.tokens.contracts.types.TokenType

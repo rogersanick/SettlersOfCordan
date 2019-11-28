@@ -5,55 +5,18 @@ import com.contractsAndStates.states.HexTileIndex
 import com.contractsAndStates.states.HexTileType
 import com.flows.BuildInitialSettlementAndRoadFlow
 import com.flows.SetupGameBoardFlow
-import com.testUtilities.placeAPieceFromASpecificNodeAndEndTurn
-import com.testUtilities.setupGameBoardForTesting
+import com.gameUtilities.placeAPieceFromASpecificNodeAndEndTurn
+import com.gameUtilities.setupGameBoardForTesting
+import com.testUtilities.BaseCordanTest
 import net.corda.core.contracts.TransactionVerificationException
 import net.corda.core.flows.FlowException
-import net.corda.core.identity.CordaX500Name
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
-import net.corda.testing.common.internal.testNetworkParameters
 import net.corda.testing.internal.chooseIdentity
-import net.corda.testing.node.*
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertFailsWith
 
-class InitialSettlementPlacementFlowTests {
-    private val network = MockNetwork(MockNetworkParameters(
-            notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB"))),
-            networkParameters = testNetworkParameters(minimumPlatformVersion = 4),
-            cordappsForAllNodes = listOf(
-                    TestCordapp.findCordapp("com.flows"),
-                    TestCordapp.findCordapp("com.oracleClientFlows"),
-                    TestCordapp.findCordapp("com.contractsAndStates"),
-                    TestCordapp.findCordapp("com.r3.corda.lib.tokens.workflows"),
-                    TestCordapp.findCordapp("com.r3.corda.lib.tokens.contracts"),
-                    TestCordapp.findCordapp("com.r3.corda.lib.tokens.money")
-            )
-    )
-    )
-    private val a = network.createNode(MockNodeParameters())
-    private val b = network.createNode(MockNodeParameters())
-    private val c = network.createNode(MockNodeParameters())
-    private val d = network.createNode(MockNodeParameters())
-    private val oracleName = CordaX500Name("Oracle", "New York", "US")
-    private val oracle = network.createNode(
-            MockNodeParameters(legalName = oracleName).withAdditionalCordapps(
-                    listOf(
-                            TestCordapp.findCordapp("com.oracleService")
-                    )
-            )
-    )
-
-    @Before
-    fun setup() {
-        network.runNetwork()
-    }
-
-    @After
-    fun tearDown() = network.stopNodes()
+class InitialSettlementPlacementFlowTests: BaseCordanTest() {
 
     @Test
     fun flowReturnsCorrectlyFormedFullySignedTransaction() {

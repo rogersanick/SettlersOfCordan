@@ -3,63 +3,18 @@ package com.tradeTests
 import com.contractsAndStates.states.*
 import com.flows.SetupGameBoardFlow
 import com.flows.TradeWithPortFlow
-import com.testUtilities.countAllResourcesForASpecificNode
-import com.testUtilities.getDiceRollWithSpecifiedRollValue
-import com.testUtilities.rollDiceThenGatherThenMaybeEndTurn
-import com.testUtilities.setupGameBoardForTesting
+import com.gameUtilities.countAllResourcesForASpecificNode
+import com.gameUtilities.getDiceRollWithSpecifiedRollValue
+import com.gameUtilities.rollDiceThenGatherThenMaybeEndTurn
+import com.gameUtilities.setupGameBoardForTesting
+import com.testUtilities.BaseCordanTest
 import net.corda.core.contracts.Amount
-import net.corda.core.identity.CordaX500Name
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
-import net.corda.testing.common.internal.testNetworkParameters
 import net.corda.testing.internal.chooseIdentity
-import net.corda.testing.node.*
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 
-class TradeWithPortFlowTest {
-    private val network = MockNetwork(MockNetworkParameters(
-            notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB"))),
-            networkParameters = testNetworkParameters(minimumPlatformVersion = 4),
-            cordappsForAllNodes = listOf(
-                    TestCordapp.findCordapp("com.flows"),
-                    TestCordapp.findCordapp("com.oracleClientFlows"),
-                    TestCordapp.findCordapp("com.contractsAndStates"),
-                    TestCordapp.findCordapp("com.r3.corda.lib.tokens.workflows"),
-                    TestCordapp.findCordapp("com.r3.corda.lib.tokens.contracts"),
-                    TestCordapp.findCordapp("com.r3.corda.lib.tokens.money")
-            )
-    )
-    )
-    private val a = network.createNode(MockNodeParameters())
-    private val b = network.createNode(MockNodeParameters())
-    private val c = network.createNode(MockNodeParameters())
-    private val d = network.createNode(MockNodeParameters())
-    private val oracleName = CordaX500Name("Oracle", "New York", "US")
-    private val oracle = network.createNode(
-            MockNodeParameters(legalName = oracleName).withAdditionalCordapps(
-                    listOf(
-                            TestCordapp.findCordapp("com.oracleService")
-                    )
-            )
-    )
-
-    @Before
-    fun setup() {
-        network.runNetwork()
-    }
-
-    /**
-     * TODO: This flow is particularly difficult to test because after the initial setup,
-     * no party will have sufficient resources to trade with a port. All resource generation after the fact is random.
-     *
-     * Solution to this would be refactoring to generate specific test scenarios without the need for convulated flows
-     * accounting for randomness.
-     */
-
-    @After
-    fun tearDown() = network.stopNodes()
+class TradeWithPortFlowTest: BaseCordanTest() {
 
     @Test
     fun player1IsAbleToMakeMultipleTradesWithAPortOnTheirTurn() {

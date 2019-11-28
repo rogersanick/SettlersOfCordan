@@ -4,56 +4,19 @@ import com.contractsAndStates.states.GameBoardState
 import com.contractsAndStates.states.TradeState
 import com.flows.*
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
-import com.testUtilities.countAllResourcesForASpecificNode
-import com.testUtilities.getDiceRollWithRandomRollValue
-import com.testUtilities.setupGameBoardForTesting
+import com.gameUtilities.countAllResourcesForASpecificNode
+import com.gameUtilities.getDiceRollWithRandomRollValue
+import com.gameUtilities.setupGameBoardForTesting
+import com.testUtilities.BaseCordanTest
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.requireThat
-import net.corda.core.identity.CordaX500Name
 import net.corda.core.node.services.queryBy
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
-import net.corda.testing.common.internal.testNetworkParameters
 import net.corda.testing.internal.chooseIdentity
-import net.corda.testing.node.*
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 
-class TradeFlowTests {
-    private val network = MockNetwork(MockNetworkParameters(
-            notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB"))),
-            networkParameters = testNetworkParameters(minimumPlatformVersion = 4),
-            cordappsForAllNodes = listOf(
-                    TestCordapp.findCordapp("com.flows"),
-                    TestCordapp.findCordapp("com.oracleClientFlows"),
-                    TestCordapp.findCordapp("com.contractsAndStates"),
-                    TestCordapp.findCordapp("com.r3.corda.lib.tokens.workflows"),
-                    TestCordapp.findCordapp("com.r3.corda.lib.tokens.contracts"),
-                    TestCordapp.findCordapp("com.r3.corda.lib.tokens.money")
-            )
-        )
-    )
-    private val a = network.createNode(MockNodeParameters())
-    private val b = network.createNode(MockNodeParameters())
-    private val c = network.createNode(MockNodeParameters())
-    private val d = network.createNode(MockNodeParameters())
-    private val oracleName = CordaX500Name("Oracle", "New York", "US")
-    private val oracle = network.createNode(
-            MockNodeParameters(legalName = oracleName).withAdditionalCordapps(
-                    listOf(
-                            TestCordapp.findCordapp("com.oracleService")
-                    )
-            )
-    )
-
-    @Before
-    fun setup() {
-        network.runNetwork()
-    }
-
-    @After
-    fun tearDown() = network.stopNodes()
+class TradeFlowTests: BaseCordanTest() {
 
     @Test
     fun player1IsAbleToIssueATradeOnTheirTurn() {

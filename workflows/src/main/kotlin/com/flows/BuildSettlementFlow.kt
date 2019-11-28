@@ -85,7 +85,7 @@ class BuildSettlementFlow(
 
         // Step 10. Add the appropriate resources to the transaction to pay for the Settlement.
         serviceHub.cordaService(GenerateSpendService::class.java)
-                .generateInGameSpend(serviceHub, tb, getBuildableCosts(Buildable.Settlement), ourIdentity, ourIdentity)
+                .generateInGameSpend(tb, getBuildableCosts(Buildable.Settlement), ourIdentity, ourIdentity)
 
         // Step 11. Determine new longest road holder
         val longestRoadHolder = longestRoad(

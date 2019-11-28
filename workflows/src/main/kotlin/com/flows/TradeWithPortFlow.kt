@@ -56,7 +56,7 @@ class TradeWithPortFlow(
         val tb = TransactionBuilder(notary)
         val sold = portToBeTradedWith.getInputOf(soldResource)
         serviceHub.cordaService(GenerateSpendService::class.java)
-                .generateInGameSpend(serviceHub, tb, mapOf(sold.token to sold.quantity), ourIdentity, ourIdentity)
+                .generateInGameSpend(tb, mapOf(sold.token to sold.quantity), ourIdentity, ourIdentity)
 
         // Step 5. Generate all tokens and commands for issuance from the port
         val playerKeys = gameBoardState.playerKeys()
