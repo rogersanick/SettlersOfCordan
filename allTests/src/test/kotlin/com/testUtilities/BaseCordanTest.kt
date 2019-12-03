@@ -16,7 +16,7 @@ abstract class BaseCordanTest {
 
     val network = MockNetwork(MockNetworkParameters(
             notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB"))),
-            networkParameters = testNetworkParameters(minimumPlatformVersion = 4),
+            networkParameters = testNetworkParameters(minimumPlatformVersion = 5),
             cordappsForAllNodes = listOf(
                     TestCordapp.findCordapp("com.flows"),
                     TestCordapp.findCordapp("com.oracleClientFlows"),
@@ -49,7 +49,6 @@ abstract class BaseCordanTest {
     @After
     fun tearDown() {
         network.stopNodes()
-        System.gc()
     }
 
 }

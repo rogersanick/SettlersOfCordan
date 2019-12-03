@@ -10,7 +10,6 @@ import com.gameUtilities.setupGameBoardForTesting
 import com.testUtilities.BaseCordanTest
 import net.corda.core.contracts.TransactionVerificationException
 import net.corda.core.flows.FlowException
-import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.internal.chooseIdentity
 import org.junit.Test
@@ -75,11 +74,10 @@ class InitialSettlementPlacementFlowTests: BaseCordanTest() {
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
 
-        val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
-        setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
+        setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder)
 
     }
 
@@ -102,18 +100,17 @@ class InitialSettlementPlacementFlowTests: BaseCordanTest() {
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
 
-        val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
         val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0, 5), Pair(0, 4), Pair(0, 3), Pair(1, 1))
         val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(1, 3), Pair(2, 1), Pair(2, 3), Pair(3, 3))
 
         for (i in 0..3) {
-            placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
+            placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, false)
         }
 
         for (i in 3.downTo(0)) {
-            placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
+            placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, false)
         }
 
     }
@@ -137,13 +134,12 @@ class InitialSettlementPlacementFlowTests: BaseCordanTest() {
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
 
-        val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
-        setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
+        setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder)
 
-        assertFailsWith<FlowException>("You should be using the end turn function") { placeAPieceFromASpecificNodeAndEndTurn(0, arrayListOf(Pair(0, 0)), gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false) }
+        assertFailsWith<FlowException>("You should be using the end turn function") { placeAPieceFromASpecificNodeAndEndTurn(0, arrayListOf(Pair(0, 0)), gameState, network, arrayOfAllPlayerNodesInOrder, false) }
 
     }
 
@@ -166,14 +162,13 @@ class InitialSettlementPlacementFlowTests: BaseCordanTest() {
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
 
-        val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
         val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0, 5), Pair(0, 1), Pair(0, 3), Pair(1, 1))
 
 
-        placeAPieceFromASpecificNodeAndEndTurn(0, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
-        assertFailsWith<FlowException>("Only the current player may propose the nextmove.") { placeAPieceFromASpecificNodeAndEndTurn(2, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false) }
+        placeAPieceFromASpecificNodeAndEndTurn(0, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, false)
+        assertFailsWith<FlowException>("Only the current player may propose the nextmove.") { placeAPieceFromASpecificNodeAndEndTurn(2, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, false) }
 
     }
 

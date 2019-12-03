@@ -44,7 +44,13 @@ fun rollDiceThenGatherThenMaybeEndTurn(
     return ResourceCollectionSignedTransactions(stxWithDiceRoll, stxWithIssuedResources, stxWithEndedTurn)
 }
 
-fun placeAPieceFromASpecificNodeAndEndTurn(i: Int, testCoordinates: ArrayList<Pair<Int, Int>>, gameState: GameBoardState, network: MockNetwork, arrayOfAllPlayerNodesInOrder: List<StartedMockNode>, arrayOfAllTransactions: ArrayList<SignedTransaction>, initialSetupComplete: Boolean) {
+fun placeAPieceFromASpecificNodeAndEndTurn(
+        i: Int,
+        testCoordinates: ArrayList<Pair<Int, Int>>,
+        gameState: GameBoardState,
+        network: MockNetwork,
+        arrayOfAllPlayerNodesInOrder: List<StartedMockNode>,
+        initialSetupComplete: Boolean): SignedTransaction {
     // Build an initial settlement by issuing a settlement state
     // and updating the current turn.
     if (gameState.hexTiles.get(HexTileIndex(testCoordinates[i].first)).resourceType == HexTileType.Desert) {
@@ -62,21 +68,27 @@ fun placeAPieceFromASpecificNodeAndEndTurn(i: Int, testCoordinates: ArrayList<Pa
         val buildSettlementFlow = BuildSettlementFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second)
         val futureWithInitialSettlementBuild = currPlayer.startFlow(buildSettlementFlow)
         network.runNetwork()
-        arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
+        val txWithUpdatedGameBoardState = futureWithInitialSettlementBuild.getOrThrow()
 
         // End turn during normal game play
-        currPlayer.startFlow(EndTurnDuringInitialPlacementFlow(gameState.linearId))
+        val endTurnFlow = currPlayer.startFlow(EndTurnDuringInitialPlacementFlow(gameState.linearId))
         network.runNetwork()
+        endTurnFlow.getOrThrow()
+
+        return txWithUpdatedGameBoardState
     } else {
         // Build an initial settlement and road
         val buildInitialSettlementFlow = BuildInitialSettlementAndRoadFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second, testCoordinates[i].second)
         val futureWithInitialSettlementBuild = currPlayer.startFlow(buildInitialSettlementFlow)
         network.runNetwork()
-        arrayOfAllTransactions.add(futureWithInitialSettlementBuild.getOrThrow())
+        val txWithUpdatedGameBoardState = futureWithInitialSettlementBuild.getOrThrow()
 
         // End turn during initial setup phase
-        currPlayer.startFlow(EndTurnDuringInitialPlacementFlow(gameState.linearId))
+        val endTurnFlow = currPlayer.startFlow(EndTurnDuringInitialPlacementFlow(gameState.linearId))
         network.runNetwork()
+        endTurnFlow.getOrThrow()
+
+        return txWithUpdatedGameBoardState
     }
 
 }

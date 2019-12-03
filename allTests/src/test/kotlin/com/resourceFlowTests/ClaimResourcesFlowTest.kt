@@ -35,14 +35,11 @@ class ClaimResourcesFlowTest: BaseCordanTest() {
 
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
-
-        val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
-        setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
-
-        val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
+        // Setup game board for testing
+        val gameBoardState = setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder)
 
         val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(1, 4, gameBoardState, oracle)
         val rollDiceFlow = RollDiceFlow(gameBoardState.linearId, deterministicDiceRoll)
@@ -78,14 +75,11 @@ class ClaimResourcesFlowTest: BaseCordanTest() {
 
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
-
-        val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
-        setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
-
-        val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
+        // Setup game board for testing
+        val gameBoardState = setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder)
 
         val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(1, 4, gameBoardState, oracle)
         val rollDiceFlow = RollDiceFlow(gameBoardState.linearId, deterministicDiceRoll)
@@ -126,14 +120,11 @@ class ClaimResourcesFlowTest: BaseCordanTest() {
 
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
-
-        val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
-        setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
-
-        val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
+        // Setup game board for testing
+        val gameBoardState = setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder)
 
         val randomDiceRoll1 = getDiceRollWithRandomRollValue(gameBoardState, oracle)
         val rollDiceFlow1 = RollDiceFlow(gameBoardState.linearId, randomDiceRoll1)

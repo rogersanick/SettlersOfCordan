@@ -16,6 +16,7 @@ import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.Party
 import net.corda.core.internal.uncheckedCast
 import net.corda.core.transactions.LedgerTransaction
+import java.security.PublicKey
 
 class GameCurrencyContract: AbstractTokenContract<GameCurrencyState>(), Contract {
 
@@ -25,7 +26,7 @@ class GameCurrencyContract: AbstractTokenContract<GameCurrencyState>(), Contract
         val contractId = "com.contractsAndStates.contracts.GameCurrencyContract"
     }
 
-    override fun verifyIssue(issueCommand: CommandWithParties<TokenCommand>, inputs: List<IndexedState<GameCurrencyState>>, outputs: List<IndexedState<GameCurrencyState>>, attachments: List<Attachment>) {
+    override fun verifyIssue(issueCommand: CommandWithParties<TokenCommand>, inputs: List<IndexedState<GameCurrencyState>>, outputs: List<IndexedState<GameCurrencyState>>, attachments: List<Attachment>, references: List<StateAndRef<ContractState>>) {
         // This code is a replication of the FungibleTokenContract verifyIssue function with one small change. In this case, currency must be issued
         val issuedToken: IssuedTokenType = issueCommand.value.token
         require(inputs.isEmpty()) { "When issuing tokens, there cannot be any input states." }
@@ -38,6 +39,13 @@ class GameCurrencyContract: AbstractTokenContract<GameCurrencyState>(), Contract
             }
             val hasZeroAmounts = any { it.state.data.amount == Amount.zero(issuedToken) }
             require(hasZeroAmounts.not()) { "You cannot issue tokens with a zero amount." }
+
+            val issuerKeys: List<PublicKey> = this.map { it.state.data }.map(AbstractToken::issuer).toSet().map { it.owningKey }
+            val issueSigners: List<PublicKey> = issueCommand.signers
+            // The issuer should be signing the issue command. Notice that it can be signed by more parties.
+            require(issuerKeys.all { issuerKey -> issuerKey in issueSigners}) {
+                "The issuer must be the signing party when an amount of tokens are issued."
+            }
         }
 
         requireThat {
@@ -48,8 +56,8 @@ class GameCurrencyContract: AbstractTokenContract<GameCurrencyState>(), Contract
         }
     }
 
-    override fun verifyMove(moveCommands: List<CommandWithParties<TokenCommand>>, inputs: List<IndexedState<GameCurrencyState>>, outputs: List<IndexedState<GameCurrencyState>>, attachments: List<Attachment>) {
-        FungibleTokenContract().verifyMove(moveCommands, inputs, outputs, attachments)
+    override fun verifyMove(moveCommands: List<CommandWithParties<TokenCommand>>, inputs: List<IndexedState<GameCurrencyState>>, outputs: List<IndexedState<GameCurrencyState>>, attachments: List<Attachment>, references: List<StateAndRef<ContractState>>) {
+        FungibleTokenContract().verifyMove(moveCommands, inputs, outputs, attachments, references)
         requireThat {
             "All of the input tokens should be for the same game board" using inputs.all { it.state.data.gameBoardId == inputs.first().state.data.gameBoardId }
             "All of the output tokens should be for the same game board" using outputs.all { it.state.data.gameBoardId == outputs.first().state.data.gameBoardId }
@@ -57,8 +65,8 @@ class GameCurrencyContract: AbstractTokenContract<GameCurrencyState>(), Contract
         }
     }
 
-    override fun verifyRedeem(redeemCommand: CommandWithParties<TokenCommand>, inputs: List<IndexedState<GameCurrencyState>>, outputs: List<IndexedState<GameCurrencyState>>, attachments: List<Attachment>) {
-        FungibleTokenContract().verifyRedeem(redeemCommand, inputs, outputs, attachments)
+    override fun verifyRedeem(redeemCommand: CommandWithParties<TokenCommand>, inputs: List<IndexedState<GameCurrencyState>>, outputs: List<IndexedState<GameCurrencyState>>, attachments: List<Attachment>, references: List<StateAndRef<ContractState>>) {
+        FungibleTokenContract().verifyRedeem(redeemCommand, inputs, outputs, attachments, references)
         requireThat {
             "All of the input tokens should be for the same game board" using inputs.all { it.state.data.gameBoardId == inputs.first().state.data.gameBoardId }
             "All of the output tokens should be for the same game board" using outputs.all { it.state.data.gameBoardId == outputs.first().state.data.gameBoardId }

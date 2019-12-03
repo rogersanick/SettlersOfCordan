@@ -44,11 +44,10 @@ class TradeWithPortFlowTest: BaseCordanTest() {
         }
 
         // Get a reference to the issued game state
-        val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameBoardState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
-        setupGameBoardForTesting(gameBoardState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
+        setupGameBoardForTesting(gameBoardState, network, arrayOfAllPlayerNodesInOrder)
 
         val portToTradeWith = gameBoardState.ports.value[0]
         val outputResource = portToTradeWith.portTile.outputRequired.first().token as Resource

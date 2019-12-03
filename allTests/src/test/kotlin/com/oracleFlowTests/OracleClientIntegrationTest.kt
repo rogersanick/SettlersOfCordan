@@ -30,14 +30,11 @@ class OracleClientIntegrationTest: BaseCordanTest() {
 
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
-
-        val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
-        setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
-
-        val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
+        // Setup the game board for testing
+        val gameBoardState = setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder)
 
         val rollDiceFlow = RollDiceFlow(gameBoardState.linearId)
         val futureWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)

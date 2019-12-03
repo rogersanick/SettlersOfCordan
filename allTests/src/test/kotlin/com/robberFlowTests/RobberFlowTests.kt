@@ -34,13 +34,10 @@ class RobberFlowTests: BaseCordanTest() {
 
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
-
-        val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
-        setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
-        val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
+        val gameBoardState = setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder)
 
         val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(3, 2, gameBoardState, oracle)
         val rollDiceFlow = RollDiceFlow(gameBoardState.linearId, deterministicDiceRoll)
@@ -72,14 +69,11 @@ class RobberFlowTests: BaseCordanTest() {
 
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
-
-        val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
-        setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
-
-        val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
+        // Setup game board for testing
+        val gameBoardState = setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder)
 
         val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(3, 4, gameBoardState, oracle)
         val rollDiceFlow = RollDiceFlow(gameBoardState.linearId, deterministicDiceRoll)
@@ -115,14 +109,10 @@ class RobberFlowTests: BaseCordanTest() {
 
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
-
-        val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
-        setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
-
-        val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
+        val gameBoardState = setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder)
 
         val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(3, 4, gameBoardState, oracle)
         val rollDiceFlow = RollDiceFlow(gameBoardState.linearId, deterministicDiceRoll)
@@ -167,14 +157,10 @@ class RobberFlowTests: BaseCordanTest() {
 
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
-
-        val arrayOfAllTransactions = arrayListOf<SignedTransaction>()
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
-        setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions)
-
-        val gameBoardState = arrayOfAllTransactions.last().coreTransaction.outRefsOfType<GameBoardState>().first().state.data
+        val gameBoardState = setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder)
         val nodeWithMoreThan7 = gatherResourcesUntilAPlayerHasMoreThan7(gameBoardState, arrayOfAllPlayerNodesInOrder, oracle, network)
 
         val diceRollTriggeringRobber = getDiceRollWithSpecifiedRollValue(3,4, gameBoardState, oracle)

@@ -9,17 +9,31 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.StartedMockNode
 
-fun setupGameBoardForTesting(gameState: GameBoardState, network: MockNetwork, arrayOfAllPlayerNodesInOrder: List<StartedMockNode>, arrayOfAllTransactions: ArrayList<SignedTransaction>) {
-    val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0, 5), Pair(0, 3), Pair(2, 0), Pair(2, 2))
-    val nonconflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(12, 5), Pair(12, 3), Pair(14, 0), Pair(14, 2))
+fun setupGameBoardForTesting(gameState: GameBoardState, network: MockNetwork, arrayOfAllPlayerNodesInOrder: List<StartedMockNode>): GameBoardState {
+    val nonConflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0, 5), Pair(0, 3), Pair(2, 0), Pair(2, 2))
+    val nonConflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(12, 5), Pair(12, 3), Pair(14, 0), Pair(14, 2))
+
+    val setupGameBoardTxs = arrayListOf<SignedTransaction>()
 
     for (i in 0..3) {
-        placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
+        setupGameBoardTxs.add(
+                placeAPieceFromASpecificNodeAndEndTurn(i, nonConflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, false)
+        )
     }
 
     for (i in 3.downTo(0)) {
-        placeAPieceFromASpecificNodeAndEndTurn(i, nonconflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, arrayOfAllTransactions, false)
+        setupGameBoardTxs.add(
+                placeAPieceFromASpecificNodeAndEndTurn(i, nonConflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, false)
+        )
     }
+
+    return setupGameBoardTxs
+            .last()
+            .coreTransaction
+            .outRefsOfType<GameBoardState>()
+            .first()
+            .state
+            .data
 }
 
 fun getDiceRollWithSpecifiedRollValue(int1: Int, int2: Int, gameBoardState: GameBoardState, oracle: StartedMockNode): DiceRollState {

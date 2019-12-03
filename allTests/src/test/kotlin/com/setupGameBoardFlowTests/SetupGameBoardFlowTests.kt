@@ -21,7 +21,7 @@ class SetupGameBoardFlowTests: BaseCordanTest() {
 
         // Issue a game state onto the ledger.
         val gameStateIssueFlow = SetupGameBoardFlow(p1, p2, p3, p4)
-        val future = a.startFlow(gameStateIssueFlow);
+        val future = a.startFlow(gameStateIssueFlow)
         network.runNetwork()
 
         val ptx = future.getOrThrow()
