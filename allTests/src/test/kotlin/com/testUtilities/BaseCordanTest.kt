@@ -2,6 +2,7 @@ package com.testUtilities
 
 import net.corda.core.identity.CordaX500Name
 import net.corda.testing.common.internal.testNetworkParameters
+import net.corda.testing.internal.chooseIdentity
 import net.corda.testing.node.*
 import org.junit.After
 import org.junit.Before
@@ -14,7 +15,7 @@ abstract class BaseCordanTest {
     @get:Rule
     val timeoutRule = Timeout(3, TimeUnit.MINUTES)
 
-    val network = MockNetwork(MockNetworkParameters(
+    var network = MockNetwork(MockNetworkParameters(
             notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB"))),
             networkParameters = testNetworkParameters(minimumPlatformVersion = 5),
             cordappsForAllNodes = listOf(
@@ -23,15 +24,20 @@ abstract class BaseCordanTest {
                     TestCordapp.findCordapp("com.contractsAndStates"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.workflows"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.contracts"),
-                    TestCordapp.findCordapp("com.r3.corda.lib.tokens.money"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.money")
-            )
-    )
-    )
-    val a = network.createNode(MockNodeParameters())
-    val b = network.createNode(MockNodeParameters())
-    val c = network.createNode(MockNodeParameters())
-    val d = network.createNode(MockNodeParameters())
+            )))
+
+    var a = network.createNode(MockNodeParameters())
+    var b = network.createNode(MockNodeParameters())
+    var c = network.createNode(MockNodeParameters())
+    var d = network.createNode(MockNodeParameters())
+
+    // Get an identity for each of the players of the game.
+    var p1 = a.info.chooseIdentity()
+    var p2 = b.info.chooseIdentity()
+    var p3 = c.info.chooseIdentity()
+    var p4 = d.info.chooseIdentity()
+
     private val oracleName = CordaX500Name("Oracle", "New York", "US")
     val oracle = network.createNode(
             MockNodeParameters(legalName = oracleName).withAdditionalCordapps(

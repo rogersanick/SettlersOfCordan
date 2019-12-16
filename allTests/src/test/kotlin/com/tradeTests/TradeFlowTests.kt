@@ -11,7 +11,6 @@ import com.testUtilities.BaseCordanTest
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.requireThat
 import net.corda.core.node.services.queryBy
-import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.internal.chooseIdentity
 import org.junit.Test
@@ -20,12 +19,6 @@ class TradeFlowTests: BaseCordanTest() {
 
     @Test
     fun player1IsAbleToIssueATradeOnTheirTurn() {
-
-        // Get an identity for each of the players of the game.
-        val p1 = a.info.chooseIdentity()
-        val p2 = b.info.chooseIdentity()
-        val p3 = c.info.chooseIdentity()
-        val p4 = d.info.chooseIdentity()
 
         // Issue a game state onto the ledger
         val gameStateIssueFlow = (SetupGameBoardFlow(p1, p2, p3, p4))
@@ -78,12 +71,6 @@ class TradeFlowTests: BaseCordanTest() {
 
     @Test
     fun player2IsAbleToExecuteATradeImposedByPlayer1() {
-
-        // Get an identity for each of the players of the game.
-        val p1 = a.info.chooseIdentity()
-        val p2 = b.info.chooseIdentity()
-        val p3 = c.info.chooseIdentity()
-        val p4 = d.info.chooseIdentity()
 
         // Issue a game state onto the ledger
         val gameStateIssueFlow = (SetupGameBoardFlow(p1, p2, p3, p4))

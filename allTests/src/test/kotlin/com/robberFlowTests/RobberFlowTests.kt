@@ -19,12 +19,6 @@ class RobberFlowTests: BaseCordanTest() {
     @Test
     fun player1IsUnableToMoveTheRobberWhenA7IsNotRolled() {
 
-        // Get an identity for each of the players of the game.
-        val p1 = a.info.chooseIdentity()
-        val p2 = b.info.chooseIdentity()
-        val p3 = c.info.chooseIdentity()
-        val p4 = d.info.chooseIdentity()
-
         // Issue a game state onto the ledger
         val gameStateIssueFlow = (SetupGameBoardFlow(p1, p2, p3, p4))
         val futureWithGameState = a.startFlow(gameStateIssueFlow)

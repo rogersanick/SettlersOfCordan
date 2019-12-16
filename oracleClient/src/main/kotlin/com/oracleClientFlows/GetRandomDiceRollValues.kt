@@ -1,4 +1,4 @@
-package com.oracleClientFlows.flows
+package com.oracleClientFlows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.oracleClientStatesAndContracts.states.DiceRollState
