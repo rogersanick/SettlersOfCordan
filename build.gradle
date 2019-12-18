@@ -7,7 +7,7 @@ buildscript {
         corda_release_distribution = 'net.corda'
         corda_gradle_plugins_version = '5.0.5'
         kotlin_version = '1.2.71'
-        junit_version = '4.12'
+        junit_version = '5.5.2'
         quasar_version = '0.7.12_r3'
         spring_boot_version = '2.0.2.RELEASE'
         spring_boot_gradle_plugin_version = '2.0.2.RELEASE'
@@ -46,6 +46,7 @@ allprojects {
         maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-dev' }
         maven { url 'https://jitpack.io' }
         maven { url 'https://mvnrepository.com/artifact/com.nhaarman/mockito-kotlin' }
+        maven { url 'https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine' }
     }
 }
 
@@ -56,7 +57,8 @@ apply plugin: 'net.corda.plugins.cordformation'
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    compile "junit:junit:$junit_version"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_version"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
 
     // Corda dependencies.
     cordaCompile "$corda_release_group:corda-core:$corda_release_version"
