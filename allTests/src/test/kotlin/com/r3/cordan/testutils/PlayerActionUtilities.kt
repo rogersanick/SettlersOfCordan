@@ -19,11 +19,12 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.StartedMockNode
+import net.corda.testing.node.internal.InternalMockNetwork
 
 fun rollDiceThenGatherThenMaybeEndTurn(
         gameBoardLinearId: UniqueIdentifier,
         node: StartedMockNode,
-        network: MockNetwork,
+        network: InternalMockNetwork,
         endTurn: Boolean = true,
         diceRollState: DiceRollState? = null): ResourceCollectionSignedTransactions {
 
@@ -56,7 +57,7 @@ fun placeAPieceFromASpecificNodeAndEndTurn(
         i: Int,
         testCoordinates: ArrayList<Pair<Int, Int>>,
         gameState: GameBoardState,
-        network: MockNetwork,
+        network: InternalMockNetwork,
         arrayOfAllPlayerNodesInOrder: List<StartedMockNode>,
         initialSetupComplete: Boolean): SignedTransaction {
     // Build an initial settlement by issuing a settlement state
@@ -104,7 +105,7 @@ fun placeAPieceFromASpecificNodeAndEndTurn(
 fun gatherResourcesUntilAPlayerHasMoreThan7(gameBoardState: GameBoardState,
                                             listOfNodes: List<StartedMockNode>,
                                             oracle: StartedMockNode,
-                                            network: MockNetwork): StartedMockNode {
+                                            network: InternalMockNetwork): StartedMockNode {
     var allNodesHaveLessThan7Resources = true
     var nodeWithMoreThan7Resources: StartedMockNode? = null
     while(allNodesHaveLessThan7Resources) {
