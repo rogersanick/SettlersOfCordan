@@ -13,9 +13,7 @@ import net.corda.core.contracts.requireThat
 import net.corda.core.node.services.queryBy
 import net.corda.core.utilities.getOrThrow
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TradeFlowTests: BaseBoardGameTest() {
 
     @Test
@@ -29,6 +27,7 @@ class TradeFlowTests: BaseBoardGameTest() {
         val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(GatherResourcesFlow(gameBoardLinearId = gameState.linearId))
         network.runNetwork()
         val txWithNewResources = futureWithClaimedResources.getOrThrow()
+
 
         requireThat {
             val resources = txWithNewResources.coreTransaction.outputsOfType<FungibleToken>()
@@ -67,6 +66,7 @@ class TradeFlowTests: BaseBoardGameTest() {
         val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(GatherResourcesFlow(gameBoardLinearId = gameState.linearId))
         network.runNetwork()
         val txWithNewResources = futureWithClaimedResources.getOrThrow()
+
         requireThat {
             val resources = txWithNewResources.coreTransaction.outputsOfType<FungibleToken>()
             "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)

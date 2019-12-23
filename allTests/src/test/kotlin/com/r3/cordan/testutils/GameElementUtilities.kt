@@ -22,13 +22,13 @@ fun setupGameBoardForTestingAndReturnIds(gameState: GameBoardState, network: Int
     val setupGameBoardTxs = arrayListOf<SignedTransaction>()
 
     for (i in 0..3) {
-        setupGameBoardTxs.add(
+        setupGameBoardTxs.addAll(
                 placeAPieceFromASpecificNodeAndEndTurn(i, nonConflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, false)
         )
     }
 
     for (i in 3.downTo(0)) {
-        setupGameBoardTxs.add(
+        setupGameBoardTxs.addAll(
                 placeAPieceFromASpecificNodeAndEndTurn(i, nonConflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, false)
         )
     }
@@ -44,19 +44,18 @@ fun setupGameBoardForTesting(gameState: GameBoardState, network: InternalMockNet
     val setupGameBoardTxs = arrayListOf<SignedTransaction>()
 
     for (i in 0..3) {
-        setupGameBoardTxs.add(
+        setupGameBoardTxs.addAll(
                 placeAPieceFromASpecificNodeAndEndTurn(i, nonConflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, false)
         )
     }
 
     for (i in 3.downTo(0)) {
-        setupGameBoardTxs.add(
+        setupGameBoardTxs.addAll(
                 placeAPieceFromASpecificNodeAndEndTurn(i, nonConflictingHextileIndexAndCoordinatesRound2, gameState, network, arrayOfAllPlayerNodesInOrder, false)
         )
     }
 
-    return setupGameBoardTxs
-            .last()
+    return setupGameBoardTxs[setupGameBoardTxs.size-2]
             .coreTransaction
             .outRefsOfType<GameBoardState>()
             .first()

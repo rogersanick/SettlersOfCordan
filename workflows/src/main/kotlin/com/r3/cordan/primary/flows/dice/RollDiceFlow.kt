@@ -31,7 +31,7 @@ class RollDiceFlow(val gameBoardLinearId: UniqueIdentifier, val diceRollState: D
     @Suspendable
     override fun call(): SignedTransaction {
 
-        val gameBoardStateAndRef = serviceHub.vaultService
+         val gameBoardStateAndRef = serviceHub.vaultService
                 .querySingleState<GameBoardState>(gameBoardLinearId)
         val gameBoardReferenceStateAndRef = ReferencedStateAndRef(gameBoardStateAndRef)
         val gameBoardState = gameBoardStateAndRef.state.data

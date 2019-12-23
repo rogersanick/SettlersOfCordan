@@ -11,14 +11,14 @@ class TileSideIndexTest {
 
     @Test
     fun `it rejects a negative index`() {
-        assertFailsWith<IllegalArgumentException>() {
+        assertFailsWith<IllegalArgumentException> {
             TileSideIndex(-1)
         }
     }
 
     @Test
     fun `it rejects a too large index`() {
-        assertFailsWith<IllegalArgumentException>() {
+        assertFailsWith<IllegalArgumentException> {
             TileSideIndex(HexTile.SIDE_COUNT)
         }
     }

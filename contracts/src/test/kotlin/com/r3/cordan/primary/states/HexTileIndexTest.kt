@@ -10,14 +10,14 @@ class HexTileIndexTest {
 
     @Test
     fun `it rejects a negative index`() {
-        assertFailsWith<IllegalArgumentException>() {
+        assertFailsWith<IllegalArgumentException> {
             HexTileIndex(-1)
         }
     }
 
     @Test
     fun `it rejects a too large index`() {
-        assertFailsWith<IllegalArgumentException>() {
+        assertFailsWith<IllegalArgumentException> {
             HexTileIndex(GameBoardState.TILE_COUNT)
         }
     }

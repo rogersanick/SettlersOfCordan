@@ -59,7 +59,7 @@ fun placeAPieceFromASpecificNodeAndEndTurn(
         gameState: GameBoardState,
         network: InternalMockNetwork,
         arrayOfAllPlayerNodesInOrder: List<StartedMockNode>,
-        initialSetupComplete: Boolean): SignedTransaction {
+        initialSetupComplete: Boolean): List<SignedTransaction> {
     // Build an initial settlement by issuing a settlement state
     // and updating the current turn.
     if (gameState.hexTiles.get(HexTileIndex(testCoordinates[i].first)).resourceType == HexTileType.Desert) {
@@ -82,9 +82,9 @@ fun placeAPieceFromASpecificNodeAndEndTurn(
         // End turn during normal game play
         val endTurnFlow = currPlayer.startFlow(EndTurnDuringInitialPlacementFlow(gameState.linearId))
         network.runNetwork()
-        endTurnFlow.getOrThrow()
+        val txWithUpdatedTurnState = endTurnFlow.getOrThrow()
 
-        return txWithUpdatedGameBoardState
+        return listOf(txWithUpdatedGameBoardState, txWithUpdatedTurnState)
     } else {
         // Build an initial settlement and road
         val buildInitialSettlementFlow = BuildInitialSettlementAndRoadFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second, testCoordinates[i].second)
@@ -95,9 +95,9 @@ fun placeAPieceFromASpecificNodeAndEndTurn(
         // End turn during initial setup phase
         val endTurnFlow = currPlayer.startFlow(EndTurnDuringInitialPlacementFlow(gameState.linearId))
         network.runNetwork()
-        endTurnFlow.getOrThrow()
+        val txWithUpdatedTurnState = endTurnFlow.getOrThrow()
 
-        return txWithUpdatedGameBoardState
+        return listOf(txWithUpdatedGameBoardState, txWithUpdatedTurnState)
     }
 
 }

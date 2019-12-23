@@ -14,7 +14,7 @@ import org.junit.jupiter.api.AfterEach
 
 abstract class BaseCordanTest {
 
-    var network = InternalMockNetwork(
+    val network = InternalMockNetwork(
             initialNetworkParameters = testNetworkParameters(minimumPlatformVersion = 5),
             defaultParameters = MockNetworkParameters(
                 notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB")))
@@ -31,21 +31,22 @@ abstract class BaseCordanTest {
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.money")
             ).map { it as TestCordappInternal })
 
-    var internalA = network.createNode(InternalMockNodeParameters())
-    var internalB = network.createNode(InternalMockNodeParameters())
-    var internalC = network.createNode(InternalMockNodeParameters())
-    var internalD = network.createNode(InternalMockNodeParameters())
+    val internalA = network.createNode(InternalMockNodeParameters())
+    val internalB = network.createNode(InternalMockNodeParameters())
+    val internalC = network.createNode(InternalMockNodeParameters())
+    val internalD = network.createNode(InternalMockNodeParameters())
+    val notary = network.defaultNotaryNode
 
-    var a = StartedMockNode.create(internalA)
-    var b = StartedMockNode.create(internalB)
-    var c = StartedMockNode.create(internalC)
-    var d = StartedMockNode.create(internalD)
+    val a = StartedMockNode.create(internalA)
+    val b = StartedMockNode.create(internalB)
+    val c = StartedMockNode.create(internalC)
+    val d = StartedMockNode.create(internalD)
 
     // Get an identity for each of the players of the game.
-    var p1 = a.info.chooseIdentity()
-    var p2 = b.info.chooseIdentity()
-    var p3 = c.info.chooseIdentity()
-    var p4 = d.info.chooseIdentity()
+    val p1 = a.info.chooseIdentity()
+    val p2 = b.info.chooseIdentity()
+    val p3 = c.info.chooseIdentity()
+    val p4 = d.info.chooseIdentity()
 
     private val oracleName = CordaX500Name("Oracle", "New York", "US")
     val internalOracle = network.createNode(

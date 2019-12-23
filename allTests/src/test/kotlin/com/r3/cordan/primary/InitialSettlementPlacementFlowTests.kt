@@ -5,6 +5,7 @@ import com.r3.cordan.primary.flows.board.SetupGameBoardFlow
 import com.r3.cordan.primary.states.structure.GameBoardState
 import com.r3.cordan.primary.states.board.HexTileIndex
 import com.r3.cordan.primary.states.resources.HexTileType
+import com.r3.cordan.testutils.BaseBoardGameTest
 import com.r3.cordan.testutils.placeAPieceFromASpecificNodeAndEndTurn
 import com.r3.cordan.testutils.setupGameBoardForTesting
 import com.r3.cordan.testutils.BaseCordanTest
@@ -14,6 +15,7 @@ import net.corda.core.utilities.getOrThrow
 import net.corda.testing.internal.chooseIdentity
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
+import java.lang.IllegalArgumentException
 import kotlin.test.assertFailsWith
 
 class InitialSettlementPlacementFlowTests: BaseCordanTest() {
@@ -75,7 +77,7 @@ class InitialSettlementPlacementFlowTests: BaseCordanTest() {
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
 
-        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
+        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
         setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder)
@@ -101,12 +103,12 @@ class InitialSettlementPlacementFlowTests: BaseCordanTest() {
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
 
-        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
+        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
         val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0, 0), Pair(0, 0), Pair(0, 0), Pair(0, 0))
 
         placeAPieceFromASpecificNodeAndEndTurn(0, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, false)
-        assertThrows(TransactionVerificationException::class.java) {
+        assertFailsWith<IllegalArgumentException>("The flow should fail when constructing a new GameBoardState.") {
             placeAPieceFromASpecificNodeAndEndTurn(1, nonconflictingHextileIndexAndCoordinatesRound1, gameState, network, arrayOfAllPlayerNodesInOrder, false)
         }
 
@@ -159,7 +161,7 @@ class InitialSettlementPlacementFlowTests: BaseCordanTest() {
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
 
-        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d);
+        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
         val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0, 5), Pair(0, 1), Pair(0, 3), Pair(1, 1))
 

@@ -6,18 +6,14 @@ import com.r3.cordan.primary.states.structure.GameBoardState
 import com.r3.cordan.primary.states.board.HexTileIndex
 import com.r3.cordan.primary.states.resources.HexTileType
 import com.r3.cordan.primary.states.resources.Resource
-import com.r3.cordan.testutils.countAllResourcesForASpecificNode
-import com.r3.cordan.testutils.getDiceRollWithSpecifiedRollValue
-import com.r3.cordan.testutils.rollDiceThenGatherThenMaybeEndTurn
-import com.r3.cordan.testutils.setupGameBoardForTesting
-import com.r3.cordan.testutils.BaseCordanTest
+import com.r3.cordan.testutils.*
 import net.corda.core.contracts.Amount
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.internal.chooseIdentity
 import org.junit.jupiter.api.Test
 
-class TradeWithPortFlowTest: BaseCordanTest() {
+class TradeWithPortFlowTest: BaseBoardGameTest() {
 
     @Test
     fun player1IsAbleToMakeMultipleTradesWithAPortOnTheirTurn() {

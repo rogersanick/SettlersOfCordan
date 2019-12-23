@@ -30,9 +30,9 @@ import net.corda.core.node.services.VaultService
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
-// ********************
-// * Issue Trade Flow *
-// ********************
+// *************************
+// * Gather Resources Flow *
+// *************************
 
 /**
  * This flow allows nodes to self-issue tokens where they are able to prove that

@@ -1,54 +1,33 @@
 package com.r3.cordan.primary
 
 import com.r3.corda.lib.tokens.contracts.types.TokenType
-import com.r3.cordan.primary.flows.board.SetupGameBoardFlow
 import com.r3.cordan.primary.flows.dice.RollDiceFlow
 import com.r3.cordan.primary.flows.robber.ApplyRobberFlow
 import com.r3.cordan.primary.flows.robber.MoveRobberFlow
 import com.r3.cordan.primary.flows.robber.RemovePlayBlockerFlow
-import com.r3.cordan.primary.states.structure.GameBoardState
 import com.r3.cordan.primary.states.board.HexTileIndex
 import com.r3.cordan.primary.states.robber.PlayBlockerState
 import com.r3.cordan.primary.states.robber.RobberState
-import com.r3.cordan.testutils.countAllResourcesForASpecificNode
-import com.r3.cordan.testutils.gatherResourcesUntilAPlayerHasMoreThan7
-import com.r3.cordan.testutils.getDiceRollWithSpecifiedRollValue
-import com.r3.cordan.testutils.setupGameBoardForTesting
-import com.r3.cordan.testutils.BaseCordanTest
+import com.r3.cordan.testutils.*
 import net.corda.core.contracts.TransactionVerificationException
 import net.corda.core.contracts.requireThat
 import net.corda.core.node.services.queryBy
 import net.corda.core.utilities.getOrThrow
-import net.corda.testing.internal.chooseIdentity
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
 
-class RobberFlowTests: BaseCordanTest() {
+class RobberFlowTests: BaseBoardGameTest() {
 
     @Test
     fun player1IsUnableToMoveTheRobberWhenA7IsNotRolled() {
 
-        // Issue a game state onto the ledger
-        val gameStateIssueFlow = (SetupGameBoardFlow(p1, p2, p3, p4))
-        val futureWithGameState = a.startFlow(gameStateIssueFlow)
-        network.runNetwork()
-
-        val stxGameState = futureWithGameState.getOrThrow()
-
-        // Get a reference to the issued game state
-        val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
-        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
-        val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
-
-        val gameBoardState = setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder)
-
-        val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(3, 2, gameBoardState, oracle)
-        val rollDiceFlow = RollDiceFlow(gameBoardState.linearId, deterministicDiceRoll)
+        val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(3, 2, gameState, oracle)
+        val rollDiceFlow = RollDiceFlow(gameState.linearId, deterministicDiceRoll)
         val futureWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
         network.runNetwork()
         futureWithDiceRoll.getOrThrow()
 
-        val futureWithMovedRobber = arrayOfAllPlayerNodesInOrder[0].startFlow(MoveRobberFlow(gameBoardState.linearId, 5))
+        val futureWithMovedRobber = arrayOfAllPlayerNodesInOrder[0].startFlow(MoveRobberFlow(gameState.linearId, 5))
         network.runNetwork()
 
         assertFailsWith<TransactionVerificationException.ContractRejection>("The associated dice roll must have a value of 7.") { futureWithMovedRobber.getOrThrow() }
@@ -57,34 +36,13 @@ class RobberFlowTests: BaseCordanTest() {
     @Test
     fun player1IsAbleToMoveTheRobberWhenA7IsRolled() {
 
-        // Get an identity for each of the players of the game.
-        val p1 = a.info.chooseIdentity()
-        val p2 = b.info.chooseIdentity()
-        val p3 = c.info.chooseIdentity()
-        val p4 = d.info.chooseIdentity()
-
-        // Issue a game state onto the ledger
-        val gameStateIssueFlow = (SetupGameBoardFlow(p1, p2, p3, p4))
-        val futureWithGameState = a.startFlow(gameStateIssueFlow)
-        network.runNetwork()
-
-        val stxGameState = futureWithGameState.getOrThrow()
-
-        // Get a reference to the issued game state
-        val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
-        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
-        val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
-
-        // Setup game board for testing
-        val gameBoardState = setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder)
-
-        val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(3, 4, gameBoardState, oracle)
-        val rollDiceFlow = RollDiceFlow(gameBoardState.linearId, deterministicDiceRoll)
+        val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(3, 4, gameState, oracle)
+        val rollDiceFlow = RollDiceFlow(gameState.linearId, deterministicDiceRoll)
         val futureWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
         network.runNetwork()
         futureWithDiceRoll.getOrThrow()
 
-        val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(MoveRobberFlow(gameBoardState.linearId, 5))
+        val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(MoveRobberFlow(gameState.linearId, 5))
         network.runNetwork()
         val futureWithMovedRobber = futureWithClaimedResources.getOrThrow()
 
@@ -97,37 +55,17 @@ class RobberFlowTests: BaseCordanTest() {
     @Test
     fun player1IsAbleToApplyTheRobberAfterMovingIt() {
 
-        // Get an identity for each of the players of the game.
-        val p1 = a.info.chooseIdentity()
-        val p2 = b.info.chooseIdentity()
-        val p3 = c.info.chooseIdentity()
-        val p4 = d.info.chooseIdentity()
-
-        // Issue a game state onto the ledger
-        val gameStateIssueFlow = (SetupGameBoardFlow(p1, p2, p3, p4))
-        val futureWithGameState = a.startFlow(gameStateIssueFlow)
-        network.runNetwork()
-
-        val stxGameState = futureWithGameState.getOrThrow()
-
-        // Get a reference to the issued game state
-        val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
-        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
-        val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
-
-        val gameBoardState = setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder)
-
-        val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(3, 4, gameBoardState, oracle)
-        val rollDiceFlow = RollDiceFlow(gameBoardState.linearId, deterministicDiceRoll)
+        val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(3, 4, gameState, oracle)
+        val rollDiceFlow = RollDiceFlow(gameState.linearId, deterministicDiceRoll)
         val futureWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
         network.runNetwork()
         futureWithDiceRoll.getOrThrow()
 
-        val futureWithMovedRobber = arrayOfAllPlayerNodesInOrder[0].startFlow(MoveRobberFlow(gameBoardState.linearId, 5))
+        val futureWithMovedRobber = arrayOfAllPlayerNodesInOrder[0].startFlow(MoveRobberFlow(gameState.linearId, 5))
         network.runNetwork()
         futureWithMovedRobber.getOrThrow()
 
-        val futureWithRobberApplied = arrayOfAllPlayerNodesInOrder[0].startFlow(ApplyRobberFlow(gameBoardState.linearId))
+        val futureWithRobberApplied = arrayOfAllPlayerNodesInOrder[0].startFlow(ApplyRobberFlow(gameState.linearId))
         network.runNetwork()
         val txWithAppliedRobber = futureWithRobberApplied.getOrThrow().coreTransaction
 
@@ -144,38 +82,19 @@ class RobberFlowTests: BaseCordanTest() {
 
     @Test
     fun aPlayerIsAbleToRemoveAPlayBlockerState() {
+        
+        val nodeWithMoreThan7 = gatherResourcesUntilAPlayerHasMoreThan7(gameState, arrayOfAllPlayerNodesInOrder, oracle, network)
 
-        // Get an identity for each of the players of the game.
-        val p1 = a.info.chooseIdentity()
-        val p2 = b.info.chooseIdentity()
-        val p3 = c.info.chooseIdentity()
-        val p4 = d.info.chooseIdentity()
-
-        // Issue a game state onto the ledger
-        val gameStateIssueFlow = (SetupGameBoardFlow(p1, p2, p3, p4))
-        val futureWithGameState = a.startFlow(gameStateIssueFlow)
-        network.runNetwork()
-
-        val stxGameState = futureWithGameState.getOrThrow()
-
-        // Get a reference to the issued game state
-        val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
-        val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
-        val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
-
-        val gameBoardState = setupGameBoardForTesting(gameState, network, arrayOfAllPlayerNodesInOrder)
-        val nodeWithMoreThan7 = gatherResourcesUntilAPlayerHasMoreThan7(gameBoardState, arrayOfAllPlayerNodesInOrder, oracle, network)
-
-        val diceRollTriggeringRobber = getDiceRollWithSpecifiedRollValue(3, 4, gameBoardState, oracle)
-        val futureWithRobberTriggered = arrayOfAllPlayerNodes[0].startFlow(RollDiceFlow(gameBoardState.linearId, diceRollTriggeringRobber))
+        val diceRollTriggeringRobber = getDiceRollWithSpecifiedRollValue(3, 4, gameState, oracle)
+        val futureWithRobberTriggered = arrayOfAllPlayerNodesInOrder[0].startFlow(RollDiceFlow(gameState.linearId, diceRollTriggeringRobber))
         network.runNetwork()
         futureWithRobberTriggered.getOrThrow()
 
-        val futureWithMovedRobber = arrayOfAllPlayerNodesInOrder[0].startFlow(MoveRobberFlow(gameBoardState.linearId, 5))
+        val futureWithMovedRobber = arrayOfAllPlayerNodesInOrder[0].startFlow(MoveRobberFlow(gameState.linearId, 5))
         network.runNetwork()
         futureWithMovedRobber.getOrThrow()
 
-        val futureWithRobberApplied = arrayOfAllPlayerNodesInOrder[0].startFlow(ApplyRobberFlow(gameBoardState.linearId))
+        val futureWithRobberApplied = arrayOfAllPlayerNodesInOrder[0].startFlow(ApplyRobberFlow(gameState.linearId))
         network.runNetwork()
         val txWithAppliedRobber = futureWithRobberApplied.getOrThrow().coreTransaction
 
@@ -206,7 +125,7 @@ class RobberFlowTests: BaseCordanTest() {
 
         requireThat {
             "All nodes now recognize that the nodeWithMoreThan7 has removed its playBlocker" using (
-                    arrayOfAllPlayerNodes.all { it.services.vaultService.queryBy<PlayBlockerState>().states.filter { it.state.data.playerBlocked == nodeWithMoreThan7.info.legalIdentities.first() }.isEmpty() })
+                    arrayOfAllPlayerNodesInOrder.all { it.services.vaultService.queryBy<PlayBlockerState>().states.filter { it.state.data.playerBlocked == nodeWithMoreThan7.info.legalIdentities.first() }.isEmpty() })
         }
 
     }
