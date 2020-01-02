@@ -41,6 +41,7 @@ abstract class BaseCordanTest {
     val b = StartedMockNode.create(internalB)
     val c = StartedMockNode.create(internalC)
     val d = StartedMockNode.create(internalD)
+    val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
 
     // Get an identity for each of the players of the game.
     val p1 = a.info.chooseIdentity()

@@ -4,10 +4,12 @@ import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.whenever
 import com.r3.cordan.primary.flows.board.SetupGameBoardFlow
 import com.r3.cordan.primary.states.structure.GameBoardState
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.SecureHash
 import net.corda.core.utilities.getOrThrow
 import net.corda.node.services.config.NotaryConfig
 import net.corda.testing.internal.chooseIdentity
+import net.corda.testing.node.StartedMockNode
 import net.corda.testing.node.internal.InternalMockNetwork
 import net.corda.testing.node.internal.InternalMockNodeParameters
 import net.corda.testing.node.internal.TestStartedNode
@@ -21,7 +23,6 @@ abstract class BaseBoardGameTest: BaseCordanTest() {
 
     // Get access to an array of playerNodes
     private val arrayOfAllInternalNodes = arrayListOf(internalA, internalB, internalC, internalD, internalOracle)
-    private val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
     private val setupTxs = arrayListOf<SecureHash>()
 
     val gameState = {
@@ -111,6 +112,14 @@ abstract class BaseBoardGameTest: BaseCordanTest() {
         jdbc.prepareStatement("UPDATE VAULT_STATES SET STATE_STATUS=0 WHERE transaction_id='$gameBoardStateTransaction'").executeUpdate()
         val turnTrackerTransaction = setupTxs[setupTxs.size - 1]
         jdbc.prepareStatement("UPDATE VAULT_STATES SET STATE_STATUS=0 WHERE transaction_id='$turnTrackerTransaction'").executeUpdate()
+    }
+
+    fun StartedMockNode.restoreStatesInTx(txId: SecureHash, className: String? = null) {
+        if (className != null) {
+            this.services.jdbcSession().prepareStatement("UPDATE VAULT_STATES SET STATE_STATUS=0 WHERE transaction_id='$txId' and CONTRACT_STATE_CLASS_NAME='$className'").executeUpdate()
+        } else {
+            this.services.jdbcSession().prepareStatement("UPDATE VAULT_STATES SET STATE_STATUS=0 WHERE transaction_id='$txId'").executeUpdate()
+        }
     }
 
     private fun deleteAllTransactionsFromNotaryExcept(
