@@ -7,7 +7,7 @@ import net.corda.testing.driver.DriverDSL
 import net.corda.testing.driver.DriverParameters
 import net.corda.testing.driver.NodeHandle
 import net.corda.testing.driver.driver
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.util.concurrent.Future
 import kotlin.test.assertEquals
 

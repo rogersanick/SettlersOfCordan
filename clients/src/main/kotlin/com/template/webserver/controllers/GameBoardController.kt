@@ -1,7 +1,7 @@
 package com.template.webserver.controllers
 
 import com.contractsAndStates.states.GameBoardState
-import com.flows.SetupGameBoardFlow
+import com.r3.cordan.primary.flows.board.SetupGameBoardFlow
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.template.webserver.NodeRPCConnection
 import net.corda.core.contracts.UniqueIdentifier
