@@ -47,7 +47,7 @@ class GatherPhaseContract : Contract {
                 /**
                  *  ******** BUSINESS LOGIC ********
                  */
-                "The input dice roll is not equal to 7" using !diceRollInputState.isRobberTotal()
+                "The input random roll is not equal to 7" using !diceRollInputState.isRobberTotal()
 
                 /**
                  *  ******** SIGNATURES ********

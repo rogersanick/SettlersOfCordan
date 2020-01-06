@@ -1,9 +1,10 @@
 package com.r3.cordan.testutils
 
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.cordan.oracle.client.states.DiceRollState
 import com.r3.cordan.primary.flows.structure.BuildInitialSettlementAndRoadFlow
 import com.r3.cordan.primary.flows.structure.BuildSettlementFlow
-import com.r3.cordan.primary.flows.dice.RollDiceFlow
+import com.r3.cordan.primary.flows.random.RollDiceFlow
 import com.r3.cordan.primary.flows.resources.GatherResourcesFlow
 import com.r3.cordan.primary.flows.turn.EndTurnDuringInitialPlacementFlow
 import com.r3.cordan.primary.flows.turn.EndTurnFlow
@@ -17,7 +18,6 @@ import net.corda.core.internal.sumByLong
 import net.corda.core.node.services.queryBy
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
-import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.StartedMockNode
 import net.corda.testing.node.internal.InternalMockNetwork
 
@@ -28,7 +28,7 @@ fun rollDiceThenGatherThenMaybeEndTurn(
         endTurn: Boolean = true,
         diceRollState: DiceRollState? = null): ResourceCollectionSignedTransactions {
 
-    // Roll the dice
+    // Roll the random
     val futureWithDiceRoll: CordaFuture<SignedTransaction> = when (diceRollState) {
         null -> node.startFlow(RollDiceFlow(gameBoardLinearId))
         else -> node.startFlow(RollDiceFlow(gameBoardLinearId, diceRollState))
@@ -102,13 +102,37 @@ fun placeAPieceFromASpecificNodeAndEndTurn(
 
 }
 
-fun gatherResourcesUntilAPlayerHasMoreThan7(gameBoardState: GameBoardState,
-                                            listOfNodes: List<StartedMockNode>,
-                                            oracle: StartedMockNode,
-                                            network: InternalMockNetwork): StartedMockNode {
-    var allNodesHaveLessThan7Resources = true
+fun gatherUntilAPlayerHasEnoughForSpend(gameBoardState: GameBoardState,
+                                        listOfNodes: List<StartedMockNode>,
+                                        oracle: StartedMockNode,
+                                        network: InternalMockNetwork,
+                                        resourceCost: Map<TokenType, Long>): StartedMockNode {
+    var nodeWithEnoughResources: StartedMockNode? = null
+    while(nodeWithEnoughResources == null) {
+        for (nodeIndex in 0..3) {
+            val diceRoll = getDiceRollWithRandomRollValue(gameBoardState, oracle)
+            rollDiceThenGatherThenMaybeEndTurn(gameBoardState.linearId, listOfNodes[nodeIndex], network, diceRollState = diceRoll)
+        }
+
+        val nodeResources = listOfNodes
+                .map { Pair(it, countAllResourcesForASpecificNode(it)) }
+
+        nodeResources.forEach { node ->
+            if (node.second.mutableMap.all { (t, a) -> a > resourceCost[t] ?: 0 }) {
+                nodeWithEnoughResources = node.first
+            }
+        }
+    }
+
+    return nodeWithEnoughResources!!
+}
+
+fun gatherUntilAPlayerHasMoreThan7(gameBoardState: GameBoardState,
+                                   listOfNodes: List<StartedMockNode>,
+                                   oracle: StartedMockNode,
+                                   network: InternalMockNetwork): StartedMockNode {
     var nodeWithMoreThan7Resources: StartedMockNode? = null
-    while(allNodesHaveLessThan7Resources) {
+    while(nodeWithMoreThan7Resources == null) {
         for (nodeIndex in 0..3) {
             val diceRoll = getDiceRollWithRandomRollValue(gameBoardState, oracle)
             rollDiceThenGatherThenMaybeEndTurn(gameBoardState.linearId, listOfNodes[nodeIndex], network, diceRollState = diceRoll)
@@ -120,7 +144,6 @@ fun gatherResourcesUntilAPlayerHasMoreThan7(gameBoardState: GameBoardState,
 
         nodeResources.forEach { node ->
             if (node.second.sumByLong { it.state.data.fungibleToken.amount.quantity } > 7) {
-                allNodesHaveLessThan7Resources = false
                 nodeWithMoreThan7Resources = node.first
             }
         }

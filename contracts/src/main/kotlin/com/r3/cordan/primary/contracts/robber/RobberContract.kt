@@ -79,7 +79,7 @@ class RobberContract : Contract {
                 "The output robber state must be activated." using outputRobberState.active
 
                 val inputDiceRollState = tx.inputsOfType<DiceRollState>().single()
-                "The associated dice roll must have a value of 7." using inputDiceRollState.isRobberTotal()
+                "The associated random roll must have a value of 7." using inputDiceRollState.isRobberTotal()
 
                 /**
                  *  ******** SIGNATURES ********

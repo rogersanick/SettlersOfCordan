@@ -1,7 +1,7 @@
 package com.r3.cordan.primary
 
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
-import com.r3.cordan.primary.flows.dice.RollDiceFlow
+import com.r3.cordan.primary.flows.random.RollDiceFlow
 import com.r3.cordan.primary.flows.resources.GatherResourcesFlow
 import com.r3.cordan.primary.flows.trade.ExecuteTradeFlow
 import com.r3.cordan.primary.flows.trade.IssueTradeFlow

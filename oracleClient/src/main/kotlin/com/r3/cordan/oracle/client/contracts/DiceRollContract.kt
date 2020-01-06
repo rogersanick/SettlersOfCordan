@@ -22,8 +22,8 @@ class DiceRollContract : Contract {
                     "There is exactly one output" using (tx.outputStates.size == 1)
 
                     val diceRollState = tx.outputStates[0] as DiceRollState
-                    "The output dice roll state must have between 1 and 6 pips (representing an int value)" using (diceRollState.randomRoll1 in 1..6)
-                    "The output dice roll state must have between 1 and 6 pips (representing an int value)" using (diceRollState.randomRoll2 in 1..6)
+                    "The output random roll state must have between 1 and 6 pips (representing an int value)" using (diceRollState.randomRoll1 in 1..6)
+                    "The output random roll state must have between 1 and 6 pips (representing an int value)" using (diceRollState.randomRoll2 in 1..6)
                 }
             }
 

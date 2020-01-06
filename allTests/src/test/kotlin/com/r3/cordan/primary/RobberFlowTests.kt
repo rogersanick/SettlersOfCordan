@@ -2,7 +2,7 @@ package com.r3.cordan.primary
 
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.cordan.primary.flows.board.SetupGameBoardFlow
-import com.r3.cordan.primary.flows.dice.RollDiceFlow
+import com.r3.cordan.primary.flows.random.RollDiceFlow
 import com.r3.cordan.primary.flows.robber.ApplyRobberFlow
 import com.r3.cordan.primary.flows.robber.MoveRobberFlow
 import com.r3.cordan.primary.flows.robber.RemovePlayBlockerFlow
@@ -48,7 +48,7 @@ class RobberFlowTests: BaseCordanTest() {
         val futureWithMovedRobber = arrayOfAllPlayerNodesInOrder[0].startFlow(MoveRobberFlow(gameState.linearId, 5))
         network.runNetwork()
 
-        assertFailsWith<TransactionVerificationException.ContractRejection>("The associated dice roll must have a value of 7.") { futureWithMovedRobber.getOrThrow() }
+        assertFailsWith<TransactionVerificationException.ContractRejection>("The associated random roll must have a value of 7.") { futureWithMovedRobber.getOrThrow() }
     }
 
     @Test
@@ -147,7 +147,7 @@ class RobberFlowTests: BaseCordanTest() {
                 arrayOfAllPlayerNodesInOrder
         )
 
-        val nodeWithMoreThan7 = gatherResourcesUntilAPlayerHasMoreThan7(gameState, arrayOfAllPlayerNodesInOrder, oracle, network)
+        val nodeWithMoreThan7 = gatherUntilAPlayerHasMoreThan7(gameState, arrayOfAllPlayerNodesInOrder, oracle, network)
 
         val diceRollTriggeringRobber = getDiceRollWithSpecifiedRollValue(3, 4, gameState, oracle)
         val futureWithRobberTriggered = arrayOfAllPlayerNodesInOrder[0].startFlow(RollDiceFlow(gameState.linearId, diceRollTriggeringRobber))

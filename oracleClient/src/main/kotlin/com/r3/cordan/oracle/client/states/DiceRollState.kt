@@ -50,7 +50,7 @@ data class DiceRollState(
 }
 
 /**
- * Role trigger tiles are placed on hexTiles to denote the dice roll that gives the player the right to harvest
+ * Role trigger tiles are placed on hexTiles to denote the random roll that gives the player the right to harvest
  * a resource on a given turn. These are placed in counter-clockwise order, start from the top left corner of
  * the game board.
  */

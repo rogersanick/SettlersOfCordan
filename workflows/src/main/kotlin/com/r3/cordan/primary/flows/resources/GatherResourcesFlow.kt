@@ -73,7 +73,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         val diceRollState = diceRollStateAndRef.state.data
 
         if (diceRollState.isRobberTotal()) {
-            throw FlowException("The last active dice roll has a value of 7. You must move the robber and apply its consequences using MoveRobberFlow before continuing.")
+            throw FlowException("The last active random roll has a value of 7. You must move the robber and apply its consequences using MoveRobberFlow before continuing.")
         }
 
         // Step 5. Create a transaction builder
@@ -92,7 +92,7 @@ class GatherResourcesFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<S
         addIssueTokens(tb, tokensToIssue, gameBoardState.playerKeys())
         addTokenTypeJar(tokensToIssue, tb)
 
-        // Step 8. Add reference states for turn tracker and game board. Add the dice roll as an input
+        // Step 8. Add reference states for turn tracker and game board. Add the random roll as an input
         // state so that the counter-party may verify the correct number of resources have been issued.
         tb.addInputState(diceRollStateAndRef)
         tb.addReferenceState(ReferencedStateAndRef(gameBoardStateAndRef))

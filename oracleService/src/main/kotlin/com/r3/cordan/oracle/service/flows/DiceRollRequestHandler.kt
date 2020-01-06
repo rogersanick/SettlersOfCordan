@@ -20,10 +20,10 @@ class DiceRollRequestHandler(val session: FlowSession): FlowLogic<Unit>() {
             val data = untrustworthyData.unwrap { it }
 
             if (serviceHub.vaultService.queryBy(DiceRollState::class.java).states.filter { it.state.data.turnTrackerUniqueIdentifier == data[0] }.isNotEmpty()) {
-                throw FlowException("A dice roll has previously been generated for this turn")
+                throw FlowException("A random roll has previously been generated for this turn")
             }
 
-            // Get random dice rolls from the oracle
+            // Get random random rolls from the oracle
             val diceRoll1 = serviceHub.cordaService(OracleService::class.java).getRandomDiceRoll()
             val diceRoll2 = serviceHub.cordaService(OracleService::class.java).getRandomDiceRoll()
 

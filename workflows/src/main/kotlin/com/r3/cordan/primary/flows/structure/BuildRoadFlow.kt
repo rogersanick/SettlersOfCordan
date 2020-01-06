@@ -76,7 +76,7 @@ class BuildRoadFlow(
         // Step 5. Create a new transaction builder
         val tb = TransactionBuilder(notary)
 
-        // Step 6. Create new commands for placing a settlement and ending a turn. Add both to the transaction.
+        // Step 6. Create new commands for placing a settlement.
         val buildRoadCommand = Command(
                 BuildPhaseContract.Commands.BuildRoad(),
                 gameBoardState.playerKeys())
