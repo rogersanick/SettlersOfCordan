@@ -28,7 +28,7 @@ class DiceRollRequestHandler(val session: FlowSession): FlowLogic<Unit>() {
             val diceRoll2 = serviceHub.cordaService(OracleService::class.java).getRandomDiceRoll()
 
             val byteArrayOfDataToSign = byteArrayOf(diceRoll1.toByte(), diceRoll2.toByte(), data[0].hashCode().toByte(), data[1].hashCode().toByte())
-            val signatureOfDataSignedByTheOracle = ourIdentity.signWithCert { DigitalSignatureWithCert(ourIdentityAndCert.certificate, byteArrayOfDataToSign) }
+            val signatureOfDataSignedByTheOracle = serviceHub.keyManagementService.sign(byteArrayOfDataToSign, ourIdentity.owningKey)
             session.send(arrayListOf(diceRoll1, diceRoll2))
             session.send(signatureOfDataSignedByTheOracle)
         } catch (e: Error) {

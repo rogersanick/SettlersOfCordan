@@ -1,5 +1,6 @@
 package com.r3.cordan.primary.service
 
+import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.of
 import com.r3.corda.lib.tokens.contracts.utilities.sumTokenStateAndRefs
@@ -7,7 +8,9 @@ import com.r3.corda.lib.tokens.contracts.utilities.withoutIssuer
 import com.r3.corda.lib.tokens.workflows.flows.redeem.addTokensToRedeem
 import com.r3.corda.lib.tokens.workflows.internal.selection.TokenSelection
 import com.r3.corda.lib.tokens.workflows.utilities.heldTokenAmountCriteria
+import com.r3.cordan.primary.states.resources.GameCurrencyState
 import net.corda.core.contracts.Amount
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
 import net.corda.core.node.AppServiceHub
 import net.corda.core.node.services.CordaService
@@ -17,6 +20,7 @@ import net.corda.core.transactions.TransactionBuilder
 
 @CordaService
 class GenerateSpendService(val serviceHub: AppServiceHub): SingletonSerializeAsToken() {
+
     /**
      * When a player spends tokens in-game, those tokens are consumed as inputs to a transaction. The generateInGameSpend
      * method leverages the token-SDK to build a transaction proposing the consumption of tokens when they are
@@ -36,15 +40,13 @@ class GenerateSpendService(val serviceHub: AppServiceHub): SingletonSerializeAsT
      */
 
     fun generateInGameSpend(
+            gameBoardId: UniqueIdentifier,
             tb: TransactionBuilder,
             costs: Map<TokenType, Long>,
             holder: Party,
             changeOwner: Party,
             additionalQueryCriteria: QueryCriteria? = null
     ): TransactionBuilder {
-
-        // Create a tokenSelector
-        val tokenSelection = TokenSelection(serviceHub)
 
         // Generate exits for tokens of the appropriate type
         costs.filter { it.value > 0 }.forEach { (type, amount) ->
@@ -53,7 +55,7 @@ class GenerateSpendService(val serviceHub: AppServiceHub): SingletonSerializeAsT
             val queryCriteria = additionalQueryCriteria?.let { baseCriteria.and(it) } ?: baseCriteria
 
             // Get a list of tokens satisfying the costs
-            val tokensToSpend = tokenSelection
+            val tokensToSpend = TokenSelection(serviceHub)
                     .attemptSpend(amount of type, tb.lockId, queryCriteria)
 
             // Run checks on the tokens to ensure the proposed transaction is valid
@@ -69,11 +71,11 @@ class GenerateSpendService(val serviceHub: AppServiceHub): SingletonSerializeAsT
                     .forEach {
                         val amountOfTokens = it.value.sumTokenStateAndRefs().withoutIssuer()
                         spentAmount = spentAmount.plus(amountOfTokens)
-                        val (exitStates, change) = tokenSelection.generateExit(
+                        val (exitStates, change) = TokenSelection(serviceHub).generateExit(
                                 it.value,
                                 if (spentAmount.quantity > costs[type]!!) Amount(amount, type) else amountOfTokens,
                                 changeOwner)
-                        addTokensToRedeem(tb, exitStates, change)
+                        addTokensToRedeem(tb, exitStates, if (change != null) GameCurrencyState(change, gameBoardId) else null )
                     }
         }
 

@@ -6,13 +6,18 @@ import com.r3.cordan.primary.flows.structure.BuildInitialSettlementAndRoadFlow
 import com.r3.cordan.primary.flows.structure.BuildSettlementFlow
 import com.r3.cordan.primary.flows.random.RollDiceFlow
 import com.r3.cordan.primary.flows.resources.GatherResourcesFlow
+import com.r3.cordan.primary.flows.trade.ExecuteTradeFlow
+import com.r3.cordan.primary.flows.trade.IssueTradeFlow
 import com.r3.cordan.primary.flows.turn.EndTurnDuringInitialPlacementFlow
 import com.r3.cordan.primary.flows.turn.EndTurnFlow
 import com.r3.cordan.primary.states.structure.GameBoardState
 import com.r3.cordan.primary.states.resources.GameCurrencyState
 import com.r3.cordan.primary.states.board.HexTileIndex
 import com.r3.cordan.primary.states.resources.HexTileType
+import com.r3.cordan.primary.states.resources.Wheat
+import com.r3.cordan.primary.states.trade.TradeState
 import net.corda.core.concurrent.CordaFuture
+import net.corda.core.contracts.Amount
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.internal.sumByLong
 import net.corda.core.node.services.queryBy
@@ -102,31 +107,6 @@ fun placeAPieceFromASpecificNodeAndEndTurn(
 
 }
 
-fun gatherUntilAPlayerHasEnoughForSpend(gameBoardState: GameBoardState,
-                                        listOfNodes: List<StartedMockNode>,
-                                        oracle: StartedMockNode,
-                                        network: InternalMockNetwork,
-                                        resourceCost: Map<TokenType, Long>): StartedMockNode {
-    var nodeWithEnoughResources: StartedMockNode? = null
-    while(nodeWithEnoughResources == null) {
-        for (nodeIndex in 0..3) {
-            val diceRoll = getDiceRollWithRandomRollValue(gameBoardState, oracle)
-            rollDiceThenGatherThenMaybeEndTurn(gameBoardState.linearId, listOfNodes[nodeIndex], network, diceRollState = diceRoll)
-        }
-
-        val nodeResources = listOfNodes
-                .map { Pair(it, countAllResourcesForASpecificNode(it)) }
-
-        nodeResources.forEach { node ->
-            if (node.second.mutableMap.all { (t, a) -> a > resourceCost[t] ?: 0 }) {
-                nodeWithEnoughResources = node.first
-            }
-        }
-    }
-
-    return nodeWithEnoughResources!!
-}
-
 fun gatherUntilAPlayerHasMoreThan7(gameBoardState: GameBoardState,
                                    listOfNodes: List<StartedMockNode>,
                                    oracle: StartedMockNode,
@@ -150,4 +130,48 @@ fun gatherUntilAPlayerHasMoreThan7(gameBoardState: GameBoardState,
     }
 
     return nodeWithMoreThan7Resources!!
+}
+
+fun gatherUntilThereAreEnoughResourcesForSpend(gameBoardState: GameBoardState,
+                                        listOfNodes: List<StartedMockNode>,
+                                        oracle: StartedMockNode,
+                                        network: InternalMockNetwork,
+                                        resourceCost: Map<TokenType, Long>) {
+    var nodesDoNotHaveEnoughResources: Boolean = true
+    while(nodesDoNotHaveEnoughResources) {
+        for (nodeIndex in 0..3) {
+            val diceRoll = getDiceRollWithRandomRollValue(gameBoardState, oracle)
+            rollDiceThenGatherThenMaybeEndTurn(gameBoardState.linearId, listOfNodes[nodeIndex], network, diceRollState = diceRoll)
+        }
+
+        val nodeResources = listOfNodes
+                .map { countAllResourcesForASpecificNode(it) }
+
+        val allNodeResources = nodeResources.fold(MapOfResources(mutableMapOf())) { acc, map ->
+            map.mutableMap.forEach { if (acc.mutableMap[it.key] != null) acc.mutableMap[it.key] = acc.mutableMap[it.key]!!.plus(it.value) else acc.mutableMap[it.key] = it.value }
+            acc
+        }
+
+        if (allNodeResources.mutableMap.all { (t, a) -> a > resourceCost[t] ?: 0 }) {
+            nodesDoNotHaveEnoughResources = false
+        }
+    }
+}
+
+fun giveAllResourcesToPlayer1(gameBoardState: GameBoardState,
+                              listOfNodes: List<StartedMockNode>,
+                              network: InternalMockNetwork) {
+    val player1 = listOfNodes[0]
+    val otherPlayers = listOfNodes - player1
+    otherPlayers.forEach { node ->
+        countAllResourcesForASpecificNode(node).mutableMap.forEach {
+            if (it.value > 0) {
+                val tradeState = player1.runFlowAndReturn(
+                        IssueTradeFlow(Amount.zero(Wheat), Amount(it.value, it.key), node.info.legalIdentities.first(), gameBoardState.linearId),
+                        network
+                ).coreTransaction.outputsOfType<TradeState>().single()
+                node.runFlowAndReturn(ExecuteTradeFlow(tradeState.linearId), network)
+            }
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package com.r3.cordan.primary.states.structure
 
+import co.paralleluniverse.fibers.Suspendable
 import com.r3.cordan.primary.states.resources.*
 
 enum class Buildable {
@@ -14,6 +15,7 @@ enum class Buildable {
  * below represents the effective rate card shared mutually amongst participants to verify proposed transactions
  * are consuming the appropriate number of resources.
  */
+@Suspendable
 fun getBuildableCosts(buildable: Buildable) = when (buildable) {
     Buildable.Road -> mapOf(Brick to 1L, Wood to 1L)
     Buildable.Settlement -> mapOf(Brick to 1L, Sheep to 1L, Wheat to 1L, Wood to 1L)

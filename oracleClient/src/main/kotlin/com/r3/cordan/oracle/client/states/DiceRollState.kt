@@ -4,6 +4,7 @@ import com.r3.cordan.oracle.client.contracts.DiceRollContract
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.UniqueIdentifier
+import net.corda.core.crypto.DigitalSignature
 import net.corda.core.identity.Party
 import net.corda.core.internal.SignedDataWithCert
 import net.corda.core.schemas.PersistentState
@@ -17,7 +18,7 @@ data class DiceRollState(
         val turnTrackerUniqueIdentifier: UniqueIdentifier,
         val gameBoardLinearId: UniqueIdentifier,
         override val participants: List<Party>,
-        val signedDataWithOracleCert: SignedDataWithCert<Party>
+        val signedData: DigitalSignature.WithKey
 ) : ContractState, PersistentState() {
 
     constructor(diceRollState: DiceRollState) : this(
@@ -26,7 +27,7 @@ data class DiceRollState(
             diceRollState.turnTrackerUniqueIdentifier,
             diceRollState.gameBoardLinearId,
             diceRollState.participants,
-            diceRollState.signedDataWithOracleCert
+            diceRollState.signedData
     )
 
     init {

@@ -156,7 +156,7 @@ class RobberFlowTests: BaseCordanTest() {
 
         val futureWithMovedRobber = arrayOfAllPlayerNodesInOrder[0].startFlow(MoveRobberFlow(gameState.linearId, 5))
         network.runNetwork()
-        val stxWithMovedRobber = futureWithMovedRobber.getOrThrow()
+        futureWithMovedRobber.getOrThrow()
 
         val futureWithRobberApplied = arrayOfAllPlayerNodesInOrder[0].startFlow(ApplyRobberFlow(gameState.linearId))
         network.runNetwork()

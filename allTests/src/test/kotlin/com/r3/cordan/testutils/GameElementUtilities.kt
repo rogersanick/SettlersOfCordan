@@ -64,10 +64,8 @@ fun setupGameBoardForTesting(gameState: GameBoardState, network: InternalMockNet
 }
 
 fun getDiceRollWithSpecifiedRollValue(int1: Int, int2: Int, gameBoardState: GameBoardState, oracle: StartedMockNode): DiceRollState {
-    val oracleParty = oracle.info.legalIdentities.first()
-    val oraclePartyAndCert = oracle.info.legalIdentitiesAndCerts.first()
     val byteArrayOfDataToSign = byteArrayOf(int1.toByte(), int2.toByte(), gameBoardState.turnTrackerLinearId.hashCode().toByte(), gameBoardState.linearId.hashCode().toByte())
-    val signatureOfOracleSigningOverData = oracleParty.signWithCert { DigitalSignatureWithCert(oraclePartyAndCert.certificate, byteArrayOfDataToSign) }
+    val signatureOfOracleSigningOverData = oracle.services.keyManagementService.sign(byteArrayOfDataToSign, oracle.info.legalIdentities.first().owningKey)
     return DiceRollState(
             int1,
             int2,
@@ -79,8 +77,6 @@ fun getDiceRollWithSpecifiedRollValue(int1: Int, int2: Int, gameBoardState: Game
 }
 
 fun getDiceRollWithRandomRollValue(gameBoardState: GameBoardState, oracle: StartedMockNode, cannotBe7: Boolean = true): DiceRollState {
-    val oracleParty = oracle.info.legalIdentities.first()
-    val oraclePartyAndCert = oracle.info.legalIdentitiesAndCerts.first()
     var int1 = newSecureRandom().nextInt(6) + 1
     val int2 = newSecureRandom().nextInt(6) + 1
 
@@ -91,7 +87,7 @@ fun getDiceRollWithRandomRollValue(gameBoardState: GameBoardState, oracle: Start
     }
 
     val byteArrayOfDataToSign = byteArrayOf(int1.toByte(), int2.toByte(), gameBoardState.turnTrackerLinearId.hashCode().toByte(), gameBoardState.linearId.hashCode().toByte())
-    val signatureOfOracleSigningOverData = oracleParty.signWithCert { DigitalSignatureWithCert(oraclePartyAndCert.certificate, byteArrayOfDataToSign) }
+    val signatureOfOracleSigningOverData = oracle.services.keyManagementService.sign(byteArrayOfDataToSign, oracle.info.legalIdentities.first().owningKey)
     return DiceRollState(
             int1,
             int2,

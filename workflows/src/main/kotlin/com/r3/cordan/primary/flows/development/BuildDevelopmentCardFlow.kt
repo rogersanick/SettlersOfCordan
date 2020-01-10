@@ -11,6 +11,8 @@ import com.r3.cordan.primary.states.turn.TurnTrackerState
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
+import net.corda.core.contracts.requireThat
+import net.corda.core.crypto.DigitalSignature
 import net.corda.core.crypto.SecureHash
 import net.corda.core.crypto.newSecureRandom
 import net.corda.core.flows.*
@@ -63,12 +65,13 @@ class BuildDevelopmentCardFlow(
         val tb = TransactionBuilder(notary)
 
         // Step 6. Request randomness from counter parties
-        val committedRandomNums = arrayListOf<Pair<Int, SignedDataWithCert<Party>>>()
+        val committedRandomNums = arrayListOf<Pair<Int, DigitalSignature.WithKey>>()
         val seed = UniqueIdentifier().id.hashCode()
         gameBoardState.players.forEach { party ->
             val session = initiateFlow(party)
-            committedRandomNums.add(session.sendAndReceive<Pair<Int, SignedDataWithCert<Party>>>(seed).unwrap { it })
+            committedRandomNums.add(session.sendAndReceive<Pair<Int, DigitalSignature.WithKey>>(seed).unwrap { it })
         }
+
         val devCardTypeIndex = committedRandomNums.sumBy { it.first } % 5
         val devCardType = DevelopmentCardType.values()[devCardTypeIndex]
 
@@ -77,7 +80,7 @@ class BuildDevelopmentCardFlow(
 
         // Step 8. Add the appropriate resources to the transaction to pay for the Settlement.
         serviceHub.cordaService(GenerateSpendService::class.java)
-                .generateInGameSpend(tb, getBuildableCosts(Buildable.DevelopmentCard), ourIdentity, ourIdentity)
+                .generateInGameSpend(gameBoardLinearId, tb, getBuildableCosts(Buildable.DevelopmentCard), ourIdentity, ourIdentity)
 
         // Step 9. Add all states and commands to the transaction.
         tb.addReferenceState(gameBoardReferencedStateAndRef)
@@ -85,26 +88,35 @@ class BuildDevelopmentCardFlow(
         tb.addOutputState(developmentCard)
 
         // Step 10. Create new commands for placing a settlement and ending a turn. Add both to the transaction.
-        tb.addCommand(Command(DevelopmentCardContract.Commands.Issue(committedRandomNums), listOf(ourIdentity.owningKey)))
+        tb.addCommand(Command(DevelopmentCardContract.Commands.Issue(seed, committedRandomNums), listOf(ourIdentity.owningKey)))
 
         // Step 11. Sign initial transaction
         tb.verify(serviceHub)
         val stx = serviceHub.signInitialTransaction(tb)
 
         // Step 12. Finalize the TX
-        return subFlow(FinalityFlow(stx, listOf()))
+        return subFlow(FinalityFlow(stx, gameBoardState.players.map { initiateFlow(it) }))
     }
 }
 
 @InitiatedBy(BuildDevelopmentCardFlow::class)
-class BuildDevelopmentCardFlowResponder(val counterpartySession: FlowSession) : FlowLogic<Unit>() {
+class BuildDevelopmentCardFlowResponder(val counterpartySession: FlowSession) : FlowLogic<SignedTransaction>() {
     @Suspendable
-    override fun call() {
+    override fun call(): SignedTransaction {
         val seed = counterpartySession.receive<Int>().unwrap { it }
         val randomInput = newSecureRandom().nextInt(10)
         val byteArrayOfDataToSign = byteArrayOf(seed.toByte(), randomInput.toByte())
-        val ourSignatureOverData = ourIdentity
-                .signWithCert { DigitalSignatureWithCert(ourIdentityAndCert.certificate, byteArrayOfDataToSign) }
+        val ourSignatureOverData = serviceHub.keyManagementService.sign(byteArrayOfDataToSign, ourIdentity.owningKey)
         counterpartySession.send(Pair(randomInput, ourSignatureOverData))
+
+        val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
+            override fun checkTransaction(stx: SignedTransaction) = requireThat {
+                val gameBoardState = stx.coreTransaction.outputsOfType<GameBoardState>().single()
+            }
+        }
+
+        val txWeJustSignedId = subFlow(signedTransactionFlow)
+        return subFlow(ReceiveFinalityFlow(otherSideSession = counterpartySession, expectedTxId = txWeJustSignedId.id))
+
     }
 }

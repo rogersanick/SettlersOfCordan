@@ -1,7 +1,9 @@
 package com.r3.cordan.testutils
 
+import net.corda.core.flows.FlowLogic
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.node.NetworkParameters
+import net.corda.core.utilities.getOrThrow
 import net.corda.testing.common.internal.testNetworkParameters
 import net.corda.testing.internal.chooseIdentity
 import net.corda.testing.internal.createTestSerializationEnv
@@ -69,5 +71,4 @@ abstract class BaseCordanTest {
     open fun tearDown() {
         network.stopNodes()
     }
-
 }

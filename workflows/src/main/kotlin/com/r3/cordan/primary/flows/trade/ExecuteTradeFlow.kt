@@ -73,14 +73,16 @@ class ExecuteTradeFlow(private val tradeStateLinearId: UniqueIdentifier) : FlowL
 
         // 2. Use the tokenSDK to generate the movement of resources required to execute the trade.
         val tb = TransactionBuilder()
-        val tokenSelection = TokenSelection(serviceHub)
-        val (inputGameCurrency, outputGameCurrency) = tokenSelection.generateMoveGameCurrency<GameCurrencyState>(
-                tb.lockId,
-                listOf(PartyAndAmount(tradeState.owner, tradeState.wanted)),
-                ourIdentity,
-                tradeState.gameBoardLinearId
-        )
-        addMoveTokens(tb, inputGameCurrency, outputGameCurrency)
+        if (tradeState.wanted.quantity > 0) {
+            val tokenSelection = TokenSelection(serviceHub)
+            val (inputGameCurrency, outputGameCurrency) = tokenSelection.generateMoveGameCurrency<GameCurrencyState>(
+                    tb.lockId,
+                    listOf(PartyAndAmount(tradeState.owner, tradeState.wanted)),
+                    ourIdentity,
+                    tradeState.gameBoardLinearId
+            )
+            addMoveTokens(tb, inputGameCurrency, outputGameCurrency)
+        }
 
         // 3. Get a reference to the notary and assign it to the transaction.
         require(serviceHub.networkMapCache.notaryIdentities.isNotEmpty()) { "No notary nodes registered" }
@@ -145,14 +147,16 @@ class ExecuteTradeFlowResponder(otherSideSession: FlowSession) : TwoPartyDealFlo
         counterPartyGameCurrencyInputs.forEach { tb.addInputState(it) }
         counterPartyGameCurrencyOutputs.forEach { tb.addOutputState(it, GameCurrencyContract.contractId) }
 
-        val tokenSelection = TokenSelection(serviceHub)
-        val (inputGameCurrency, outputGameCurrency) = tokenSelection.generateMoveGameCurrency<GameCurrencyState>(
-                tb.lockId,
-                listOf(PartyAndAmount(otherSideSession.counterparty, handShakeToAssembleSharedTX.offering)),
-                ourIdentity,
-                gameBoardLinearId)
-        addMoveTokens(tb, inputGameCurrency, outputGameCurrency)
-        addTokenTypeJar(tb.outputStates().filterIsInstance<TransactionState<GameCurrencyState>>().map { it.data }, tb)
+        if (handShakeToAssembleSharedTX.offering.quantity > 0) {
+            val tokenSelection = TokenSelection(serviceHub)
+            val (inputGameCurrency, outputGameCurrency) = tokenSelection.generateMoveGameCurrency<GameCurrencyState>(
+                    tb.lockId,
+                    listOf(PartyAndAmount(otherSideSession.counterparty, handShakeToAssembleSharedTX.offering)),
+                    ourIdentity,
+                    gameBoardLinearId)
+            addMoveTokens(tb, inputGameCurrency, outputGameCurrency)
+            addTokenTypeJar(tb.outputStates().filterIsInstance<TransactionState<GameCurrencyState>>().map { it.data }, tb)
+        }
 
         // Add the trade state to the transaction.
         tb.addInputState(tradeState)
