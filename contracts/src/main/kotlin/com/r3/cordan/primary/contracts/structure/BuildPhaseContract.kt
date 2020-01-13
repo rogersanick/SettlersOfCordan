@@ -33,27 +33,29 @@ class BuildPhaseContract : Contract {
         val command = tx.commands.requireSingleCommand<Commands>()
         val inputBoards = tx.inputsOfType<GameBoardState>()
         val outputBoards = tx.outputsOfType<GameBoardState>()
+        val referenceBoards = tx.referenceInputsOfType<GameBoardState>()
         val inputSettlements = tx.inputsOfType<SettlementState>()
         val outputSettlements = tx.outputsOfType<SettlementState>()
         val outputRoads = tx.outputsOfType<RoadState>()
         val inputResources = tx.inputsOfType<GameCurrencyState>()
         val outputResources = tx.outputsOfType<GameCurrencyState>()
 
-        /**
-         *  ******** SHAPE ********
-         */
-        requireThat {
-            "There should only be one input of type GameBoardState." using (inputBoards.size == 1)
-            "There should be one output state of type GameBoardState" using (outputBoards.size == 1)
-        }
+        fun checkAndReturnGameBoards(): Pair<GameBoardState, GameBoardState> {
+            requireThat {
+                "There should only be one input of type GameBoardState." using (inputBoards.size == 1)
+                "There should be one output state of type GameBoardState" using (outputBoards.size == 1)
+            }
 
-        val inputBoard = inputBoards.single()
-        val outputBoard = outputBoards.single()
+            val inputBoard = inputBoards.single()
+            val outputBoard = outputBoards.single()
+            return Pair(inputBoard, outputBoard)
+        }
 
         when (command.value) {
 
             is Commands.BuildInitialSettlementAndRoad -> requireThat {
 
+                val (inputBoard, outputBoard) = checkAndReturnGameBoards()
                 val turnTrackers = tx.referenceInputsOfType<TurnTrackerState>()
 
                 /**
@@ -157,9 +159,13 @@ class BuildPhaseContract : Contract {
                 /**
                  *  ******** SHAPE ********
                  */
+                val (inputBoard, outputBoard) = checkAndReturnGameBoards()
                 "There must be no input settlements" using (inputSettlements.isEmpty())
                 "There should be one output state of type SettlementState" using (outputSettlements.size == 1)
-                "There should be 4 resource input states" using (inputResources.size == 4)
+                "There should be 4 spent resources" using (inputResources
+                        .sumByLong { it.fungibleToken.amount.quantity }.toInt()
+                        .minus(outputResources.sumByLong { it.fungibleToken.amount.quantity }.toInt())
+                        .equals(4))
 
                 /**
                  *  ******** BUSINESS LOGIC ********
@@ -175,7 +181,7 @@ class BuildPhaseContract : Contract {
                 "A settlement must not have previously been built in this vicinity." using
                         itAndNeighboringCorners.none { inputBoard.hasSettlementOn(it) }
 
-                verifyPaymentIsEnough(getBuildableCosts(Buildable.Settlement), outputResources, "settlement")
+                verifyPaymentIsEnough(getBuildableCosts(Buildable.Settlement), inputResources, "settlement")
 
                 /**
                  *  ******** SIGNATURES ********
@@ -193,7 +199,11 @@ class BuildPhaseContract : Contract {
                  *  ******** SHAPE ********
                  */
                 "There should be 1 road state" using (outputRoads.size == 1)
-                "There should be 2 resource input states" using (inputResources.size == 2)
+                "There should be 2 spent resources" using (inputResources
+                        .sumByLong { it.fungibleToken.amount.quantity }.toInt()
+                        .minus(outputResources.sumByLong { it.fungibleToken.amount.quantity }.toInt())
+                        .equals(2))
+                val (inputBoard, outputBoard) = checkAndReturnGameBoards()
 
                 /**
                  *  ******** BUSINESS LOGIC ********
@@ -201,7 +211,7 @@ class BuildPhaseContract : Contract {
                  */
                 val newRoad = outputRoads.single()
 
-                verifyPaymentIsEnough(getBuildableCosts(Buildable.Road), outputResources, "road")
+                verifyPaymentIsEnough(getBuildableCosts(Buildable.Road), inputResources, "road")
 
                 "The road must belong to the board" using (inputBoard.linearId == newRoad.gameBoardLinearId)
                 "A road must not have previously been built in this location." using
@@ -234,23 +244,28 @@ class BuildPhaseContract : Contract {
                  */
                 "There should be 1 input state of type SettlementState" using (inputSettlements.size == 1)
                 "There should be 1 output state of type SettlementState" using ((outputSettlements.size == 1))
-                "There should be 6 resource input states" using (inputResources.size == 6)
+                "There should be 5 spent resources" using (inputResources
+                                .sumByLong { it.fungibleToken.amount.quantity }.toInt()
+                                .minus(outputResources.sumByLong { it.fungibleToken.amount.quantity }.toInt())
+                                .equals(5))
+                "There should be 1 reference gameBoardState" using (referenceBoards.size == 1)
 
                 /**
                  *  ******** BUSINESS LOGIC ********
                  *  Check that the counter party is proposing a move that is allowed by the rules of the game.
                  */
+                val referenceBoard = referenceBoards.single()
                 val inputSettlement = inputSettlements.single()
                 val newCity = outputSettlements.single()
 
                 "The input settlement must belong to the board" using
-                        (inputBoard.linearId == inputSettlement.gameBoardLinearId)
+                        (referenceBoard.linearId == inputSettlement.gameBoardLinearId)
                 "The output city must belong to the board" using
-                        (inputBoard.linearId == newCity.gameBoardLinearId)
+                        (referenceBoard.linearId == newCity.gameBoardLinearId)
                 "A city cannot be built on a hexTile that is of type Desert" using
-                        (inputBoard.get(newCity.absoluteCorner.tileIndex).resourceType == HexTileType.Desert)
+                        (referenceBoard.get(newCity.absoluteCorner.tileIndex).resourceType != HexTileType.Desert)
 
-                verifyPaymentIsEnough(getBuildableCosts(Buildable.City), outputResources, "city")
+                verifyPaymentIsEnough(getBuildableCosts(Buildable.City), inputResources, "city")
 
                 "The city must be built in the same location as the settlement being upgraded." using
                         (inputSettlement.absoluteCorner == newCity.absoluteCorner)
@@ -260,11 +275,12 @@ class BuildPhaseContract : Contract {
                  *  Check that the necessary parties have signed the transaction.
                  */
                 val signingParties = command.signers.toSet()
-                val participants = outputBoard.participants.map { it.owningKey }
+                val participants = referenceBoard.participants.map { it.owningKey }
                 "All players must verify and sign the transaction to build a settlement." using
                         (signingParties.containsAll(participants) && signingParties.size == 4)
             }
         }
+
     }
 
     fun GameBoardState.getItAndNeighboringCorners(onCorner: AbsoluteCorner) =

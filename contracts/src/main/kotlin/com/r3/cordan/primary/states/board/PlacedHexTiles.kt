@@ -73,7 +73,7 @@ data class PlacedHexTiles @ConstructorForDeserialization constructor(
         }
     }
 
-    override fun get(index: HexTileIndex) = value[index.value]
+    override operator fun get(index: HexTileIndex) = value[index.value]
     /**
      * Excludes tiles that have a robber.
      */

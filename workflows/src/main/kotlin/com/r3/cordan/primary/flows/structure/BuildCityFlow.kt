@@ -39,6 +39,7 @@ class BuildCityFlow(
         // Step 1. Retrieve the Game Board State from the vault.
         val gameBoardStateAndRef = serviceHub.vaultService
                 .querySingleState<GameBoardState>(gameBoardLinearId)
+        val gameBoardReferenceStateAndRef = ReferencedStateAndRef(gameBoardStateAndRef)
         val gameBoardState = gameBoardStateAndRef.state.data
 
         // Step 2. Get a reference to the notary service on the network
@@ -73,6 +74,7 @@ class BuildCityFlow(
         tb.addInputState(inputSettlementStateAndRef)
         tb.addOutputState(outputCityState, BuildPhaseContract.ID)
         tb.addReferenceState(turnTrackerReferenceStateAndRef)
+        tb.addReferenceState(gameBoardReferenceStateAndRef)
 
         // Step 9. Sign initial transaction
         tb.verify(serviceHub)
@@ -93,20 +95,20 @@ class BuildCityFlowResponder(val counterpartySession: FlowSession) : FlowLogic<S
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) {
-                val gameBoardStates = stx.coreTransaction.outputsOfType<GameBoardState>()
-                require(gameBoardStates.size == 1) { "There should be a single output of GameBoardState" }
-                val gameBoardState = gameBoardStates.single()
-
                 val references = stx.coreTransaction.references
-                require(references.size == 1) { "There should be a single reference state" }
+                require(references.size == 2) { "There should be a single reference state" }
 
-                val turnTrackerStateRef = references.single()
-                val turnTrackerState = serviceHub.vaultService
-                        .querySingleState<TurnTrackerState>(turnTrackerStateRef)
+                val gameBoardState = serviceHub.vaultService
+                        .querySingleState<GameBoardState>(stx.coreTransaction.references)
                         .state.data
+                val turnTrackerState = serviceHub.vaultService
+                        .querySingleState<TurnTrackerState>(stx.coreTransaction.references)
+                        .state.data
+
                 if (gameBoardState.turnTrackerLinearId != turnTrackerState.linearId) {
                     throw FlowException("The TurnTracker included in the transaction is not correct for this game or turn.")
                 }
+
                 if (!gameBoardState.isValid(turnTrackerState)) {
                     throw FlowException("The turn tracker state does not point back to the GameBoardState")
                 }

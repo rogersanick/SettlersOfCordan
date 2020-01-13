@@ -19,6 +19,6 @@ enum class Buildable {
 fun getBuildableCosts(buildable: Buildable) = when (buildable) {
     Buildable.Road -> mapOf(Brick to 1L, Wood to 1L)
     Buildable.Settlement -> mapOf(Brick to 1L, Sheep to 1L, Wheat to 1L, Wood to 1L)
-    Buildable.City -> mapOf(Ore to 3L, Wheat to 3L)
+    Buildable.City -> mapOf(Ore to 3L, Wheat to 2L)
     Buildable.DevelopmentCard -> mapOf(Ore to 1L, Sheep to 1L, Wheat to 1L)
 }
