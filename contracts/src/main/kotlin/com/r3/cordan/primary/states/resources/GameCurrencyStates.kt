@@ -4,6 +4,7 @@ import com.r3.cordan.primary.contracts.resources.GameCurrencyContract
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.of
+import net.corda.core.contracts.Amount
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.UniqueIdentifier
@@ -14,6 +15,23 @@ import java.math.BigDecimal
 @BelongsToContract(GameCurrencyContract::class)
 data class GameCurrencyState(val fungibleToken: FungibleToken,
                              val gameBoardId: UniqueIdentifier): FungibleToken(fungibleToken.amount, fungibleToken.holder), ContractState
+
+val Int.BRICK: Amount<TokenType> get() = Amount(this.toLong(), Brick)
+val Long.BRICK: Amount<TokenType> get() = Amount(this, Brick)
+val Double.BRICK: Amount<TokenType> get() = Amount(this.toLong(), Brick)
+val Int.ORE: Amount<TokenType> get() = Amount(this.toLong(), Ore)
+val Long.ORE: Amount<TokenType> get() = Amount(this.toLong(), Ore)
+val Double.ORE: Amount<TokenType> get() = Amount(this.toLong(), Ore)
+val Int.SHEEP: Amount<TokenType> get() = Amount(this.toLong(), Sheep)
+val Long.SHEEP: Amount<TokenType> get() = Amount(this.toLong(), Sheep)
+val Double.SHEEP: Amount<TokenType> get() = Amount(this.toLong(), Sheep)
+val Int.WHEAT: Amount<TokenType> get() = Amount(this.toLong(), Wheat)
+val Long.WHEAT: Amount<TokenType> get() = Amount(this.toLong(), Wheat)
+val Double.WHEAT: Amount<TokenType> get() = Amount(this.toLong(), Wheat)
+val Int.WOOD: Amount<TokenType> get() = Amount(this.toLong(), Wood)
+val Long.WOOD: Amount<TokenType> get() = Amount(this.toLong(), Wood)
+val Double.WOOD: Amount<TokenType> get() = Amount(this.toLong(), Wood)
+
 
 infix fun FungibleToken.forGameBoard(gameBoardId: UniqueIdentifier): GameCurrencyState = GameCurrencyState(this, gameBoardId)
 

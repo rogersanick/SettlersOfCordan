@@ -20,15 +20,9 @@ class TradeFlowTests: BaseBoardGameTest() {
     fun player1IsAbleToIssueATradeOnTheirTurn() {
         
         val rollDiceFlow = RollDiceFlow(gameState.linearId, getDiceRollWithRandomRollValue(gameState, oracle))
-        val futureWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
-        network.runNetwork()
-        futureWithDiceRoll.getOrThrow()
+        arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(rollDiceFlow, network)
 
-        val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(GatherResourcesFlow(gameBoardLinearId = gameState.linearId))
-        network.runNetwork()
-        val txWithNewResources = futureWithClaimedResources.getOrThrow()
-
-
+        val txWithNewResources = arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(GatherResourcesFlow(gameBoardLinearId = gameState.linearId), network)
         requireThat {
             val resources = txWithNewResources.coreTransaction.outputsOfType<FungibleToken>()
             "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)
@@ -37,18 +31,17 @@ class TradeFlowTests: BaseBoardGameTest() {
         val player1Resources = arrayOfAllPlayerNodesInOrder[0].services.vaultService.queryBy<FungibleToken>().states.firstOrNull()?.state?.data?.amount
         val player2Resources = arrayOfAllPlayerNodesInOrder[1].services.vaultService.queryBy<FungibleToken>().states.firstOrNull()?.state?.data?.amount
 
-        val futureWithIssuedTrade = arrayOfAllPlayerNodesInOrder[0].startFlow(
+        val txWithIssuedTrade = arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(
                 IssueTradeFlow(
                         Amount(player1Resources!!.quantity, player1Resources.token.tokenType),
                         Amount(player2Resources!!.quantity, player2Resources.token.tokenType),
                         arrayOfAllPlayerNodesInOrder[1].info.legalIdentities.single(),
                         gameState.linearId
-                )
+                ),
+                 network
         )
-        network.runNetwork()
-        val txWithIssuedTrade = futureWithIssuedTrade.getOrThrow()
-        val issuedTrades = txWithIssuedTrade.coreTransaction.outputsOfType<TradeState>()
 
+        val issuedTrades = txWithIssuedTrade.coreTransaction.outputsOfType<TradeState>()
         requireThat {
             "A trade must have been issued." using (issuedTrades.size == 1)
         }
@@ -59,14 +52,9 @@ class TradeFlowTests: BaseBoardGameTest() {
     fun player2IsAbleToExecuteATradeImposedByPlayer1() {
 
         val rollDiceFlow = RollDiceFlow(gameState.linearId, getDiceRollWithRandomRollValue(gameState, oracle))
-        val futureWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
-        network.runNetwork()
-        futureWithDiceRoll.getOrThrow()
+        arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(rollDiceFlow, network)
 
-        val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(GatherResourcesFlow(gameBoardLinearId = gameState.linearId))
-        network.runNetwork()
-        val txWithNewResources = futureWithClaimedResources.getOrThrow()
-
+        val txWithNewResources = arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(GatherResourcesFlow(gameBoardLinearId = gameState.linearId), network)
         requireThat {
             val resources = txWithNewResources.coreTransaction.outputsOfType<FungibleToken>()
             "Assert that between 0 and 6 resources were produced in the transaction" using (resources.size in 0..6)
@@ -78,26 +66,19 @@ class TradeFlowTests: BaseBoardGameTest() {
         val player1ResourceToTrade = arrayOfAllPlayerNodesInOrder[0].services.vaultService.queryBy<FungibleToken>().states.filter { it.state.data.holder.owningKey == arrayOfAllPlayerNodesInOrder[0].info.legalIdentities.first().owningKey }.firstOrNull()?.state?.data?.amount
         val player2ResourceToTrade = arrayOfAllPlayerNodesInOrder[1].services.vaultService.queryBy<FungibleToken>().states.filter { it.state.data.holder.owningKey == arrayOfAllPlayerNodesInOrder[1].info.legalIdentities.first().owningKey && it.state.data.amount.token.tokenType != player1ResourceToTrade!!.token.tokenType }.firstOrNull()?.state?.data?.amount
 
-        val futureWithIssuedTrade = arrayOfAllPlayerNodesInOrder[0].startFlow(
+        val txWithIssuedTrade = arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(
                 IssueTradeFlow(
                         Amount(player1ResourceToTrade!!.quantity, player1ResourceToTrade.token.tokenType),
                         Amount(player2ResourceToTrade!!.quantity, player2ResourceToTrade.token.tokenType),
                         arrayOfAllPlayerNodesInOrder[1].info.legalIdentities.single(),
                         gameState.linearId
-                )
+                ),
+                network
         )
-        network.runNetwork()
-        val txWithIssuedTrade = futureWithIssuedTrade.getOrThrow()
         val tradeToExecute = txWithIssuedTrade.coreTransaction.outputsOfType<TradeState>().single()
         val linearIdOfTradeToExecute = tradeToExecute.linearId
-
-        val futureWithPlayer1TurnEnded = arrayOfAllPlayerNodesInOrder[0].startFlow(EndTurnFlow(gameState.linearId))
-        network.runNetwork()
-        futureWithPlayer1TurnEnded.getOrThrow()
-
-        val futureWithExecutedTrade = arrayOfAllPlayerNodesInOrder[1].startFlow(ExecuteTradeFlow(linearIdOfTradeToExecute))
-        network.runNetwork()
-        futureWithExecutedTrade.getOrThrow()
+        arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(EndTurnFlow(gameState.linearId), network)
+        arrayOfAllPlayerNodesInOrder[1].runFlowAndReturn(ExecuteTradeFlow(linearIdOfTradeToExecute), network)
 
         val player1ResourcesPostTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
         val player2ResourcesPostTrade = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[1])

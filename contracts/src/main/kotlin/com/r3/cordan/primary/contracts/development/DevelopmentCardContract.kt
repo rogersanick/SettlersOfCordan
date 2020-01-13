@@ -1,16 +1,14 @@
 package com.r3.cordan.primary.contracts.development
 
-import com.r3.cordan.primary.states.development.DevelopmentCardState
+import com.r3.cordan.primary.states.development.RevealedDevelopmentCardState
 import com.r3.cordan.primary.states.development.DevelopmentCardType
+import com.r3.cordan.primary.states.development.FaceDownDevelopmentCardState
 import com.r3.cordan.primary.states.structure.GameBoardState
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
 import net.corda.core.contracts.requireSingleCommand
 import net.corda.core.contracts.requireThat
 import net.corda.core.crypto.DigitalSignature
-import net.corda.core.identity.Party
-import net.corda.core.internal.DigitalSignatureWithCert
-import net.corda.core.internal.SignedDataWithCert
 import net.corda.core.transactions.LedgerTransaction
 
 // *****************************
@@ -27,19 +25,22 @@ class DevelopmentCardContract : Contract {
     override fun verify(tx: LedgerTransaction) {
 
         val command = tx.commands.requireSingleCommand<Commands>()
-        val issuedDevelopmentCard = tx.outputsOfType<DevelopmentCardState>().single()
         val gameBoardState = tx.referenceInputRefsOfType<GameBoardState>().single().state.data
 
         when (command.value) {
-            is Commands.Issue -> requireThat {
-                val castedCommand = command.value as Commands.Issue
+            is Commands.Issue -> {
+                val issuedDevelopmentCard = tx.outputsOfType<FaceDownDevelopmentCardState>().single()
+            }
+            is Commands.Reveal -> requireThat {
+                val revealedDevelopmentCard = tx.outputsOfType<RevealedDevelopmentCardState>().single()
+                val castedCommand = command.value as Commands.Reveal
                 val randInputFromPeers = castedCommand.randInputFromPeers
                 val devCardType = DevelopmentCardType.values()[randInputFromPeers.sumBy { it.first } % 5]
-                "The issued development card is of the appropriate type" using (issuedDevelopmentCard.cardType == devCardType)
-                "All other players must have provided random input." using (randInputFromPeers.size == 4)
+                "The issued development card is of the appropriate type" using (revealedDevelopmentCard.cardType == devCardType)
+                "All other players must have provided random input." using (randInputFromPeers.size == 3)
                 "The list of players signing the data must be the same as those playing the game" using (
                         randInputFromPeers.map { it.second.by }.toSet()
-                                == gameBoardState.players.map { it.owningKey }.toSet())
+                                == gameBoardState.players.map { it.owningKey }.toSet() - revealedDevelopmentCard.owner.owningKey)
 
                 "All signatures must be valid" using randInputFromPeers.all { randInput ->
                     val dataToVerify = byteArrayOf(castedCommand.seed.toByte(), randInput.first.toByte())
@@ -51,7 +52,8 @@ class DevelopmentCardContract : Contract {
 
     // Used to indicate the transaction's intent.
     interface Commands : CommandData {
-        class Issue(
+        class Issue: Commands
+        class Reveal(
                 val seed: Int,
                 val randInputFromPeers: List<Pair<Int, DigitalSignature.WithKey>>
         ): Commands

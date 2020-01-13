@@ -5,15 +5,9 @@ import com.r3.cordan.primary.flows.board.SetupGameBoardFlow
 import com.r3.cordan.primary.states.structure.GameBoardState
 import com.r3.cordan.primary.states.board.HexTileIndex
 import com.r3.cordan.primary.states.resources.HexTileType
-import com.r3.cordan.testutils.BaseBoardGameTest
-import com.r3.cordan.testutils.placeAPieceFromASpecificNodeAndEndTurn
-import com.r3.cordan.testutils.setupGameBoardForTesting
-import com.r3.cordan.testutils.BaseCordanTest
-import net.corda.core.contracts.TransactionVerificationException
+import com.r3.cordan.testutils.*
 import net.corda.core.flows.FlowException
-import net.corda.core.utilities.getOrThrow
 import net.corda.testing.internal.chooseIdentity
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import java.lang.IllegalArgumentException
 import kotlin.test.assertFailsWith
@@ -30,11 +24,8 @@ class InitialSettlementPlacementFlowTests: BaseCordanTest() {
         val p4 = d.info.chooseIdentity()
 
         // Issue a game state onto the ledger
-        val gameStateIssueFlow = (SetupGameBoardFlow(p1, p2, p3, p4))
-        val futureWithGameState = a.startFlow(gameStateIssueFlow)
-        network.runNetwork()
-
-        val stxGameState = futureWithGameState.getOrThrow()
+        val gameStateIssueFlow = SetupGameBoardFlow(p1, p2, p3, p4)
+        val stxGameState = a.runFlowAndReturn(gameStateIssueFlow, network)
 
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
@@ -45,10 +36,8 @@ class InitialSettlementPlacementFlowTests: BaseCordanTest() {
         val buildInitialSettlementFlow = BuildInitialSettlementAndRoadFlow(gameState.linearId, hexTileIndex, 5, 5)
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
-        val futureWithInitialSettlementBuild = arrayOfAllPlayerNodesInOrder.first().startFlow(buildInitialSettlementFlow)
-        network.runNetwork()
-
-        val stxBuildInitialSettlement = futureWithInitialSettlementBuild.getOrThrow()
+        val stxBuildInitialSettlement = arrayOfAllPlayerNodesInOrder
+                .first().runFlowAndReturn(buildInitialSettlementFlow, network)
 
         assert(stxBuildInitialSettlement.tx.inputs.size == 1)
         assert(stxBuildInitialSettlement.tx.outputs.size == 3)
@@ -68,11 +57,8 @@ class InitialSettlementPlacementFlowTests: BaseCordanTest() {
         val p4 = d.info.chooseIdentity()
 
         // Issue a game state onto the ledger
-        val gameStateIssueFlow = (SetupGameBoardFlow(p1, p2, p3, p4))
-        val futureWithGameState = a.startFlow(gameStateIssueFlow)
-        network.runNetwork()
-
-        val stxGameState = futureWithGameState.getOrThrow()
+        val gameStateIssueFlow = SetupGameBoardFlow(p1, p2, p3, p4)
+        val stxGameState = a.runFlowAndReturn(gameStateIssueFlow, network)
 
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
@@ -94,15 +80,11 @@ class InitialSettlementPlacementFlowTests: BaseCordanTest() {
         val p4 = d.info.chooseIdentity()
 
         // Issue a game state onto the ledger
-        val gameStateIssueFlow = (SetupGameBoardFlow(p1, p2, p3, p4))
-        val futureWithGameState = a.startFlow(gameStateIssueFlow)
-        network.runNetwork()
-
-        val stxGameState = futureWithGameState.getOrThrow()
+        val gameStateIssueFlow = SetupGameBoardFlow(p1, p2, p3, p4)
+        val stxGameState = a.runFlowAndReturn(gameStateIssueFlow, network)
 
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
-
         val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
         val nonconflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0, 0), Pair(0, 0), Pair(0, 0), Pair(0, 0))
@@ -124,11 +106,8 @@ class InitialSettlementPlacementFlowTests: BaseCordanTest() {
         val p4 = d.info.chooseIdentity()
 
         // Issue a game state onto the ledger
-        val gameStateIssueFlow = (SetupGameBoardFlow(p1, p2, p3, p4))
-        val futureWithGameState = a.startFlow(gameStateIssueFlow)
-        network.runNetwork()
-
-        val stxGameState = futureWithGameState.getOrThrow()
+        val gameStateIssueFlow = SetupGameBoardFlow(p1, p2, p3, p4)
+        val stxGameState = a.runFlowAndReturn(gameStateIssueFlow, network)
 
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()
@@ -152,11 +131,8 @@ class InitialSettlementPlacementFlowTests: BaseCordanTest() {
         val p4 = d.info.chooseIdentity()
 
         // Issue a game state onto the ledger
-        val gameStateIssueFlow = (SetupGameBoardFlow(p1, p2, p3, p4))
-        val futureWithGameState = a.startFlow(gameStateIssueFlow)
-        network.runNetwork()
-
-        val stxGameState = futureWithGameState.getOrThrow()
+        val gameStateIssueFlow = SetupGameBoardFlow(p1, p2, p3, p4)
+        val stxGameState = a.runFlowAndReturn(gameStateIssueFlow, network)
 
         // Get a reference to the issued game state
         val gameState = stxGameState.coreTransaction.outputsOfType<GameBoardState>().single()

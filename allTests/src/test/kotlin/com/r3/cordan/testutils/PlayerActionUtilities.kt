@@ -16,43 +16,34 @@ import com.r3.cordan.primary.states.board.HexTileIndex
 import com.r3.cordan.primary.states.resources.HexTileType
 import com.r3.cordan.primary.states.resources.Wheat
 import com.r3.cordan.primary.states.trade.TradeState
-import net.corda.core.concurrent.CordaFuture
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.internal.sumByLong
 import net.corda.core.node.services.queryBy
 import net.corda.core.transactions.SignedTransaction
-import net.corda.core.utilities.getOrThrow
+import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.StartedMockNode
-import net.corda.testing.node.internal.InternalMockNetwork
 
 fun rollDiceThenGatherThenMaybeEndTurn(
         gameBoardLinearId: UniqueIdentifier,
         node: StartedMockNode,
-        network: InternalMockNetwork,
+        network: MockNetwork,
         endTurn: Boolean = true,
         diceRollState: DiceRollState? = null): ResourceCollectionSignedTransactions {
 
     // Roll the random
-    val futureWithDiceRoll: CordaFuture<SignedTransaction> = when (diceRollState) {
-        null -> node.startFlow(RollDiceFlow(gameBoardLinearId))
-        else -> node.startFlow(RollDiceFlow(gameBoardLinearId, diceRollState))
+    val stxWithDiceRoll: SignedTransaction = when (diceRollState) {
+        null -> node.runFlowAndReturn(RollDiceFlow(gameBoardLinearId), network)
+        else -> node.runFlowAndReturn(RollDiceFlow(gameBoardLinearId, diceRollState), network)
     }
 
-    network.runNetwork()
-    val stxWithDiceRoll = futureWithDiceRoll.getOrThrow()
-
     // Collect Resources
-    val futureWithResources = node.startFlow(GatherResourcesFlow(gameBoardLinearId))
-    network.runNetwork()
-    val stxWithIssuedResources = futureWithResources.getOrThrow()
+    val stxWithIssuedResources = node.runFlowAndReturn(GatherResourcesFlow(gameBoardLinearId), network)
 
     // End Turn if applicable
     var stxWithEndedTurn: SignedTransaction? = null
     if (endTurn) {
-        val futureWithEndedTurn = node.startFlow(EndTurnFlow(gameBoardLinearId))
-        network.runNetwork()
-        stxWithEndedTurn = futureWithEndedTurn.getOrThrow()
+        stxWithEndedTurn = node.runFlowAndReturn(EndTurnFlow(gameBoardLinearId), network)
     }
 
     return ResourceCollectionSignedTransactions(stxWithDiceRoll, stxWithIssuedResources, stxWithEndedTurn)
@@ -62,7 +53,7 @@ fun placeAPieceFromASpecificNodeAndEndTurn(
         i: Int,
         testCoordinates: ArrayList<Pair<Int, Int>>,
         gameState: GameBoardState,
-        network: InternalMockNetwork,
+        network: MockNetwork,
         arrayOfAllPlayerNodesInOrder: List<StartedMockNode>,
         initialSetupComplete: Boolean): List<SignedTransaction> {
     // Build an initial settlement by issuing a settlement state
@@ -80,27 +71,19 @@ fun placeAPieceFromASpecificNodeAndEndTurn(
     if (initialSetupComplete) {
         // Build a settlement only
         val buildSettlementFlow = BuildSettlementFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second)
-        val futureWithInitialSettlementBuild = currPlayer.startFlow(buildSettlementFlow)
-        network.runNetwork()
-        val txWithUpdatedGameBoardState = futureWithInitialSettlementBuild.getOrThrow()
+        val txWithUpdatedGameBoardState = currPlayer.runFlowAndReturn(buildSettlementFlow, network)
 
         // End turn during normal game play
-        val endTurnFlow = currPlayer.startFlow(EndTurnDuringInitialPlacementFlow(gameState.linearId))
-        network.runNetwork()
-        val txWithUpdatedTurnState = endTurnFlow.getOrThrow()
+        val txWithUpdatedTurnState = currPlayer.runFlowAndReturn(buildSettlementFlow, network)
 
         return listOf(txWithUpdatedGameBoardState, txWithUpdatedTurnState)
     } else {
         // Build an initial settlement and road
         val buildInitialSettlementFlow = BuildInitialSettlementAndRoadFlow(gameState.linearId, testCoordinates[i].first, testCoordinates[i].second, testCoordinates[i].second)
-        val futureWithInitialSettlementBuild = currPlayer.startFlow(buildInitialSettlementFlow)
-        network.runNetwork()
-        val txWithUpdatedGameBoardState = futureWithInitialSettlementBuild.getOrThrow()
+        val txWithUpdatedGameBoardState = currPlayer.runFlowAndReturn(buildInitialSettlementFlow, network)
 
         // End turn during initial setup phase
-        val endTurnFlow = currPlayer.startFlow(EndTurnDuringInitialPlacementFlow(gameState.linearId))
-        network.runNetwork()
-        val txWithUpdatedTurnState = endTurnFlow.getOrThrow()
+        val txWithUpdatedTurnState = currPlayer.runFlowAndReturn(EndTurnDuringInitialPlacementFlow(gameState.linearId), network)
 
         return listOf(txWithUpdatedGameBoardState, txWithUpdatedTurnState)
     }
@@ -110,7 +93,7 @@ fun placeAPieceFromASpecificNodeAndEndTurn(
 fun gatherUntilAPlayerHasMoreThan7(gameBoardState: GameBoardState,
                                    listOfNodes: List<StartedMockNode>,
                                    oracle: StartedMockNode,
-                                   network: InternalMockNetwork): StartedMockNode {
+                                   network: MockNetwork): StartedMockNode {
     var nodeWithMoreThan7Resources: StartedMockNode? = null
     while(nodeWithMoreThan7Resources == null) {
         for (nodeIndex in 0..3) {
@@ -135,7 +118,7 @@ fun gatherUntilAPlayerHasMoreThan7(gameBoardState: GameBoardState,
 fun gatherUntilThereAreEnoughResourcesForSpend(gameBoardState: GameBoardState,
                                         listOfNodes: List<StartedMockNode>,
                                         oracle: StartedMockNode,
-                                        network: InternalMockNetwork,
+                                        network: MockNetwork,
                                         resourceCost: Map<TokenType, Long>) {
     var nodesDoNotHaveEnoughResources: Boolean = true
     while(nodesDoNotHaveEnoughResources) {
@@ -160,7 +143,7 @@ fun gatherUntilThereAreEnoughResourcesForSpend(gameBoardState: GameBoardState,
 
 fun giveAllResourcesToPlayer1(gameBoardState: GameBoardState,
                               listOfNodes: List<StartedMockNode>,
-                              network: InternalMockNetwork) {
+                              network: MockNetwork) {
     val player1 = listOfNodes[0]
     val otherPlayers = listOfNodes - player1
     otherPlayers.forEach { node ->

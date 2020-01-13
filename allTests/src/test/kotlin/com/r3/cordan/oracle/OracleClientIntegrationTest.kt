@@ -3,6 +3,7 @@ package com.r3.cordan.oracle
 import com.r3.cordan.oracle.client.states.DiceRollState
 import com.r3.cordan.primary.flows.random.RollDiceFlow
 import com.r3.cordan.testutils.BaseBoardGameTest
+import com.r3.cordan.testutils.runFlowAndReturn
 import net.corda.core.utilities.getOrThrow
 import org.junit.jupiter.api.Test
 
@@ -11,9 +12,7 @@ class OracleClientIntegrationTest: BaseBoardGameTest() {
     @Test
     fun oracleReturnsARandomDiceRoll() {
         val rollDiceFlow = RollDiceFlow(gameState.linearId)
-        val futureWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
-        network.runNetwork()
-        val txWithDiceRoll = futureWithDiceRoll.getOrThrow()
+        val txWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(rollDiceFlow, network)
         val diceRollState = txWithDiceRoll.coreTransaction.outputsOfType<DiceRollState>().single()
 
         val diceRoll1 = diceRollState.randomRoll1

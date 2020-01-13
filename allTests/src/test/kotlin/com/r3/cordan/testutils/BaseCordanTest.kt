@@ -1,27 +1,21 @@
 package com.r3.cordan.testutils
 
-import net.corda.core.flows.FlowLogic
 import net.corda.core.identity.CordaX500Name
-import net.corda.core.node.NetworkParameters
-import net.corda.core.utilities.getOrThrow
 import net.corda.testing.common.internal.testNetworkParameters
 import net.corda.testing.internal.chooseIdentity
-import net.corda.testing.internal.createTestSerializationEnv
 import net.corda.testing.node.*
-import net.corda.testing.node.internal.InternalMockNetwork
-import net.corda.testing.node.internal.InternalMockNodeParameters
 import net.corda.testing.node.internal.TestCordappInternal
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 
 abstract class BaseCordanTest {
 
-    val network = InternalMockNetwork(
-            initialNetworkParameters = testNetworkParameters(minimumPlatformVersion = 5),
-            defaultParameters = MockNetworkParameters(
-                notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB")))
-            ),
-            cordappsForAllNodes = listOf(
+    val network = MockNetwork(
+            MockNetworkParameters(
+                threadPerNode = true,
+                networkParameters = testNetworkParameters(minimumPlatformVersion = 5),
+                notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB"))),
+                cordappsForAllNodes = listOf(
                     TestCordapp.findCordapp("com.r3.cordan.primary.flows"),
                     TestCordapp.findCordapp("com.r3.cordan.primary.contracts"),
                     TestCordapp.findCordapp("com.r3.cordan.primary.states"),
@@ -31,19 +25,16 @@ abstract class BaseCordanTest {
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.workflows"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.contracts"),
                     TestCordapp.findCordapp("com.r3.corda.lib.tokens.money")
-            ).map { it as TestCordappInternal })
+                ).map { it as TestCordappInternal }
+            )
+    )
 
-    val internalA = network.createNode(InternalMockNodeParameters())
-    val internalB = network.createNode(InternalMockNodeParameters())
-    val internalC = network.createNode(InternalMockNodeParameters())
-    val internalD = network.createNode(InternalMockNodeParameters())
-    val notary = network.defaultNotaryNode
-
-    val a = StartedMockNode.create(internalA)
-    val b = StartedMockNode.create(internalB)
-    val c = StartedMockNode.create(internalC)
-    val d = StartedMockNode.create(internalD)
+    val a = network.createNode(MockNodeParameters())
+    val b = network.createNode(MockNodeParameters())
+    val c = network.createNode(MockNodeParameters())
+    val d = network.createNode(MockNodeParameters())
     val arrayOfAllPlayerNodes = arrayListOf(a, b, c, d)
+    val notary = network.defaultNotaryNode
 
     // Get an identity for each of the players of the game.
     val p1 = a.info.chooseIdentity()
@@ -52,23 +43,21 @@ abstract class BaseCordanTest {
     val p4 = d.info.chooseIdentity()
 
     private val oracleName = CordaX500Name("Oracle", "New York", "US")
-    val internalOracle = network.createNode(
-            InternalMockNodeParameters(
+    val oracle = network.createNode(
+            MockNodeParameters(
                     legalName = oracleName,
                     additionalCordapps = listOf(
                             TestCordapp.findCordapp("com.r3.cordan.oracle.service") as TestCordappInternal
                     )
             )
     )
-    val oracle = StartedMockNode.create(internalOracle)
 
     @BeforeEach
     fun setup() {
-        network.runNetwork()
+        if (network.networkSendManuallyPumped) network.runNetwork()
+        network.startNodes()
     }
 
     @AfterEach
-    open fun tearDown() {
-        network.stopNodes()
-    }
+    open fun stop() = network.stopNodes()
 }

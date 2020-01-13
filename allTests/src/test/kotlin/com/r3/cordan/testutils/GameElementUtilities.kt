@@ -2,20 +2,12 @@ package com.r3.cordan.testutils
 
 import com.r3.cordan.oracle.client.states.DiceRollState
 import com.r3.cordan.primary.states.structure.GameBoardState
-import net.corda.core.DeleteForDJVM
 import net.corda.core.crypto.newSecureRandom
-import net.corda.core.internal.DigitalSignatureWithCert
-import net.corda.core.internal.SignedDataWithCert
-import net.corda.core.internal.signWithCert
-import net.corda.core.serialization.SerializedBytes
-import net.corda.core.serialization.serialize
 import net.corda.core.transactions.SignedTransaction
-import net.corda.testing.internal.createTestSerializationEnv
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.StartedMockNode
-import net.corda.testing.node.internal.InternalMockNetwork
 
-fun setupGameBoardForTestingAndReturnIds(gameState: GameBoardState, network: InternalMockNetwork, arrayOfAllPlayerNodesInOrder: List<StartedMockNode>): List<SignedTransaction> {
+fun setupGameBoardForTestingAndReturnIds(gameState: GameBoardState, network: MockNetwork, arrayOfAllPlayerNodesInOrder: List<StartedMockNode>): List<SignedTransaction> {
     val nonConflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0, 5), Pair(0, 3), Pair(2, 0), Pair(2, 2))
     val nonConflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(12, 5), Pair(12, 3), Pair(14, 0), Pair(14, 2))
 
@@ -37,7 +29,7 @@ fun setupGameBoardForTestingAndReturnIds(gameState: GameBoardState, network: Int
 }
 
 
-fun setupGameBoardForTesting(gameState: GameBoardState, network: InternalMockNetwork, arrayOfAllPlayerNodesInOrder: List<StartedMockNode>): GameBoardState {
+fun setupGameBoardForTesting(gameState: GameBoardState, network: MockNetwork, arrayOfAllPlayerNodesInOrder: List<StartedMockNode>): GameBoardState {
     val nonConflictingHextileIndexAndCoordinatesRound1 = arrayListOf(Pair(0, 5), Pair(0, 3), Pair(2, 0), Pair(2, 2))
     val nonConflictingHextileIndexAndCoordinatesRound2 = arrayListOf(Pair(12, 5), Pair(12, 3), Pair(14, 0), Pair(14, 2))
 

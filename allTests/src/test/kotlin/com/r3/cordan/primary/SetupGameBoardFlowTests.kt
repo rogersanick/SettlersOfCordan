@@ -4,6 +4,7 @@ import com.r3.cordan.primary.contracts.board.GameStateContract
 import com.r3.cordan.primary.flows.board.SetupGameBoardFlow
 import com.r3.cordan.primary.states.structure.GameBoardState
 import com.r3.cordan.testutils.BaseCordanTest
+import com.r3.cordan.testutils.runFlowAndReturn
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.internal.chooseIdentity
 import org.junit.jupiter.api.Test
@@ -21,10 +22,7 @@ class SetupGameBoardFlowTests: BaseCordanTest() {
 
         // Issue a game state onto the ledger.
         val gameStateIssueFlow = SetupGameBoardFlow(p1, p2, p3, p4)
-        val future = a.startFlow(gameStateIssueFlow)
-        network.runNetwork()
-
-        val ptx = future.getOrThrow()
+        val ptx = a.runFlowAndReturn(gameStateIssueFlow, network)
 
         assert(ptx.tx.inputs.isEmpty())
 
@@ -55,10 +53,7 @@ class SetupGameBoardFlowTests: BaseCordanTest() {
 
         // Issue a game state onto the ledger.
         val gameStateIssueFlow = SetupGameBoardFlow(p1, p2, p3, p4)
-        val future = a.startFlow(gameStateIssueFlow)
-        network.runNetwork()
-
-        val stx = future.getOrThrow()
+        val stx = a.runFlowAndReturn(gameStateIssueFlow, network)
 
         assert(stx.tx.inputs.isEmpty())
 

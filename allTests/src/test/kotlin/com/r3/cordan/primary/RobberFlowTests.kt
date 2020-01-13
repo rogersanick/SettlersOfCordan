@@ -26,10 +26,7 @@ class RobberFlowTests: BaseCordanTest() {
 
         // Issue a game state onto the ledger.
         val gameStateIssueFlow = SetupGameBoardFlow(p1, p2, p3, p4)
-        val future = a.startFlow(gameStateIssueFlow)
-        network.runNetwork()
-
-        val ptx = future.getOrThrow()
+        val ptx = a.runFlowAndReturn(gameStateIssueFlow, network)
         val gameState = ptx.tx.outputs.filter{ it.data is GameBoardState }.single().data as GameBoardState
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
@@ -41,14 +38,12 @@ class RobberFlowTests: BaseCordanTest() {
 
         val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(3, 2, gameState, oracle)
         val rollDiceFlow = RollDiceFlow(gameState.linearId, deterministicDiceRoll)
-        val futureWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
-        network.runNetwork()
-        futureWithDiceRoll.getOrThrow()
+        arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(rollDiceFlow, network)
 
-        val futureWithMovedRobber = arrayOfAllPlayerNodesInOrder[0].startFlow(MoveRobberFlow(gameState.linearId, 5))
-        network.runNetwork()
-
-        assertFailsWith<TransactionVerificationException.ContractRejection>("The associated random roll must have a value of 7.") { futureWithMovedRobber.getOrThrow() }
+        assertFailsWith<TransactionVerificationException.ContractRejection>("The associated random roll must have a value of 7.") {
+            arrayOfAllPlayerNodesInOrder[0]
+                    .runFlowAndReturn(MoveRobberFlow(gameState.linearId, 5), network)
+        }
     }
 
     @Test
@@ -56,10 +51,7 @@ class RobberFlowTests: BaseCordanTest() {
 
         // Issue a game state onto the ledger.
         val gameStateIssueFlow = SetupGameBoardFlow(p1, p2, p3, p4)
-        val future = a.startFlow(gameStateIssueFlow)
-        network.runNetwork()
-
-        val ptx = future.getOrThrow()
+        val ptx = a.runFlowAndReturn(gameStateIssueFlow, network)
         val gameState = ptx.tx.outputs.filter{ it.data is GameBoardState }.single().data as GameBoardState
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
@@ -71,13 +63,10 @@ class RobberFlowTests: BaseCordanTest() {
 
         val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(3, 4, gameState, oracle)
         val rollDiceFlow = RollDiceFlow(gameState.linearId, deterministicDiceRoll)
-        val futureWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
-        network.runNetwork()
-        futureWithDiceRoll.getOrThrow()
+        arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(rollDiceFlow, network)
 
-        val futureWithClaimedResources = arrayOfAllPlayerNodesInOrder[0].startFlow(MoveRobberFlow(gameState.linearId, 5))
-        network.runNetwork()
-        val stxWithMovedRobber = futureWithClaimedResources.getOrThrow()
+        val stxWithMovedRobber = arrayOfAllPlayerNodesInOrder[0]
+                .runFlowAndReturn(MoveRobberFlow(gameState.linearId, 5), network)
 
         requireThat {
             val outputRobber = stxWithMovedRobber.coreTransaction.outputsOfType<RobberState>().first()
@@ -90,10 +79,7 @@ class RobberFlowTests: BaseCordanTest() {
 
         // Issue a game state onto the ledger.
         val gameStateIssueFlow = SetupGameBoardFlow(p1, p2, p3, p4)
-        val future = a.startFlow(gameStateIssueFlow)
-        network.runNetwork()
-
-        val ptx = future.getOrThrow()
+        val ptx = a.runFlowAndReturn(gameStateIssueFlow, network)
         val gameState = ptx.tx.outputs.filter{ it.data is GameBoardState }.single().data as GameBoardState
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
@@ -106,17 +92,12 @@ class RobberFlowTests: BaseCordanTest() {
         // TODO: Ensure robber cannot be moved until setup is complete
         val deterministicDiceRoll = getDiceRollWithSpecifiedRollValue(3, 4, gameState, oracle)
         val rollDiceFlow = RollDiceFlow(gameState.linearId, deterministicDiceRoll)
-        val futureWithDiceRoll = arrayOfAllPlayerNodesInOrder[0].startFlow(rollDiceFlow)
-        network.runNetwork()
-        futureWithDiceRoll.getOrThrow()
+        arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(rollDiceFlow, network)
 
-        val futureWithMovedRobber = arrayOfAllPlayerNodesInOrder[0].startFlow(MoveRobberFlow(gameState.linearId, 5))
-        network.runNetwork()
-        val stxWithMovedRobber = futureWithMovedRobber.getOrThrow()
+        arrayOfAllPlayerNodesInOrder[0]
+                .runFlowAndReturn(MoveRobberFlow(gameState.linearId, 5), network)
 
-        val futureWithRobberApplied = arrayOfAllPlayerNodesInOrder[0].startFlow(ApplyRobberFlow(gameState.linearId))
-        network.runNetwork()
-        val txWithAppliedRobber = futureWithRobberApplied.getOrThrow().coreTransaction
+        val txWithAppliedRobber = arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(ApplyRobberFlow(gameState.linearId), network).tx
 
         val inputRobber = txWithAppliedRobber.outputsOfType<RobberState>().single()
         val outputRobber = txWithAppliedRobber.outputsOfType<RobberState>().single()
@@ -134,10 +115,7 @@ class RobberFlowTests: BaseCordanTest() {
 
         // Issue a game state onto the ledger.
         val gameStateIssueFlow = SetupGameBoardFlow(p1, p2, p3, p4)
-        val future = a.startFlow(gameStateIssueFlow)
-        network.runNetwork()
-
-        val ptx = future.getOrThrow()
+        val ptx = a.runFlowAndReturn(gameStateIssueFlow, network)
         val gameState = ptx.tx.outputs.filter{ it.data is GameBoardState }.single().data as GameBoardState
         val arrayOfAllPlayerNodesInOrder = gameState.players.map { player -> arrayOfAllPlayerNodes.filter { it.info.chooseIdentity() == player }.first() }
 
@@ -150,19 +128,11 @@ class RobberFlowTests: BaseCordanTest() {
         val nodeWithMoreThan7 = gatherUntilAPlayerHasMoreThan7(gameState, arrayOfAllPlayerNodesInOrder, oracle, network)
 
         val diceRollTriggeringRobber = getDiceRollWithSpecifiedRollValue(3, 4, gameState, oracle)
-        val futureWithRobberTriggered = arrayOfAllPlayerNodesInOrder[0].startFlow(RollDiceFlow(gameState.linearId, diceRollTriggeringRobber))
-        network.runNetwork()
-        futureWithRobberTriggered.getOrThrow()
+        arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(RollDiceFlow(gameState.linearId, diceRollTriggeringRobber), network)
+        arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(MoveRobberFlow(gameState.linearId, 5), network)
+        val txWithAppliedRobber = arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(ApplyRobberFlow(gameState.linearId), network).coreTransaction
 
-        val futureWithMovedRobber = arrayOfAllPlayerNodesInOrder[0].startFlow(MoveRobberFlow(gameState.linearId, 5))
-        network.runNetwork()
-        futureWithMovedRobber.getOrThrow()
-
-        val futureWithRobberApplied = arrayOfAllPlayerNodesInOrder[0].startFlow(ApplyRobberFlow(gameState.linearId))
-        network.runNetwork()
-        val txWithAppliedRobber = futureWithRobberApplied.getOrThrow().coreTransaction
-
-       val playBlockerState = txWithAppliedRobber.outputsOfType<PlayBlockerState>()
+        val playBlockerState = txWithAppliedRobber.outputsOfType<PlayBlockerState>()
                 .filter { it.playerBlocked == nodeWithMoreThan7.info.legalIdentities.first() }
                 .first()
 
@@ -183,9 +153,8 @@ class RobberFlowTests: BaseCordanTest() {
             }
         }
 
-        val futureWithRemovedPlayBlockerState = nodeWithMoreThan7.startFlow(RemovePlayBlockerFlow(playBlockerState.linearId, resourcesToSpend))
-        network.runNetwork()
-        futureWithRemovedPlayBlockerState.getOrThrow()
+        nodeWithMoreThan7.runFlowAndReturn(RemovePlayBlockerFlow(playBlockerState.linearId, resourcesToSpend), network)
+        network.waitQuiescent()
 
         requireThat {
             "All nodes now recognize that the nodeWithMoreThan7 has removed its playBlocker" using (
