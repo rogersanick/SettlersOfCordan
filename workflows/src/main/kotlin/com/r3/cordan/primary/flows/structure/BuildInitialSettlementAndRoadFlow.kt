@@ -12,7 +12,7 @@ import com.r3.cordan.primary.flows.querySingleState
 import com.r3.cordan.primary.states.board.*
 import com.r3.cordan.primary.states.resources.HexTileType
 import com.r3.cordan.primary.states.resources.forGameBoard
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.structure.RoadState
 import com.r3.cordan.primary.states.structure.SettlementState
 import com.r3.cordan.primary.states.turn.TurnTrackerState

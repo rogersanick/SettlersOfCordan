@@ -1,7 +1,7 @@
 package com.r3.cordan.primary.states
 
 import com.r3.cordan.primary.states.board.HexTileIndex
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

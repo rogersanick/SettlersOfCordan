@@ -1,7 +1,6 @@
-package com.r3.cordan.primary.states.structure
+package com.r3.cordan.primary.states.board
 
 import com.r3.cordan.primary.contracts.board.GameStateContract
-import com.r3.cordan.primary.states.board.*
 import com.r3.cordan.primary.states.robber.RobberState
 import com.r3.cordan.primary.states.trade.TradeState
 import com.r3.cordan.primary.states.turn.TurnTrackerState
@@ -9,11 +8,12 @@ import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
+import net.corda.core.schemas.MappedSchema
 import net.corda.core.schemas.PersistentState
+import net.corda.core.schemas.QueryableState
 import net.corda.core.schemas.StatePersistable
 import net.corda.core.serialization.ConstructorForDeserialization
 import net.corda.core.serialization.CordaSerializable
-import javax.persistence.Column
 
 /**
  * This state represents the same shared data that the symbolic representation of the Settlers board game
@@ -37,7 +37,7 @@ data class GameBoardState @ConstructorForDeserialization constructor(
         val initialPiecesPlaced: Int = 0,
         val winner: Party? = null,
         val beginner: Boolean = false
-) : LinearState,
+) : QueryableState, LinearState,
         TileLocator<HexTile> by hexTiles,
         AbsoluteSideLocator by hexTiles,
         AbsoluteCornerLocator by hexTiles,
@@ -73,6 +73,17 @@ data class GameBoardState @ConstructorForDeserialization constructor(
             beginner = beginner)
 
     fun playerKeys() = players.map { it.owningKey }
+
+    override fun generateMappedObject(schema: MappedSchema): PersistentState {
+        return when (schema) {
+            is GameBoardSchemaV1 -> GameBoardSchemaV1.PersistentGameBoardState(linearId.toString())
+            else -> throw IllegalArgumentException("Unrecognised schema $schema")
+        }
+    }
+
+    override fun supportedSchemas(): Iterable<MappedSchema> {
+        return listOf(GameBoardSchemaV1)
+    }
 
     class Builder(
             val linearId: UniqueIdentifier = UniqueIdentifier(),
@@ -145,14 +156,14 @@ interface HasGameBoardId {
     val gameBoardLinearId: UniqueIdentifier
 }
 
+interface HasGameBoardIdSchema {
+    val gameBoardLinearId: String
+}
+
 /**
  * Other persistence classes cannot inherit this class. Otherwise the system cannot detect the column name.
  */
-sealed class BelongsToGameBoard(
-        @Column(name = columnName, nullable = false)
-        var gameBoardLinearId: String
-) : PersistentState(), StatePersistable {
-
+sealed class BelongsToGameBoard {
     companion object {
         const val columnName = "game_board_linear_id"
     }

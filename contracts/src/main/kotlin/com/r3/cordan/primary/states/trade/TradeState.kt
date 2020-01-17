@@ -3,8 +3,8 @@ package com.r3.cordan.primary.states.trade
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.cordan.primary.contracts.trade.TradePhaseContract
 import com.r3.corda.lib.tokens.contracts.types.TokenType
-import com.r3.cordan.primary.states.structure.BelongsToGameBoard
-import com.r3.cordan.primary.states.structure.HasGameBoardId
+import com.r3.cordan.primary.states.board.BelongsToGameBoard
+import com.r3.cordan.primary.states.board.HasGameBoardId
 import net.corda.core.contracts.*
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.AbstractParty

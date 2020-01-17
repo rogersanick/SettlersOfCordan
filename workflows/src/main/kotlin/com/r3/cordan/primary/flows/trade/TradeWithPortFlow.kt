@@ -13,7 +13,7 @@ import com.r3.cordan.primary.states.board.TileCornerIndex
 import com.r3.cordan.primary.states.resources.GameCurrencyState
 import com.r3.cordan.primary.states.resources.Resource
 import com.r3.cordan.primary.states.resources.forGameBoard
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.turn.TurnTrackerState
 import net.corda.core.contracts.FungibleState
 import net.corda.core.contracts.ReferencedStateAndRef

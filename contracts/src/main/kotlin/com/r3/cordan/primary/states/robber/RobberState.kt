@@ -2,8 +2,8 @@ package com.r3.cordan.primary.states.robber
 
 import com.r3.cordan.primary.contracts.robber.RobberContract
 import com.r3.cordan.primary.states.board.HexTileIndex
-import com.r3.cordan.primary.states.structure.BelongsToGameBoard
-import com.r3.cordan.primary.states.structure.HasGameBoardId
+import com.r3.cordan.primary.states.board.BelongsToGameBoard
+import com.r3.cordan.primary.states.board.HasGameBoardId
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier

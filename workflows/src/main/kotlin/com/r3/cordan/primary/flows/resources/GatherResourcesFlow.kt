@@ -15,7 +15,7 @@ import com.r3.cordan.primary.states.board.HexTile
 import com.r3.cordan.primary.states.resources.GameCurrencyState
 import com.r3.cordan.primary.states.resources.forGameBoard
 import com.r3.cordan.primary.states.robber.RobberState
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.structure.SettlementState
 import com.r3.cordan.primary.states.turn.TurnTrackerState
 import net.corda.core.contracts.FungibleState

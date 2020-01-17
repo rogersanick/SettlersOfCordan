@@ -6,6 +6,7 @@ import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
 import com.r3.corda.lib.tokens.contracts.utilities.of
 import com.r3.cordan.primary.states.board.AbsoluteCorner
 import com.r3.cordan.primary.states.board.AbsoluteSide
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.resources.GameCurrencyState
 import com.r3.cordan.primary.states.resources.HexTileType
 import com.r3.cordan.primary.states.resources.forGameBoard

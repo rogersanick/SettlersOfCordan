@@ -1,9 +1,7 @@
 package com.r3.cordan.primary.states.structure
 
 import com.r3.cordan.primary.contracts.structure.BuildPhaseContract
-import com.r3.cordan.primary.states.board.AbsoluteCorner
-import com.r3.cordan.primary.states.board.AbsoluteSide
-import com.r3.cordan.primary.states.board.PlacedHexTiles
+import com.r3.cordan.primary.states.board.*
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
@@ -91,7 +89,7 @@ object RoadSchemaV1 : MappedSchema(
             ])
     class PersistentRoadState(
             @Column(name = BelongsToGameBoard.columnName, nullable = false)
-            var gameBoardLinearId: String,
+            override var gameBoardLinearId: String,
 
             @Column(name = "tile_index", nullable = false)
             var tileIndex: Int,
@@ -104,7 +102,7 @@ object RoadSchemaV1 : MappedSchema(
 
             @Column(name = "linear_id", nullable = false)
             var linearId: String
-    ) : PersistentState(), StatePersistable
+    ) : PersistentState(), StatePersistable, HasGameBoardIdSchema
 }
 
 /**

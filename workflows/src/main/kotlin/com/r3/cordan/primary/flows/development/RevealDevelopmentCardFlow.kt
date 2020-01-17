@@ -5,7 +5,7 @@ import com.r3.cordan.primary.contracts.development.DevelopmentCardContract
 import com.r3.cordan.primary.flows.querySingleState
 import com.r3.cordan.primary.states.development.RevealedDevelopmentCardState
 import com.r3.cordan.primary.states.development.DevelopmentCardType
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.turn.TurnTrackerState
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef

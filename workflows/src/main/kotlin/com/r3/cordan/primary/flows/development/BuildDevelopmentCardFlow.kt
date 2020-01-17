@@ -4,6 +4,7 @@ import co.paralleluniverse.fibers.Suspendable
 import com.r3.cordan.primary.contracts.development.DevelopmentCardContract
 import com.r3.cordan.primary.service.GenerateSpendService
 import com.r3.cordan.primary.flows.querySingleState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.development.FaceDownDevelopmentCardState
 import com.r3.cordan.primary.states.structure.*
 import com.r3.cordan.primary.states.turn.TurnTrackerState
@@ -55,7 +56,7 @@ class BuildDevelopmentCardFlow(
         val tb = TransactionBuilder(notary)
 
         // Create face down development card
-        val developmentCard = FaceDownDevelopmentCardState(ourIdentity, gameBoardState.players)
+        val developmentCard = FaceDownDevelopmentCardState(ourIdentity, gameBoardState.players, gameBoardLinearId)
 
         // Add the appropriate resources to the transaction to pay for the Settlement.
         serviceHub.cordaService(GenerateSpendService::class.java)

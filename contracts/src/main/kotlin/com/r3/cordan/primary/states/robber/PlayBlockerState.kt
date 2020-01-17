@@ -25,6 +25,7 @@ data class PlayBlockerState(val playerBlocked: Party,
 
 @CordaSerializable
 enum class BlockedStatus {
+    MUST_PAY_RESOURCES_TO_PLAYER,
     MUST_DISCARD_RESOURCES,
     MUST_PAY_ROBBER_STOLEN_RESOURCE
 }

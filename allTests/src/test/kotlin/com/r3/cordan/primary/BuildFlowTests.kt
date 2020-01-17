@@ -1,10 +1,12 @@
 package com.r3.cordan.primary
 
 import com.r3.cordan.primary.flows.structure.BuildCityFlow
+import com.r3.cordan.primary.flows.structure.BuildRoadFlow
 import com.r3.cordan.primary.flows.structure.BuildSettlementFlow
 import com.r3.cordan.primary.states.board.HexTileIndex
 import com.r3.cordan.primary.states.resources.HexTileType
 import com.r3.cordan.primary.states.structure.Buildable
+import com.r3.cordan.primary.states.structure.RoadState
 import com.r3.cordan.primary.states.structure.SettlementState
 import com.r3.cordan.primary.states.structure.getBuildableCosts
 import com.r3.cordan.testutils.*
@@ -52,9 +54,31 @@ class BuildFlowTests: BaseBoardGameTest() {
             resourcesPostSpend = resourcesPostSpend.addTokenState(Amount(it.value, it.key))
         }
 
-        assertEquals(resourcesPreSpend.mutableMap, resourcesPostSpend.mutableMap, "The resources owned by player1 should reflect the spend required to build the development card.")
+        assertEquals(resourcesPreSpend.mutableMap, resourcesPostSpend.mutableMap, "The resources owned by player1 should reflect the spend required to build the city.")
         assertEquals(stxWithSettlement.coreTransaction.outputsOfType<SettlementState>().first().owner,
                 arrayOfAllPlayerNodesInOrder.first().info.legalIdentities.first(), "The settlement should be owned by player 1")
+    }
+
+    @Test
+    fun testAPlayerIsAbleToBuildARoad() {
+        gatherUntilThereAreEnoughResourcesForSpend(gameState, arrayOfAllPlayerNodesInOrder, oracle, network, getBuildableCosts(Buildable.Settlement))
+        giveAllResourcesToPlayer1(gameState, arrayOfAllPlayerNodesInOrder, network)
+        val hexTileIndex = if (gameState.hexTiles[HexTileIndex(17)].resourceType == HexTileType.Desert) 15 else 17
+        arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(BuildSettlementFlow(gameState.linearId, hexTileIndex, 2), network)
+
+        gatherUntilThereAreEnoughResourcesForSpend(gameState, arrayOfAllPlayerNodesInOrder, oracle, network, getBuildableCosts(Buildable.Road))
+        giveAllResourcesToPlayer1(gameState, arrayOfAllPlayerNodesInOrder, network)
+        val resourcesPreSpend = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
+        val stxWithRoad = arrayOfAllPlayerNodesInOrder[0].runFlowAndReturn(BuildRoadFlow(gameState.linearId, hexTileIndex, 1), network)
+        var resourcesPostSpend = countAllResourcesForASpecificNode(arrayOfAllPlayerNodesInOrder[0])
+
+        getBuildableCosts(Buildable.Road).forEach{
+            resourcesPostSpend = resourcesPostSpend.addTokenState(Amount(it.value, it.key))
+        }
+
+        assertEquals(resourcesPreSpend.mutableMap, resourcesPostSpend.mutableMap, "The resources owned by player1 should reflect the spend required to build the road.")
+        assertEquals(stxWithRoad.coreTransaction.outputsOfType<RoadState>().first().owner,
+                arrayOfAllPlayerNodesInOrder.first().info.legalIdentities.first(), "The road should be owned by player 1")
     }
 
 }

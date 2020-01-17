@@ -1,7 +1,7 @@
 package com.r3.cordan.primary.contracts.resources
 
 import com.r3.cordan.oracle.client.states.DiceRollState
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.resources.GameCurrencyState
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract

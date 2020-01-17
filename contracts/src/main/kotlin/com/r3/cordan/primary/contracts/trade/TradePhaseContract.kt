@@ -3,7 +3,7 @@ package com.r3.cordan.primary.contracts.trade
 import com.r3.cordan.primary.states.board.HexTileIndex
 import com.r3.cordan.primary.states.board.TileCornerIndex
 import com.r3.cordan.primary.states.resources.GameCurrencyState
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.turn.TurnTrackerState
 import net.corda.core.contracts.*
 import net.corda.core.internal.sumByLong

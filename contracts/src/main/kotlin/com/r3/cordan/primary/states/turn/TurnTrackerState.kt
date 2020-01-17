@@ -1,8 +1,8 @@
 package com.r3.cordan.primary.states.turn
 
 import com.r3.cordan.primary.contracts.turn.TurnTrackerContract
-import com.r3.cordan.primary.states.structure.BelongsToGameBoard
-import com.r3.cordan.primary.states.structure.HasGameBoardId
+import com.r3.cordan.primary.states.board.BelongsToGameBoard
+import com.r3.cordan.primary.states.board.HasGameBoardId
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier

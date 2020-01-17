@@ -1,7 +1,6 @@
 package com.r3.cordan.primary.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.r3.cordan.oracle.client.states.DiceRollState
 import com.r3.corda.lib.tokens.contracts.commands.IssueTokenCommand
 import com.r3.corda.lib.tokens.contracts.states.AbstractToken
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
@@ -9,18 +8,24 @@ import com.r3.corda.lib.tokens.contracts.types.IssuedTokenType
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.workflows.internal.selection.TokenSelection
 import com.r3.corda.lib.tokens.workflows.types.PartyAndAmount
-import com.r3.cordan.primary.states.structure.BelongsToGameBoard
+import com.r3.cordan.oracle.client.states.DiceRollState
+import com.r3.cordan.primary.states.board.GameBoardSchemaV1
 import com.r3.cordan.primary.states.resources.GameCurrencyState
-import com.r3.cordan.primary.states.structure.HasGameBoardId
-import net.corda.core.contracts.*
+import com.r3.cordan.primary.states.board.HasGameBoardIdSchema
+import net.corda.core.contracts.ContractState
+import net.corda.core.contracts.StateAndRef
+import net.corda.core.contracts.StateRef
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.FlowException
 import net.corda.core.identity.AbstractParty
+import net.corda.core.node.services.Vault
 import net.corda.core.node.services.VaultService
 import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.node.services.vault.builder
+import net.corda.core.schemas.PersistentState
+import net.corda.core.schemas.QueryableState
 import net.corda.core.transactions.TransactionBuilder
-
 import java.security.PublicKey
 import java.util.*
 
@@ -54,11 +59,11 @@ inline fun <reified T : ContractState> VaultService.querySingleState(linearId: U
                 }
                 .single()
 
-inline fun <reified T : ContractState> VaultService.querySingleState(stateRef: StateRef): StateAndRef<T> =
-        querySingleState(listOf(stateRef))
+inline fun <reified T : ContractState> VaultService.querySingleState(stateRef: StateRef, stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED): StateAndRef<T> =
+        querySingleState(listOf(stateRef), stateStatus)
 
-inline fun <reified T : ContractState> VaultService.querySingleState(stateRefs: List<StateRef>) =
-        QueryCriteria.VaultQueryCriteria(stateRefs = stateRefs)
+inline fun <reified T : ContractState> VaultService.querySingleState(stateRefs: List<StateRef>, stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED) =
+        QueryCriteria.VaultQueryCriteria(stateRefs = stateRefs, status = stateStatus)
                 .let { criteria ->
                     queryBy<T>(criteria).states
                 }
@@ -69,15 +74,15 @@ inline fun <reified T : ContractState> VaultService.querySingleState(stateRefs: 
                 }
                 .single()
 
-inline fun <reified T> VaultService.queryBelongsToGameBoard(gameBoardLinearId: UniqueIdentifier)
-        where T : ContractState, T : HasGameBoardId =
-        builder {
-            BelongsToGameBoard::gameBoardLinearId.equal(gameBoardLinearId)
-        }.let { predicate ->
-            QueryCriteria.VaultCustomQueryCriteria(predicate)
-        }.let { criteria ->
-            queryBy<T>(criteria).states
-        }
+inline fun <reified T> VaultService.queryBelongsToGameBoard(gameBoardLinearId: UniqueIdentifier, persistentState: PersistentState)
+                where T : ContractState, T: QueryableState =
+                builder {
+                    GameBoardSchemaV1.PersistentGameBoardState::linearId.equal(gameBoardLinearId.toString())
+                }.let { predicate ->
+                    QueryCriteria.VaultCustomQueryCriteria(predicate)
+                }.let { criteria ->
+                    queryBy<T>(criteria).states
+                }
 
 fun VaultService.queryDiceRoll(gameBoardLinearId: UniqueIdentifier) =
         queryBy<DiceRollState>()

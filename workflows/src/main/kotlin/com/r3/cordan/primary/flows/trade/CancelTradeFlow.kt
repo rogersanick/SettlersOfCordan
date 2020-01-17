@@ -3,7 +3,7 @@ package com.r3.cordan.primary.flows.trade
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.cordan.primary.contracts.trade.TradePhaseContract
 import com.r3.cordan.primary.flows.querySingleState
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.trade.TradeState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.contracts.requireThat

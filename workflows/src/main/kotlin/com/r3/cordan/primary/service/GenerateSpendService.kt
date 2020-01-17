@@ -1,6 +1,5 @@
 package com.r3.cordan.primary.service
 
-import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.of
 import com.r3.corda.lib.tokens.contracts.utilities.sumTokenStateAndRefs
@@ -65,18 +64,22 @@ class GenerateSpendService(val serviceHub: AppServiceHub): SingletonSerializeAsT
 
             // Begin to spend tokens to satisfy costs
             var spentAmount = Amount(0, type)
-
             tokensToSpend
-                    .groupBy { it.state.data.issuer }
-                    .forEach {
-                        val amountOfTokens = it.value.sumTokenStateAndRefs().withoutIssuer()
-                        spentAmount = spentAmount.plus(amountOfTokens)
-                        val (exitStates, change) = TokenSelection(serviceHub).generateExit(
-                                it.value,
-                                if (spentAmount.quantity > costs[type]!!) Amount(amount, type) else amountOfTokens,
-                                changeOwner)
-                        addTokensToRedeem(tb, exitStates, if (change != null) GameCurrencyState(change, gameBoardId) else null )
+                .groupBy { it.state.data.issuer }
+                .forEach {
+                    val sumOfTokensInGroup = it.value.sumTokenStateAndRefs().withoutIssuer()
+                    val adjustedAmountToSpend = if (spentAmount.plus(sumOfTokensInGroup).quantity > costs[type]!!) {
+                        Amount(amount.minus(spentAmount.quantity), type)
+                    } else {
+                        sumOfTokensInGroup
                     }
+                    val (exitStates, change) = TokenSelection(serviceHub).generateExit(
+                            it.value,
+                            adjustedAmountToSpend,
+                            changeOwner)
+                    spentAmount = spentAmount.plus(sumOfTokensInGroup)
+                    addTokensToRedeem(tb, exitStates, if (change != null) GameCurrencyState(change, gameBoardId) else null )
+                }
         }
 
         // Return the mutated transaction builder

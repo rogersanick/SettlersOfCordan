@@ -7,7 +7,7 @@ import com.r3.cordan.primary.contracts.robber.RobberContract
 import com.r3.cordan.primary.contracts.turn.TurnTrackerContract
 import com.r3.cordan.primary.states.resources.HexTileType
 import com.r3.cordan.primary.states.robber.RobberState
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.turn.TurnTrackerState
 import com.r3.cordan.primary.states.win.LongestRoadState
 import net.corda.core.contracts.Command

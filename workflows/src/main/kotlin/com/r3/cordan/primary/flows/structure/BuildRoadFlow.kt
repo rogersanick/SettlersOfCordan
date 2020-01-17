@@ -4,15 +4,13 @@ import co.paralleluniverse.fibers.Suspendable
 import com.r3.cordan.primary.contracts.structure.BuildPhaseContract
 import com.r3.cordan.primary.contracts.board.GameStateContract
 import com.r3.cordan.primary.contracts.win.LongestRoadContract
-import com.r3.cordan.primary.flows.queryBelongsToGameBoard
 import com.r3.cordan.primary.flows.querySingleState
+import com.r3.cordan.primary.service.GenerateSpendService
 import com.r3.cordan.primary.states.board.AbsoluteSide
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.board.HexTileIndex
 import com.r3.cordan.primary.states.board.TileSideIndex
-import com.r3.cordan.primary.states.structure.GameBoardState
-import com.r3.cordan.primary.states.structure.RoadState
-import com.r3.cordan.primary.states.structure.SettlementState
-import com.r3.cordan.primary.states.structure.longestRoad
+import com.r3.cordan.primary.states.structure.*
 import com.r3.cordan.primary.states.turn.TurnTrackerState
 import com.r3.cordan.primary.states.win.LongestRoadState
 import net.corda.core.contracts.Command
@@ -50,7 +48,6 @@ class BuildRoadFlow(
         // Step 1. Retrieve the Game Board State from the vault.
         val gameBoardStateAndRef = serviceHub.vaultService
                 .querySingleState<GameBoardState>(gameBoardLinearId)
-        val gameBoardReferenceStateAndRef = ReferencedStateAndRef(gameBoardStateAndRef)
         val gameBoardState = gameBoardStateAndRef.state.data
 
         // Step 2. Get a reference to the notary service on the network
@@ -58,10 +55,11 @@ class BuildRoadFlow(
 
         // Step 3. Retrieve roads, settlements and current longest road state
         val roadStates = serviceHub.vaultService
-                .queryBelongsToGameBoard<RoadState>(gameBoardLinearId)
+                .queryBy<RoadState>().states
                 .map { it.state.data }
         val settlementStates = serviceHub.vaultService
-                .queryBelongsToGameBoard<SettlementState>(gameBoardLinearId).map { it.state.data }
+                .queryBy<SettlementState>().states
+                .map { it.state.data }
         val longestRoadStateStateAndRef = serviceHub.vaultService
                 .queryBy<LongestRoadState>().states.first()
         val longestRoadState = longestRoadStateStateAndRef.state.data
@@ -103,8 +101,12 @@ class BuildRoadFlow(
                 currentHolder = longestRoadState.holder)
         val outputLongestRoadState = longestRoadState.copy(holder = longestRoadHolder)
 
+        // Add resources to pay off the play blocker state
+        serviceHub.cordaService(GenerateSpendService::class.java)
+                .generateInGameSpend(gameBoardState.linearId, tb, getBuildableCosts(Buildable.Road), ourIdentity, ourIdentity)
+
         // Step 10. Add all states and commands to the transaction.
-        tb.addReferenceState(gameBoardReferenceStateAndRef)
+        tb.addInputState(gameBoardStateAndRef)
         tb.addReferenceState(turnTrackerReferenceStateAndRef)
         tb.addOutputState(roadState, BuildPhaseContract.ID)
         tb.addOutputState(outputGameBoardState, GameStateContract.ID)

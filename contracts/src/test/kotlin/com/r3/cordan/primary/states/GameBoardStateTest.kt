@@ -3,7 +3,7 @@ package com.r3.cordan.primary.states
 import com.nhaarman.mockito_kotlin.whenever
 import com.r3.cordan.primary.states.board.*
 import com.r3.cordan.primary.states.robber.RobberState
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.trade.TradeState
 import com.r3.cordan.primary.states.turn.TurnTrackerState
 import net.corda.core.contracts.UniqueIdentifier

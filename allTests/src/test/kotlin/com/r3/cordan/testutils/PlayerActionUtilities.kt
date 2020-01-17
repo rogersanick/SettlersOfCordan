@@ -10,7 +10,7 @@ import com.r3.cordan.primary.flows.trade.ExecuteTradeFlow
 import com.r3.cordan.primary.flows.trade.IssueTradeFlow
 import com.r3.cordan.primary.flows.turn.EndTurnDuringInitialPlacementFlow
 import com.r3.cordan.primary.flows.turn.EndTurnFlow
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.resources.GameCurrencyState
 import com.r3.cordan.primary.states.board.HexTileIndex
 import com.r3.cordan.primary.states.resources.HexTileType
@@ -116,10 +116,10 @@ fun gatherUntilAPlayerHasMoreThan7(gameBoardState: GameBoardState,
 }
 
 fun gatherUntilThereAreEnoughResourcesForSpend(gameBoardState: GameBoardState,
-                                        listOfNodes: List<StartedMockNode>,
-                                        oracle: StartedMockNode,
-                                        network: MockNetwork,
-                                        resourceCost: Map<TokenType, Long>) {
+                                               listOfNodes: List<StartedMockNode>,
+                                               oracle: StartedMockNode,
+                                               network: MockNetwork,
+                                               resourceCost: Map<TokenType, Long>) {
     var nodesDoNotHaveEnoughResources: Boolean = true
     while(nodesDoNotHaveEnoughResources) {
         for (nodeIndex in 0..3) {

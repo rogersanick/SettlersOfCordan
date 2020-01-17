@@ -2,7 +2,7 @@ package com.r3.cordan.primary
 
 import com.r3.cordan.primary.flows.structure.BuildInitialSettlementAndRoadFlow
 import com.r3.cordan.primary.flows.board.SetupGameBoardFlow
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.board.HexTileIndex
 import com.r3.cordan.primary.states.resources.HexTileType
 import com.r3.cordan.testutils.*

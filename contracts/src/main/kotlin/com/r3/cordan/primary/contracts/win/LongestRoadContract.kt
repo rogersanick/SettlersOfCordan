@@ -1,6 +1,6 @@
 package com.r3.cordan.primary.contracts.win
 
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.structure.RoadState
 import com.r3.cordan.primary.states.structure.SettlementState
 import com.r3.cordan.primary.states.structure.longestRoad

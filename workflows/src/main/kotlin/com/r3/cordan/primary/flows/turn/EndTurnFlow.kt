@@ -3,7 +3,7 @@ package com.r3.cordan.primary.flows.turn
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.cordan.primary.contracts.turn.TurnTrackerContract
 import com.r3.cordan.primary.flows.querySingleState
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.turn.TurnTrackerState
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef

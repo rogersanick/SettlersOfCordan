@@ -2,10 +2,9 @@ package com.r3.cordan.primary
 
 import com.r3.cordan.primary.contracts.board.GameStateContract
 import com.r3.cordan.primary.flows.board.SetupGameBoardFlow
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.testutils.BaseCordanTest
 import com.r3.cordan.testutils.runFlowAndReturn
-import net.corda.core.utilities.getOrThrow
 import net.corda.testing.internal.chooseIdentity
 import org.junit.jupiter.api.Test
 

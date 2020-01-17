@@ -1,6 +1,10 @@
 package com.r3.cordan.primary.contracts.board
 
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.contracts.structure.BuildPhaseContract
+import com.r3.cordan.primary.states.board.AbsoluteSide
+import com.r3.cordan.primary.states.board.GameBoardState
+import com.r3.cordan.primary.states.board.HexTileIndex
+import com.r3.cordan.primary.states.structure.RoadState
 import com.r3.cordan.primary.states.structure.SettlementState
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
@@ -80,8 +84,8 @@ class GameStateContract : Contract {
                  *  ******** SHAPE ********
                  */
 
-                "There is one input and it is of type GameBoardState" using (inputGameBoardStates.size == 1)
-                "There is one output and it is of type GameBoardState" using (outputGameBoardStates.size == 1)
+                "There is one input of type GameBoardState" using (inputGameBoardStates.size == 1)
+                "There is one output of type GameBoardState" using (outputGameBoardStates.size == 1)
                 val inputGameBoardState = inputGameBoardStates.single()
 
                 /**
@@ -101,7 +105,44 @@ class GameStateContract : Contract {
                 val participants = inputGameBoardState.participants.map { it.owningKey }
                 "All players must verify and sign the transaction to build a settlement." using
                         (signingParties.containsAll(participants) && signingParties.size == 4)
+
             }
+
+            is Commands.UpdateWithRoad -> requireThat {
+                /**
+                 *  ******** SHAPE ********
+                 */
+
+                "There is one input and it is of type GameBoardState" using (inputGameBoardStates.size == 1)
+                "There is one output and it is of type GameBoardState" using (outputGameBoardStates.size == 1)
+                val inputGameBoardState = inputGameBoardStates.single()
+                val outputGameBoardState = outputGameBoardStates.single()
+                val outputRoadState = tx.outputsOfType<RoadState>().single()
+
+                /**
+                 *  ******** BUSINESS LOGIC ********
+                 */
+
+                "The constructed road should be reflected on the output gameState" using (
+                            outputGameBoardState.getRoadOn((command.value as Commands.UpdateWithRoad).absoluteSide) == outputRoadState.linearId
+                        )
+
+
+                "The constructed road should not be reflected on the input gameState" using (
+                            inputGameBoardState.getRoadOn((command.value as Commands.UpdateWithRoad).absoluteSide) == null
+                        )
+
+
+                /**
+                 *  ******** SIGNATURES ********
+                 */
+
+                val signingParties = command.signers.toSet()
+                val participants = inputGameBoardState.participants.map { it.owningKey }
+                "All players must verify and sign the transaction to build a settlement." using
+                        (signingParties.containsAll(participants) && signingParties.size == 4)
+            }
+
 
         }
     }
@@ -111,5 +152,6 @@ class GameStateContract : Contract {
         class SetUpGameBoard : Commands
         class WinGame : Commands
         class UpdateWithSettlement : Commands
+        class UpdateWithRoad(val absoluteSide: AbsoluteSide): Commands
     }
 }

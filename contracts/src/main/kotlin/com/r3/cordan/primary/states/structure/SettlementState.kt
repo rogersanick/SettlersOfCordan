@@ -2,6 +2,8 @@ package com.r3.cordan.primary.states.structure
 
 import com.r3.cordan.primary.contracts.structure.BuildPhaseContract
 import com.r3.cordan.primary.states.board.AbsoluteCorner
+import com.r3.cordan.primary.states.board.BelongsToGameBoard
+import com.r3.cordan.primary.states.board.HasGameBoardId
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier

@@ -9,7 +9,7 @@ import com.r3.corda.lib.tokens.workflows.utilities.addTokenTypeJar
 import com.r3.cordan.primary.flows.generateMoveGameCurrency
 import com.r3.cordan.primary.flows.querySingleState
 import com.r3.cordan.primary.states.resources.GameCurrencyState
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.trade.ExtendedDealState
 import com.r3.cordan.primary.states.trade.InformationForAcceptor
 import com.r3.cordan.primary.states.trade.TradeState

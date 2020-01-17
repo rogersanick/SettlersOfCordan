@@ -1,4 +1,4 @@
-package com.r3.cordan.primary.flows.robber
+package com.r3.cordan.primary.flows.development
 
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.cordan.primary.contracts.robber.PlayBlockerContract
@@ -9,6 +9,9 @@ import com.r3.cordan.primary.states.robber.BlockedStatus
 import com.r3.cordan.primary.states.robber.PlayBlockerState
 import com.r3.cordan.primary.states.robber.RobberState
 import com.r3.cordan.primary.states.board.GameBoardState
+import com.r3.cordan.primary.states.development.DevelopmentCardType
+import com.r3.cordan.primary.states.development.FaceDownDevelopmentCardState
+import com.r3.cordan.primary.states.development.RevealedDevelopmentCardState
 import com.r3.cordan.primary.states.turn.TurnTrackerState
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -20,20 +23,29 @@ import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow(version = 1)
 @StartableByRPC
-class ApplyRobberFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<SignedTransaction>() {
+class PlayDevelopmentCardFlow(private val revealedDevelopmentCardId: UniqueIdentifier) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
 
-        // Step 1. Retrieve the Game Board State from the vault.
-        val gameBoardStateAndRef = serviceHub.vaultService
-                .querySingleState<GameBoardState>(gameBoardLinearId)
-        val gameBoardState = gameBoardStateAndRef.state.data
-        val gameBoardReferenceStateAndRef = ReferencedStateAndRef(gameBoardStateAndRef)
+        // Retrieve the Development Card State from the vault.
+        val revealedDevelopmentCardStateAndRef = serviceHub.vaultService
+                .querySingleState<RevealedDevelopmentCardState>(revealedDevelopmentCardId)
+        val revealedDevelopmentCardState = revealedDevelopmentCardStateAndRef.state.data
 
-        // Step 2. Get a reference to the notary service on the network
+        // Retrieve the FaceDown development card state from the vault
+        val faceDownDevelopmentCardStateAndRef = serviceHub.vaultService
+                .querySingleState<FaceDownDevelopmentCardState>(revealedDevelopmentCardState.faceDownDevelopmentCardId)
+        val faceDownDevelopmentCardState = faceDownDevelopmentCardStateAndRef.state.data
+
+        // Retrieve the Game Board State from the vault.
+        val gameBoardStateAndRef = serviceHub.vaultService
+                .querySingleState<GameBoardState>(faceDownDevelopmentCardState.gameBoardId)
+        val gameBoardState = gameBoardStateAndRef.state.data
+
+        // Get a reference to the notary service on the network
         val notary = gameBoardStateAndRef.state.notary
 
-        // Step 3. Retrieve the Turn Tracker State from the vault
+        // Retrieve the Turn Tracker State from the vault
         val turnTrackerStateAndRef = serviceHub.vaultService
                 .querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
         if (!gameBoardState.isValid(turnTrackerStateAndRef.state.data)) {
@@ -41,59 +53,8 @@ class ApplyRobberFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<Signe
         }
         val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(turnTrackerStateAndRef)
 
-        // Step 4. Add the existing robber state as an input state
-        val robberStateAndRef = serviceHub.vaultService
-                .querySingleState<RobberState>(gameBoardState.robberLinearId)
-        val robber = robberStateAndRef.state.data
-        if (!gameBoardState.isValid(robberStateAndRef.state.data)) {
-            throw FlowException("The robber state does not point back to the GameBoardState")
-        }
-        if (!robber.active) {
-            throw FlowException("The robber state is not active")
-        }
-
-        // Step 5. Create a new robber state
-        val deactivatedRobberState = robberStateAndRef.state.data.deactivate()
-
         // Step 6. Create a transaction builder
         val tb = TransactionBuilder(notary)
-
-        // Step 7. Add PlayBlockerStates for each of the players with more than 7 resources
-        val gameCurrencyInPlay = serviceHub.vaultService.queryBy<GameCurrencyState>().states.map { it.state.data }
-        val mapOfResources = mapOf(
-                gameBoardState.players[0] to gameCurrencyInPlay.filter { it.holder.owningKey == gameBoardState.players[0].owningKey }.sumBy { it.fungibleToken.amount.quantity.toInt() },
-                gameBoardState.players[1] to gameCurrencyInPlay.filter { it.holder.owningKey == gameBoardState.players[1].owningKey }.sumBy { it.fungibleToken.amount.quantity.toInt() },
-                gameBoardState.players[2] to gameCurrencyInPlay.filter { it.holder.owningKey == gameBoardState.players[2].owningKey }.sumBy { it.fungibleToken.amount.quantity.toInt() },
-                gameBoardState.players[3] to gameCurrencyInPlay.filter { it.holder.owningKey == gameBoardState.players[3].owningKey }.sumBy { it.fungibleToken.amount.quantity.toInt() })
-
-
-        var playBlockerCommand: PlayBlockerContract.Commands.IssuePlayBlockers? = null
-
-        mapOfResources.forEach { (party, int) ->
-            if (int > 7) {
-                playBlockerCommand = PlayBlockerContract.Commands.IssuePlayBlockers()
-                tb.addOutputState(PlayBlockerState(party, gameBoardState.players, int / 2, BlockedStatus.MUST_DISCARD_RESOURCES, gameBoardLinearId))
-            }
-        }
-
-        // Step 8. Add a PlayBlockerState for the target player
-        if (robber.targetPlayer != null) {
-            tb.addOutputState(PlayBlockerState(robber.targetPlayer!!, gameBoardState.players, 1, BlockedStatus.MUST_PAY_ROBBER_STOLEN_RESOURCE, gameBoardLinearId))
-            if (playBlockerCommand != null) playBlockerCommand = PlayBlockerContract.Commands.IssuePlayBlockers()
-        }
-
-        // Step 9. Add the PlayBlockerCommand if it exists
-        if (playBlockerCommand != null) tb.addCommand(playBlockerCommand!!, gameBoardState.playerKeys())
-
-        // Step 9. Create the appropriate command
-        val robberCommand = RobberContract.Commands.ApplyRobber()
-
-        // Step 10. Add all input/output states
-        tb.addInputState(robberStateAndRef)
-        tb.addOutputState(deactivatedRobberState)
-        tb.addReferenceState(gameBoardReferenceStateAndRef)
-        tb.addReferenceState(turnTrackerReferenceStateAndRef)
-        tb.addCommand(robberCommand, gameBoardState.playerKeys())
 
         // Step 10. Verify and sign the transaction
         tb.verify(serviceHub)
@@ -108,8 +69,8 @@ class ApplyRobberFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<Signe
     }
 }
 
-@InitiatedBy(ApplyRobberFlow::class)
-class ApplyRobberFlowResponder(val counterpartySession: FlowSession) : FlowLogic<SignedTransaction>() {
+@InitiatedBy(PlayDevelopmentCardFlow::class)
+class PlayDevelopmentCardFlowResponder(val counterpartySession: FlowSession) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {

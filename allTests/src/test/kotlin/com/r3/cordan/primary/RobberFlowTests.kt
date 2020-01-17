@@ -9,12 +9,11 @@ import com.r3.cordan.primary.flows.robber.RemovePlayBlockerFlow
 import com.r3.cordan.primary.states.board.HexTileIndex
 import com.r3.cordan.primary.states.robber.PlayBlockerState
 import com.r3.cordan.primary.states.robber.RobberState
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.testutils.*
 import net.corda.core.contracts.TransactionVerificationException
 import net.corda.core.contracts.requireThat
 import net.corda.core.node.services.queryBy
-import net.corda.core.utilities.getOrThrow
 import net.corda.testing.internal.chooseIdentity
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith

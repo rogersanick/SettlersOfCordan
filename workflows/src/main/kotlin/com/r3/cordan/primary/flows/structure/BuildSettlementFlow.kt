@@ -7,6 +7,7 @@ import com.r3.cordan.primary.contracts.win.LongestRoadContract
 import com.r3.cordan.primary.service.GenerateSpendService
 import com.r3.cordan.primary.flows.querySingleState
 import com.r3.cordan.primary.states.board.AbsoluteCorner
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.board.HexTileIndex
 import com.r3.cordan.primary.states.board.TileCornerIndex
 import com.r3.cordan.primary.states.structure.*

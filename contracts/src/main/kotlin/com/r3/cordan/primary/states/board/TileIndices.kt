@@ -1,6 +1,5 @@
 package com.r3.cordan.primary.states.board
 
-import com.r3.cordan.primary.states.structure.GameBoardState
 import net.corda.core.serialization.ConstructorForDeserialization
 import net.corda.core.serialization.CordaSerializable
 

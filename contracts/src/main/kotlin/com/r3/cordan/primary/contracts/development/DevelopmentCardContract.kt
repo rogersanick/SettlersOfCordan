@@ -3,7 +3,7 @@ package com.r3.cordan.primary.contracts.development
 import com.r3.cordan.primary.states.development.RevealedDevelopmentCardState
 import com.r3.cordan.primary.states.development.DevelopmentCardType
 import com.r3.cordan.primary.states.development.FaceDownDevelopmentCardState
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
 import net.corda.core.contracts.requireSingleCommand
@@ -57,5 +57,11 @@ class DevelopmentCardContract : Contract {
                 val seed: Int,
                 val randInputFromPeers: List<Pair<Int, DigitalSignature.WithKey>>
         ): Commands
+        class PlayVictoryPoint: Commands
+        class PlayMonopoly: Commands
+        class PlayKnight: Commands
+        class PlayYearOfPlenty: Commands
+        class PlayRoadBuilding: Commands
+
     }
 }

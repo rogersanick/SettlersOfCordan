@@ -4,12 +4,13 @@ import co.paralleluniverse.fibers.Suspendable
 import com.r3.cordan.primary.contracts.board.GameStateContract
 import com.r3.cordan.primary.flows.queryBelongsToGameBoard
 import com.r3.cordan.primary.flows.querySingleState
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.structure.SettlementState
 import com.r3.cordan.primary.states.turn.TurnTrackerState
 import net.corda.core.contracts.ReferencedStateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
+import net.corda.core.node.services.queryBy
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
@@ -45,7 +46,7 @@ class ClaimWinFlow(val gameBoardLinearId: UniqueIdentifier) : FlowLogic<SignedTr
 
         // Step 4. Retrieve all of our settlement states from the vault.
         val settlementStatesWeOwn = serviceHub.vaultService
-                .queryBelongsToGameBoard<SettlementState>(gameBoardLinearId)
+                .queryBy<SettlementState>().states
                 .filter { it -> it.state.data.owner == ourIdentity }
                 .map { ReferencedStateAndRef(it) }
 

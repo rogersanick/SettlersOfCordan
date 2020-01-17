@@ -5,6 +5,7 @@ import net.corda.testing.common.internal.testNetworkParameters
 import net.corda.testing.internal.chooseIdentity
 import net.corda.testing.node.*
 import net.corda.testing.node.internal.TestCordappInternal
+import net.corda.testing.node.internal.cordappsForPackages
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 

@@ -3,7 +3,7 @@ package com.r3.cordan.primary.states
 import com.r3.cordan.oracle.client.states.RollTrigger
 import com.r3.cordan.primary.states.board.*
 import com.r3.cordan.primary.states.resources.HexTileType
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.internal.toMultiMap
 import org.junit.jupiter.api.Test

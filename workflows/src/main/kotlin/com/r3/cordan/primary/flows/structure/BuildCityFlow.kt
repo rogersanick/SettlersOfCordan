@@ -5,7 +5,7 @@ import com.r3.cordan.primary.contracts.structure.BuildPhaseContract
 import com.r3.cordan.primary.service.GenerateSpendService
 import com.r3.cordan.primary.flows.querySingleState
 import com.r3.cordan.primary.states.structure.Buildable
-import com.r3.cordan.primary.states.structure.GameBoardState
+import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.structure.SettlementState
 import com.r3.cordan.primary.states.structure.getBuildableCosts
 import com.r3.cordan.primary.states.turn.TurnTrackerState
