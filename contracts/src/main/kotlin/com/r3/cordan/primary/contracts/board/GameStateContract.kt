@@ -109,6 +109,7 @@ class GameStateContract : Contract {
             }
 
             is Commands.UpdateWithRoad -> requireThat {
+
                 /**
                  *  ******** SHAPE ********
                  */
@@ -117,20 +118,24 @@ class GameStateContract : Contract {
                 "There is one output and it is of type GameBoardState" using (outputGameBoardStates.size == 1)
                 val inputGameBoardState = inputGameBoardStates.single()
                 val outputGameBoardState = outputGameBoardStates.single()
-                val outputRoadState = tx.outputsOfType<RoadState>().single()
+                val outputRoadStates = tx.outputsOfType<RoadState>()
 
                 /**
                  *  ******** BUSINESS LOGIC ********
                  */
 
                 "The constructed road should be reflected on the output gameState" using (
-                            outputGameBoardState.getRoadOn((command.value as Commands.UpdateWithRoad).absoluteSide) == outputRoadState.linearId
-                        )
+                    (command.value as Commands.UpdateWithRoad).roadLocations.all { side ->
+                            outputGameBoardState.getRoadOn(side) in outputRoadStates.map { it.linearId }
+                    }
+                )
 
 
                 "The constructed road should not be reflected on the input gameState" using (
-                            inputGameBoardState.getRoadOn((command.value as Commands.UpdateWithRoad).absoluteSide) == null
-                        )
+                    (command.value as Commands.UpdateWithRoad).roadLocations.all { side ->
+                        outputGameBoardState.getRoadOn(side) == null
+                    }
+                )
 
 
                 /**
@@ -152,6 +157,6 @@ class GameStateContract : Contract {
         class SetUpGameBoard : Commands
         class WinGame : Commands
         class UpdateWithSettlement : Commands
-        class UpdateWithRoad(val absoluteSide: AbsoluteSide): Commands
+        class UpdateWithRoad(val roadLocations: List<AbsoluteSide>): Commands
     }
 }

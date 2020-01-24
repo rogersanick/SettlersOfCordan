@@ -182,7 +182,7 @@ class AssignLongestRoadTests {
     @Test
     fun `Another player has same length as current holder`() {
         val candidates = createCandidates(5, 5, 3, 4)
-        assertEquals(p2.party, assignLongestRoad(p2.party, candidates))
+        assertEquals(null, assignLongestRoad(p2.party, candidates))
     }
 
     @Test

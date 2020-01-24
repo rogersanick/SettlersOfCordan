@@ -16,9 +16,9 @@ enum class Buildable {
  * are consuming the appropriate number of resources.
  */
 @Suspendable
-fun getBuildableCosts(buildable: Buildable) = when (buildable) {
-    Buildable.Road -> mapOf(Brick to 1L, Wood to 1L)
-    Buildable.Settlement -> mapOf(Brick to 1L, Sheep to 1L, Wheat to 1L, Wood to 1L)
-    Buildable.City -> mapOf(Ore to 3L, Wheat to 2L)
-    Buildable.DevelopmentCard -> mapOf(Ore to 1L, Sheep to 1L, Wheat to 1L)
+fun getBuildableCosts(buildable: Buildable, multiple: Int = 1) = when (buildable) {
+    Buildable.Road -> mapOf(Brick to 1L * multiple, Wood to 1L * multiple)
+    Buildable.Settlement -> mapOf(Brick to 1L * multiple, Sheep to 1L * multiple, Wheat to 1L * multiple, Wood to 1L * multiple)
+    Buildable.City -> mapOf(Ore to 3L * multiple, Wheat to 2L * multiple)
+    Buildable.DevelopmentCard -> mapOf(Ore to 1L * multiple, Sheep to 1L * multiple, Wheat to 1L * multiple)
 }

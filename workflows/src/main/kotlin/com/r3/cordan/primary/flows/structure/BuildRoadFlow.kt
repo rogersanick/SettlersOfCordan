@@ -15,8 +15,11 @@ import com.r3.cordan.primary.states.turn.TurnTrackerState
 import com.r3.cordan.primary.states.win.LongestRoadState
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.ReferencedStateAndRef
+import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
+import net.corda.core.identity.Party
+import net.corda.core.node.ServiceHub
 import net.corda.core.node.StatesToRecord
 import net.corda.core.node.services.queryBy
 import net.corda.core.transactions.SignedTransaction
@@ -45,78 +48,33 @@ class BuildRoadFlow(
     override fun call(): SignedTransaction {
 
 
-        // Step 1. Retrieve the Game Board State from the vault.
+        // Retrieve the Game Board State from the vault.
         val gameBoardStateAndRef = serviceHub.vaultService
                 .querySingleState<GameBoardState>(gameBoardLinearId)
         val gameBoardState = gameBoardStateAndRef.state.data
 
-        // Step 2. Get a reference to the notary service on the network
+        // Get a reference to the notary service on the network
         val notary = gameBoardStateAndRef.state.notary
 
-        // Step 3. Retrieve roads, settlements and current longest road state
-        val roadStates = serviceHub.vaultService
-                .queryBy<RoadState>().states
-                .map { it.state.data }
-        val settlementStates = serviceHub.vaultService
-                .queryBy<SettlementState>().states
-                .map { it.state.data }
-        val longestRoadStateStateAndRef = serviceHub.vaultService
-                .queryBy<LongestRoadState>().states.first()
-        val longestRoadState = longestRoadStateStateAndRef.state.data
-
-        // Step 4. Retrieve the Turn Tracker State from the vault
-        val turnTrackerReferenceStateAndRef = ReferencedStateAndRef(
-                serviceHub.vaultService.querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId))
-        if (!gameBoardState.isValid(turnTrackerReferenceStateAndRef.stateAndRef.state.data)) {
+        // Retrieve the Turn Tracker State from the vault
+        val turnTrackerStateAndRef =
+                serviceHub.vaultService.querySingleState<TurnTrackerState>(gameBoardState.turnTrackerLinearId)
+        if (!gameBoardState.isValid(turnTrackerStateAndRef.state.data)) {
             throw FlowException("The turn tracker state does not point back to the GameBoardState")
         }
 
         // Step 5. Create a new transaction builder
         val tb = TransactionBuilder(notary)
 
-        // Step 6. Create new commands for placing a settlement.
-        val buildRoadCommand = Command(
-                BuildPhaseContract.Commands.BuildRoad(),
-                gameBoardState.playerKeys())
-        tb.addCommand(buildRoadCommand)
-
-        // Step 7. Create initial road state
-        val roadState = RoadState(
-                gameBoardLinearId = gameBoardState.linearId,
-                absoluteSide = absoluteSide,
-                players = gameBoardState.players,
-                owner = ourIdentity)
-
-        // Step 8. Determine if the road state is extending an existing road
-        val newBoardStateBuilder = gameBoardState.toBuilder()
-        newBoardStateBuilder.setRoadOn(absoluteSide, roadState.linearId)
-        val outputGameBoardState = newBoardStateBuilder.build()
-
-        // Step 9. Determine new longest road holder
-        val longestRoadHolder = longestRoad(
-                board = gameBoardState.hexTiles,
-                roads = roadStates,
-                settlements = settlementStates,
-                players = gameBoardState.players,
-                currentHolder = longestRoadState.holder)
-        val outputLongestRoadState = longestRoadState.copy(holder = longestRoadHolder)
-
-        // Add resources to pay off the play blocker state
-        serviceHub.cordaService(GenerateSpendService::class.java)
-                .generateInGameSpend(gameBoardState.linearId, tb, getBuildableCosts(Buildable.Road), ourIdentity, ourIdentity)
-
-        // Step 10. Add all states and commands to the transaction.
-        tb.addInputState(gameBoardStateAndRef)
-        tb.addReferenceState(turnTrackerReferenceStateAndRef)
-        tb.addOutputState(roadState, BuildPhaseContract.ID)
-        tb.addOutputState(outputGameBoardState, GameStateContract.ID)
-        if (outputLongestRoadState.holder != longestRoadState.holder) {
-            tb.addInputState(longestRoadStateStateAndRef)
-            tb.addOutputState(outputLongestRoadState, LongestRoadContract.ID)
-        }
+        tb.buildTransactionWithNewRoad(
+                gameBoardStateAndRef,
+                turnTrackerStateAndRef,
+                listOf(absoluteSide),
+                ourIdentity,
+                serviceHub
+        )
 
         // Step 11. Sign initial transaction
-
         tb.verify(serviceHub)
         val ptx = serviceHub.signInitialTransaction(tb)
 
@@ -160,5 +118,71 @@ class BuildRoadFlowResponder(val counterpartySession: FlowSession) : FlowLogic<S
                 otherSideSession = counterpartySession,
                 expectedTxId = txWeJustSignedId.id,
                 statesToRecord = StatesToRecord.ALL_VISIBLE))
+    }
+}
+
+@Suspendable
+fun TransactionBuilder.buildTransactionWithNewRoad(
+        gameBoardStateAndRef: StateAndRef<GameBoardState>,
+        turnTrackerStateAndRef: StateAndRef<TurnTrackerState>,
+        roadLocations: List<AbsoluteSide>,
+        ourIdentity: Party,
+        serviceHub: ServiceHub
+) {
+    val gameBoardState = gameBoardStateAndRef.state.data
+
+    val existingRoadStates = serviceHub.vaultService
+            .queryBy<RoadState>().states
+            .map { it.state.data }
+    val settlementStates = serviceHub.vaultService
+            .queryBy<SettlementState>().states
+            .map { it.state.data }
+    val currLongestRoadStateAndRef = serviceHub.vaultService
+            .queryBy<LongestRoadState>().states.first()
+    val currLongestRoadState = currLongestRoadStateAndRef.state.data
+
+    val buildRoadCommand = Command(
+            BuildPhaseContract.Commands.BuildRoad(),
+            gameBoardState.playerKeys())
+    this.addCommand(buildRoadCommand)
+
+    // Create initial road states
+    val newRoadStates = roadLocations.map { absoluteSide ->
+        RoadState(
+                gameBoardLinearId = gameBoardState.linearId,
+                absoluteSide = absoluteSide,
+                players = gameBoardState.players,
+                owner = ourIdentity,
+                roadAttachedA = gameBoardState.getRoadOn(absoluteSide.next()),
+                roadAttachedB = gameBoardState.getRoadOn(absoluteSide.previous())
+        )
+    }
+
+    // Determine if the road state is extending an existing road
+    val newBoardStateBuilder = gameBoardState.toBuilder()
+    newRoadStates.forEach { newBoardStateBuilder.setRoadOn(it.absoluteSide, it.linearId) }
+    val outputGameBoardState = newBoardStateBuilder.build()
+
+    // Determine new longest road holder
+    val longestRoadHolder = longestRoad(
+            board = gameBoardState.hexTiles,
+            roads = existingRoadStates + newRoadStates,
+            settlements = settlementStates,
+            players = gameBoardState.players,
+            currentHolder = currLongestRoadState.holder)
+    val outputLongestRoadState = currLongestRoadState.copy(holder = longestRoadHolder)
+
+    // Add resources to pay for the road
+    serviceHub.cordaService(GenerateSpendService::class.java)
+            .generateInGameSpend(gameBoardState.linearId, this, getBuildableCosts(Buildable.Road, newRoadStates.size), ourIdentity, ourIdentity)
+
+    this.addInputState(gameBoardStateAndRef)
+    this.addReferenceState(ReferencedStateAndRef(turnTrackerStateAndRef))
+    newRoadStates.forEach { this.addOutputState(it, BuildPhaseContract.ID) }
+    this.addOutputState(outputGameBoardState, GameStateContract.ID)
+    this.addCommand(Command(GameStateContract.Commands.UpdateWithRoad(roadLocations), gameBoardState.playerKeys()))
+    if (outputLongestRoadState.holder != currLongestRoadState.holder) {
+        this.addInputState(currLongestRoadStateAndRef)
+        this.addOutputState(outputLongestRoadState, LongestRoadContract.ID)
     }
 }

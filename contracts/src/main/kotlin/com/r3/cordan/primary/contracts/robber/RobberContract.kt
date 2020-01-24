@@ -95,6 +95,7 @@ class RobberContract : Contract {
     interface Commands : CommandData {
         class CreateRobber : Commands
         class MoveRobber : Commands
-        class ApplyRobber: Commands
+        class MoveRobberWithKnight: Commands
+        class ApplyRobber(val activatedByKnight: Boolean): Commands
     }
 }

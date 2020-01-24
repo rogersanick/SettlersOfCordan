@@ -1,5 +1,6 @@
 package com.r3.cordan.primary.states.structure
 
+import co.paralleluniverse.fibers.Suspendable
 import com.r3.cordan.primary.contracts.structure.BuildPhaseContract
 import com.r3.cordan.primary.states.board.*
 import net.corda.core.contracts.BelongsToContract
@@ -110,6 +111,7 @@ object RoadSchemaV1 : MappedSchema(
  * of the board, roads, settlements, players and the current holder of the card. Either the
  * current holder and the return value can be null meaning no player had or will have the card.
  */
+@Suspendable
 fun longestRoad(board: PlacedHexTiles,
                 roads: List<RoadState>,
                 settlements: List<SettlementState>,
@@ -126,31 +128,29 @@ data class LongestRoadCandidate(val player: Party, val longestRoadLength: Int)
  * the longest road card (null means no one has the card), return the new card holder. It can
  * be a new player, the same player or null if no one meets the criteria.
  */
+@Suspendable
 fun assignLongestRoad(holder: Party?, candidates: List<LongestRoadCandidate>): Party? {
 
     val orderedCandidates = candidates.sortedByDescending { it.longestRoadLength }
+
+    if (orderedCandidates.isEmpty()) throw IllegalArgumentException("Candidates must be provided in order to assign the longest road.")
 
     // Longest candidate does not have at least 5 roads
     if (orderedCandidates[0].longestRoadLength < 5)
         return null
 
-    // Only one player has the longest road
-    if (orderedCandidates[0].longestRoadLength > orderedCandidates[1].longestRoadLength)
-        return orderedCandidates[0].player
-
-    val holderLongestRoadLength = orderedCandidates.first { it.player == holder }.longestRoadLength
-
-    // Holder and another player has same length
-    if (holderLongestRoadLength == orderedCandidates[0].longestRoadLength)
-        return holder
-
-    // All other cases. More than one player has same length and longer than current holder
-    return null
+    return when {
+        // Check if only one player has the longest road
+        orderedCandidates[0].longestRoadLength > orderedCandidates[1].longestRoadLength -> orderedCandidates[0].player
+        // If more than one players have candidates of equal length, return null
+        else -> null
+    }
 }
 
 /**
  * Returns a list with the count of the longest road for each player.
  */
+@Suspendable
 fun longestRoadsForAllPlayers(board: PlacedHexTiles,
                               roads: List<RoadState>,
                               settlements: List<SettlementState>,
@@ -161,6 +161,7 @@ fun longestRoadsForAllPlayers(board: PlacedHexTiles,
 /**
  * Returns a set of road ids with the longest road for a particular player.
  */
+@Suspendable
 fun longestRoadForPlayer(board: PlacedHexTiles,
                          roads: List<RoadState>,
                          settlements: List<SettlementState>,
@@ -175,6 +176,7 @@ fun longestRoadForPlayer(board: PlacedHexTiles,
  * roads must only contain roads for the player.
  * settlements must only contain settlements of all the other players.
  */
+@Suspendable
 private fun calculateLongestRoad(board: PlacedHexTiles,
                                  roads: Set<RoadState>,
                                  settlements: Set<SettlementState>): Set<UniqueIdentifier> {
@@ -198,6 +200,7 @@ private fun calculateLongestRoad(board: PlacedHexTiles,
     return longestRoad
 }
 
+@Suspendable
 private fun calculateLongestRoad(board: PlacedHexTiles,
                                  roadState: RoadState,
                                  playerRoads: Set<UniqueIdentifier>,
