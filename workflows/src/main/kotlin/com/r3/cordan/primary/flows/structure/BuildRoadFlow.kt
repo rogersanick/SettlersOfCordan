@@ -148,13 +148,15 @@ fun TransactionBuilder.buildTransactionWithNewRoad(
 
     // Create initial road states
     val newRoadStates = roadLocations.map { absoluteSide ->
+        val adjacentCorners = absoluteSide.getAdjacentCorners()
+        adjacentCorners.forEach { it.getAdjacentSides() - absoluteSide }
         RoadState(
                 gameBoardLinearId = gameBoardState.linearId,
                 absoluteSide = absoluteSide,
                 players = gameBoardState.players,
                 owner = ourIdentity,
-                roadAttachedA = gameBoardState.getRoadOn(absoluteSide.next()),
-                roadAttachedB = gameBoardState.getRoadOn(absoluteSide.previous())
+                roadsAttachedAhead = listOf(),
+                roadsAttachedBehind = listOf()
         )
     }
 
@@ -164,7 +166,7 @@ fun TransactionBuilder.buildTransactionWithNewRoad(
     val outputGameBoardState = newBoardStateBuilder.build()
 
     // Determine new longest road holder
-    val longestRoadHolder = longestRoad(
+    val longestRoadHolder = getLongestRoadHolder(
             board = gameBoardState.hexTiles,
             roads = existingRoadStates + newRoadStates,
             settlements = settlementStates,

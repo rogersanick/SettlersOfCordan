@@ -3,7 +3,7 @@ package com.r3.cordan.primary.contracts.win
 import com.r3.cordan.primary.states.board.GameBoardState
 import com.r3.cordan.primary.states.structure.RoadState
 import com.r3.cordan.primary.states.structure.SettlementState
-import com.r3.cordan.primary.states.structure.longestRoad
+import com.r3.cordan.primary.states.structure.getLongestRoadHolder
 import com.r3.cordan.primary.states.win.LongestRoadState
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
@@ -61,7 +61,7 @@ class LongestRoadContract : Contract {
                 "All settlements must belong to the board" using
                         inputSettlements.all { inputBoard.linearId == it.gameBoardLinearId }
 
-                val candidate = longestRoad(
+                val candidate = getLongestRoadHolder(
                         inputBoard.hexTiles, inputRoads, inputSettlements,
                         inputBoard.players, inputLongestRoads.holder)
 

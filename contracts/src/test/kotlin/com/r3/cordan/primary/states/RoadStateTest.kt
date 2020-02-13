@@ -8,15 +8,13 @@ import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.testing.core.TestIdentity
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 
 class RoadStateTest {
-
-    private lateinit var placedSettlements: PlacedSettlements
-    private lateinit var settlementsBuilder: PlacedSettlements.Builder
+    
     private lateinit var settlements: MutableSet<SettlementState>
     private lateinit var roads: MutableSet<RoadState>
     private lateinit var builder: PlacedHexTiles.Builder
@@ -24,33 +22,42 @@ class RoadStateTest {
 
     private var p1 = TestIdentity((CordaX500Name("player1", "New York", "GB")))
     private var p2 = TestIdentity((CordaX500Name("player2", "New York", "GB")))
+    private var p3 = TestIdentity((CordaX500Name("player3", "New York", "GB")))
+    private var p4 = TestIdentity((CordaX500Name("player4", "New York", "GB")))
 
     private fun buildRoads(owner: Party, pairs: List<Pair<Int, Int>>) = pairs.forEach {
+        // Build a version of the board based on the latest hexTiles
+        buildBoard()
+
+        // Get all adjacent absolute corners corresponding to the absolute side
+        val absoluteSide = AbsoluteSide(HexTileIndex(it.first), TileSideIndex(it.second))
+        val oppositeAbsoluteSide = board.getOpposite(absoluteSide)
+
         roads.add(RoadState(
                 gameBoardLinearId = UniqueIdentifier(),
                 absoluteSide = AbsoluteSide(HexTileIndex(it.first), TileSideIndex(it.second)),
                 players = listOf(),
-                owner = owner,
-                roadAttachedA = null,
-                roadAttachedB = null))
+                owner = owner
+        ))
+
         builder.setRoadOn(roads.last().absoluteSide, roads.last().linearId)
     }
 
     private fun buildSettlements(owner: Party, pairs: List<Pair<Int, Int>>) = pairs.forEach {
-        settlements.add(SettlementState(
+        val settlementState = SettlementState(
                 UniqueIdentifier(),
-                AbsoluteCorner(HexTileIndex(it.first), TileCornerIndex(it.second)), listOf(), owner))
-        settlementsBuilder.setSettlementOn(settlements.last().absoluteCorner.cornerIndex, settlements.last().linearId)
+                AbsoluteCorner(HexTileIndex(it.first), TileCornerIndex(it.second)), listOf(), owner
+        )
+        settlements.add(settlementState)
+        builder.setSettlementOn(settlementState.absoluteCorner, settlementState.linearId)
     }
 
     private fun buildBoard() {
-        placedSettlements = settlementsBuilder.build()
         board = builder.build()
     }
 
     @BeforeEach
     fun init() {
-        settlementsBuilder = PlacedSettlements.Builder()
         settlements = mutableSetOf()
         roads = mutableSetOf()
         builder = PlacedHexTiles.Builder(getAllTileBuilders().toMutableList())
@@ -140,6 +147,38 @@ class RoadStateTest {
         buildSettlements(p1.party, listOf(6 to 5))
         buildBoard()
         assertEquals(2, longestRoadForPlayer(board, roads.toList(), settlements.toList(), p1.party).count())
+    }
+
+    @Test
+    fun `longest road of 1 board setup state`() {
+        buildRoads(p1.party, listOf(0 to 5, 12 to 5))
+        buildRoads(p2.party, listOf(0 to 3, 12 to 3))
+        buildRoads(p3.party, listOf(2 to 0, 14 to 0))
+        buildRoads(p4.party, listOf(2 to 2, 14 to 2))
+        buildSettlements(p1.party, listOf(0 to 5, 12 to 5))
+        buildSettlements(p2.party, listOf(0 to 3, 12 to 3))
+        buildSettlements(p3.party, listOf(2 to 0, 14 to 0))
+        buildSettlements(p4.party, listOf(2 to 2, 14 to 2))
+
+        buildSettlements(p1.party, listOf(15 to 2))
+        buildRoads(p1.party, listOf(15 to 1))
+        buildBoard()
+        assertEquals(1, longestRoadForPlayer(board, roads.toList(), settlements.toList(), p1.party).count())
+    }
+
+    @Test
+    fun `longest road of 5 with split path`() {
+        buildRoads(p1.party, listOf(0 to 2, 1 to 3, 1 to 2, 1 to 1, 2 to 3))
+        buildBoard()
+        assertEquals(4, longestRoadForPlayer(board, roads.toList(), listOf(), p1.party).count())
+    }
+
+    @Test
+    fun `longest road of 12 with two complete hexes`() {
+        buildRoads(p1.party, listOf(0 to 0, 0 to 1, 0 to 2, 0 to 3, 0 to 4, 0 to 5, 1 to 3,
+                5 to 0, 5 to 1, 5 to 2, 5 to 3, 5 to 4, 5 to 5))
+        buildBoard()
+        assertEquals(4, longestRoadForPlayer(board, roads.toList(), listOf(), p1.party).count())
     }
 }
 

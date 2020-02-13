@@ -96,7 +96,7 @@ class BuildSettlementFlow(
                 .generateInGameSpend(gameBoardLinearId, tb, getBuildableCosts(Buildable.Settlement), ourIdentity, ourIdentity)
 
         // Step 11. Determine new longest road holder
-        val longestRoadHolder = longestRoad(
+        val longestRoadHolder = getLongestRoadHolder(
                 board = gameBoardState.hexTiles,
                 roads = roadStates,
                 settlements = settlementStates,
