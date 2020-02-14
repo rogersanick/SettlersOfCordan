@@ -154,9 +154,7 @@ fun TransactionBuilder.buildTransactionWithNewRoad(
                 gameBoardLinearId = gameBoardState.linearId,
                 absoluteSide = absoluteSide,
                 players = gameBoardState.players,
-                owner = ourIdentity,
-                roadsAttachedAhead = listOf(),
-                roadsAttachedBehind = listOf()
+                owner = ourIdentity
         )
     }
 

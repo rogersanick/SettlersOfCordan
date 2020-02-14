@@ -99,9 +99,7 @@ data class GameBoardState @ConstructorForDeserialization constructor(
     ) : TileLocator<HexTile.Builder> by hexTiles,
             AbsoluteSideLocator by hexTiles,
             AbsoluteCornerLocator by hexTiles,
-            AbsoluteRoadLocator by hexTiles,
             AbsoluteRoadBuilder by hexTiles,
-            AbsoluteSettlementLocator by hexTiles,
             AbsoluteSettlementBuilder by hexTiles {
 
         companion object {

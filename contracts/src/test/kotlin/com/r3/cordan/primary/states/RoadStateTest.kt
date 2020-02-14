@@ -178,7 +178,7 @@ class RoadStateTest {
         buildRoads(p1.party, listOf(0 to 0, 0 to 1, 0 to 2, 0 to 3, 0 to 4, 0 to 5, 1 to 3,
                 5 to 0, 5 to 1, 5 to 2, 5 to 3, 5 to 4, 5 to 5))
         buildBoard()
-        assertEquals(4, longestRoadForPlayer(board, roads.toList(), listOf(), p1.party).count())
+        assertEquals(13, longestRoadForPlayer(board, roads.toList(), listOf(), p1.party).count())
     }
 }
 

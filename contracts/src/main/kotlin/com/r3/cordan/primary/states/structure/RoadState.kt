@@ -39,22 +39,28 @@ data class RoadState(
 ) : LinearState, QueryableState, StatePersistable, HasGameBoardId {
     override val participants: List<AbstractParty> = players
 
-    fun getAllValidRoadsAttached(board: PlacedHexTiles, currLongestRoad: LinkedList<RoadState>): Set<UniqueIdentifier> {
+    fun getAllValidRoadsAttached(board: PlacedHexTiles, currLongestRoad: LinkedList<RoadState>, otherSettlements: Set<UniqueIdentifier>): Set<UniqueIdentifier> {
         // Create a reference list of road Ids
         val currLongestRoadIds = currLongestRoad.map { it.linearId }
         // Calculate all attached roads filtering out those that have already been included in the current longest road
         val allRoadsAttached = this.getAllRoadsAttached(board).filter { it !in currLongestRoadIds }.toSet()
-
-        return when {
-            currLongestRoad.size > 1 -> {
-                // Find the road previous to this one
-                val previousRoad = currLongestRoad.filter { it.getAllRoadsAttached(board).contains(this.linearId) } - this
-                // Remove any roads that wouldn't extend the currLongestRoad
-                (allRoadsAttached - previousRoad.flatMap { it.getAllRoadsAttached(board) }).toSet()
-            }
-            else -> { allRoadsAttached }
-        }
-
+        // Find the road previous to this one
+        val previousRoad = currLongestRoad.filter { it.getAllRoadsAttached(board).contains(this.linearId) } - this
+        // Remove any roads that wouldn't extend the currLongestRoad
+        val roadsFilteredForDuplicatePaths = (allRoadsAttached - previousRoad.flatMap { it.getAllRoadsAttached(board) }).toSet()
+        // Filter any roads that are blocked by settlements
+        return roadsFilteredForDuplicatePaths.filter {
+            // Get the first adjacent road to compare
+            val compareRoad = board.getRoadById(it)
+                    ?: throw IllegalArgumentException("The road does not exist on the given board.")
+            // Determine the location of a potentially conflicting settlement between this road and the proposed addition
+            val potentiallyConflictingLocation = compareRoad.getAdjacentCorners().intersect(this.absoluteSide.getAdjacentCorners().flatMap { corner -> board.getOverlappedCorners(corner) + corner }).single()
+            // Retrieve the potentially conflicting settlement using the location
+            val potentiallyConflictingSettlement = board.getSettlementOn(potentiallyConflictingLocation!!)
+            // Return the set of roads filtered for roads blocked by the settlement of another player
+            if (potentiallyConflictingSettlement == null) { true }
+            else potentiallyConflictingSettlement !in otherSettlements
+        }.toSet()
     }
 
     fun getAllRoadsAttached(board: PlacedHexTiles): Set<UniqueIdentifier> {
@@ -205,7 +211,7 @@ fun longestRoadForPlayer(board: PlacedHexTiles,
 @Suspendable
 private fun calculateLongestRoad(board: PlacedHexTiles,
                                  roadStates: Set<RoadState>,
-                                 settlements: Set<SettlementState>): Set<UniqueIdentifier> {
+                                 otherSettlements: Set<SettlementState>): Set<UniqueIdentifier> {
 
     val roads = roadStates.toMutableSet()
     val mapOfRoads = roads.map { it.linearId to it }.toMap()
@@ -224,8 +230,8 @@ private fun calculateLongestRoad(board: PlacedHexTiles,
 
         // Recurse with the new visited road
         when(addAhead) {
-            true -> currLongestRoad.addLast(road)
-            false -> currLongestRoad.addFirst(road)
+            true -> { currLongestRoad.addLast(road) }
+            false -> { currLongestRoad.addFirst(road) }
         }
 
         callBack(currLongestRoad)
@@ -251,11 +257,11 @@ private fun calculateLongestRoad(board: PlacedHexTiles,
         val currRoadStart = currLongestRoad.first()
         val currRoadEnd = currLongestRoad.last()
 
-        currRoadEnd.getAllValidRoadsAttached(board, currLongestRoad).filter { it !in currLongestRoadIds }. forEach {
+        currRoadEnd.getAllValidRoadsAttached(board, currLongestRoad, otherSettlements.map { it.linearId }.toSet()).filter { it !in currLongestRoadIds }. forEach {
             visitAndThenRecurse(it, true, currLongestRoad, ::recurse)
         }
 
-        currRoadStart.getAllValidRoadsAttached(board, currLongestRoad).filter { it !in currLongestRoadIds }.forEach {
+        currRoadStart.getAllValidRoadsAttached(board, currLongestRoad, otherSettlements.map { it.linearId }.toSet()).filter { it !in currLongestRoadIds }.forEach {
             visitAndThenRecurse(it, false, currLongestRoad, ::recurse)
         }
     }
